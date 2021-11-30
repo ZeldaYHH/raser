@@ -569,7 +569,7 @@ class CalCurrent2D:
         if((self.track_x+self.delta_x+self.dif_x)>=det.det_width):
             self.d_cx = det.det_width
         
-        elif((self.self.track_x+self.delta_x+self.dif_x)<0):
+        elif((self.track_x+self.delta_x+self.dif_x)<0):
             self.d_cx = 0
 
         else:
