@@ -11,6 +11,7 @@ import mshr
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from array import array
 
 
 #Calculate the weighting potential and electric field
@@ -166,8 +167,13 @@ class FenicsCal:
         """
         bc_l = []
         p_ele,n_ele=self.model_para(my_d,model)
+        x_list = []
+        y_list = []
+        radius = my_d.e_tr[0][2]
         for i in range (len(my_d.e_tr)):
             e_i = my_d.e_tr[i]
+            x_list.append(e_i[0])
+            y_list.append(e_i[1])
             str_e = "x[0]>={e_0}-{e_2} && x[0]<={e_0}+"\
                     +"{e_2} && x[1]>={e_1}-{e_2} && "\
                     +"x[1]<={e_1}+{e_2} && x[2]>={e_3} \
@@ -180,6 +186,8 @@ class FenicsCal:
             else:
                 bc = fenics.DirichletBC(self.V, n_ele, elec_p)
             bc_l.append(bc)
+        bc = self.out_column(x_list,y_list,radius,model,my_d)
+        bc_l.append(bc)
         return bc_l
 
     def boundary_definition_2D(self,my_d,model):
@@ -197,7 +205,25 @@ class FenicsCal:
             return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
-    
+
+    def out_column(self,x_list,y_list,radius,model,my_d):
+        x_min = min(x_list)-radius
+        x_max = max(x_list)+radius
+        y_min = min(y_list)-radius
+        y_max = max(y_list)+radius
+        
+        x_center = my_d.e_tr[0][0]
+        y_center = my_d.e_tr[0][1]
+        str_e = "(x[0]-{e_0})*(x[0]-{e_0}) +(x[1]-{e_1})*(x[1]-{e_1}) >= {e_2}*{e_2}"  
+        elec_p = str_e.format(e_0=x_center, e_1=y_center,
+                              e_2=my_d.e_gap)        
+        if model == "Possion":
+            bc = fenics.DirichletBC(self.V, 0.0, elec_p) 
+        elif model == "Laplace":
+            bc = fenics.DirichletBC(self.V, 1.0, elec_p)     
+        return bc    
+
+        
     def model_para(self,my_d,model):
         """
         @description:

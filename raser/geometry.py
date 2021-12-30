@@ -36,10 +36,15 @@ class R3dDetector:
         self.v_voltage = det_dic['voltage'] 
         self.temperature = det_dic['temp']
         self.det_model = dset.det_model
-        self.mater = 1    
+        self.mater = 1
         self.current_define()
-        if 'plugin3D' in self.det_model:
+        if 'plugin3D' in self.det_model and det_dic['custom_electron'] == "False":
+            self.e_ir = det_dic['e_ir'] 
             self.set_3D_electrode(det_dic['e_ir'],det_dic['e_gap'])
+        elif det_dic['custom_electron'] == "True":
+            self.e_gap = det_dic['e_gap']
+            self.e_tr = dset.electron_customs
+
 
     def current_define(self):
         """
@@ -84,13 +89,13 @@ class R3dDetector:
         e_int = e_gap 
         e_t_y = self.infor_ele(e_r,e_int)
         self.e_tr=[]
-        self.e_t_1 = [self.l_x*0.5          ,self.l_y*0.5      ,e_r,0,self.l_z,"n"]
-        self.e_t_2 = [self.l_x*0.5-e_int    ,self.l_y*0.5      ,e_r,0,self.l_z,"p"]
-        self.e_t_3 = [self.l_x*0.5+e_int    ,self.l_y*0.5      ,e_r,0,self.l_z,"p"]
-        self.e_t_4 = [self.l_x*0.5-e_int*0.5,self.l_y*0.5+e_t_y,e_r,0,self.l_z,"p"]
-        self.e_t_5 = [self.l_x*0.5+e_int*0.5,self.l_y*0.5+e_t_y,e_r,0,self.l_z,"p"]
-        self.e_t_6 = [self.l_x*0.5-e_int*0.5,self.l_y*0.5-e_t_y,e_r,0,self.l_z,"p"]
-        self.e_t_7 = [self.l_x*0.5+e_int*0.5,self.l_y*0.5-e_t_y,e_r,0,self.l_z,"p"]
+        self.e_t_1 = [self.l_x*0.5          ,self.l_y*0.5      ,e_r,0,self.l_z,"p"]
+        self.e_t_2 = [self.l_x*0.5-e_int    ,self.l_y*0.5      ,e_r,0,self.l_z,"n"]
+        self.e_t_3 = [self.l_x*0.5+e_int    ,self.l_y*0.5      ,e_r,0,self.l_z,"n"]
+        self.e_t_4 = [self.l_x*0.5-e_int*0.5,self.l_y*0.5+e_t_y,e_r,0,self.l_z,"n"]
+        self.e_t_5 = [self.l_x*0.5+e_int*0.5,self.l_y*0.5+e_t_y,e_r,0,self.l_z,"n"]
+        self.e_t_6 = [self.l_x*0.5-e_int*0.5,self.l_y*0.5-e_t_y,e_r,0,self.l_z,"n"]
+        self.e_t_7 = [self.l_x*0.5+e_int*0.5,self.l_y*0.5-e_t_y,e_r,0,self.l_z,"n"]
         for i in range(7):
            n_e = eval('self.e_t_' + str(i+1))
            self.e_tr.append(n_e)
