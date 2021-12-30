@@ -264,11 +264,11 @@ class CalCurrent:
         """ Judge whether the drift loop should end """
         if(self.wpot>(1-1e-5)):
             self.end_cond=1
-        if(self.d_x<=0):
+        if(self.d_x<=1.0):
             self.end_cond=2
-        if(self.d_y<=0):
+        if(self.d_y<=1.0):
             self.end_cond=4
-        if(self.d_z<=0):
+        if(self.d_z<=1.0):
             self.end_cond=5
         if(self.path_len>self.max_drift_len):
             self.end_cond=6

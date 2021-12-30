@@ -105,14 +105,14 @@ class Setting:
         if "planar3D" in self.det_model:
             detector = {'name':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 
-                        'voltage':p['voltage'], 'temp':p['temp']
+                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
                         }
             
         if "plugin3D" in self.det_model:
             detector = {'name':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 
                         'voltage':p['voltage'], 'temp':p['temp'], 
-                        'e_ir':p['e_ir'], 'e_gap':p['e_gap']
+                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
         
         if "lgad2D" in self.det_model:
@@ -136,6 +136,13 @@ class Setting:
                         }
         return detector
 
+    def electron_custom(self,electrodes):
+        self.electrodes = electrodes
+
+    @property
+    def electron_customs(self):
+        return self.electrodes
+        
     @property
     def fenics(self):
         """
