@@ -38,7 +38,7 @@ class Setting:
         if "laser_model" in self._pardic:
             self.laser_model=self._pardic['laser_model']
             self.append_par(self._pardic['laser_file'])
-        if self.det_model in ("plugin3D","planar3D"):
+        if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
             self.scan_variation()
 
     def input2dic(self,parameters):
@@ -105,14 +105,21 @@ class Setting:
         if "planar3D" in self.det_model:
             detector = {'name':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 
-                        'voltage':p['voltage'], 'temp':p['temp']
+                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
                         }
             
         if "plugin3D" in self.det_model:
             detector = {'name':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 
                         'voltage':p['voltage'], 'temp':p['temp'], 
-                        'e_ir':p['e_ir'], 'e_gap':p['e_gap']
+                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
+                        }
+
+        if "lgad3D" in self.det_model:
+            detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 
+                        'lz':p['lz'], 'doping':p['doping'], 
+                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron'],
+                        'Avalanche':p['Avalanche']
                         }
         
         if "lgad2D" in self.det_model:
@@ -136,6 +143,13 @@ class Setting:
                         }
         return detector
 
+    def electron_custom(self,electrodes):
+        self.electrodes = electrodes
+
+    @property
+    def electron_customs(self):
+        return self.electrodes
+        
     @property
     def fenics(self):
         """
@@ -157,7 +171,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
@@ -189,7 +203,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             pygeant4 = {'name':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
