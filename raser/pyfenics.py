@@ -10,14 +10,14 @@ import fenics
 import mshr
 import sys
 import numpy as np
-import ROOT
+import matplotlib.pyplot as plt
 from array import array
 
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
 
-    def __init__(self,my_d,fen_dic):
+    def __init__(self,my_d,fen_dic,det_dic):
         self.p_electric = []
         self.w_p_electric = []
         self.det_model = fen_dic['name']
@@ -25,6 +25,7 @@ class FenicsCal:
         self.fl_y=my_d.l_y/fen_dic['xyscale']  
         self.fl_z=my_d.l_z
         self.tol = 1e-14
+        self.det_dic=det_dic
         m_sensor_box=self.fenics_space(my_d)  
         self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])  
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
@@ -121,7 +122,13 @@ class FenicsCal:
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-        f = fenics.Constant(self.f_value(my_d))
+        if self.det_dic['name']=="lgad3D":
+            bond = self.det_dic['bond']
+            doping_avalanche = self.det_dic['doping_avalanche']
+            doping = self.det_dic['doping']
+            f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
+        else:
+            f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
         L = f*v*fenics.dx
         # Compute solution
@@ -167,8 +174,13 @@ class FenicsCal:
         """
         bc_l = []
         p_ele,n_ele=self.model_para(my_d,model)
+        x_list = []
+        y_list = []
+        radius = my_d.e_tr[0][2]
         for i in range (len(my_d.e_tr)):
             e_i = my_d.e_tr[i]
+            x_list.append(e_i[0])
+            y_list.append(e_i[1])
             str_e = "x[0]>={e_0}-{e_2} && x[0]<={e_0}+"\
                     +"{e_2} && x[1]>={e_1}-{e_2} && "\
                     +"x[1]<={e_1}+{e_2} && x[2]>={e_3} \
@@ -181,6 +193,8 @@ class FenicsCal:
             else:
                 bc = fenics.DirichletBC(self.V, n_ele, elec_p)
             bc_l.append(bc)
+        bc = self.out_column(x_list,y_list,radius,model,my_d)
+        bc_l.append(bc)
         return bc_l
 
     def boundary_definition_2D(self,my_d,model):
@@ -198,7 +212,25 @@ class FenicsCal:
             return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
-    
+
+    def out_column(self,x_list,y_list,radius,model,my_d):
+        x_min = min(x_list)-radius
+        x_max = max(x_list)+radius
+        y_min = min(y_list)-radius
+        y_max = max(y_list)+radius
+        
+        x_center = my_d.e_tr[0][0]
+        y_center = my_d.e_tr[0][1]
+        str_e = "(x[0]-{e_0})*(x[0]-{e_0}) +(x[1]-{e_1})*(x[1]-{e_1}) >= {e_2}*{e_2}"  
+        elec_p = str_e.format(e_0=x_center, e_1=y_center,
+                              e_2=my_d.e_gap)        
+        if model == "Possion":
+            bc = fenics.DirichletBC(self.V, 0.0, elec_p) 
+        elif model == "Laplace":
+            bc = fenics.DirichletBC(self.V, 1.0, elec_p)     
+        return bc    
+
+        
     def model_para(self,my_d,model):
         """
         @description:
@@ -467,8 +499,8 @@ class FenicsCal2D:
                     self.p_w_electric[i].append(1)
                     self.p_electric[i].append(0)
                 else:
-                    self.p_w_electric[i].append(self.w_electric_value[i+j*nx])
-                    self.p_electric[i].append(self.electric_value[i+j*nx])
+                    self.p_w_electric[i].append(self.weighting_potential_value_1d[i+j*nx])
+                    self.p_electric[i].append(self.potential_value_1d[i+j*nx])
 
     def cal_field(self):
 
