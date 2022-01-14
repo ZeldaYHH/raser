@@ -113,7 +113,7 @@ class CalCurrent:
                     self.drift_v(my_d,my_f) #drift_position                   
                     self.drift_s_step(my_d) #drift_next_posiiton
                     self.charge_collection(my_f)             
-                    self.save_gain_track(my_d) 
+                    self.save_gain_track() 
                     self.drift_end_condition()
                 self.n_step+=1 
         self.get_current_gain(my_d)
@@ -164,7 +164,6 @@ class CalCurrent:
         self.gain_charge=0
         self.gain_time=0
         self.s_gain=0
-        self.track_gain=1.0
 
     def judge_whether_insensor(self,my_d,my_f):
         """
@@ -290,7 +289,6 @@ class CalCurrent:
 
     def charge_collection(self,my_f):
         """ Calculate charge collection """ 
-        self.track_gain *=self.s_gain
         self.wpot = my_f.get_w_p(self.d_cx,self.d_cy,self.d_cz)
         delta_Uw = (self.wpot 
                     - my_f.get_w_p(self.d_x,self.d_y,self.d_z))
@@ -304,8 +302,8 @@ class CalCurrent:
 
     def update_gain_track(self):
         if self.det_dic['name']=="lgad3D":
-            if (self.charg>0) and (self.track_gain>1):
-                self.gain_charge = self.ionized_pairs*self.charg*(self.track_gain-1)
+            if (self.charg>0) and (self.s_gain>1):
+                self.gain_charge = self.ionized_pairs*self.charg*self.s_gain
                 self.gain_time=self.d_time
                 self.gain_dic_p[0].append(self.gain_time)
                 self.gain_dic_p[1].append(self.gain_charge)
@@ -350,7 +348,7 @@ class CalCurrent:
                 self.d_dic_n["tk_"+str(self.n_track)][3].append(self.charge)
                 self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
-    def save_gain_track(self,my_d):
+    def save_gain_track(self):
         self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
         self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
         self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
