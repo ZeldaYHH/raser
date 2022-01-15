@@ -38,6 +38,7 @@ class CalCurrent:
         self.d_dic_p = {}
         self.gain_dic_p = [ [] for n in range(5) ]
         self.gain_cu_p = {}
+        self.gain_cu_n = {}
         self.events_position(my_g4p, batch) 
         for n in range(len(self.tracks_p)-1):
             self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
@@ -98,24 +99,29 @@ class CalCurrent:
         """
         for i in range(len(self.gain_dic_p[0])-1):
             self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
+            self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.n_track = i+1
             self.initial_parameter()
-            self.charg = self.gain_dic_p[1][i]
-            self.d_time = self.gain_dic_p[0][i]
-            self.d_x = self.gain_dic_p[2][i]
-            self.d_y = self.gain_dic_p[3][i]
-            self.d_z = self.gain_dic_p[4][i]
-            while (self.end_cond == 0):
-                if self.judge_whether_insensor(my_d,my_f):               
-                    pass
-                else:                                                                     
-                    self.delta_p() #delta_poisiton               
-                    self.drift_v(my_d,my_f) #drift_position                   
-                    self.drift_s_step(my_d) #drift_next_posiiton
-                    self.charge_collection(my_f)             
-                    self.save_gain_track() 
-                    self.drift_end_condition()
-                self.n_step+=1 
+            for j in range(2):
+                if (j==0):
+                    self.charg = self.gain_dic_p[1][i] #hole
+                if (j==1):
+                    self.charg = -self.gain_dic_p[1][i] #electron 
+                self.d_time = self.gain_dic_p[0][i]
+                self.d_x = self.gain_dic_p[2][i]
+                self.d_y = self.gain_dic_p[3][i]
+                self.d_z = self.gain_dic_p[4][i]
+                while (self.end_cond == 0):
+                    if self.judge_whether_insensor(my_d,my_f):               
+                        pass
+                    else:                                                                     
+                        self.delta_p() #delta_poisiton               
+                        self.drift_v(my_d,my_f) #drift_position                   
+                        self.drift_s_step(my_d) #drift_next_posiiton
+                        self.charge_collection(my_f)             
+                        self.save_gain_track() 
+                        self.drift_end_condition()
+                    self.n_step+=1 
         self.get_current_gain(my_d)
 
     def energy_deposition(self,my_d,j):
@@ -349,11 +355,18 @@ class CalCurrent:
                 self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def save_gain_track(self):
-        self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
-        self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
-        self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
-        self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
-        self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
+        if (self.charg>0):
+            self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
+            self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
+            self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
+            self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
+            self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
+        else:
+            self.gain_cu_n["tk_"+str(self.n_track)][0].append(self.d_x)
+            self.gain_cu_n["tk_"+str(self.n_track)][1].append(self.d_y)
+            self.gain_cu_n["tk_"+str(self.n_track)][2].append(self.d_z)
+            self.gain_cu_n["tk_"+str(self.n_track)][3].append(self.charge)
+            self.gain_cu_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def get_current(self,my_d):
         """ Charge distribution to total current"""
@@ -380,21 +393,32 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
+        if self.det_dic['name']=="lgad3D":
+            pass
+        else:
+            my_d.sum_cu.Add(my_d.positive_cu)
+            my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
         my_d.gain_positive_cu.Reset()
+        my_d.gain_negative_cu.Reset()
         test_p_gain = ROOT.TH1F("testgain+","testgain+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_n_gain = ROOT.TH1F("testgain-","testgain-",my_d.n_bin,my_d.t_start,my_d.t_end)
         e0 = 1.60217733e-19
         for j in range(len(self.gain_dic_p[0])-2):
             for i in range(len(self.gain_cu_p["tk_"+str(j+1)][2])):
                 test_p_gain.Fill(self.gain_cu_p["tk_"+str(j+1)][4][i],
                         self.gain_cu_p["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
+            for i in range(len(self.gain_cu_n["tk_"+str(j+1)][2])):
+                test_n_gain.Fill(self.gain_cu_n["tk_"+str(j+1)][4][i],
+                        self.gain_cu_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
             my_d.gain_positive_cu.Add(test_p_gain)
+            my_d.gain_negative_cu.Add(test_n_gain)
             test_p_gain.Reset()
+            test_n_gain.Reset()
         my_d.sum_cu.Add(my_d.gain_positive_cu)
+        my_d.sum_cu.Add(my_d.gain_negative_cu)
 
     def reset_start(self,my_d):
         """ Reset th1f """
