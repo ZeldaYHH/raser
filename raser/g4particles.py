@@ -302,33 +302,34 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         g4b.G4VUserPrimaryGeneratorAction.__init__(self)
         par_direction = [ par_out[i] - par_in[i] for i in range(3) ]  
         particle_table = g4b.G4ParticleTable.GetParticleTable()
-        electron = particle_table.FindParticle("e-") # define the beta electron
+        #electron = particle_table.FindParticle("e-") # define the beta electron
+        alpha = particle_table.FindParticle("alpha")
         beam = g4b.G4ParticleGun(1)
-        beam.SetParticleEnergy(2.28*g4b.MeV)
+        beam.SetParticleEnergy(5.156*g4b.MeV)
         # beam.SetParticleEnergy(0.546*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
                                                             par_direction[2]))
-        beam.SetParticleDefinition(electron)
+        beam.SetParticleDefinition(alpha)
         beam.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
                                                    par_in[1]*g4b.um,
                                                    par_in[2]*g4b.um))  
 
-        beam2 = g4b.G4ParticleGun(1)
-        beam2.SetParticleEnergy(0.546*g4b.MeV)
-        beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
-                                                             par_direction[1],
-                                                             par_direction[2]))
-        beam2.SetParticleDefinition(electron)
-        beam2.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
-                                                    par_in[1]*g4b.um,
-                                                    par_in[2]*g4b.um))  
+        #beam2 = g4b.G4ParticleGun(1)
+        #beam2.SetParticleEnergy(0.546*g4b.MeV)
+        #beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
+        #                                                     par_direction[1],
+        #                                                     par_direction[2]))
+        #beam2.SetParticleDefinition(electron)
+        #beam2.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
+        #                                            par_in[1]*g4b.um,
+        #                                            par_in[2]*g4b.um))  
         self.particleGun = beam
-        self.particleGun2 = beam2
+        #self.particleGun2 = beam2
 
     def GeneratePrimaries(self, event):
         self.particleGun.GeneratePrimaryVertex(event)
-        self.particleGun2.GeneratePrimaryVertex(event)
+        #self.particleGun2.GeneratePrimaryVertex(event)
 
 
 class MyRunAction(g4b.G4UserRunAction):
