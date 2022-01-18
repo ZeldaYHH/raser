@@ -101,9 +101,9 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             tz_Si = 0*g4b.um
             tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
             self.init_tz_device = 10000
-            tz_pcb2 = 10000*g4b.um-750*g4b.um
-            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um
-            device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
+            tz_pcb2 = 10000*g4b.um-1100*g4b.um
+            device_x = my_d.l_x*g4b.um
+            device_y = my_d.l_y*g4b.um
             device_z = my_d.l_z*g4b.um
             # tz_Si = 10000*g4b.um
             # tz_device = my_d.l_z/2.0*g4b.um
@@ -176,7 +176,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 colour = [0,0.5,0.8],   
                                 mother = 'world')
 
-        if "plugin3D" in sensor_model or "planar3D" in sensor_model:
+        if "plugin3D" in sensor_model:
             self.create_sic_box(
                                 name = "SiC_sub",
                                 sidex = my_d.l_x*g4b.um,
