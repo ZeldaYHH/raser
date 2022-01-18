@@ -123,10 +123,21 @@ class FenicsCal:
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
         if self.det_dic['name']=="lgad3D":
-            bond = self.f_value(my_d,self.det_dic['bond'])
-            doping_avalanche = self.f_value(my_d,self.det_dic['doping_avalanche'])
-            doping = self.f_value(my_d,self.det_dic['doping'])
-            f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
+            if self.det_dic['part']==2:
+                bond = self.det_dic['bond']
+                doping_avalanche = self.f_value(my_d,self.det_dic['doping1'])
+                doping = self.f_value(my_d,self.det_dic['doping2'])
+                f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
+            elif self.det_dic['part'] == 3:
+                bond1 = self.det_dic['bond1']
+                bond2 = self.det_dic['bond2']
+                doping1 = self.f_value(my_d,self.det_dic['doping1'])
+                doping2 = self.f_value(my_d,self.det_dic['doping2'])
+                doping3 = self.f_value(my_d,self.det_dic['doping3'])
+                f = fenics.Expression('x[2] < bonda ? dopinga : x[2] > bondb ? dopingc : dopingb', degree = 1, 
+                                         bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3)
+            else:
+                print("The structure of lgad is wrong.")
         else:
             f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx

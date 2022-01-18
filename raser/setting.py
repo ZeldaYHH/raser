@@ -117,7 +117,8 @@ class Setting:
 
         if "lgad3D" in self.det_model:
             detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                        'bond':p['bond'], 'doping':p['doping'], 'doping_avalanche':p['doping_avalanche'],
+                        'bond1':p['bond1'], 'bond2':p['bond2'], 'doping1':p['doping1'],
+                        'doping2':p['doping2'], 'doping3':p['doping3'], 'part':p['part'], 
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
                         'Avalanche':p['Avalanche']
                         }
