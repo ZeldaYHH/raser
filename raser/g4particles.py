@@ -153,16 +153,25 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 material_O = "O",
                                 colour = [0,0.5,0.8],   
                                 mother = 'world')
-        self.create_sic_box(
-                            name = "Device",
-                            sidex = device_x,
-                            sidey = device_y,
-                            sidez = device_z,
-                            translation = [tx_all,ty_all,tz_device],
-                            material_Si = "Si",
-                            material_c = "C",
-                            colour = [1,0,0],
-                            mother = 'world')
+        # self.create_sic_box(
+        #                     name = "Device",
+        #                     sidex = device_x,
+        #                     sidey = device_y,
+        #                     sidez = device_z,
+        #                     translation = [tx_all,ty_all,tz_device],
+        #                     material_Si = "Si",
+        #                     material_c = "C",
+        #                     colour = [1,0,0],
+        #                     mother = 'world')
+        self.create_AlorSi_box(
+                                name = "Device",
+                                sidex = device_x,
+                                sidey = device_y,
+                                sidez = device_z,
+                                translation = [tx_all,ty_all,tz_device],
+                                material_type = "G4_Si",
+                                colour = [1,0,0],
+                                mother = 'world')
         self.create_pcb_board(
                                 name = "pcb2",
                                 sidex = 20000*g4b.um,
@@ -310,7 +319,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         #electron = particle_table.FindParticle("e-") # define the beta electron
         alpha = particle_table.FindParticle("alpha")
         beam = g4b.G4ParticleGun(1)
-        beam.SetParticleEnergy(5.156*g4b.MeV)
+        beam.SetParticleEnergy(5.486*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
                                                             par_direction[2]))
