@@ -153,25 +153,25 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 material_O = "O",
                                 colour = [0,0.5,0.8],   
                                 mother = 'world')
-        # self.create_sic_box(
-        #                     name = "Device",
-        #                     sidex = device_x,
-        #                     sidey = device_y,
-        #                     sidez = device_z,
-        #                     translation = [tx_all,ty_all,tz_device],
-        #                     material_Si = "Si",
-        #                     material_c = "C",
-        #                     colour = [1,0,0],
-        #                     mother = 'world')
-        self.create_AlorSi_box(
-                                name = "Device",
-                                sidex = device_x,
-                                sidey = device_y,
-                                sidez = device_z,
-                                translation = [tx_all,ty_all,tz_device],
-                                material_type = "G4_Si",
-                                colour = [1,0,0],
-                                mother = 'world')
+        self.create_sic_box(
+                            name = "Device",
+                            sidex = device_x,
+                            sidey = device_y,
+                            sidez = device_z,
+                            translation = [tx_all,ty_all,tz_device],
+                            material_Si = "Si",
+                            material_c = "C",
+                            colour = [1,0,0],
+                            mother = 'world')
+        # self.create_AlorSi_box(
+        #                         name = "Device",
+        #                         sidex = device_x,
+        #                         sidey = device_y,
+        #                         sidez = device_z,
+        #                         translation = [tx_all,ty_all,tz_device],
+        #                         material_type = "G4_Si",
+        #                         colour = [1,0,0],
+        #                         mother = 'world')
         self.create_pcb_board(
                                 name = "pcb2",
                                 sidex = 20000*g4b.um,
