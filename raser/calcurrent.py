@@ -14,7 +14,6 @@ import sys
 from array import array
 from raser.model import Mobility
 from raser.model import Avalanche
-from raser.source import MIPs
 
 #The drift of generated particles
 class CalCurrent:
