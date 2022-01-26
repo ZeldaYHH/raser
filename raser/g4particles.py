@@ -98,29 +98,22 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
             device_z = my_d.l_z*g4b.um
         elif "planar3D" in sensor_model:
-            tz_Si = 0*g4b.um
-            tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
-            self.init_tz_device = 10000
-            tz_pcb2 = 10000*g4b.um-1100*g4b.um
-            device_x = my_d.l_x*g4b.um
+            tz_Si = 10000*g4b.um
+            tz_device = my_d.l_z/2.0*g4b.um
+            self.init_tz_device = 0
+            tz_pcb2 = -1100*g4b.um
+            device_x = my_d.l_x*g4b.um 
             device_y = my_d.l_y*g4b.um
             device_z = my_d.l_z*g4b.um
-            # tz_Si = 10000*g4b.um
-            # tz_device = my_d.l_z/2.0*g4b.um
-            # self.init_tz_device = 0
-            # tz_pcb2 = -1100*g4b.um
-            # device_x = my_d.l_x*g4b.um 
-            # device_y = my_d.l_y*g4b.um
-            # device_z = my_d.l_z*g4b.um
-        # self.create_AlorSi_box(
-        #                         name = "Al",
-        #                         sidex = my_d.l_x*g4b.um,
-        #                         sidey = my_d.l_y*g4b.um,
-        #                         sidez = 10*g4b.um,
-        #                         translation = [tx_all,ty_all,15000*g4b.um],
-        #                         material_type = "G4_Al",
-        #                         colour = [1,0.1,0.8],
-        #                         mother = 'world')
+        self.create_AlorSi_box(
+                                name = "Al",
+                                sidex = my_d.l_x*g4b.um,
+                                sidey = my_d.l_y*g4b.um,
+                                sidez = 10*g4b.um,
+                                translation = [tx_all,ty_all,15000*g4b.um],
+                                material_type = "G4_Al",
+                                colour = [1,0.1,0.8],
+                                mother = 'world')
         self.create_AlorSi_box(
                                 name = "Si_main",
                                 sidex = 1300*g4b.um,
@@ -164,15 +157,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                             material_c = "C",
                             colour = [1,0,0],
                             mother = 'world')
-        # self.create_AlorSi_box(
-        #                         name = "Device",
-        #                         sidex = device_x,
-        #                         sidey = device_y,
-        #                         sidez = device_z,
-        #                         translation = [tx_all,ty_all,tz_device],
-        #                         material_type = "G4_Au",
-        #                         colour = [1,1,1],
-        #                         mother = 'world')
+
         self.create_pcb_board(
                                 name = "pcb2",
                                 sidex = 20000*g4b.um,
@@ -204,8 +189,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def create_world(self,my_d):
 
         self.nist = g4b.G4NistManager.Instance()
-        # material = self.nist.FindOrBuildMaterial("G4_AIR")
-        material = self.nist.FindOrBuildMaterial("G4_Galactic")
+        material = self.nist.FindOrBuildMaterial("G4_AIR")  
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
@@ -318,10 +302,9 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         g4b.G4VUserPrimaryGeneratorAction.__init__(self)
         par_direction = [ par_out[i] - par_in[i] for i in range(3) ]  
         particle_table = g4b.G4ParticleTable.GetParticleTable()
-        electron = particle_table.FindParticle("alpha") # define the beta electron
+        electron = particle_table.FindParticle("e-") # define the beta electron
         beam = g4b.G4ParticleGun(1)
-        beam.SetParticleEnergy(7.7*g4b.MeV)
-        # beam.SetParticleEnergy(2.28*g4b.MeV)
+        beam.SetParticleEnergy(2.28*g4b.MeV)
         # beam.SetParticleEnergy(0.546*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
@@ -331,21 +314,21 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                    par_in[1]*g4b.um,
                                                    par_in[2]*g4b.um))  
 
-        # beam2 = g4b.G4ParticleGun(1)
-        # beam2.SetParticleEnergy(0.546*g4b.MeV)
-        # beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
-        #                                                      par_direction[1],
-        #                                                      par_direction[2]))
-        # beam2.SetParticleDefinition(electron)
-        # beam2.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
-        #                                             par_in[1]*g4b.um,
-        #                                             par_in[2]*g4b.um))  
+        beam2 = g4b.G4ParticleGun(1)
+        beam2.SetParticleEnergy(0.546*g4b.MeV)
+        beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
+                                                             par_direction[1],
+                                                             par_direction[2]))
+        beam2.SetParticleDefinition(electron)
+        beam2.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
+                                                    par_in[1]*g4b.um,
+                                                    par_in[2]*g4b.um))  
         self.particleGun = beam
-        # self.particleGun2 = beam2
+        self.particleGun2 = beam2
 
     def GeneratePrimaries(self, event):
         self.particleGun.GeneratePrimaryVertex(event)
-        # self.particleGun2.GeneratePrimaryVertex(event)
+        self.particleGun2.GeneratePrimaryVertex(event)
 
 
 class MyRunAction(g4b.G4UserRunAction):
@@ -466,3 +449,4 @@ class MyActionInitialization(g4b.G4VUserActionInitialization):
         myEA = MyEventAction(myRA_action,self.par_in,self.par_out)
         self.SetUserAction(myEA)
         self.SetUserAction(MySteppingAction(myEA))
+

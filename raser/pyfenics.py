@@ -17,17 +17,16 @@ from array import array
 #Calculate the weighting potential and electric field
 class FenicsCal:
 
-    def __init__(self,my_d,fen_dic,det_dic):
+    def __init__(self,my_d,fen_dic):
         self.p_electric = []
         self.w_p_electric = []
         self.det_model = fen_dic['name']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
-        self.fl_y=my_d.l_y/fen_dic['xyscale']
+        self.fl_y=my_d.l_y/fen_dic['xyscale']  
         self.fl_z=my_d.l_z
         self.tol = 1e-14
-        self.det_dic=det_dic
-        m_sensor_box=self.fenics_space(my_d)
-        self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])
+        m_sensor_box=self.fenics_space(my_d)  
+        self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])  
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.fenics_p_electric(my_d)
         self.fenics_p_w_electric(my_d)
@@ -122,24 +121,7 @@ class FenicsCal:
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-        if self.det_dic['name']=="lgad3D":
-            if self.det_dic['part']==2:
-                bond = self.det_dic['bond']
-                doping_avalanche = self.f_value(my_d,self.det_dic['doping1'])
-                doping = self.f_value(my_d,self.det_dic['doping2'])
-                f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
-            elif self.det_dic['part'] == 3:
-                bond1 = self.det_dic['bond1']
-                bond2 = self.det_dic['bond2']
-                doping1 = self.f_value(my_d,self.det_dic['doping1'])
-                doping2 = self.f_value(my_d,self.det_dic['doping2'])
-                doping3 = self.f_value(my_d,self.det_dic['doping3'])
-                f = fenics.Expression('x[2] < bonda ? dopinga : x[2] > bondb ? dopingc : dopingb', degree = 1, 
-                                         bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3)
-            else:
-                print("The structure of lgad is wrong.")
-        else:
-            f = fenics.Constant(self.f_value(my_d))
+        f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
         L = f*v*fenics.dx
         # Compute solution
@@ -260,7 +242,7 @@ class FenicsCal:
             print("The input fenics solver model is wrong")
         return p_ele,n_ele
 
-    def f_value(self,my_d,input_doping=None):
+    def f_value(self,my_d):
         """
         @description: 
             Cal f_value of Poisson equation
@@ -279,10 +261,7 @@ class FenicsCal:
             print("material is wrong")            
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
-        if self.det_dic['name']=="lgad3D":
-            f_value = e0*input_doping*1e6/perm0/perm_mat
-        else:
-            f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
+        f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
         return f_value
         
     def get_e_field(self,px,py,pz):
@@ -379,269 +358,3 @@ class FenicsCal:
     
     def __del__(self):
         pass
-
-
-class FenicsCal2D:
-
-    def __init__(self,det):
-        
-        self.det = det
-
-        # poential & field
-        self.potential_value_2d = []
-    
-        self.electric_field_x_position = [ [] for n in range(self.det.ny+1) ]
-        self.electric_field_y_position = [ [] for n in range(self.det.ny) ]
-
-        # weighting poential & weighting field
-        self.weighting_potential_value_2d = []
-    
-        self.weighting_electric_field_x_value = [ [] for n in range(self.det.ny+1) ]
-        self.weighting_electric_field_y_value = [ [] for n in range(self.det.ny) ]
-
-        self.weighting_electric_field_x_position = [ [] for n in range(self.det.ny+1) ]
-        self.weighting_electric_field_y_position = [ [] for n in range(self.det.ny) ]
-
-        self.solve()
-        #self.draw()
-
-    def cal_possion(self):
-        
-        width = self.det.det_width
-        thin = self.det.det_thin
-        
-        nx = self.det.nx
-        ny = self.det.ny
-
-        # Create mesh and function space
-        mesh = fenics.RectangleMesh(fenics.Point(0, 0), fenics.Point(width, thin), nx, ny)
-        V = fenics.FunctionSpace(mesh, "P", 1)
-
-        # Define boundary condition
-        u_D = fenics.Expression('x[1] < tol? det_voltage : 0', degree = 2,tol = 1E-14,det_voltage = self.det.bias_voltage)
-
-        def boundary(x, on_boundary):
-            return abs(x[1])<1E-14 or abs(x[1]-thin)<1E-14
-
-        bc = fenics.DirichletBC(V, u_D, boundary)
-
-        # Define variational problem
-        u = fenics.TrialFunction(V)
-        v = fenics.TestFunction(V)
-
-        f = fenics.Expression(self.det.doping_epr,degree=2)
-        a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = f*v*fenics.dx #+ g*v*ds
-
-        # Compute solution
-        u = fenics.Function(V)
-        fenics.solve(a == L, u, bc)
-
-        potential_value_1d = u.compute_vertex_values()
-        potential_value_2d = np.array(potential_value_1d).reshape(ny+1,nx+1)
-
-        self.potential_value_2d = potential_value_2d
-        self.potential_value_1d = potential_value_1d
-
-        # print(self.potential_value_2d)
-
-
-    def cal_weighting_possion(self):
-
-        width = self.det.det_width
-        thin = self.det.det_thin
-        
-        nx = self.det.nx
-        ny = self.det.ny
-
-        # Create mesh and function space
-        mesh = fenics.RectangleMesh(fenics.Point(0, 0), fenics.Point(width, thin), nx, ny)
-        V = fenics.FunctionSpace(mesh, "P", 1)
-
-        # Define boundary condition
-        u_D = fenics.Expression('x[1] < tol? det_voltage : 0', degree = 2,tol = 1E-14,det_voltage = self.det.bias_voltage/abs(self.det.bias_voltage))
-
-        def boundary(x, on_boundary):
-            return abs(x[1])<1E-14 or abs(x[1]-thin)<1E-14
-
-        bc = fenics.DirichletBC(V, u_D, boundary)
-
-        # Define variational problem
-        u = fenics.TrialFunction(V)
-        v = fenics.TestFunction(V)
-
-        f = fenics.Constant(0)
-        a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = f*v*fenics.dx #+ g*v*ds
-
-        # Compute solution
-        u = fenics.Function(V)
-        fenics.solve(a == L, u, bc)
-
-        weighting_potential_value_1d = u.compute_vertex_values()
-        weighting_potential_value_2d = np.array(weighting_potential_value_1d).reshape(ny+1,nx+1)
-
-        self.weighting_potential_value_2d = weighting_potential_value_2d
-        self.weighting_potential_value_1d = weighting_potential_value_1d
-
-        return weighting_potential_value_1d
-
-    def cal_electric_field(self):
-
-        width = self.det.det_width
-        thin = self.det.det_thin
-        
-        nx = self.det.nx+1
-        ny = self.det.ny+1
-
-        x_step = width/nx
-        y_step = thin/ny
-
-        self.p_w_electric = [ [] for n in range(nx) ]
-        self.p_electric = [ [] for n in range(nx) ]
-        self.x_position = [ [] for n in range(nx) ]
-        self.y_position = [ [] for n in range(nx) ]
-
-        for j in range(ny):
-            for i in range(nx):
-                self.x_position[i].append(x_step*(i))
-                self.y_position[i].append(y_step*(j))
-                if (j==0):
-                    self.p_w_electric[i].append(0)
-                    self.p_electric[i].append(self.det.bias_voltage)
-                elif(j==ny-1):
-                    self.p_w_electric[i].append(1)
-                    self.p_electric[i].append(0)
-                else:
-                    self.p_w_electric[i].append(self.weighting_potential_value_1d[i+j*nx])
-                    self.p_electric[i].append(self.potential_value_1d[i+j*nx])
-
-    def cal_field(self):
-
-        nx = self.det.nx
-        ny = self.det.ny
-
-        width = self.det.det_width
-        thin = self.det.det_thin
-
-        x_step = width/nx
-        y_step = thin/ny
-
-        self.electric_field_x_position = [[]for n in range(nx)]
-        self.electric_field_y_position = [[]for n in range(nx)]
-        self.electric_field_x_value = [[]for n in range(nx)]
-        self.electric_field_y_value = [[]for n in range(nx)]
-
-        for j in range(ny):
-            for i in range(nx):
-                self.electric_field_x_position[i].append(0.5*x_step*(2*i+1))
-                self.electric_field_y_position[i].append(0.5*y_step*(2*j+1))
-                self.electric_field_x_value[i].append((self.p_electric[i+1][j]-self.p_electric[i][j])/x_step)
-                self.electric_field_y_value[i].append((self.p_electric[i][j+1]-self.p_electric[i][j])/y_step)
-
-    def cal_point_field(self,px_point,py_point,input_value):
-
-        width = self.det.det_width
-        thin = self.det.det_thin
-        
-        nx = self.det.nx
-        ny = self.det.ny
-
-        x_step = width/nx
-        y_step = thin/ny
-
-        #Interpolation method 
-        rex_value=px_point%x_step
-        nx_value=int(px_point/x_step)
-        rey_value=py_point%y_step
-        ny_value=int(py_point/y_step)
-
-        if(rex_value>x_step/2):
-            e_v_x1=rex_value-x_step/2
-            nx1_v=nx_value
-            nx2_v=nx_value+1
-        else:
-            e_v_x1=rex_value+x_step/2
-            e_v_x2=x_step-e_v_x1
-            nx1_v=nx_value-1
-            nx2_v=nx_value
-
-        if(rey_value>y_step/2):
-            e_v_y1=rey_value-y_step/2
-            ny1_v=ny_value
-            ny2_v=ny_value+1
-        else:
-            e_v_y1=rey_value+y_step/2
-            e_v_y2=y_step-e_v_y1
-            ny1_v=ny_value-1
-            ny2_v=ny_value
-
-        if (nx_value<=0):
-            r_u=0
-            nx1_v=nx2_v
-        elif (nx_value>=nx-1):
-            r_u=0
-            nx2_v=nx1_v
-        else:
-            r_u=e_v_x1/x_step
-
-        if (ny_value<=0):
-            r_t=0
-            ny1_v=ny2_v
-        elif (ny_value>=ny-1):
-            r_t=0
-            ny2_v=ny1_v
-        else:
-            r_t=e_v_y1/y_step
-
-        value_11=input_value[nx1_v][ny1_v]
-        value_21=input_value[nx1_v][ny2_v]
-        value_12=input_value[nx1_v][ny1_v]
-        value_22=input_value[nx1_v][ny2_v]
-        out_field=0.0
-        out_field=(1-r_u)*(1-r_t)*value_11
-        out_field+=r_u*(1-r_t)*value_21
-        out_field+=r_u*r_t*value_22
-        out_field+=(1-r_u)*r_t*value_12
-
-        return out_field        
-
-
-    def solve(self):
-
-        self.cal_possion()
-        self.cal_weighting_possion()
-        self.cal_electric_field()
-        self.cal_field()
-
-    def draw(self):
-
-        cutline = int(self.det.nx/2.0)
-
-        plt.figure(figsize=(20,20))
-
-        plt.subplot(2,2,1)
-        plt.title('Electric field')
-        plt.xlabel('depth [um]')
-        plt.ylabel('Electric field [V/um]')
-        plt.plot(self.electric_field_y_position[cutline],self.electric_field_y_value[cutline])
-
-        plt.subplot(2,2,2)
-        plt.title('Electric field')
-        plt.xlabel('X [um]')
-        plt.ylabel('Electric field [V/um]')
-        plt.plot(self.electric_field_x_position[1],self.electric_field_x_value[1])
-
-        plt.subplot(2,2,3)
-        plt.title('weighting potential')
-        plt.xlabel('depth [um]')
-        plt.ylabel('Electric potential [V]')
-        plt.plot(self.y_position[0], self.p_w_electric[0])
-
-        plt.subplot(2,2,4)
-        plt.title('potential')
-        plt.xlabel('depth [um]')
-        plt.ylabel('Electric potential [V]')
-        plt.plot(self.y_position[0], self.p_electric[0])
-
-        plt.savefig("electric_field.pdf")

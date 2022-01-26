@@ -38,7 +38,7 @@ class Setting:
         if "laser_model" in self._pardic:
             self.laser_model=self._pardic['laser_model']
             self.append_par(self._pardic['laser_file'])
-        if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
+        if self.det_model in ("plugin3D","planar3D"):
             self.scan_variation()
 
     def input2dic(self,parameters):
@@ -114,34 +114,6 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
-
-        if "lgad3D" in self.det_model:
-            detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                        'bond1':p['bond1'], 'bond2':p['bond2'], 'doping1':p['doping1'],
-                        'doping2':p['doping2'], 'doping3':p['doping3'], 'part':p['part'], 
-                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
-                        'Avalanche':p['Avalanche']
-                        }
-        
-        if "lgad2D" in self.det_model:
-            detector = {'name':'lgad2D',
-                        'det_width':p['det_width'], 'det_thin':p['det_thin'],
-                        'x_step':p['x_step'], 'y_step':p['y_step'],
-                        'material':p['material'],
-                        'doping_epr':p['doping_epr'],
-                        'bias_voltage':p['bias_voltage'],
-                        'temperature':p['temperature']
-                        }
-
-        if "pin2D" in self.det_model:
-            detector = {'name':'pin2D',
-                        'det_width':p['det_width'], 'det_thin':p['det_thin'],
-                        'x_step':p['x_step'], 'y_step':p['y_step'],
-                        'material':p['material'],
-                        'doping_epr':p['doping_epr'],
-                        'bias_voltage':p['bias_voltage'],
-                        'temperature':p['temperature']
-                        }
         return detector
 
     def electron_custom(self,electrodes):
@@ -172,7 +144,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
+        if "planar3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
@@ -204,7 +176,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
+        if "planar3D" in self.det_model:
             pygeant4 = {'name':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
