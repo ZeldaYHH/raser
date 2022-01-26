@@ -114,26 +114,6 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
-        
-        if "lgad2D" in self.det_model:
-            detector = {'name':'lgad2D',
-                        'det_width':p['det_width'], 'det_thin':p['det_thin'],
-                        'x_step':p['x_step'], 'y_step':p['y_step'],
-                        'material':p['material'],
-                        'doping_epr':p['doping_epr'],
-                        'bias_voltage':p['bias_voltage'],
-                        'temperature':p['temperature']
-                        }
-
-        if "pin2D" in self.det_model:
-            detector = {'name':'pin2D',
-                        'det_width':p['det_width'], 'det_thin':p['det_thin'],
-                        'x_step':p['x_step'], 'y_step':p['y_step'],
-                        'material':p['material'],
-                        'doping_epr':p['doping_epr'],
-                        'bias_voltage':p['bias_voltage'],
-                        'temperature':p['temperature']
-                        }
         return detector
 
     def electron_custom(self,electrodes):
