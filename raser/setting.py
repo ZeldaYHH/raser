@@ -151,7 +151,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
@@ -183,7 +183,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             pygeant4 = {'name':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
