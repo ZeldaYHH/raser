@@ -151,7 +151,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
@@ -183,7 +183,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             pygeant4 = {'name':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
@@ -196,33 +196,6 @@ class Setting:
                         "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
                         }
         return pygeant4
-
-    # @property
-    # def mips(self):
-    #     """
-    #     Description:
-    #         Define mips parameters
-    #     Parameters:
-    #     ---------
-    #     track_entry : list
-    #         Incident particle position
-    #     track_exit : list
-    #         Exit position
-    #     n_div: int
-    #         Divide the track line to n_div points
-    #     @Returns:
-    #     ---------
-    #         A dictionary containing all parameters
-    #     @Modify:
-    #     ---------
-    #         2021/09/07
-    #     """
-    #     p = self.paras
-    #     track_par = {'name':'mips',
-    #                  'track_entry':[25,0],
-    #                  'track_exit':[25,50],
-    #                  'n_div':100}      
-    #     return track_par
 
     @property
     def laser(self):
