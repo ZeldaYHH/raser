@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self,my_d,laser,min_carrier=0):
+    def __init__(self,my_d,laser,x_rel,y_rel,z_rel,min_carrier=0):
         #technique used
         self.tech=laser["tech"]
         self.direction=laser["direction"]
@@ -45,9 +45,12 @@ class TCTTracks():
         self.ly=my_d.l_y
         self.lz=my_d.l_z
         #relative and absolute position of the focus
-        self.fx_rel=laser["fx_rel"]
-        self.fy_rel=laser["fy_rel"]
-        self.fz_rel=laser["fz_rel"]
+        #self.fx_rel=laser["fx_rel"]
+        #self.fy_rel=laser["fy_rel"]
+        #self.fz_rel=laser["fz_rel"]
+        self.fx_rel=x_rel
+        self.fy_rel=y_rel
+        self.fz_rel=z_rel
         self.fx_abs=self.fx_rel*self.lx
         self.fy_abs=self.fy_rel*self.ly
         self.fz_abs=self.fz_rel*self.lz
