@@ -1,0 +1,412 @@
+#!/usr/bin/env bash        
+
+# Main driver to run RASER    
+# Author SHI Xin <shixin@ihep.ac.cn>  
+# Created [2021-03-21 Sun 10:04] 
+
+
+usage() { 
+    printf "NAME\n\trun - Main driver to run RASER\n"
+    printf "\nSYNOPSIS\n"
+    printf "\n\t%-5s\n" "./run [OPTION]" 
+    printf "\nOPTIONS\n"    
+    printf "\n\t%-9s  %-40s"  "0.1"       "RASER 2D"
+	printf "\n\t%-9s  %-40s"  "0.2"       "RASER 3D" 
+    printf "\n\n" 
+}
+
+usage_0_1() { 
+    printf "\n\t%-5s  %-40s\n"  "0.1.1"    "raser planar3D SiC basic information..." 
+    printf "\n\t%-5s  %-40s\n"  "0.1.2"    "planar3D batch model" 
+    printf "\n\t%-5s  %-40s\n"  "0.1.3"    "raser planar3D scan for time resolution... used by 0.1.2" 
+    printf "\n\t%-5s  %-40s\n"  "0.1.4"    "get rise time and amplitude" 
+}
+usage_0_2() { 
+    printf "\n\t%-5s  %-40s\n"  "0.2.1"    "raser plugin3D SiC basic information..." 
+    printf "\n\t%-5s  %-40s\n"  "0.2.2"    "plugin3D batch model" 
+    printf "\n\t%-5s  %-40s\n"  "0.2.3"    "raser plugin3D scan for time resolution... used by 0.2.2" 
+	printf "\n\t%-5s  %-40s\n"  "0.2.4"    "get time resolution plugin3D"
+	printf "\n\t%-5s  %-40s\n"  "0.2.5"    "singularity instance stop --all" 
+}
+
+if [[ $# -eq 0 ]]; then
+    usage
+    echo "Please enter your option: "
+    read option
+else
+	./singularity/singularity_bashrc.sh	
+    option=$1 
+	input_para=$* 
+fi
+
+
+track(){
+    cd 
+    singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
+    #singularity shell -B /afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-2.1.simg 
+}
+
+geant4(){
+export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
+source $GEANT4_INSTALL/bin/geant4.sh
+export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
+}
+
+sub_0_1(){
+case $option in 
+    0.1.0) echo "Run shell of track"
+    track 
+    ;; 
+    0.1.1) echo "raser planar3D SiC basic information..."
+        geant4 
+        ./python/gsignal.py det_model=planar3D parfile=setting.json
+        ;;
+
+	0.1.2) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=planar3D  step=2000 total=40000 \
+							 instance=0 output=out/planar3Dscan/20220323_3D/ batch=True para_number=1 
+        ;;
+
+    0.1.3) echo "get time resolution planar3D"
+        ./python/add_noise_raser.py  out/planar3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
+        ;;
+
+    0.1.4) echo "get rise time and amplitude"
+        ./python/fit_time_ampl1.py   out/planar3Dscan  draw_voltage
+        ;;
+        esac
+}
+ 
+sub_0_2(){
+case $option in 
+    0.2.1) echo "raser plugin3D SiC basic information..."
+        ./python/gsignal.py  det_model=plugin3D parfile=setting.json		
+        ;;
+
+    0.2.2) echo "get time resolution plugin3D one point"
+        ./python/add_noise_raser.py  out/plugin3Dtmp_202109023/_d=10.0_v=-200.0_g=150.0_tmp=258.0_thick=350.0 1
+        ;;
+
+	# Voltage
+	0.2.3.1) echo "batch model with scanning voltage [-50,-500] test"
+		./python/run_batchjob.py det_model=plugin3D step=10 total=20  \
+							 instance=0 output=out/plugin3Dthick_20220324/ batch=False para_number=10 
+		;;
+	0.2.3.2) echo "batch model with scanning voltage [-50,-500] run"
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=20000  \
+							 instance=0 output=out/plugin3Dthick_20220324/ batch=True para_number=10 
+		;;
+    0.2.3.3) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dthick_20220324 scan
+        ;;
+    0.2.3.4) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dthick_20220324/time_resolution_scan1.csv draw_voltage 0
+        ;;
+    0.2.3.5) echo "get time resolution draw voltage vs efficiency"
+        ./python/time_scan.py  out/plugin3Dthick_20220324/time_resolution_scan1.csv draw_voltage 1
+        ;;
+    0.2.3.6) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dthick_20220324   draw_voltage
+        ;;
+
+	# temperature
+	0.2.4.1) echo "batch model with scanning tmp [200,300]"
+		#plugin3Dtmp_202109023   temperature 240-300
+		#plugin3Dtmp_20211110    temperature 240-400  modify fenics electric field boundary conditions
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=20000  \
+							 instance=0 output=out/plugin3Dtmp_202109023/ 2
+		# ./python/run_batchjob.py det_model=plugin3D step=20000 total=40000  \
+		# 					 instance=0 output=out/plugin3Dtmp_20211110/ 2
+		;;
+    0.2.4.2) echo "get time resolution plugin3D multi points tmp [200,300]"
+		# rm out/plugin3Dtmp_202109023/time_resolution_scan.csv
+		./python/time_scan.py  out/plugin3Dtmp_202109023  scan
+        ;;
+    0.2.4.21) echo "merge csv file"
+		# rm out/plugin3Dtmp_202109023/time_resolution_scan.csv
+		./python/merge_csv.py  out/plugin3Dtmp_202109023
+        ;;		
+    0.2.4.3) echo "get time resolution draw tmp  [200,300]"
+		./python/time_scan.py  out/plugin3Dtmp_202109023/time_resolution_scan1.csv draw_tmp 0
+        #./python/time_scan.py  out/plugin3Dtmp_20211110/time_resolution_scan.csv draw_tmp 0
+        ;;
+    0.2.4.4) echo "get time resolution draw tmp vs efficiency"
+        ./python/time_scan.py  out/plugin3Dtmp_20211110/time_resolution_scan.csv draw_tmp 1
+        ;;
+    0.2.4.5) echo "get rise time and amplitude for different temperature"
+        ./python/fit_time_ampl.py  out/plugin3Dtmp_202109023   draw_tmp
+        ;;
+
+	# Doping
+	0.2.5.1) echo "batch model with scanning Doping [10,100]"
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=40000  \
+							 instance=0 output=out/plugin3Ddoping_20211013/ 2
+		;;
+    0.2.5.2) echo "get time resolution plugin3D multi points Doping [10,100] "
+		# rm out/plugin3Ddoping_202109024/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Ddoping_20211013 scan
+        ;;
+    0.2.5.3) echo "get time resolution draw Doping [10,100]"
+        ./python/time_scan.py  out/plugin3Ddoping_20211013/time_resolution_scan.csv draw_doping 0
+        ;;
+    0.2.5.4) echo "get time resolution draw Doping [10,100] vs efficiency"
+        ./python/time_scan.py  out/plugin3Ddoping_20211013/time_resolution_scan.csv draw_doping 1
+        ;;
+    0.2.5.5) echo "get rise time and amplitude for different Dopings"
+        ./python/fit_time_ampl.py  out/plugin3Ddoping_20211013  draw_doping
+        ;;
+	# Gap
+	0.2.6.1) echo "batch model with scanning Gap [120,300]"
+		./python/run_batchjob.py det_model=plugin3D step=5 total=5  \
+							 instance=0 output=out/plugin3Dgap_202109026/ 1
+		;;
+	0.2.6.2) echo "batch model with scanning Gap [120,300]"
+		./python/run_batchjob.py det_model=plugin3D step=20000 total=40000  \
+							 instance=0 output=out/plugin3Dgap_202109026/ 2
+		;;
+    0.2.6.3) echo "get time resolution plugin3D multi points Gap [120,300] "
+		# rm out/plugin3Dgap_202109026/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dgap_202109026 scan
+        ;;
+    0.2.6.4) echo "get time resolution draw Gap [120,300]" 
+        ./python/time_scan.py  out/plugin3Dgap_202109026/time_resolution_scan.csv draw_gap 0
+        ;;
+    0.2.6.5) echo "get time resolution draw Gap [120,300] vs efficiency" 
+        ./python/time_scan.py  out/plugin3Dgap_202109026/time_resolution_scan.csv draw_gap 1
+        ;;
+    0.2.6.6) echo "get rise time and amplitude for different gaps"
+        ./python/fit_time_ampl.py   out/plugin3Dgap_202109026  draw_gap
+        ;;
+	# thickness
+	0.2.7.1) echo "batch model with scanning thick [150,450] try test"
+		./python/run_batchjob.py det_model=plugin3D step=5 total=5  \
+							 instance=0 output=out/plugin3Dthick_202109026/ 1
+		;;
+	0.2.7.2) echo "batch model with scanning thick [150,450] run batch model"
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=20000  \
+							 instance=0 output=out/plugin3Dthick_202109026/ 2
+		;;
+    0.2.7.3) echo "get time resolution plugin3D multi points thick [150,450] "
+		# rm out/plugin3Dthick_202109026/time_resolution_scan.csv
+        ./python/time_scan.py out/plugin3Dthick_202109026 scan
+        ;;
+    0.2.7.4) echo "get time resolution draw thick [150,450]" 
+        ./python/time_scan.py   out/plugin3Dthick_202109026/time_resolution_scan.csv draw_thick 0
+        ;;
+    0.2.7.5) echo "get time resolution draw thick [150,450] vs efficiency " 
+        ./python/time_scan.py   out/plugin3Dthick_202109026/time_resolution_scan.csv draw_thick 1
+        ;;
+    0.2.7.6) echo "get rise time and amplitude for different Dopings"
+        ./python/fit_time_ampl.py  out/plugin3Dthick_202109026 draw_thick
+        ;;
+
+	# Structure
+        esac
+}
+ 
+sub_0_3(){
+case $option in 
+	# five different structure sensors
+	0.3.1.1) echo "batch model with scanning voltage [-50,-500] with different structures five electrodes"
+		./python/run_batchjob.py det_model=plugin3D step=20000 total=40000  \
+							 instance=0 output=out/plugin3Dthick_20211021/ 2
+		;;
+    0.3.1.2) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py out/plugin3Dthick_20211021 scan 
+        ;;
+    0.3.1.3) echo "get time resolution draw voltage and efficiency"
+        ./python/time_scan.py  out/plugin3Dthick_20211021/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dthick_20211021/time_resolution_scan.csv draw_voltage 1
+		;;
+    0.3.1.4) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dthick_20211021  draw_voltage
+        ;;
+
+	# four structures simulation
+	0.3.2.1) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=40000  \
+							 instance=0 output=out/plugin3Dvoltage_20211029/ 2
+		;;
+    0.3.2.2) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dvoltage_20211029 scan
+        ;;
+    0.3.2.3) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dvoltage_20211029/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dvoltage_20211029/time_resolution_scan.csv draw_voltage 1    
+        ;;
+    0.3.2.4) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dvoltage_20211029   draw_gap
+        ;;
+
+
+	# seven radius = 50, gap = 150
+	0.3.4.1) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=100 total=100  \
+							 instance=0 output=out/plugin3Dthick_202109022/ 2
+		;;
+    0.3.4.2) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dvoltage_202109022 scan
+        ;;
+    0.3.4.3) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dvoltage_202109022/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dvoltage_202109022/time_resolution_scan.csv draw_voltage 1    
+        ;;
+    0.3.4.4) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dvoltage_202109022   draw_voltage
+        ;;
+
+	# seven radius = 50, gap = 200
+	0.3.5.1) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=10000 total=20000  \
+							 instance=0 output=out/plugin3Dvoltage_202110253/ 2
+		;;
+    0.3.5.2) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dvoltage_202110253 scan
+        ;;
+    0.3.5.3) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dvoltage_202110253/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dvoltage_202110253/time_resolution_scan.csv draw_voltage 1    
+        ;;
+    0.3.5.4) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dvoltage_202110253   draw_voltage
+        ;;
+
+	# seven radius = 25, gap = 150
+	0.3.5.1) echo "Not batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=10 total=10  \
+				instance=0 output=out/plugin3Dvoltage_202110274/ 1
+		;;
+	0.3.5.2) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=20000 total=20000  \
+							 instance=0 output=out/plugin3Dvoltage_202110254/ 2
+		;;
+    0.3.5.3) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dvoltage_202110254 scan
+        ;;
+    0.3.5.4) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dvoltage_202110254/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dvoltage_202110254/time_resolution_scan.csv draw_voltage 1    
+        ;;
+    0.3.5.5) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dvoltage_202110254   draw_voltage
+        ;;
+
+	# seven radius = 25, gap = 100
+	0.3.6.1) echo "Not batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=10 total=10  \
+				instance=0 output=out/plugin3Dvoltage_202110275/ 1
+		;;
+	0.3.6.2) echo "batch model with scanning voltage [-50,-500]"
+		./python/run_batchjob.py det_model=plugin3D step=20000 total=20000  \
+							 instance=0 output=out/plugin3Dvoltage_202110255/ 2
+		;;
+    0.3.6.3) echo "get time resolution plugin3D multi points voltage [-50,-500] "
+		# rm out/plugin3Dvoltage_202109022/time_resolution_scan.csv
+        ./python/time_scan.py  out/plugin3Dvoltage_202110255 scan
+        ;;
+    0.3.6.4) echo "get time resolution draw voltage"
+        ./python/time_scan.py  out/plugin3Dvoltage_202110255/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3Dvoltage_202110255/time_resolution_scan.csv draw_voltage 1    
+        ;;
+    0.3.6.5) echo "get rise time and amplitude for different voltages"
+        ./python/fit_time_ampl.py  out/plugin3Dvoltage_202110255   draw_voltage
+        ;;
+        esac
+}
+
+
+sub_0_4(){
+case $option in 
+	# Planar and 3D compare
+	0.4.1) echo "Planar and 3D compare"
+		homepath=/cefs/higgs/tanyuhang/raser/raser-1
+		flist=(
+			${homepath}/out/planar3Dscan/outfile:20211018_d=10.0_v=-500.0_tmp=300.0_thick=100.0/out.root
+			${homepath}/out/plugin3Dvoltage_202109022/outfile:_d=10.0_v=-500.0_g=150.0_tmp=300.0_thick=350.0/out.root
+			
+		)
+		./python/compare_result.py  fig/compare_planar_3D draw_voltage ${flist[*]}
+	;;
+
+	0.4.2) echo "two differetn electrodes"
+		homepath=/cefs/higgs/tanyuhang/raser/raser-1
+		flist=(
+			${homepath}/out/plugin3Dvoltage_202109022/outfile:_d=10.0_v=-500.0_g=150.0_tmp=300.0_thick=350.0/out.root
+			${homepath}/out/plugin3Dthick_20211021/outfile:_d=10.0_v=-500.0_g=150.0_tmp=300.0_thick=350.0/out.root
+			
+		)
+		./python/compare_3D_electrodes.py  fig/compare_3D_electrodes draw_voltage ${flist[*]}
+	;;
+
+	0.4.3) echo "four different parameters"
+
+		homepath=/cefs/higgs/tanyuhang/raser/raser-1
+		flist=(
+			${homepath}/out/plugin3Dvoltage_20211029/outfile:_d=10.0_v=-500.0_g=100.0_tmp=300.0_thick=350.0_radius=25.0/out.root
+			${homepath}/out/plugin3Dvoltage_20211029/outfile:_d=10.0_v=-500.0_g=150.0_tmp=300.0_thick=350.0_radius=25.0/out.root
+			${homepath}/out/plugin3Dvoltage_20211029/outfile:_d=10.0_v=-500.0_g=150.0_tmp=300.0_thick=350.0_radius=50.0/out.root
+			${homepath}/out/plugin3Dvoltage_20211029/outfile:_d=10.0_v=-500.0_g=200.0_tmp=300.0_thick=350.0_radius=50.0/out.root
+			
+		)
+		./python/compare_3D_parameters.py  fig/compare_3D_parameters draw_voltage ${flist[*]}
+	;;
+
+
+
+
+
+        esac
+}
+
+
+
+case $option in 
+   0.1) echo "RASER planar3D"
+        usage_0_1
+        echo "Please enter your option: " 
+        read option 
+        sub_0_1 option 
+        ;;
+    0.1.*) echo "RASER planar3D"
+        sub_0_1 option
+        ;;
+   0.2) echo "RASER plugin3D"
+        usage_0_2
+        echo "Please enter your option: " 
+        read option 
+        sub_0_2 option 
+        ;;
+    0.2.*) echo "RASER plugin3D"
+        sub_0_2 option 
+		;;
+   0.3) echo "RASER plugin3D"
+        usage_0_3
+        echo "Please enter your option: " 
+        read option 
+        sub_0_3 option 
+        ;;
+    0.3.*) echo "RASER plugin3D"
+        sub_0_3 option 
+		;;
+   0.4) echo "Data analysis"
+        usage_0_4
+        echo "Please enter your option: " 
+        read option 
+        sub_0_4 option 
+        ;;
+    0.4.*) echo "Data analysis"
+        sub_0_4 option 
+		;;
+   0.5) echo "Data analysis"
+        usage_0_5
+        echo "Please enter your option: " 
+        read option 
+        sub_0_5 option 
+        ;;
+		esac
