@@ -53,10 +53,11 @@ class Setting:
         for dic_par in dic_pars:
             if dic_par['name'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
-                paras =  dic_par
-            if dic_par['name'] in self.laser_model:
-                laser_paras = dic_par
-        for x in paras or laser_paras: 
+                paras = dic_par
+            if "laser_model" in self._pardic\
+            and dic_par['name'] in self.laser_model:
+                paras.update(dic_par)
+        for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
             else:
