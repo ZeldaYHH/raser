@@ -229,7 +229,7 @@ class Setting:
             2021/09/08
         """
         if hasattr(self,"laser_model"):
-            p = self.laser_paras
+            p = self.paras
             laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
                     "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
