@@ -115,7 +115,7 @@
     {
         "tech" : "SPA",
         "direction" : "top",
-        "name" : "top_TCT_Si",
+        "name" : "top_TCT",
         
         "alpha" : 21000,
         "refractionIndex" : 3.124,
