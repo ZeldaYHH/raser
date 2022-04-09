@@ -112,7 +112,7 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
                         'Avalanche':p['Avalanche']
                         }
-        detector.append(p.setdefault('material','SiC'))
+        detector['material'] = p.setdefault('material','SiC')
         return detector
 
     def electron_custom(self,electrodes):
