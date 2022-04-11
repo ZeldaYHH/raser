@@ -361,9 +361,9 @@ def draw_drift_path(my_d,my_f,my_current,path):
                 except RuntimeError:
                     structure.SetBinContent(i+1,j+1,k+1,1)
     structure.SetFillColor(1)
-    structure.GetXaxis().SetTitle("x aixs")
-    structure.GetYaxis().SetTitle("y aixs")
-    structure.GetZaxis().SetTitle("z aixs")
+    structure.GetXaxis().SetTitle("x axis")
+    structure.GetYaxis().SetTitle("y axis")
+    structure.GetZaxis().SetTitle("z axis")
     structure.GetXaxis().CenterTitle()
     structure.GetYaxis().CenterTitle() 
     structure.GetZaxis().CenterTitle() 
@@ -414,8 +414,8 @@ def draw_drift_path(my_d,my_f,my_current,path):
             del z_array[:]
     c1.cd(2)
     mg.Draw("APL")
-    mg.GetXaxis().SetTitle("x aixs")
-    mg.GetYaxis().SetTitle("z aixs")
+    mg.GetXaxis().SetTitle("x axis")
+    mg.GetYaxis().SetTitle("z axis")
     c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
     del c1
 

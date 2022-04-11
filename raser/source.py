@@ -61,9 +61,7 @@ class TCTTracks():
     def mesh_definition(self):
         self.r_char=self.widthBeamWaist
         if self.tech == "SPA":
-            #adjusted
-            #self.h_char=float('inf')
-            self.h_char=10
+            self.h_char=float('inf')
 
         elif self.tech == "TPA":
             self.h_char=self.l_Rayleigh
