@@ -97,7 +97,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             device_x = (my_f.sx_r-my_f.sx_l)*g4b.um 
             device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
             device_z = my_d.l_z*g4b.um
-        elif "planar3D" in sensor_model:
+        elif "planar3D" or "lgad3D" in sensor_model:
             tz_Si = 10000*g4b.um
             tz_device = my_d.l_z/2.0*g4b.um
             self.init_tz_device = 0

@@ -53,10 +53,10 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
 
 def savedata(my_d,output,batch_number,ele_current,my_g4p):
     " Save data to the file"
-    if "plugin" in my_d.det_model:
+    if "plugin3D" in my_d.det_model:
         output_path = (output + "_d:"+str(my_d.d_neff) 
         +"_v:"+str(my_d.v_voltage)+"_g:"+str(my_d.e_gap))
-    elif "planar" in my_d.det_model:
+    elif "planar3D" or "lgad3D" in my_d.det_model:
         output_path = (output + "_d:"+str(my_d.d_neff) 
         +"_v:"+str(my_d.v_voltage)+"_thick:"+str(my_d.l_z))
     create_path(output_path)
@@ -217,7 +217,7 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             l_yr = my_d.l_z
         else:
             print("the draw plane is not existing")
-    elif "planar3D" in sensor_model or "lgad3D" in sensor_model:
+    elif "planar3D" or "lgad3D" in sensor_model or "lgad3D" in sensor_model:
         l_xl = 0
         l_yl = 0 
         if plane == "xy":

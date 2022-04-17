@@ -40,16 +40,17 @@ else
 	input_para=$* 
 fi
 
-export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
-source $GEANT4_INSTALL/bin/geant4.sh
-export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
-
 track(){
     cd 
     singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
     #singularity shell -B /afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-2.1.simg 
 }
 
+geant4(){
+    export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
+    source $GEANT4_INSTALL/bin/geant4.sh
+    export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
+}
 
 sub_0_1(){
 case $option in 
@@ -58,6 +59,7 @@ case $option in
         ;; 
 
     0.1.1) echo "raser planar3D SiC basic information..."
+        geant4
         ./python/gsignal.py det_model=planar3D parfile=setting.json
         ;;
 

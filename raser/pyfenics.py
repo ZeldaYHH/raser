@@ -53,7 +53,7 @@ class FenicsCal:
                                      fenics.Point(e_t_i[0],e_t_i[1],e_t_i[4]),
                                      e_t_i[2],e_t_i[2])
                 m_sensor =m_sensor - elec_n 
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             m_sensor =  mshr.Box(fenics.Point(0, 0, 0), 
                                  fenics.Point(self.fl_x, self.fl_y, self.fl_z))
         else:
@@ -117,7 +117,7 @@ class FenicsCal:
         if  "plugin3D" in self.det_model:
             bc_l=[]
             bc_l = self.boundary_definition_3D(my_d,"Possion")          
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Possion")
 
         u = fenics.TrialFunction(self.V)
@@ -164,7 +164,7 @@ class FenicsCal:
         if  "plugin3D" in self.det_model:
             bc_l = []
             bc_l = self.boundary_definition_3D(my_d,"Laplace")
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Laplace")
         # Define variational problem
         u_w = fenics.TrialFunction(self.V)
@@ -373,7 +373,7 @@ class FenicsCal:
                 out_range=True
             else:
                 out_range=False
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             out_range=False
         return out_range
     
