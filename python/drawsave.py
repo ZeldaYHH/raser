@@ -13,7 +13,7 @@ import sys
 import os
 import time
 
-def drawplot(my_d,ele_current,my_f,my_g4p,my_current):
+def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     @description:
         Draw electric field ,drift path and energy deposition
@@ -25,16 +25,17 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current):
         2021/08/31
     """
     now = time.strftime("%Y_%m%d_%H%M")
-    path = "out/fig/" + now + "/"
+    path = "fig/" + now + "/"
     create_path(path)
-    #draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
+    draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
     draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
-    #draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
-    #draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
+    draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-    #Draw Drift path
-    #draw_drift_path(my_d,my_f,my_current,path)
+    if my_l!=None :
+        draw_nocarrier3D(path,my_l)
+    draw_drift_path(my_d,my_f,my_current,path)
      
 def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     """
@@ -50,28 +51,21 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
+def savedata(my_d,output,batch_number,ele_current,my_g4p):
     " Save data to the file"
     if "plugin" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)+"_g="+str(my_d.e_gap)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z)
-                       + "_radius="+str(my_d.e_ir) )
+        output_path = (output + "_d:"+str(my_d.d_neff) 
+        +"_v:"+str(my_d.v_voltage)+"_g:"+str(my_d.e_gap))
     elif "planar" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) )
+        output_path = (output + "_d:"+str(my_d.d_neff) 
+        +"_v:"+str(my_d.v_voltage)+"_thick:"+str(my_d.l_z))
     create_path(output_path)
-    save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
-    if batch_number > 0 and batch_number < 10:
-        draw_ele_field_scan(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,output_path,batch_number)
+    save_ele(ele_current,my_g4p,batch_number,output_path)
 
-def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
+def save_ele(ele_current,my_g4p,number,output_path="none"):
     """ Save induced current after CSA and BB"""
-    charge = "_charge=%.2f_"%(ele_current.qtot*1e15)  #fc
-    e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
+    charge = "_charge:%.2f_"%(ele_current.qtot*1e15)  #fc
+    e_dep = "dep:%.5f_"%(my_g4p.edep_devices[number]) #mv
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
     f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
@@ -80,7 +74,6 @@ def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
                                 ele_current.CSA_ele[i],
                                 ele_current.BB_ele[i]))
     f1.close()
-
     print("output_file:%s"%output_file)
     del ele_current.BB_ele
     del ele_current.CSA_ele
@@ -97,8 +90,8 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
         2021/08/31
     """
     c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
-    ROOT.gStyle.SetOptStat(0)
-    # ROOT.gStyle.SetOptFit()
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptFit()
     c1.SetLeftMargin(0.12)
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
@@ -120,53 +113,7 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.GetPad(i).SetRightMargin(0.2)
     e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
     e_field3.Draw("COLZ")
-    c1.SaveAs(path+my_d.det_model+plane+str(depth)+".root")
-    del c1
-
-
-def draw_ele_field_scan(my_d,my_f,plane,sensor_model,depth,path,batch_number):
-    """
-    @description:
-        Draw eletric field
-    @param:
-        None     
-    @Returns:
-        None
-    @Modify:
-        2021/08/31
-    """
-    c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
-    ROOT.gROOT.SetBatch(True)
-    ROOT.gStyle.SetOptStat(0)
-    # ROOT.gStyle.SetOptFit()
-    c1.SetLeftMargin(0.12)
-    c1.SetRightMargin(0.2)
-    c1.SetBottomMargin(0.14)
-    c1.SetRightMargin(0.12)
-    c1.Divide(2,2)
-    model = ["E","P","WP"]
-    i=1
-    c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field1=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field1.Draw("COLZ")
-    i=2
-    c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field2=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field2.Draw("COLZ")
-    i=3
-    c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field3.Draw("COLZ")
-    paths = path.split("/_")[:]
-    print(paths)
-    outpath  = paths[0] + "/root/" + paths[1]+"/"
-    print(outpath)
-    create_path(outpath)
-    c1.SaveAs(outpath+str(batch_number)+my_d.det_model+plane+str(depth)+".pdf")
-    
+    c1.SaveAs(path+my_d.det_model+plane+str(depth)+".pdf")
     del c1
 
 
@@ -181,11 +128,10 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     @Modify:
         2021/08/31
     """
-    nx_e=300
-    ny_e=300
+    nx_e=30
+    ny_e=30
     d_r=confirm_range(my_d,my_f,plane,sensor_model,depth)
     e_v = ROOT.TH2F("","",nx_e,d_r[0],d_r[1],ny_e,d_r[2],d_r[3])
-    ROOT.gStyle.SetOptStat(0)
     for j in range (ny_e):
         for i in range(nx_e):
             x_v = (i+1)*((d_r[1]-d_r[0])/nx_e)+d_r[0]
@@ -203,7 +149,6 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     if plane == "xy":
         e_v.GetXaxis().SetTitle("x")
         e_v.GetYaxis().SetTitle("y")
-        e_v.GetZaxis().SetTitle("V/#mum")
     elif plane == "yz":
         e_v.GetXaxis().SetTitle("y")
         e_v.GetYaxis().SetTitle("z")
@@ -272,7 +217,7 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             l_yr = my_d.l_z
         else:
             print("the draw plane is not existing")
-    elif "planar3D" in sensor_model:
+    elif "planar3D" in sensor_model or "lgad3D" in sensor_model:
         l_xl = 0
         l_yl = 0 
         if plane == "xy":
@@ -287,8 +232,8 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
         else:
             print("the draw plane is not existing")
     else:
-        print("sensor model is wrrong")
-        sys.exit()
+        print("sensor model is wrong")
+        raise NameError
     for x in "xyz":
         if x not in plane:
             t_name = plane + " at " + x + " = " + str(depth)
@@ -318,7 +263,7 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
     my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
     my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
-    my_d.sum_cu.GetXaxis().SetNdivisions(505)
+    my_d.sum_cu.GetXaxis().SetNdivisions(510)
     my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
     my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
     my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
@@ -328,8 +273,8 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.GetXaxis().SetTitle("Time [s]")
     my_d.sum_cu.GetYaxis().SetTitle("Current [A]")
     my_d.sum_cu.Draw("HIST")
-    # my_d.positive_cu.Draw("SAME HIST")
-    # my_d.negative_cu.Draw("SAME HIST")
+    my_d.positive_cu.Draw("SAME HIST")
+    my_d.negative_cu.Draw("SAME HIST")
     my_d.sum_cu.SetLineColor(3)
     my_d.positive_cu.SetLineColor(2)
     my_d.negative_cu.SetLineColor(4)
@@ -375,8 +320,7 @@ def draw_plot(my_d, ele_current, model, path):
     legend.SetTextSize(45)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.C")
+    c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -472,7 +416,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
     mg.Draw("APL")
     mg.GetXaxis().SetTitle("x aixs")
     mg.GetYaxis().SetTitle("z aixs")
-    c1.SaveAs(path+my_d.det_model+"_drift_path.root")
+    c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
     del c1
 
 def energy_deposition(my_g4v):
@@ -495,7 +439,7 @@ def energy_deposition(my_g4v):
     print("MPV:%s"%g1.GetParameter(1))
     h1.Draw()
     now = time.strftime("%Y_%m%d_%H%M")
-    c1.SaveAs("out/fig/dep_SiC"+"_"+now+"_energy.root")
+    c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.pdf")
 
 def create_path(path):
     """ If the path does not exit, create the path"""
@@ -536,3 +480,21 @@ def draw_scat_angle(evnets_angle,angle,model):
     h2.SetLineColor(2)
     h2.Draw("HIST")    
     c1.SaveAs("scat_angle"+model+".pdf")
+
+def draw_nocarrier3D(path,my_l):
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    h = ROOT.TH3D("h","pairs of carrier generation",\
+        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min-0.5*my_l.x_step,my_l.x_max+0.5*my_l.x_step,\
+        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min-0.5*my_l.y_step,my_l.y_max+0.5*my_l.y_step,\
+        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min-0.5*my_l.z_step,my_l.z_max+0.5*my_l.z_step)
+    for i in range(len(my_l.track_position)):
+        h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
+    h.Draw()
+    h.GetXaxis().SetTitle("Depth [μm]")
+    h.GetYaxis().SetTitle("Width [μm]")
+    h.GetZaxis().SetTitle("Thick [μm]")
+    c1.SaveAs(path+"nocarrier_"\
+        +str(round(my_l.fx_rel,5))+"_"\
+        +str(round(my_l.fy_rel,5))+"_"\
+        +str(round(my_l.fz_rel,5))+"_"\
+        +str(my_l.min_carrier)+".pdf")  

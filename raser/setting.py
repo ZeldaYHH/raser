@@ -34,10 +34,9 @@ class Setting:
         self._pardic = {}
         self.input2dic(parameters)
         self.det_model = self._pardic['det_model']
-        self.read_par(self._pardic['parfile'])
         if "laser_model" in self._pardic:
             self.laser_model=self._pardic['laser_model']
-            self.append_par(self._pardic['laser_file'])
+        self.read_par(self._pardic['parfile'])
         if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
             self.scan_variation()
 
@@ -54,7 +53,10 @@ class Setting:
         for dic_par in dic_pars:
             if dic_par['name'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
-                paras =  dic_par
+                paras = dic_par
+            if "laser_model" in self._pardic\
+            and dic_par['name'] in self.laser_model:
+                paras.update(dic_par)
         for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
@@ -62,17 +64,6 @@ class Setting:
                 paras[x] = paras[x]
         self.paras = paras
 
-    def append_par(self,jsonfile):
-        "Read the laser.json file and save the input parameters in paras"
-        with open(jsonfile) as f:
-            dic_pars = json.load(f)
-        for dic_par in dic_pars:
-            for x in dic_par: 
-                if self.is_number(dic_par[x]):          
-                    dic_par[x] = float(dic_par[x])
-                else:
-                    dic_par[x] = dic_par[x]
-            self.paras.update(dic_par) 
 
     @property
     def detector(self):
@@ -237,16 +228,17 @@ class Setting:
         ---------
             2021/09/08
         """
-        p = self.paras
         if hasattr(self,"laser_model"):
-            laser = {'tech':p['laser_model'],'direction':p['direction'],
+            p = self.paras
+            laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
                     "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
-                    'r_step':p['r_step'],'h_step':p['h_step']
+                    'r_step':p['r_step'],'h_step':p['h_step'],
+                    'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
                     }
-            if self.laser_model == "SPA":
+            if p['tech'] == "SPA":
                 laser.update({'alpha':p['alpha']})
-            if self.laser_model == "TPA":
+            if p['tech'] == "TPA":
                 laser.update({'beta_2':p['beta_2']})
             if 'l_Rayleigh' in p:
                 laser.update({'l_Rayleigh':p['l_Rayleigh']})
