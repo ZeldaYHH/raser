@@ -34,7 +34,6 @@ if [[ $# -eq 0 ]]; then
     echo "Please enter your option: "
     read option
 else
-	./singularity/singularity_bashrc.sh	
     option=$1 
 	input_para=$* 
 fi
@@ -43,7 +42,6 @@ fi
 track(){
     cd 
     singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
-    #singularity shell -B /afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-2.1.simg 
 }
 
 geant4(){
@@ -54,9 +52,9 @@ export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages
 
 sub_0_1(){
 case $option in 
-    0.1.0) echo "Run shell of track"
-    track 
-    ;; 
+    0.1.0) echo "Loadding TRACK into Singularity..."
+        track 
+        ;; 
     0.1.1) echo "raser planar3D SiC basic information..."
         geant4 
         ./python/gsignal.py det_model=planar3D parfile=setting.json
