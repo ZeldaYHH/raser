@@ -61,21 +61,15 @@ class TCTTracks():
     def mesh_definition(self):
         self.r_char=self.widthBeamWaist
         if self.tech == "SPA":
-            #adjusted
-            #self.h_char=float('inf')
-            self.h_char=10
+            self.h_char=float('inf')
 
         elif self.tech == "TPA":
             self.h_char=self.l_Rayleigh
 
         self.change_coordinate()
-        #adjusted
-        #self.x_min,self.x_max=max(0,self.fx_abs-5*self.x_char),min(self.lx,self.fx_abs+5*self.x_char)
-        #self.y_min,self.y_max=max(0,self.fy_abs-5*self.y_char),min(self.ly,self.fy_abs+5*self.y_char)
-        #self.z_min,self.z_max=max(0,self.fz_abs-5*self.z_char),min(self.lz,self.fz_abs+5*self.z_char)
-        self.x_min,self.x_max=max(0,self.fx_abs-2*self.x_char),min(self.lx,self.fx_abs+2*self.x_char)
-        self.y_min,self.y_max=max(0,self.fy_abs-2*self.y_char),min(self.ly,self.fy_abs+2*self.y_char)
-        self.z_min,self.z_max=max(0,self.fz_abs-2*self.z_char),min(self.lz,self.fz_abs+2*self.z_char)
+        self.x_min,self.x_max=max(0,self.fx_abs-5*self.x_char),min(self.lx,self.fx_abs+5*self.x_char)
+        self.y_min,self.y_max=max(0,self.fy_abs-5*self.y_char),min(self.ly,self.fy_abs+5*self.y_char)
+        self.z_min,self.z_max=max(0,self.fz_abs-5*self.z_char),min(self.lz,self.fz_abs+5*self.z_char)
         xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step))
         yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step))
         zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step))

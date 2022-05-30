@@ -13,7 +13,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from array import array
 
-
 #Calculate the weighting potential and electric field
 class FenicsCal:
 
@@ -25,7 +24,6 @@ class FenicsCal:
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         if self.det_model == "lgad3D":
             self.lgad_dic = det_dic
-            self.zscale = fen_dic['zscale']
             if self.lgad_dic['part']==2:
                 self.avalanche_bond = self.bond = self.lgad_dic['bond1']
             elif self.lgad_dic['part'] == 3:
@@ -33,8 +31,6 @@ class FenicsCal:
                 self.bond = self.lgad_dic['bond2']
             else:
                 raise NameError
-            self.fl_z=my_d.l_z+(self.zscale-1)*self.bond
-        else:
             self.fl_z=my_d.l_z
         self.fl_z_original=my_d.l_z
 
@@ -137,16 +133,16 @@ class FenicsCal:
         v = fenics.TestFunction(self.V)
         if "lgad3D" in self.det_model:
             if self.lgad_dic['part']==2:
-                bond = self.lgad_dic['bond1']*self.zscale
-                doping_avalanche = self.f_value(my_d,self.lgad_dic['doping1'])/self.zscale**2
+                bond = self.lgad_dic['bond1']
+                doping_avalanche = self.f_value(my_d,self.lgad_dic['doping1'])
                 doping = self.f_value(my_d,self.lgad_dic['doping2'])
                 f = fenics.Expression('x[2] < width + tol ? doping1 : doping2',\
                     degree=1,width=bond,doping1=doping_avalanche,doping2=doping, tol = self.tol)
             elif self.lgad_dic['part'] == 3:
-                bond1 = self.lgad_dic['bond1']*self.zscale
-                bond2 = self.lgad_dic['bond2']*self.zscale
-                doping1 = self.f_value(my_d,self.lgad_dic['doping1'])/self.zscale**2
-                doping2 = self.f_value(my_d,self.lgad_dic['doping2'])/self.zscale**2
+                bond1 = self.lgad_dic['bond1']
+                bond2 = self.lgad_dic['bond2']
+                doping1 = self.f_value(my_d,self.lgad_dic['doping1'])
+                doping2 = self.f_value(my_d,self.lgad_dic['doping2'])
                 doping3 = self.f_value(my_d,self.lgad_dic['doping3'])
                 f = fenics.Expression('x[2] < bonda - tol ? dopinga : (x[2] > bondb + tol ? dopingc : dopingb)',\
                     degree = 1, bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3, tol = self.tol)
@@ -285,9 +281,9 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if my_d.mater == 0:
+        if my_d.material == 'Si':
             perm_mat = 11.7  
-        elif my_d.mater == 1:
+        elif my_d.material == 'SiC':
             perm_mat = 9.76  
         else:
             print("material is wrong")            
@@ -302,7 +298,7 @@ class FenicsCal:
     def get_e_field(self,px,py,pz):
         """
         @description: 
-            Get eletric field at the px,py,pz position
+            Get eletric field at the px,py,pz position in V/um
         @param:
             out_range -- out_range = False
                       -- Position (x,y,z) don't exit in sensor fenics range
@@ -318,14 +314,7 @@ class FenicsCal:
             E_scale=1
             scale_px=px%self.fl_x
             scale_py=py%self.fl_y
-            if self.det_model=="lgad3D":
-                if pz<self.bond:
-                    scale_pz=pz*self.zscale
-                    E_scale=self.zscale
-                else:
-                    scale_pz=pz+self.bond*(self.zscale-1)
-            else:
-                scale_pz=pz
+            scale_pz=pz
             try:
                 x_value,y_value,z_value = E_scale*self.E_field(scale_px,scale_py,scale_pz)
             except RuntimeError:
@@ -349,7 +338,7 @@ class FenicsCal:
             f_w_p = 1.0
         else:
             scale_px=px%self.fl_x
-            scale_py=py%self.fl_y   
+            scale_py=py%self.fl_y
             scale_pz=pz*self.fl_z/self.fl_z_original
             try:
                 f_w_p = self.u_w(scale_px,scale_py,scale_pz)
@@ -374,14 +363,8 @@ class FenicsCal:
             f_w_p = 0
         else:
             scale_px=px%self.fl_x
-            scale_py=py%self.fl_y   
-            if self.det_model=="lgad3D":
-                if pz<self.bond:
-                    scale_pz=pz*self.zscale
-                else:
-                    scale_pz=pz+self.bond*(self.zscale-1)
-            else:
-                scale_pz=pz   
+            scale_py=py%self.fl_y
+            scale_pz=pz   
             try:
                 f_w_p = self.u(scale_px,scale_py,scale_pz)
             except RuntimeError:

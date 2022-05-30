@@ -33,12 +33,12 @@ class Setting:
         """
         self._pardic = {}
         self.input2dic(parameters)
-        self.det_model = self._pardic['det_model']
+        self.name = self._pardic['det_model']
         if "laser_model" in self._pardic:
-            self.laser_model=self._pardic['laser_model']
+            self.laser_model = self._pardic['laser_model']
         self.read_par(self._pardic['parfile'])
-        if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
-            self.scan_variation()
+        self.det_model = self.paras['type']
+        self.scan_variation()
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
@@ -51,7 +51,7 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['name'] in self.det_model:
+            if dic_par['name'] in self.name:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
             if "laser_model" in self._pardic\
@@ -112,6 +112,7 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
                         'Avalanche':p['Avalanche']
                         }
+        detector['material'] = p.setdefault('material','SiC')
         return detector
 
     def electron_custom(self,electrodes):
@@ -132,10 +133,7 @@ class Setting:
             Mesh precision value, the bigger the higher the accuracy
         xyscale : int
             In plane detector, scale_xy is scaling sensor 50 times at x and 
-            y axis, so the precision can improve 50 times in echo distance 
-        zscale : int
-            For LGAD detector, since the avalanche layer is usually thin,
-            scale in depth is able to improve precision of the solution
+            y axis, so the precision can improve 50 times in echo distance
         @Returns:
         ---------
             A dictionary containing all parameters used in fenics  
@@ -149,7 +147,7 @@ class Setting:
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "lgad3D" in self.det_model:
             fenics = {'name':'lgad3D',
-                      'mesh':p['mesh'], "xyscale":p['xyscale'], "zscale":p['zscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
             fenics = {'name':'plugin3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}

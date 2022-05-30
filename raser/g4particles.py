@@ -66,10 +66,12 @@ class Particles:
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
+        self.init_tz_device = my_g4d.init_tz_device
+        self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
+            for single_step in p_step] for p_step in self.p_steps]
         self.energy_steps=s_energy_steps
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
-        self.init_tz_device = my_g4d.init_tz_device
         del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         
     def __del__(self):
@@ -97,7 +99,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             device_x = (my_f.sx_r-my_f.sx_l)*g4b.um 
             device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
             device_z = my_d.l_z*g4b.um
-        elif "planar3D" in sensor_model:
+        elif "planar3D" or "lgad3D" in sensor_model:
             tz_Si = 10000*g4b.um
             tz_device = my_d.l_z/2.0*g4b.um
             self.init_tz_device = 0
@@ -293,7 +295,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         return self.physical['world']
 
     def __del__(self):
-        print("use __del__ to delete the MyDetectorConstruction class ")
+        print("using __del__ to delete the MyDetectorConstruction class ")
 
 
 class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
@@ -370,7 +372,7 @@ class MyEventAction(g4b.G4UserEventAction):
 
     def EndOfEventAction(self, event):
         eventID = event.GetEventID()
-        print("eventID:%s"%eventID)
+        #print("eventID:%s"%eventID)
         if len(self.p_step):
             point_a = [ b-a for a,b in zip(self.point_in,self.point_out)]
             point_b = [ c-a for a,c in zip(self.point_in,self.p_step[-1])]

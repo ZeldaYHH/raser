@@ -21,9 +21,8 @@ class R3dDetector:
         ---------
         det_dic : dictionary
             Contain all detector parameters 
-        meter : int
-            mater = 1, SiC
-            mater = 0, Si          
+        material : string
+            defining the material          
         Modify:
         ---------
             2021/09/02
@@ -38,8 +37,8 @@ class R3dDetector:
             self.d_neff = det_dic['doping'] 
         self.v_voltage = det_dic['voltage'] 
         self.temperature = det_dic['temp']
+        self.material = det_dic['material']
         self.det_model = dset.det_model
-        self.mater = 1
         self.current_define()
         if 'plugin3D' in self.det_model and det_dic['custom_electron'] == "False":
             self.e_ir = det_dic['e_ir'] 
