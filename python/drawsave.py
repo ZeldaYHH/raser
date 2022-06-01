@@ -51,21 +51,29 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def savedata(my_d,output,batch_number,ele_current,my_g4p):
+def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
-        output_path = (output + "_d:"+str(my_d.d_neff) 
-        +"_v:"+str(my_d.v_voltage)+"_g:"+str(my_d.e_gap))
+        output_path = (output + "_d="+str(my_d.d_neff) 
+                       + "_v="+str(my_d.v_voltage)+"_g="+str(my_d.e_gap)
+                       + "_tmp="+str(my_d.temperature) 
+                       + "_thick="+str(my_d.l_z)
+                       + "_radius="+str(my_d.e_ir) )
     elif "planar" in my_d.det_model:
-        output_path = (output + "_d:"+str(my_d.d_neff) 
-        +"_v:"+str(my_d.v_voltage)+"_thick:"+str(my_d.l_z))
+        output_path = (output + "_d="+str(my_d.d_neff) 
+                       + "_v="+str(my_d.v_voltage)
+                       + "_tmp="+str(my_d.temperature) 
+                       + "_thick="+str(my_d.l_z) )
     create_path(output_path)
-    save_ele(ele_current,my_g4p,batch_number,output_path)
+    save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
+    if batch_number > 0 and batch_number < 10:
+        draw_ele_field_scan(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,output_path,batch_number)
 
-def save_ele(ele_current,my_g4p,number,output_path="none"):
+
+def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
     """ Save induced current after CSA and BB"""
-    charge = "_charge:%.2f_"%(ele_current.qtot*1e15)  #fc
-    e_dep = "dep:%.5f_"%(my_g4p.edep_devices[number]) #mv
+    charge = "_charge=%.2f_"%(ele_current.qtot*1e15)  #fc
+    e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
     f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
@@ -74,6 +82,7 @@ def save_ele(ele_current,my_g4p,number,output_path="none"):
                                 ele_current.CSA_ele[i],
                                 ele_current.BB_ele[i]))
     f1.close()
+
     print("output_file:%s"%output_file)
     del ele_current.BB_ele
     del ele_current.CSA_ele
@@ -114,8 +123,53 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
     e_field3.Draw("COLZ")
     c1.SaveAs(path+my_d.det_model+plane+str(depth)+".pdf")
+    c1.SaveAs(path+my_d.det_model+plane+str(depth)+".root")
     del c1
 
+def draw_ele_field_scan(my_d,my_f,plane,sensor_model,depth,path,batch_number):
+    """
+    @description:
+        Draw eletric field
+    @param:
+        None     
+    @Returns:
+        None
+    @Modify:
+        2021/08/31
+    """
+    c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
+    ROOT.gROOT.SetBatch(True)
+    ROOT.gStyle.SetOptStat(0)
+    # ROOT.gStyle.SetOptFit()
+    c1.SetLeftMargin(0.12)
+    c1.SetRightMargin(0.2)
+    c1.SetBottomMargin(0.14)
+    c1.SetRightMargin(0.12)
+    c1.Divide(2,2)
+    model = ["E","P","WP"]
+    i=1
+    c1.cd(i)
+    # c1.GetPad(i).SetRightMargin(0.2)
+    e_field1=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    e_field1.Draw("COLZ")
+    i=2
+    c1.cd(i)
+    # c1.GetPad(i).SetRightMargin(0.2)
+    e_field2=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    e_field2.Draw("COLZ")
+    i=3
+    c1.cd(i)
+    # c1.GetPad(i).SetRightMargin(0.2)
+    e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    e_field3.Draw("COLZ")
+    paths = path.split("/_")[:]
+    print(paths)
+    outpath  = paths[0] + "/root/" + paths[1]+"/"
+    print(outpath)
+    create_path(outpath)
+    c1.SaveAs(outpath+str(batch_number)+my_d.det_model+plane+str(depth)+".pdf")
+    c1.SaveAs(outpath+str(batch_number)+my_d.det_model+plane+str(depth)+".root")
+    del c1
 
 def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     """
@@ -321,6 +375,7 @@ def draw_plot(my_d, ele_current, model, path):
     legend.Draw("same")
     c.Update()
     c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -417,6 +472,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
     mg.GetXaxis().SetTitle("x aixs")
     mg.GetYaxis().SetTitle("z aixs")
     c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
+    c1.SaveAs(path+my_d.det_model+"_drift_path.root")
     del c1
 
 def energy_deposition(my_g4v):
@@ -440,6 +496,7 @@ def energy_deposition(my_g4v):
     h1.Draw()
     now = time.strftime("%Y_%m%d_%H%M")
     c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.pdf")
+    c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.root")
 
 def create_path(path):
     """ If the path does not exit, create the path"""
