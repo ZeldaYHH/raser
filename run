@@ -40,7 +40,7 @@ fi
 
 
 track(){
-    cd 
+#    cd 
     singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
 }
 
