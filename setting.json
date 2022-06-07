@@ -2,18 +2,15 @@
 
     {
         "steplength" : 0.1,
-        "total_events" : 10000,
+        "total_events" : 1000,
         "name" : "planar3D",
         "custom_electron" : "False",
         "lx" : 1000,
         "ly" : 1000,
         "lz" : 100,
-        "doping" : 10, 
-        "doping" : 1, 
-        "voltage" : -10000,
-        "voltage" : 50,
+        "doping" : 10,  
+        "voltage" : -500,
         "temp" : 300.0,
-        "temp" : 250.0,
 
         "mesh" : 32,
         "xyscale" : 10,
