@@ -33,7 +33,7 @@ fi
 
 track(){
     # cd 
-    singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
+    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
 }
 
 geant4(){
@@ -43,7 +43,7 @@ export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages
 }
 
 hepjob(){
-export HepcMyImage=raser-1.0.simg
+export HepcMyImage=track-1.1.sif
 export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
