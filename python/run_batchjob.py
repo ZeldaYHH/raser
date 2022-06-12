@@ -94,38 +94,48 @@ def modify_json(input,name,model):
         para = json.load(f)
         for dic_par in para:
             paras = dic_par
-    if dic_par['name'] in "plugin3Dscan":
-        for i in range(input.para_number):
-            paras['voltage'] = str(-500+50*i)
-            paras['doping'] = str(10.0)
-            paras['temp'] = str(300)
-            paras['e_gap'] = str(150.0)
-            paras['e_ir'] = str(50.0)
-            paras['lz'] = str(350.0)
-            outfile = name+"setting%s.json"%(i+1)
-            json_str = json.dumps(para, indent=4)
-            with open(outfile,"w") as f:
-                f.write(json_str)
-    else:
-        for i in range(input.para_number):
-            if input.para_name == "NO":
-                pass
+            if dic_par['name'] in "plugin3Dscan":
+                for i in range(input.para_number):
+                    if input.para_name == "NO":
+                        pass
+                    else:
+                        if input.para_name == "scan_voltage":
+                            paras['voltage'] = str(-500+i*50)
+                        elif input.para_name == "scan_doping":
+                            paras['doping'] = str(10.0+i*10)
+                        elif input.para_namer == "scan_temp":
+                            paras['temp'] = str(300+i*30)
+                        elif input.para_name == "scan_thick":
+                            paras['lz'] = str(150.0+i*30)
+                        elif input.para_name == "scan_gap":
+                            paras['e_gap'] = str(140.0+i*20)
+                        else:
+                            print("Select right para_name:scan_volatge,scan_doping,scan_gap,scan_temp,scan_thick,NO")     
+                    outfile = name+"setting%s.json"%(i+1)
+                    json_str = json.dumps(para, indent=4)
+                    with open(outfile,"w") as f:
+                        f.write(json_str)
+            elif  dic_par['name'] in "planar3Dscan":
+                for i in range(input.para_number):
+                    if input.para_name == "NO":
+                        pass
+                    else:
+                        if input.para_name == "scan_voltage":
+                            paras['voltage'] = str(-200-i*30)
+                        elif input.para_name == "scan_doping":
+                            paras['doping'] = str(10.0+i*10)
+                        elif input.para_namer == "scan_temp":
+                            paras['temp'] = str(300-i*10)
+                        elif input.para_name == "scan_thick":
+                            paras['lz'] = str(100.0+i*50)
+                        else:
+                            print("Select right para_name:scan_volatge,scan_doping,scan_temp,scan_thick,NO")                 
+                    outfile = name+"setting%s.json"%(i+1)
+                    json_str = json.dumps(para, indent=4)
+                    with open(outfile,"w") as f:
+                        f.write(json_str)            
             else:
-                if input.para_name == "scan_voltage":
-                    paras['voltage'] = str(-200-i*30)
-                elif input.para_name == "scan_doping":
-                    paras['doping'] = str(10.0+i*10)
-                elif input.para_namer == "scan_temp":
-                    paras['temp'] = str(300-i*10)
-                elif input.para_name == "scan_thick":
-                    paras['lz'] = str(100.0+i*50)
-                else:
-                    print("Select right para_name:scan_volatge,scan_doping,scan_temp,scan_thick,NO")                 
-            outfile = name+"setting%s.json"%(i+1)
-            json_str = json.dumps(para, indent=4)
-            with open(outfile,"w") as f:
-                f.write(json_str)
-
+                pass
 
 if __name__ == '__main__':
     main()

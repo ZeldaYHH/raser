@@ -664,7 +664,7 @@ def root_tex(sigma,error,model):
     tex.SetTextSize(25)
     # tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5"+" "+model+"ampl")
     # tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.0f #pm %.0f ps"%(sigma,error))
-    tex.DrawLatexNDC(0.65, 0.7, "U=500V,CFD=0.5")
+    tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
     tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.1f #pm %.1f ps"%(sigma,error))
 
 def root_set():
@@ -715,8 +715,9 @@ def loop_addNoise(input_file,rset,tree_class,out_file):
                 if len(addNoise.list_c)>5:
                     addNoise.add_n(addNoise.list_c) 
                     if addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
-                        and addNoise.ampl_paras["max_BB_pulse_time"] < 4e-9:
-                        #and addNoise.ampl_paras["max_BB_pulse_time"] < 1.6e-9:
+                        and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9:
+                        # and addNoise.ampl_paras["max_BB_pulse_time"] < 4e-9:
+
                         judge_threshold(addNoise,rset,tree_class,"BB") 
                         judge_threshold(addNoise,rset,tree_class,"CSA")
                         tree_class.fill_verctor(rset,addNoise) 
