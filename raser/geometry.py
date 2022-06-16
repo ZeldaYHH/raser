@@ -9,7 +9,6 @@
 import ROOT
 import math
 import sys
-from raser.model import Material
 
 #Detector structure
 class R3dDetector:
@@ -71,10 +70,6 @@ class R3dDetector:
         self.positive_cu = ROOT.TH1F("charge+", "Positive Current",
                                      self.n_bin, self.t_start, self.t_end)
         self.negative_cu = ROOT.TH1F("charge-", "Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_positive_cu = ROOT.TH1F("gain_charge+","Current Contribution",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_negative_cu = ROOT.TH1F("gain_charge-","Gain Negative Current",
                                      self.n_bin, self.t_start, self.t_end)
         self.sum_cu = ROOT.TH1F("charge","Total Current",
                                 self.n_bin, self.t_start, self.t_end)

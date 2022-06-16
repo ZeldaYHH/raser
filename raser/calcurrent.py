@@ -10,10 +10,6 @@ import random
 import numpy as np
 import ROOT
 import math
-import sys
-from array import array
-from raser.model import Mobility
-from raser.model import Avalanche
 
 #The drift of generated particles
 class CalCurrent:
@@ -38,9 +34,6 @@ class CalCurrent:
         """" Define the output dictionary """   
         self.d_dic_n = {}
         self.d_dic_p = {}
-        self.gain_dic_p = [ [] for n in range(5) ]
-        self.gain_cu_p = {}
-        self.gain_cu_n = {}
         self.events_position(my_g4p, batch) 
         for n in range(len(self.tracks_p)-1):
             self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
@@ -94,38 +87,6 @@ class CalCurrent:
                 self.loop_electon_hole(init_tz_device,my_f,my_d,i)
         self.get_current(my_d)
 
-    def ionized_drift_gain(self,my_f,my_d):
-        """
-        Description:
-            The drift simulation of gain tracks
-        """
-        for i in range(len(self.gain_dic_p[0])-1):
-            self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
-            self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
-            self.n_track = i+1
-            for j in range(2):
-                self.initial_parameter()
-                if (j==0):
-                    self.charg = self.gain_dic_p[1][i] #hole
-                if (j==1):
-                    self.charg = -self.gain_dic_p[1][i] #electron 
-                self.d_time = self.gain_dic_p[0][i]
-                self.d_x = self.gain_dic_p[2][i]
-                self.d_y = self.gain_dic_p[3][i]
-                self.d_z = self.gain_dic_p[4][i]
-                while (self.end_cond == 0):
-                    if self.judge_whether_insensor(my_d,my_f):               
-                        pass
-                    else:                                                                     
-                        self.delta_p() #delta_poisiton               
-                        self.drift_v(my_d,my_f) #drift_position                   
-                        self.drift_s_step(my_d) #drift_next_posiiton
-                        self.charge_collection(my_f)             
-                        self.save_gain_track() 
-                        self.drift_end_condition()
-                    self.n_step+=1 
-        self.get_current_gain(my_d)
-
     def energy_deposition(self,my_d,j):
         """" Deposition energy and generate e-h pair """
         sic_loss_e=self.meter_choose(my_d)
@@ -156,7 +117,6 @@ class CalCurrent:
                 self.drift_v(my_d,my_f) #drift_position                   
                 self.drift_s_step(my_d) #drift_next_posiiton
                 self.charge_collection(my_f)
-                self.update_gain_track()
                 self.save_inf_track(my_d) 
                 self.drift_end_condition()
             self.n_step+=1 
@@ -308,23 +268,6 @@ class CalCurrent:
         self.d_y=self.d_cy
         self.d_z=self.d_cz
 
-    def update_gain_track(self):
-        """ update the gain track"""
-        if self.det_dic['name']=="lgad3D":
-            if (self.charg>0) and (self.s_gain>1):
-                self.gain_charge = self.ionized_pairs*self.charg*self.s_gain
-                self.gain_time=self.d_time
-                self.gain_dic_p[0].append(self.gain_time)
-                self.gain_dic_p[1].append(self.gain_charge)
-                self.gain_dic_p[2].append(self.d_x)
-                self.gain_dic_p[3].append(self.d_y)
-                self.gain_dic_p[4].append(self.d_z)
-            else:
-                pass
-        else:
-            pass
-
-
     def drift_end_condition(self): 
         """ Judge whether the drift loop should end """
         if(self.wpot>(1-1e-5)):
@@ -356,21 +299,6 @@ class CalCurrent:
                 self.d_dic_n["tk_"+str(self.n_track)][2].append(self.d_z)
                 self.d_dic_n["tk_"+str(self.n_track)][3].append(self.charge)
                 self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
-
-    def save_gain_track(self):
-        """ Save the gain carrier information in the dictionary """
-        if (self.charg>0):
-            self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
-            self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
-            self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
-            self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
-            self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
-        else:
-            self.gain_cu_n["tk_"+str(self.n_track)][0].append(self.d_x)
-            self.gain_cu_n["tk_"+str(self.n_track)][1].append(self.d_y)
-            self.gain_cu_n["tk_"+str(self.n_track)][2].append(self.d_z)
-            self.gain_cu_n["tk_"+str(self.n_track)][3].append(self.charge)
-            self.gain_cu_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def get_current(self,my_d):
         """ Charge distribution to initial current"""
@@ -404,27 +332,6 @@ class CalCurrent:
             my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
-    def get_current_gain(self,my_d):
-        """ Charge distribution to gain current"""
-        my_d.gain_positive_cu.Reset()
-        my_d.gain_negative_cu.Reset()
-        test_p_gain = ROOT.TH1F("testgain+","testgain+",my_d.n_bin,my_d.t_start,my_d.t_end)
-        test_n_gain = ROOT.TH1F("testgain-","testgain-",my_d.n_bin,my_d.t_start,my_d.t_end)
-        e0 = 1.60217733e-19
-        for j in range(len(self.gain_dic_p[0])-2):
-            for i in range(len(self.gain_cu_p["tk_"+str(j+1)][2])):
-                test_p_gain.Fill(self.gain_cu_p["tk_"+str(j+1)][4][i],
-                        self.gain_cu_p["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
-            for i in range(len(self.gain_cu_n["tk_"+str(j+1)][2])):
-                test_n_gain.Fill(self.gain_cu_n["tk_"+str(j+1)][4][i],
-                        self.gain_cu_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
-            my_d.gain_positive_cu.Add(test_p_gain)
-            my_d.gain_negative_cu.Add(test_n_gain)
-            test_p_gain.Reset()
-            test_n_gain.Reset()
-        my_d.sum_cu.Add(my_d.gain_positive_cu)
-        my_d.sum_cu.Add(my_d.gain_negative_cu)
-
     def reset_start(self,my_d):
         """ Reset th1f """
         my_d.positive_cu.Reset()
@@ -439,12 +346,6 @@ class CalCurrent:
             sic_loss_e = 3.6 #ev
         return sic_loss_e
 
-    def choose_avalanche(self,my_d,aver_e):
-        """Choose the avalanche model"""
-        my_avalanche = Avalanche(self.det_dic['Avalanche'])
-        tmp_coefficient = my_avalanche.cal_coefficient(aver_e,self.charg,my_d.temperature)
-        self.s_gain = math.exp(self.sstep*1e-4*tmp_coefficient)
-
     def get_trackspn(self, my_d, test_p, test_n, j):
         """ Total current of each e-h pair"""
         e0 = 1.60217733e-19
@@ -455,84 +356,6 @@ class CalCurrent:
             test_n.Fill(self.d_dic_n["tk_"+str(j+1)][4][i],
                         self.d_dic_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
         return test_p, test_n
-
-class CalCurrentLaser(CalCurrent):
-    def __init__(self, my_d, my_f, my_l, dset):
-        #mobility related with the magnetic field (now silicon useless)
-        self.muhh=1650.0   
-        self.muhe=310.0
-        self.BB=np.array([0,0,0])
-        self.sstep=dset.steplength #drift step
-        print(self.sstep)
-        self.det_dic = dset.detector
-        self.kboltz=8.617385e-5 #eV/K
-        self.max_drift_len=1e9 #maximum diftlenght [um]
-        self.parameters(my_l)
-        if "plugin3D" in dset.detector:
-            init_tz_device = 10000
-        else :
-            init_tz_device = 0
-        self.ionized_drift(init_tz_device,my_f,my_d,my_l)
-        if (self.det_dic['name'] == "lgad3D"):
-            self.ionized_drift_gain(my_f,my_d)
-        else:
-            pass
-
-    def parameters(self, my_l):
-        """" Define the output dictionary """   
-        self.d_dic_n = {}
-        self.d_dic_p = {}
-        self.gain_dic_p = [ [] for n in range(5) ]
-        self.gain_cu_p = {}
-        self.gain_cu_n = {}
-        self.tracks_p = my_l.track_position
-        for n in range(len(self.tracks_p)-1):
-            self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
-            self.d_dic_p["tk_"+str(n+1)] = [ [] for n in range(5) ]
-
-    def ionized_drift(self,init_tz_device,my_f,my_d,my_l):
-        for i in range(len(self.tracks_p)-1):
-            self.n_track=i+1
-            self.ionized_pairs=my_l.ionized_pairs[i]
-            for j in range(2):
-                if (j==0):
-                    self.charg=1 #hole
-                if (j==1):
-                    self.charg=-1 #electron 
-                self.loop_electon_hole(init_tz_device,my_f,my_d,i)
-        self.get_current(my_d,my_l)
-
-    def get_current(self,my_d,my_l):
-        """ Charge distribution to initial current"""
-        self.reset_start(my_d)
-        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
-        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
-        total_pairs=0
-        for j in range(len(self.tracks_p)-2):
-            test_p,test_n = self.get_trackspn(my_d, test_p, test_n, j)   
-            n_pairs=my_l.ionized_pairs[j]
-            total_pairs+=n_pairs
-            test_p.Scale(n_pairs)
-            test_n.Scale(n_pairs)            
-            my_d.positive_cu.Add(test_p)
-            my_d.negative_cu.Add(test_n)
-            test_p.Reset()
-            test_n.Reset()
-
-        # self.landau_t_pairs = self.tracks_t_edep*1e6/sic_loss_e
-        # print("landau_t_pairs=%s"%self.landau_t_pairs)
-
-        # if total_pairs != 0:
-        #     n_scale = self.landau_t_pairs/total_pairs
-        # else:
-        #     n_scale=0
-        if self.det_dic['name']=="lgad3D":
-            pass
-        else:
-            my_d.sum_cu.Add(my_d.positive_cu)
-            my_d.sum_cu.Add(my_d.negative_cu)
-        # my_d.sum_cu.Scale(n_scale)
-
 
 # # # mobility model
 def sic_mobility(charge,aver_e,my_d,det_dic,z):
