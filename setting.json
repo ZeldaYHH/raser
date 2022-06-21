@@ -3,8 +3,7 @@
     {
         "steplength" : 0.1,
         "total_events" : 1000,
-        "name" : "planar3D",
-        "type" : "planar3D",
+        "det_model" : "planar3D",
         "custom_electron" : "False",
         "lx" : 1000,
         "ly" : 1000,
@@ -38,8 +37,7 @@
     {
         "steplength" : 0.2,
         "total_events" : 10000,
-        "name" : "plugin3D",
-        "type" : "plugin3D",
+        "det_model" : "plugin3D",
         "custom_electron" : "False",
         "lx" : 10000,
         "ly" : 10000,

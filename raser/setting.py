@@ -48,12 +48,9 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['name'] in self.name:
+            if dic_par['det_model'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
-            if "laser_model" in self._pardic\
-            and dic_par['name'] in self.laser_model:
-                paras.update(dic_par)
         for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
