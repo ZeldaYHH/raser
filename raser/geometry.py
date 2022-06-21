@@ -30,10 +30,8 @@ class R3dDetector:
         self.l_x = det_dic['lx'] 
         self.l_y = det_dic['ly']  
         self.l_z = det_dic['lz'] 
-        if det_dic['name'] == "lgad3D":
-            pass
-        else:
-            self.d_neff = det_dic['doping'] 
+
+        self.d_neff = det_dic['doping'] 
         self.v_voltage = det_dic['voltage'] 
         self.temperature = det_dic['temp']
         self.material = det_dic['material']

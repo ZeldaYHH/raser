@@ -194,9 +194,6 @@ class CalCurrent:
         aver_e = (self.root_mean_square(self.e_field) 
                   + te_delta_f)/2.0*1e4            # V/cm
 
-        if self.det_dic['name'] == "lgad3D":
-            self.choose_avalanche(my_d,aver_e)
-
         mobility = sic_mobility(self.charg,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
         self.v_drift = mobility*aver_e 
         #drift part
@@ -320,11 +317,9 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        if self.det_dic['name']=="lgad3D":
-            pass
-        else:
-            my_d.sum_cu.Add(my_d.positive_cu)
-            my_d.sum_cu.Add(my_d.negative_cu)
+
+        my_d.sum_cu.Add(my_d.positive_cu)
+        my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
     def reset_start(self,my_d):
