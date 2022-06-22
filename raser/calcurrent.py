@@ -355,24 +355,7 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
     """
     T=my_d.temperature
     E=aver_e
-    if det_dic['name'] == "lgad3D":
-        if det_dic['part'] == 2:
-            bond = det_dic['bond1']
-            if (z < bond):
-                Neff = det_dic['doping1']
-            else:
-                Neff = det_dic['doping2']
-        elif det_dic['part'] == 3:
-            bond1 = det_dic['bond1']
-            bond2 = det_dic['bond2']
-            if (z < bond1):
-                Neff = det_dic['doping1']
-            elif (z > bond2):
-                Neff = det_dic['doping3']
-            else:
-                Neff = det_dic['doping2']
-    else:
-        Neff=abs(my_d.d_neff)
+    Neff=abs(my_d.d_neff)
 
     if my_d.material == "Si":
         alpha = 0.72*math.pow(T/300.0,0.065)
