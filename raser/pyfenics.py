@@ -20,7 +20,7 @@ class FenicsCal:
     def __init__(self,my_d,fen_dic,det_dic):
         self.p_electric = []
         self.w_p_electric = []
-        self.det_model = fen_dic['name']
+        self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z

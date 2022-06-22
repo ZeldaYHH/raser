@@ -88,13 +88,13 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            detector = {'name':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
+            detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
                         }
             
         if "plugin3D" in self.det_model:
-            detector = {'name':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
+            detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
@@ -130,10 +130,10 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            fenics = {'name':'planar3D', 
+            fenics = {'det_model':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
-            fenics = {'name':'plugin3D', 
+            fenics = {'det_model':'plugin3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         return fenics
 
@@ -162,13 +162,13 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            pygeant4 = {'name':'planar3D',
+            pygeant4 = {'det_model':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
                         "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
                         }
         if "plugin3D" in self.det_model:
-            pygeant4 = {'name':'plugin3D', 
+            pygeant4 = {'det_model':'plugin3D', 
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
                         "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],

@@ -31,7 +31,7 @@ class Particles:
             2021/09/02
         """	
         g4_dic = dset.pygeant4
-        my_g4d = MyDetectorConstruction(my_d,my_f,g4_dic['name'],g4_dic['maxstep'])		
+        my_g4d = MyDetectorConstruction(my_d,my_f,g4_dic['det_model'],g4_dic['maxstep'])		
         if g4_dic['g4_vis']: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)

@@ -94,7 +94,7 @@ def modify_json(input,name,model):
         para = json.load(f)
         for dic_par in para:
             paras = dic_par
-            if dic_par['name'] in "plugin3Dscan":
+            if dic_par['det_model'] in "plugin3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
@@ -115,7 +115,7 @@ def modify_json(input,name,model):
                     json_str = json.dumps(para, indent=4)
                     with open(outfile,"w") as f:
                         f.write(json_str)
-            elif  dic_par['name'] in "planar3Dscan":
+            elif  dic_par['det_model'] in "planar3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
