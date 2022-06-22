@@ -82,7 +82,7 @@ case $option in
 
 sub_1_2(){
 case $option in 
-    1.2.0) echo "Loadding TRACK into Singularity..."
+    1.2.0) echo "Loading TRACK into Singularity..."
         track 
         ;; 
     1.2.1) echo "3D-SiC basic information for RASER simulation ..."
