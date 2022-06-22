@@ -90,14 +90,14 @@ class Setting:
         if "planar3D" in self.det_model:
             detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
-                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
+                        'voltage':p['voltage'], 'temp':p['temp'],
                         }
             
         if "plugin3D" in self.det_model:
             detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
                         'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 
-                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
+                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
                         }
         return detector
 

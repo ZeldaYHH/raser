@@ -34,7 +34,14 @@ def main():
     """
     args = sys.argv[1:]
     dset = raser.Setting(args)
-    set_electrodes(dset)
+    det_dic = dset.detector
+    if det_dic['det_model'] == "plugin3D":
+        if det_dic['custom_electrode'] == "False":
+            pass
+        elif det_dic['custom_electrode'] == "True":
+            set_electrodes(det_dic,dset)
+        else:
+            print("The electrode model is wrong.")
     my_d = raser.R3dDetector(dset)
     my_f = raser.FenicsCal(my_d,dset.fenics,dset.detector)
     my_g4p = raser.Particles(my_d, my_f, dset)
@@ -46,29 +53,25 @@ def main():
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
 
-def set_electrodes(dset):
-    det_dic = dset.detector
-    if det_dic['custom_electron'] == "False":
-        pass
-    elif det_dic['custom_electron'] == "True":
-        l_x = det_dic['lx'] 
-        l_y = det_dic['ly']  
-        l_z = det_dic['lz'] 
-        e_int = det_dic['e_gap']
-        e_ir = det_dic['e_ir']
-        e_t_xy = e_int/math.sqrt(2)
-        e_tr=[]
-        e_t_1 = [l_x*0.5           , l_y*0.5         , e_ir,0, l_z,"p"]
-        e_t_2 = [l_x*0.5-e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
-        e_t_3 = [l_x*0.5-e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
-        e_t_4 = [l_x*0.5+e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
-        e_t_5 = [l_x*0.5+e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
-        for i in range(5):
-           n_e = eval('e_t_' + str(i+1))
-           e_tr.append(n_e)
-        dset.electron_custom(e_tr)
-    else:
-        print("The electrode model is wrong.")
+def set_electrodes(det_dic,dset):
+    
+    l_x = det_dic['lx'] 
+    l_y = det_dic['ly']  
+    l_z = det_dic['lz'] 
+    e_int = det_dic['e_gap']
+    e_ir = det_dic['e_ir']
+    e_t_xy = e_int/math.sqrt(2)
+    e_tr=[]
+    e_t_1 = [l_x*0.5           , l_y*0.5         , e_ir,0, l_z,"p"]
+    e_t_2 = [l_x*0.5-e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
+    e_t_3 = [l_x*0.5-e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
+    e_t_4 = [l_x*0.5+e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
+    e_t_5 = [l_x*0.5+e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
+    for i in range(5):
+        n_e = eval('e_t_' + str(i+1))
+        e_tr.append(n_e)
+    dset.electron_custom(e_tr)
+
 
 def batch_loop(dset,my_d, my_f, my_g4p):
     """

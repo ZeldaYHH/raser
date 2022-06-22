@@ -37,12 +37,13 @@ class R3dDetector:
         self.material = det_dic['material']
         self.det_model = dset.det_model
         self.current_define()
-        if 'plugin3D' in self.det_model and det_dic['custom_electron'] == "False":
-            self.e_ir = det_dic['e_ir'] 
-            self.set_3D_electrode(det_dic['e_ir'],det_dic['e_gap'])
-        elif det_dic['custom_electron'] == "True":
-            self.e_gap = det_dic['e_gap']
-            self.e_tr = dset.electron_customs
+        if 'plugin3D' in self.det_model: 
+            if det_dic['custom_electrode'] == "False":
+                self.e_ir = det_dic['e_ir'] 
+                self.set_3D_electrode(det_dic['e_ir'],det_dic['e_gap'])
+            elif det_dic['custom_electrode'] == "True":
+                self.e_gap = det_dic['e_gap']
+                self.e_tr = dset.electron_customs
 
 
     def current_define(self):
