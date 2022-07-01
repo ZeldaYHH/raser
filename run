@@ -92,7 +92,7 @@ case $option in
     1.2.2) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_model=plugin3D step=200 total=400  \
-							 instance=0 output=out/plugin3Dthick_20220608/ batch=False para_name=scan_voltage para_number=10
+							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10
 		;; 
     1.2.3) echo "run 3D-SiC batch model with total number, split with step number ..."
         hepjob
