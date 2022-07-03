@@ -59,7 +59,7 @@ def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_ir) )
-    elif "planar" in my_d.det_model:
+    elif "planar" or "lgad" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
                        + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
