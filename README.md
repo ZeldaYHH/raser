@@ -2,7 +2,7 @@
 
 最后更新：2022/06/23
 
-〇、程序运行顺序（斜体代表暂不在gitlab主分支中）
+〇、程序运行顺序
 python/run_batchjob.py[跑循环，变换参数调用gsignal.py]
 {
 	python/gsignal.py[主程序]

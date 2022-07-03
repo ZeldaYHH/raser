@@ -25,7 +25,7 @@ class CalCurrent:
         self.max_drift_len=1e9 #maximum driftlength [um]
         self.parameters(my_g4p, my_d, batch)
         self.ionized_drift(my_f,my_d)
-        if (self.det_dic['name'] == "lgad3D"):
+        if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
         else:
             pass
@@ -102,9 +102,9 @@ class CalCurrent:
             for j in range(2):
                 self.initial_parameter()
                 if (j==0):
-                    self.charg = self.gain_dic_p[1][i] #hole
+                    self.eorh = self.gain_dic_p[1][i] #hole
                 if (j==1):
-                    self.charg = -self.gain_dic_p[1][i] #electron 
+                    self.eorh = -self.gain_dic_p[1][i] #electron 
                 self.d_time = self.gain_dic_p[0][i]
                 self.d_x = self.gain_dic_p[2][i]
                 self.d_y = self.gain_dic_p[3][i]
@@ -235,10 +235,10 @@ class CalCurrent:
         aver_e = (self.root_mean_square(self.e_field) 
                   + te_delta_f)/2.0*1e4            # V/cm
 
-        if self.det_dic['name'] == "lgad3D":
+        if self.det_dic['det_model'] == "lgad3D":
            self.choose_avalanche(my_d,aver_e)
 
-        mobility = sic_mobility(self.charg,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
+        mobility = sic_mobility(self.eorh,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
         self.v_drift = mobility*aver_e 
         #drift part
         if(self.v_drift==0):
@@ -253,7 +253,7 @@ class CalCurrent:
             #off when the field gets large enough
             #DiffOffField=100.0  # if the electric field  
                                 # > 100V/um, the holes will multiplicat             
-            #if (te_delta_f > DiffOffField) and (self.det_dic['name'] != "lgad3D"):
+            #if (te_delta_f > DiffOffField) and (self.det_dic['det_model'] != "lgad3D"):
             #    print("the eletric field is too big, \
             #           the multiplication appear. The result might be unrealistic. ")
             self.s_time = self.sstep*1e-4/self.v_drift
@@ -307,9 +307,9 @@ class CalCurrent:
 
     def update_gain_track(self):
         """ update the gain track"""
-        if self.det_dic['name']=="lgad3D":
-            if (self.charg>0) and (self.s_gain>1):
-                self.gain_charge = self.ionized_pairs*self.charg*self.s_gain
+        if self.det_dic['det_model']=="lgad3D":
+            if (self.eorh>0) and (self.s_gain>1):
+                self.gain_charge = self.ionized_pairs*self.eorh*self.s_gain
                 self.gain_time=self.d_time
                 self.gain_dic_p[0].append(self.gain_time)
                 self.gain_dic_p[1].append(self.gain_charge)
@@ -355,7 +355,7 @@ class CalCurrent:
 
     def save_gain_track(self):
         """ Save the gain carrier information in the dictionary """
-        if (self.charg>0):
+        if (self.eorh>0):
             self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
             self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
             self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
@@ -436,7 +436,7 @@ class CalCurrent:
     def choose_avalanche(self,my_d,aver_e):
         """Choose the avalanche model"""
         my_avalanche = Avalanche(self.det_dic['Avalanche'])
-        tmp_coefficient = my_avalanche.cal_coefficient(aver_e,self.charg,my_d.temperature) #cm-1
+        tmp_coefficient = my_avalanche.cal_coefficient(aver_e,self.eorh,my_d.temperature) #cm-1
         self.s_gain = math.exp(self.sstep*1e-4*tmp_coefficient)
 
     def get_trackspn(self, my_d, test_p, test_n, j):
@@ -462,7 +462,7 @@ class CalCurrentLaser(CalCurrent):
         self.max_drift_len=1e9 #maximum diftlenght [um]
         self.parameters(my_l)
         self.ionized_drift(my_f,my_d,my_l)
-        if (self.det_dic['name'] == "lgad3D"):
+        if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
         else:
             pass
@@ -485,9 +485,9 @@ class CalCurrentLaser(CalCurrent):
             self.ionized_pairs=my_l.ionized_pairs[i]
             for j in range(2):
                 if (j==0):
-                    self.charg=1 #hole
+                    self.eorh=1 #hole
                 if (j==1):
-                    self.charg=-1 #electron 
+                    self.eorh=-1 #electron 
                 self.loop_electon_hole(my_f,my_d,i)
         self.get_current(my_d,my_l)
 
@@ -515,7 +515,7 @@ class CalCurrentLaser(CalCurrent):
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        if self.det_dic['name']=="lgad3D":
+        if self.det_dic['det_model']=="lgad3D":
             pass
         else:
             my_d.sum_cu.Add(my_d.positive_cu)
@@ -531,7 +531,7 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
     """
     T=my_d.temperature
     E=aver_e
-    if det_dic['name'] == "lgad3D":
+    if det_dic['det_model'] == "lgad3D":
         if det_dic['part'] == 2:
             bond = det_dic['bond1']
             if (z < bond):

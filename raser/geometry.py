@@ -30,9 +30,8 @@ class R3dDetector:
         self.l_x = det_dic['lx'] 
         self.l_y = det_dic['ly']  
         self.l_z = det_dic['lz'] 
-
-        if det_dic['name'] == "lgad3D":
-            pass
+        if det_dic['det_model'] == "lgad3D":
+            self.lgad_dic = det_dic
         else:
             self.d_neff = det_dic['doping'] 
         

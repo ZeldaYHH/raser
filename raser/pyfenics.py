@@ -15,7 +15,6 @@ from array import array
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
-
     def __init__(self,my_d,fen_dic):
         self.p_electric = []
         self.w_p_electric = []
@@ -23,7 +22,7 @@ class FenicsCal:
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         if self.det_model == "lgad3D":
-            self.lgad_dic = det_dic
+            self.lgad_dic = my_d.lgad_dic
             if self.lgad_dic['part']==2:
                 self.avalanche_bond = self.bond = self.lgad_dic['bond1']
             elif self.lgad_dic['part'] == 3:
