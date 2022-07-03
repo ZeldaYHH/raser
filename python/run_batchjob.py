@@ -34,6 +34,8 @@ def main():
         job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=plugin3Dscan")
     elif "planar3D" in args[0]:
         job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=planar3Dscan")
+    elif "lgad3D" in args[0]:
+        job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=lgad3Dscan")
     else:
         print("the scan model is wrong")
     if input.run_mode == "True":
@@ -133,7 +135,26 @@ def modify_json(input,name,model):
                     outfile = name+"setting%s.json"%(i+1)
                     json_str = json.dumps(para, indent=4)
                     with open(outfile,"w") as f:
-                        f.write(json_str)            
+                        f.write(json_str)
+            elif  dic_par['det_model'] in "lgad3Dscan":
+                for i in range(input.para_number):
+                    if input.para_name == "NO":
+                        pass
+                    else:
+                        if input.para_name == "scan_voltage":
+                            paras['voltage'] = str(-200-i*30)
+                        #elif input.para_name == "scan_doping":
+                        #    paras['doping'] = str(10.0+i*10)
+                        elif input.para_namer == "scan_temp":
+                            paras['temp'] = str(300-i*10)
+                        elif input.para_name == "scan_thick":
+                            paras['lz'] = str(100.0+i*50)
+                        else:
+                            print("Select right para_name:scan_volatge,scan_doping,scan_temp,scan_thick,NO")                 
+                    outfile = name+"setting%s.json"%(i+1)
+                    json_str = json.dumps(para, indent=4)
+                    with open(outfile,"w") as f:
+                        f.write(json_str)          
             else:
                 pass
 

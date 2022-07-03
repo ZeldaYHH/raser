@@ -12,6 +12,8 @@ usage() {
     printf "\nOPTIONS\n"    
     printf "\n\t%-9s  %-40s"  "1.1"       "NJU-SiC-PIN"
     printf "\n\t%-9s  %-40s"  "1.2"       "3D-SiC"
+
+    printf "\n\t%-9s  %-40s"  "2.1"       "SiC-LGAD"
     printf "\n\n" 
 }
 
@@ -30,6 +32,12 @@ usage_1_2() {
 	printf "\n\t%-5s  %-40s\n"  "1.2.5"    "get time resolution vs draw voltage ..." 
 }
 
+usage_2_1() { 
+	printf "\n\t%-5s  %-40s\n"  "2.1.0"    "Loading TRACK into Singularity..." 
+    printf "\n\t%-5s  %-40s\n"  "2.1.1"    "SiC-LGAD basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for SiC-LGAD" 
+}
 
 if [[ $# -eq 0 ]]; then
     usage
@@ -75,7 +83,6 @@ case $option in
     1.1.3) echo "get time resolution for NJU-SiC-PIN"
         ./python/add_noise_raser.py  out/planar3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
         ;;
-
         esac
 }
 
@@ -107,8 +114,30 @@ case $option in
         esac
 }
 
+sub_2_1(){
 case $option in 
-   1.1) echo "RASER simulate NJU-SiC-PIN"
+    2.1.0) echo "Loading TRACK into Singularity..."
+        track 
+        ;; 
+    2.1.1) echo "SiC-LGAD basic information for RASER simulation ..."
+        geant4 
+        ./python/gsignal.py det_model=lgad3D parfile=setting.json
+        ;;
+
+	2.1.2) echo "batch model with total number, split with step number"
+		hepjob
+		./python/run_batchjob.py det_model=lgad3D  step=100000 total=2000000 \
+							 instance=0 output=out/lgad3Dscan/20220323_3D/ batch=True para_name="NO" para_number=1 
+        ;;
+
+    2.1.3) echo "get time resolution for SiC-LGAD"
+        ./python/add_noise_raser.py  out/lgad3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
+        ;;
+        esac
+}
+
+case $option in 
+    1.1) echo "RASER simulate NJU-SiC-PIN"
         usage_1_1
         echo "Please enter your option: " 
         read option 
@@ -126,5 +155,15 @@ case $option in
         ;;
     1.2.*) echo "RASER simulate 3D-SiC"
         sub_1_2 option
+        ;;
+
+    2.1) echo "RASER simulate SiC-LGAD"
+        usage_2_1
+        echo "Please enter your option: " 
+        read option 
+        sub_2_1 option 
+        ;;
+    2.1.*) echo "RASER simulate SiC-LGAD"
+        sub_2_1 option
         ;;
 		esac

@@ -35,7 +35,7 @@ def main():
     args = sys.argv[1:]
     dset = raser.Setting(args)
     det_dic = dset.detector
-    if det_dic['det_model'] == "plugin3D":
+    if "plugin3D" in det_dic['det_model']:
         if det_dic['custom_electrode'] == "False":
             pass
         elif det_dic['custom_electrode'] == "True":
