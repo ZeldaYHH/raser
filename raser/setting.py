@@ -54,6 +54,7 @@ class Setting:
             if dic_par['det_model'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
+            break #laser settings don't have key 'det_model'
         for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
