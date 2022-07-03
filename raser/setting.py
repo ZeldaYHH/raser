@@ -34,10 +34,10 @@ class Setting:
         self._pardic = {}
         self.input2dic(parameters)
         self.det_model = self._pardic['det_model']
+        self.read_par(self._pardic['parfile'])
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
-        self.read_par(self._pardic['parfile'])
-        self.det_model = self.paras['type']
+            self.read_par_laser(self._pardic['laser_model'])
         self.scan_variation()
 
     def input2dic(self,parameters):
@@ -54,7 +54,6 @@ class Setting:
             if dic_par['det_model'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
-            break #laser settings don't have key 'det_model'
         for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
@@ -62,6 +61,19 @@ class Setting:
                 paras[x] = paras[x]
         self.paras = paras
 
+    def read_par_laser(self,jsonfile):
+        "Read the setting.json file and save the input parametersin paras"
+        with open(jsonfile) as f:
+            dic_pars = json.load(f)
+        for dic_par in dic_pars:
+            if dic_par['laser_model'] in self.laser_model:
+                laser_paras = dic_par
+        for x in laser_paras: 
+            if self.is_number(laser_paras[x]):          
+                laser_paras[x] = float(laser_paras[x])
+            else:
+                laser_paras[x] = laser_paras[x]
+        self.laser_paras = laser_paras
 
     @property
     def detector(self):
@@ -238,7 +250,7 @@ class Setting:
             2021/09/08
         """
         if hasattr(self,"laser_model"):
-            p = self.paras
+            p = self.laser_paras
             laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
                     "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
