@@ -280,3 +280,6 @@ TCT的参数配置也一并放在配置文件中。
 运行主程序及传入参数配置的脚本。
 对单个事例，需要先唤起singularity镜像再运行。
 对批量作业，程序中自带镜像配置。
+
+批量作业通过下面的路径提交，可以使用指令 hep_q -u username 查看作业运行情况，但需先添加环境变量，即执行如下指令：
+export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
