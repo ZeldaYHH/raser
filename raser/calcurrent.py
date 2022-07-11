@@ -99,12 +99,15 @@ class CalCurrent:
             self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.n_track = i+1
+            charges = math.floor(self.gain_dic_p[1][i])
+            if charges == 0:
+                continue
             for j in range(2):
                 self.initial_parameter()
                 if (j==0):
-                    self.eorh = self.gain_dic_p[1][i] #hole
+                    self.eorh = charges #hole
                 if (j==1):
-                    self.eorh = -self.gain_dic_p[1][i] #electron 
+                    self.eorh = charges #electron 
                 self.d_time = self.gain_dic_p[0][i]
                 self.d_x = self.gain_dic_p[2][i]
                 self.d_y = self.gain_dic_p[3][i]
