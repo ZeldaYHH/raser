@@ -27,6 +27,7 @@ class CalCurrent:
         self.ionized_drift(my_f,my_d)
         if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
+            self.gain_efficiency_calculate(my_d)
         else:
             pass
             
@@ -406,6 +407,27 @@ class CalCurrent:
             test_n_gain.Reset()
         my_d.sum_cu.Add(my_d.gain_positive_cu)
         my_d.sum_cu.Add(my_d.gain_negative_cu)
+
+    def gain_efficiency_calculate(self,my_d):
+        """Compare the charge collection amount induced by original and gain current"""
+        gain_cu = ROOT.TH1F("gain_cu","gain_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
+        original_cu = ROOT.TH1F("original_cu","original_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
+        gain_cu.Reset()
+        original_cu.Reset()
+
+        gain_cu.Add(my_d.gain_positive_cu)
+        gain_cu.Add(my_d.gain_negative_cu)
+        original_cu.Add(my_d.positive_cu)
+        original_cu.Add(my_d.negative_cu)
+
+        gain_charge = 0
+        for x in gain_cu:
+            gain_charge += x
+        original_charge = 0
+        for x in original_cu:
+            original_charge += x
+
+        self.gain_efficiency = gain_charge/original_charge
 
     def reset_start(self,my_d):
         """ Reset th1f """
