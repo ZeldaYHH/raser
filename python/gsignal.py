@@ -47,6 +47,8 @@ def main():
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "3Dscan" not in dset.det_model:
         my_current = raser.CalCurrent(my_d, my_f, my_g4p, dset)
+        if "lgad" in dset.det_model:
+            print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = raser.Amplifier(my_d, dset.amplifier)
         drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
     else:
@@ -92,6 +94,7 @@ def batch_loop(dset,my_d, my_f, my_g4p):
     ---------
         2021/09/07
     """   
+    #drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
     start_n = dset.intance_number * dset.total_events
     end_n = (dset.intance_number + 1) * dset.total_events
     effective_number = 0

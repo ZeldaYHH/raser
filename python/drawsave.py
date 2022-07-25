@@ -13,7 +13,7 @@ import sys
 import os
 import time
 
-def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
+def drawplot(my_d,ele_current,my_f,my_g4p,my_current):
     """
     @description:
         Draw electric field ,drift path and energy deposition
@@ -27,14 +27,13 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "fig/" + now + "/"
     create_path(path)
-    draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
-    draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
-    draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    #draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
+    #draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
+    #draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    draw_ele_field_1D(my_d,my_f,path)
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-    if my_l!=None :
-        draw_nocarrier3D(path,my_l)
     draw_drift_path(my_d,my_f,my_current,path)
      
 def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
@@ -64,11 +63,14 @@ def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
                        + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) )
+    elif "lgad" in my_d.det_model:
+        output_path = (output + "_d="+str(my_d.lgad_dic['doping1']) 
+                       + "_v="+str(my_d.v_voltage)
+                       + "_tmp="+str(my_d.temperature) 
+                       + "_thick="+str(my_d.l_z) )
+    
     create_path(output_path)
     save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
-    if batch_number > 0 and batch_number < 10:
-        draw_ele_field_scan(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,output_path,batch_number)
-
 
 def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
     """ Save induced current after CSA and BB"""
@@ -126,21 +128,10 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.SaveAs(path+my_d.det_model+plane+str(depth)+".root")
     del c1
 
-def draw_ele_field_scan(my_d,my_f,plane,sensor_model,depth,path,batch_number):
-    """
-    @description:
-        Draw eletric field
-    @param:
-        None     
-    @Returns:
-        None
-    @Modify:
-        2021/08/31
-    """
+def draw_ele_field_1D(my_d,my_f,path):
     c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
-    ROOT.gROOT.SetBatch(True)
-    ROOT.gStyle.SetOptStat(0)
-    # ROOT.gStyle.SetOptFit()
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptFit()
     c1.SetLeftMargin(0.12)
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
@@ -149,26 +140,21 @@ def draw_ele_field_scan(my_d,my_f,plane,sensor_model,depth,path,batch_number):
     model = ["E","P","WP"]
     i=1
     c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field1=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field1=fill_his_1D(model[i-1],my_d,my_f)
     e_field1.Draw("COLZ")
     i=2
     c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field2=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field2=fill_his_1D(model[i-1],my_d,my_f)
     e_field2.Draw("COLZ")
     i=3
     c1.cd(i)
-    # c1.GetPad(i).SetRightMargin(0.2)
-    e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field3=fill_his_1D(model[i-1],my_d,my_f)
     e_field3.Draw("COLZ")
-    paths = path.split("/_")[:]
-    print(paths)
-    outpath  = paths[0] + "/root/" + paths[1]+"/"
-    print(outpath)
-    create_path(outpath)
-    c1.SaveAs(outpath+str(batch_number)+my_d.det_model+plane+str(depth)+".pdf")
-    c1.SaveAs(outpath+str(batch_number)+my_d.det_model+plane+str(depth)+".root")
+    c1.SaveAs(path+my_d.det_model+".pdf")
+    c1.SaveAs(path+my_d.det_model+".root")
     del c1
 
 def fill_his(model,depth,my_d,my_f,plane,sensor_model):
@@ -182,8 +168,8 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     @Modify:
         2021/08/31
     """
-    nx_e=30
-    ny_e=30
+    nx_e=100
+    ny_e=100
     d_r=confirm_range(my_d,my_f,plane,sensor_model,depth)
     e_v = ROOT.TH2F("","",nx_e,d_r[0],d_r[1],ny_e,d_r[2],d_r[3])
     for j in range (ny_e):
@@ -211,6 +197,24 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
         e_v.GetYaxis().SetTitle("z") 
     return e_v
 
+def fill_his_1D(model,my_d,my_f):
+    nz_e=500
+    d_r=confirm_range_1D(my_d)
+    e_v = ROOT.TH1F("","",nz_e,d_r[0],d_r[1])
+    for i in range(nz_e):
+        z_v = (i+1)*((d_r[1]-d_r[0])/nz_e)+d_r[0]
+        f_v=0.0
+        try:
+            f_v,e_v = get_f_v_1D(my_d.l_x/2,my_d.l_y/2,z_v,model,my_f,e_v,d_r)
+            if model == "E":
+                f_v = math.sqrt(math.pow(f_v[0],2)
+                                +math.pow(f_v[1],2)
+                                +math.pow(f_v[2],2))                           
+        except RuntimeError:
+            f_v = 0.0
+        e_v.SetBinContent(i+1,f_v)
+    e_v.GetXaxis().SetTitle("z") 
+    return e_v
 
 def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
     """
@@ -248,6 +252,20 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
+def get_f_v_1D(i_x,i_y,i_z,model,my_f,e_v,d_r):
+    input_x=i_x
+    input_y=i_y
+    input_z=i_z
+    if model == "E":
+        e_v.SetTitle("electric field "+d_r[2])
+        f_v=my_f.get_e_field(input_x,input_y,input_z)
+    elif model == "P":
+        e_v.SetTitle("potential "+d_r[2])
+        f_v=my_f.get_potential(input_x,input_y,input_z)
+    elif model =="WP":
+        e_v.SetTitle("weigthing potential "+d_r[2]) 
+        f_v=my_f.get_w_p(input_x,input_y,input_z)
+    return f_v,e_v
 
 def confirm_range(my_d,my_f,plane,sensor_model,depth):
     """
@@ -293,6 +311,11 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             t_name = plane + " at " + x + " = " + str(depth)
     return [l_xl,l_xr,l_yl,l_yr,t_name]
 
+def confirm_range_1D(my_d):
+    l_xl=0
+    l_xr=my_d.l_z
+    t_name = "z"
+    return [l_xl,l_xr,t_name]
 
 def draw_plot(my_d, ele_current, model, path):
     """
@@ -509,7 +532,7 @@ def energy_deposition(my_g4v):
 def create_path(path):
     """ If the path does not exit, create the path"""
     if not os.access(path, os.F_OK):
-        os.makedirs(path) 
+        os.makedirs(path, exist_ok=True) 
 
 
 def draw_scat_angle(evnets_angle,angle,model):
@@ -545,21 +568,3 @@ def draw_scat_angle(evnets_angle,angle,model):
     h2.SetLineColor(2)
     h2.Draw("HIST")    
     c1.SaveAs("scat_angle"+model+".pdf")
-
-def draw_nocarrier3D(path,my_l):
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","pairs of carrier generation",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min-0.5*my_l.x_step,my_l.x_max+0.5*my_l.x_step,\
-        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min-0.5*my_l.y_step,my_l.y_max+0.5*my_l.y_step,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min-0.5*my_l.z_step,my_l.z_max+0.5*my_l.z_step)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw()
-    h.GetXaxis().SetTitle("Depth [μm]")
-    h.GetYaxis().SetTitle("Width [μm]")
-    h.GetZaxis().SetTitle("Thick [μm]")
-    c1.SaveAs(path+"nocarrier_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+"_"\
-        +str(my_l.min_carrier)+".pdf")  

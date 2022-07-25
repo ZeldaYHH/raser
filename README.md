@@ -6,13 +6,13 @@
 python/run_batchjob.py[跑循环，变换参数调用gsignal.py]
 {
 	python/gsignal.py[主程序]
-	python/TCTtest.py[TCT主程序]
+	*python/TCTtest.py[TCT主程序]*
 	{
 		raser/setting.py[设置参数]
 		raser/geometry.py[设置探测器]
 		raser/pyfenics.py[计算探测器内部电场]
 		raser/g4particles.py[在Geant4中生成实验器材，并模拟粒子穿行路径]
-		raser/source.py[生成TCT激光源，模拟光束并产生光生载流子]
+		*raser/source.py[生成TCT激光源，模拟光束并产生光生载流子]*
 		raser/calcurrent.py[计算载流子产生及漂移]
 			raser/model.py[载流子漂移与增益的模型]
 		raser/elecurrent.py[计算电路对产生信号的处理]
@@ -48,7 +48,13 @@ subgraph Geant4
 end
 
 subgraph CalCurrent
-载流子路径 & 载流子信号
+载流子路径 & 载流子信号 & 增益载流子
+style 增益载流子 fill:#ff0
+end
+
+subgraph Model
+迁移率模型 & 雪崩模型
+style 雪崩模型 fill:#ff0
 end
 
 subgraph EleCurrent
@@ -67,7 +73,15 @@ end
 
 电场--欧姆定律-->载流子路径
 
+迁移率模型-->载流子路径
+
 载流子路径-->载流子信号
+
+载流子路径-->增益载流子
+
+雪崩模型-->增益载流子
+
+增益载流子-->载流子信号
 
 加权场--肖克莱-拉莫定理-->载流子信号
 
@@ -243,13 +257,40 @@ Tan,22/6/23,A:不太清楚，不过感觉你这里的解释感觉不通畅。并
 
 二、python程序
 1、gsignal.py
-主程序。按顺序运行各程序。batch模式下会把输入参数调整成参数序列。
-2、drawsave.py
-画图与保存程序。接收gsignal.py产生的各对象，保存电场分布、粒子角分布、粒子能量损耗分布、光生载流子分布、载流子漂移路径、信号与电子学处理的数据，并产生对应图像（大部分利用ROOT自带的画图功能）。
-3、run_batchjob.py
-给定一个需要变化的参数，对每个参数值分配若干事例，循环产生对应的指令（并在配置文件里对应修改变化的参数值），存储为.sh文件，并提交到计算节点进行批量运行。
-4、add_noise_raser.py（待补充）
-5、time_scan.py（待补充）
+主程序。
+对单次模拟，程序会按顺序创建Setting对象、Detector对象（对3D探测器可以添加自定义电极）、FEniCS对象、Particles对象、CalCurrent对象及EleCurrent对象，然后唤起drawsave.py保存产生的数据并绘图。
+不论单次或批量模拟，Geant4都会产生多个入射粒子。
+在批量运行模式下，主程序会针对每个入射粒子，生成对应的CalCurrent对象与EleCurrent对象，将电流信号存储为.csv文件。
+
+2、run_batchjob.py
+提交作业（至多20个）到计算节点进行批量运行。
+作业为自动生成的.sh指令文件，每个作业执行一次以批量运行模式运行的主程序gsignal.py。
+每个作业会被分配若干事例。
+如：总事例数40000，每个作业被分配到2000个，1号作业对应Geant4的1号至2000号事例，2号作业对应2001号至4000号，以此类推。
+另有扫描模式，此模式中不同作业执行的主程序，其配置会被改变（通过生成不同的.json文件改变）。如scan_voltage，会将总事例数分为十份，每份输入给-50V至-500V不同偏压的探测器。
+
+3、add_noise_raser.py
+由各组信号的上升时间分布得到时间分辨。
+存在两种方法：
+	一是对每组理想信号，我们往上加一个高斯噪声得到实际信号，
+	然后从带噪声的信号里得到一个50%信号的CFD时刻；
+	二是对每组理想信号，我们根据附近的信号上升速度给这个时刻加一个jitter项，得到50%信号的CFD时刻。
+将所有的CFD时刻放在一起去拟合高斯分布，得到时间分辨（高斯分布的sigma参数）和不确定度。
+目前程序中采用后者。
+
+4、time_scan.py
+可以分成两部分：
+第一部分time_scan提交作业到（至多20个）到计算节点进行批量运行。
+作业为自动生成的.sh指令文件，对若干变量进行扫描，分别运行add_noise_raser.py，得到时间分辨与变量的变化关系。
+第二部分draw_scan将上述变化关系做成图像。
+
+5、drawsave.py
+画图与保存程序。接收gsignal.py产生的各对象。
+draw_ele_field、draw_ele_field_scan：电场分布
+draw_drift_path：载流子漂移路径
+draw_plot：信号与电子学处理
+energy_deposition：粒子能量损耗分布
+draw_scat_angle：粒子角分布
 
 三、setting.json配置文件
 由json文件的字典列表组成，列表里的每个字典对应一个探测器的一组参数，可以同时储存多个构型不一致的探测器。未来预计可以修改成能存储同类、不同名称的探测器。
@@ -264,3 +305,6 @@ TCT的参数配置也一并放在配置文件中。
 运行主程序及传入参数配置的脚本。
 对单个事例，需要先唤起singularity镜像再运行。
 对批量作业，程序中自带镜像配置。
+
+批量作业通过下面的路径提交，可以使用指令 hep_q -u username 查看作业运行情况，但需先添加环境变量，即执行如下指令：
+export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/

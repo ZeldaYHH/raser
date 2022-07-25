@@ -27,6 +27,7 @@ class CalCurrent:
         self.ionized_drift(my_f,my_d)
         if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
+            self.gain_efficiency_calculate(my_d)
         else:
             pass
             
@@ -99,12 +100,15 @@ class CalCurrent:
             self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.n_track = i+1
+            charges = math.floor(self.gain_dic_p[1][i])
+            if charges == 0:
+                continue
             for j in range(2):
                 self.initial_parameter()
                 if (j==0):
-                    self.eorh = self.gain_dic_p[1][i] #hole
+                    self.eorh = charges #hole
                 if (j==1):
-                    self.eorh = -self.gain_dic_p[1][i] #electron 
+                    self.eorh = charges #electron 
                 self.d_time = self.gain_dic_p[0][i]
                 self.d_x = self.gain_dic_p[2][i]
                 self.d_y = self.gain_dic_p[3][i]
@@ -402,6 +406,30 @@ class CalCurrent:
             test_n_gain.Reset()
         my_d.sum_cu.Add(my_d.gain_positive_cu)
         my_d.sum_cu.Add(my_d.gain_negative_cu)
+
+    def gain_efficiency_calculate(self,my_d):
+        """Compare the charge collection amount induced by original and gain current"""
+        gain_cu = ROOT.TH1F("gain_cu","gain_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
+        original_cu = ROOT.TH1F("original_cu","original_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
+        gain_cu.Reset()
+        original_cu.Reset()
+
+        gain_cu.Add(my_d.gain_positive_cu)
+        gain_cu.Add(my_d.gain_negative_cu)
+        original_cu.Add(my_d.positive_cu)
+        original_cu.Add(my_d.negative_cu)
+
+        gain_charge = 0
+        for x in gain_cu:
+            gain_charge += x
+        original_charge = 0
+        for x in original_cu:
+            original_charge += x
+
+        if original_charge != 0:
+            self.gain_efficiency = gain_charge/original_charge
+        else:
+            self.gain_efficiency = 0
 
     def reset_start(self,my_d):
         """ Reset th1f """
