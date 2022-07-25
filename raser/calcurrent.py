@@ -427,7 +427,10 @@ class CalCurrent:
         for x in original_cu:
             original_charge += x
 
-        self.gain_efficiency = gain_charge/original_charge
+        if original_charge != 0:
+            self.gain_efficiency = gain_charge/original_charge
+        else:
+            self.gain_efficiency = 0
 
     def reset_start(self,my_d):
         """ Reset th1f """

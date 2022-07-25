@@ -105,7 +105,7 @@ class Settting:
             2021/08/31
         """
         if not os.access(path, os.F_OK):
-            os.makedirs(path)
+            os.makedirs(path, exist_ok=True)
 
     @contextlib.contextmanager
     def open_func(self,file_name):
@@ -493,7 +493,7 @@ def save_waveform_threshold(output_file,event_n,addNoise):
     # print(output_file)
     output_path = output_file + "out_txt/"
     if not os.access(output_path, os.F_OK):
-        os.makedirs(output_path) 
+        os.makedirs(output_path, exist_ok=True) 
     f1 = open(output_path+"t_"+str(event_n)+".csv","w")
     f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
     for i in range(len(addNoise.ampl_paras["time_list"])):
@@ -695,11 +695,10 @@ def save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA
     in_list = o_ls[2].split("_")
 
     with open(out_file,"a") as f:
-        keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
-        values = [in_list[i].split("=")[1] for i in range(1,len(in_list))]
         f.write("CSA,BB,CSA_e,BB_e,efficiency \n")
         f.write(str(sigma_CSA)+","+str(sigma_BB)
                 +","+ str(error_CSA) +","+ str(error_BB) +","+ str(efficiency) + "\n")
+                
 # Loop and add noise in the raser
 def loop_addNoise(input_file,rset,tree_class,out_file):
     for root,dirs,files in os.walk(input_file):
@@ -758,5 +757,5 @@ if __name__ == '__main__':
     out_root_f.Close()
     if "plugin3D" in o_ls[1]:
         save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landua_timing,outnumer)  
-    # save time resoution
-    # save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency) 
+    else:
+        save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency) 

@@ -15,11 +15,11 @@ import subprocess
 
 class Input_parameters:
     def __init__(self,args):
+        self.model = args[0].split("=")[-1] # model name
         self.events_each_run = int(args[1].split("=")[-1]) # events/run
         self.events_total = int(args[2].split("=")[-1]) # events/total
         self.instance_in = int(args[3].split("=")[-1]) #singularity instance start number
-        # self.change_p = args[4] #parameters
-        self.output_path=args[4].split("=")[-1]      #output name
+        self.output_path = args[4].split("=")[-1]      #output name
         self.run_mode = args[5].split("=")[-1]       # 1 run example, 2 run the batch
         self.para_name = args[6].split("=")[-1]    # the change of parameter name in batch
         self.para_number = int(args[7].split("=")[-1])    # the change of parameter numbers in batch
@@ -30,23 +30,23 @@ class Input_parameters:
 def main():
     args = sys.argv[1:]
     input=Input_parameters(args)
-    if "plugin3D" in args[0]:
-        job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=plugin3Dscan")
-    elif "planar3D" in args[0]:
-        job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=planar3Dscan")
-    elif "lgad3D" in args[0]:
-        job_name=write_job(input,model=args[0],run_code="./python/gsignal.py det_model=lgad3Dscan")
+    if "plugin3D" in input.model:
+        job_name=write_job(input,run_code="./python/gsignal.py det_model=plugin3Dscan")
+    elif "planar3D" in input.model:
+        job_name=write_job(input,run_code="./python/gsignal.py det_model=planar3Dscan")
+    elif "lgad3D" in input.model:
+        job_name=write_job(input,run_code="./python/gsignal.py det_model=lgad3Dscan")
     else:
         print("the scan model is wrong")
     if input.run_mode == "True":
         run_job(job_name)
 
-def write_job(input,model,run_code):
+def write_job(input,run_code):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "job/"+now+"/"
     create_path(path)
     create_path(input.output_path)
-    modify_json(input,path,model)
+    modify_json(input,path)
     k = 1
     for j in range (1,input.para_number+1):
         mm = 1
@@ -85,76 +85,82 @@ def run_job(job_name):
 def create_path(path):
     """ If the path does not exit, create the path"""
     if not os.access(path, os.F_OK):
-        os.makedirs(path) 
+        os.makedirs(path, exist_ok=True) 
 
 def runcmd(command):
     ret = subprocess.run([command],shell=True)
 
-def modify_json(input,name,model):
+def modify_json(input,name):
     path_file = "setting.json"
     with open(path_file) as f:
-        para = json.load(f)
-        for dic_par in para:
-            paras = dic_par
-            if dic_par['det_model'] in "plugin3Dscan":
+        paras = json.load(f)
+        for para in paras:
+            if input.model in "plugin3Dscan" and para['det_model'] in "plugin3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
                     else:
                         if input.para_name == "scan_voltage":
-                            paras['voltage'] = str(-500+i*50)
+                            para.update({'voltage':str(-500+i*50)})
                         elif input.para_name == "scan_doping":
-                            paras['doping'] = str(10.0+i*10)
-                        elif input.para_namer == "scan_temp":
-                            paras['temp'] = str(300+i*30)
+                            para.update({'doping':str(10.0+i*10)})
+                        elif input.para_name == "scan_temp":
+                            para.update({'temp':str(300+i*30)})
                         elif input.para_name == "scan_thick":
-                            paras['lz'] = str(150.0+i*30)
+                            para.update({'lz':str(150.0+i*30)})
                         elif input.para_name == "scan_gap":
-                            paras['e_gap'] = str(140.0+i*20)
+                            para.update({'e_gap':str(140.0+i*20)})
                         else:
                             print("Select right para_name:scan_volatge,scan_doping,scan_gap,scan_temp,scan_thick,NO")     
                     outfile = name+"setting%s.json"%(i+1)
-                    json_str = json.dumps(para, indent=4)
+                    json_str = json.dumps([para], indent=4)
+                    # keep the same with json in main program, using a list of dic to set different paras
                     with open(outfile,"w") as f:
                         f.write(json_str)
-            elif  dic_par['det_model'] in "planar3Dscan":
+                        f.close()
+
+            elif input.model in "planar3Dscan" and para['det_model'] in "planar3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
                     else:
                         if input.para_name == "scan_voltage":
-                            paras['voltage'] = str(-200-i*30)
+                            para.update({'voltage':str(-200-i*30)})
                         elif input.para_name == "scan_doping":
-                            paras['doping'] = str(10.0+i*10)
-                        elif input.para_namer == "scan_temp":
-                            paras['temp'] = str(300-i*10)
+                            para.update({'doping':str(10.0+i*10)})
+                        elif input.para_name == "scan_temp":
+                            para.update({'temp':str(300-i*10)})
                         elif input.para_name == "scan_thick":
-                            paras['lz'] = str(100.0+i*50)
+                            para.update({'lz':str(100.0+i*50)})
                         else:
                             print("Select right para_name:scan_volatge,scan_doping,scan_temp,scan_thick,NO")                 
                     outfile = name+"setting%s.json"%(i+1)
-                    json_str = json.dumps(para, indent=4)
+                    json_str = json.dumps([para], indent=4)
                     with open(outfile,"w") as f:
                         f.write(json_str)
-            elif  dic_par['det_model'] in "lgad3Dscan":
+                        f.close()
+
+            elif input.model in "lgad3Dscan" and para['det_model'] in "lgad3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
                     else:
                         if input.para_name == "scan_voltage":
-                            paras['voltage'] = str(-200-i*30)
-                        #elif input.para_name == "scan_doping":
-                        #    paras['doping'] = str(10.0+i*10)
-                        elif input.para_namer == "scan_temp":
-                            paras['temp'] = str(300-i*10)
+                            para.update({'voltage':str(-200-i*30)})
+                        elif input.para_name == "scan_doping":#triangle wall
+                            para.update({'doping1':str(250+i*1e5)})
+                        elif input.para_name == "scan_temp":
+                            para.update({'temp':str(300-i*10)})
                         elif input.para_name == "scan_thick":
-                            paras['lz'] = str(100.0+i*50)
+                            para.update({'lz':str(100.0+i*50)})
                         else:
                             print("Select right para_name:scan_volatge,scan_doping,scan_temp,scan_thick,NO")                 
                     outfile = name+"setting%s.json"%(i+1)
-                    json_str = json.dumps(para, indent=4)
+                    json_str = json.dumps([para], indent=4)
                     with open(outfile,"w") as f:
-                        f.write(json_str)          
+                        f.write(json_str)
+                        f.close()
+                               
             else:
                 pass
 
