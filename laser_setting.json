@@ -2,7 +2,7 @@
     {
         "tech" : "SPA",
         "direction" : "top",
-        "name" : "top_TCT",
+        "laser_model" : "top_TCT",
         
         "alpha" : 21000,
         "refractionIndex" : 3.124,
@@ -23,7 +23,7 @@
     {
         "tech" : "SPA",
         "direction" : "top",
-        "name" : "top_TCT_Si",
+        "laser_model" : "top_TCT_Si",
         
         "alpha" : 300000,
         "refractionIndex" : 3.51,
@@ -44,7 +44,7 @@
     {
         "tech" : "SPA",
         "direction" : "bottom",
-        "name" : "bottom_TCT_Si",
+        "laser_model" : "bottom_TCT_Si",
         
         "alpha" : 300000,
         "refractionIndex" : 3.51,
@@ -65,7 +65,7 @@
     {
         "tech" : "SPA",
         "direction" : "edge",
-        "name" : "edge_TCT_Si",
+        "laser_model" : "edge_TCT_Si",
         
         "alpha" : 987,
         "refractionIndex" : 3.51,
@@ -86,7 +86,7 @@
     {
         "tech" : "TPA",
         "direction" : "edge",
-        "name" : "TPA-TCT_Si",
+        "laser_model" : "TPA-TCT_Si",
         
         "beta_2" : 1.5E-11,
         "refractionIndex" : 3.51,

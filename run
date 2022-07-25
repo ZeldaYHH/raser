@@ -10,10 +10,14 @@ usage() {
     printf "\nSYNOPSIS\n"
     printf "\n\t%-5s\n" "./run [OPTION]" 
     printf "\nOPTIONS\n"    
+
     printf "\n\t%-9s  %-40s"  "1.1"       "NJU-SiC-PIN"
     printf "\n\t%-9s  %-40s"  "1.2"       "3D-SiC"
 
     printf "\n\t%-9s  %-40s"  "2.1"       "SiC-LGAD"
+
+    printf "\n\t%-9s  %-40s"  "3.1"       "top-TCT"
+    
     printf "\n\n" 
 }
 
@@ -37,6 +41,11 @@ usage_2_1() {
     printf "\n\t%-5s  %-40s\n"  "2.1.1"    "SiC-LGAD basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
+}
+
+usage_3_1() { 
+	printf "\n\t%-5s  %-40s\n"  "3.1.0"    "Loading TRACK into Singularity..." 
+    printf "\n\t%-5s  %-40s\n"  "3.1.1"    "SiC-PIN top-TCT basic information ..."
 }
 
 if [[ $# -eq 0 ]]; then
@@ -133,6 +142,19 @@ case $option in
     2.1.3) echo "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
         ./python/time_scan.py  out/lgad3Dscan/20220323_3D scan
         ;;
+    esac
+}
+
+sub_3_1(){
+case $option in 
+    3.1.0) echo "Loading TRACK into Singularity..."
+        track 
+        ;; 
+    3.1.1) echo "SiC-PIN top-TCT basic information ..."
+        geant4 
+        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
+        ;;
+        esac
 }
 
 case $option in 
@@ -164,5 +186,15 @@ case $option in
         ;;
     2.1.*) echo "RASER simulate SiC-LGAD"
         sub_2_1 option
+        ;;
+
+    3.1) echo "RASER simulate top-TCT"
+        usage_3_1
+        echo "Please enter your option: " 
+        read option 
+        sub_3_1 option 
+        ;;
+    3.1.*) echo "RASER simulate top-TCT"
+        sub_3_1 option
         ;;
 		esac
