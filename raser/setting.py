@@ -35,6 +35,9 @@ class Setting:
         self.input2dic(parameters)
         self.det_model = self._pardic['det_model']
         self.read_par(self._pardic['parfile'])
+        if "laser_model" in self._pardic:
+            self.laser_model = self._pardic['laser_model']
+            self.read_par_laser(self._pardic['laser_parfile'])
         self.scan_variation()
 
     def input2dic(self,parameters):
@@ -57,7 +60,21 @@ class Setting:
             else:
                 paras[x] = paras[x]
         self.paras = paras
-        
+
+    def read_par_laser(self,jsonfile):
+        "Read the setting.json file and save the input parametersin paras"
+        with open(jsonfile) as f:
+            dic_pars = json.load(f)
+        for dic_par in dic_pars:
+            if dic_par['laser_model'] in self.laser_model:
+                laser_paras = dic_par
+        for x in laser_paras: 
+            if self.is_number(laser_paras[x]):          
+                laser_paras[x] = float(laser_paras[x])
+            else:
+                laser_paras[x] = laser_paras[x]
+        self.laser_paras = laser_paras
+
     @property
     def detector(self):
         """
@@ -183,7 +200,63 @@ class Setting:
                     "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
                     }
         return pygeant4
-       
+
+    @property
+    def laser(self):
+        """
+        Description:
+            Define laser parameters
+        Parameters:
+        ---------
+        tech : str
+            Interaction Pattern Between Laser and Detector
+        direction : str
+            Direction of Laser Incidence, Could be "top" "edge" or "bottom"
+
+        alpha : float
+            the Linear Absorption Coefficient of the Bulk of the Device
+        beta_2 : float
+            the Quadratic Absorption Coefficient of the Bulk of the Device
+        refractionIndex :float
+            the Refraction Index of the Bulk of the Device
+
+        wavelength : float
+            the Wavelength of Laser in nm
+        tau : float
+            the Full-width at Half-maximum (FWHM) of the Beam Temporal Profile
+        power : float
+            the Energy per Laser Pulse
+        widthBeamWaist : float
+            the Width of the Beam Waist of the Laser in um
+        l_Rayleigh : float
+            the Rayleigh Width of the Laser Beam
+
+        r_step, h_step : float
+            the Step Length of Block in um,
+            Carriers Generated in the Same Block Have the Same Drift Locus
+        @Returns:
+        ---------
+            A dictionary containing all parameters used in TCTTracks 
+        @Modify:
+        ---------
+            2021/09/08
+        """
+        if hasattr(self,"laser_model"):
+            p = self.laser_paras
+            laser = {'tech':p['tech'],'direction':p['direction'],
+                    'refractionIndex':p['refractionIndex'],
+                    "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
+                    'r_step':p['r_step'],'h_step':p['h_step'],
+                    'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
+                    }
+            if p['tech'] == "SPA":
+                laser.update({'alpha':p['alpha']})
+            if p['tech'] == "TPA":
+                laser.update({'beta_2':p['beta_2']})
+            if 'l_Rayleigh' in p:
+                laser.update({'l_Rayleigh':p['l_Rayleigh']})
+        return laser
+        
     @property
     def amplifier(self):
         """

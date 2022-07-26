@@ -383,7 +383,6 @@ class CalCurrent:
             my_d.negative_cu.Add(test_n)
             test_p.Reset()
             test_n.Reset()
-
         my_d.sum_cu.Add(my_d.positive_cu)
         my_d.sum_cu.Add(my_d.negative_cu)
 
@@ -462,6 +461,70 @@ class CalCurrent:
             test_n.Fill(self.d_dic_n["tk_"+str(j+1)][4][i],
                         self.d_dic_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
         return test_p, test_n
+
+class CalCurrentLaser(CalCurrent):
+    def __init__(self, my_d, my_f, my_l, dset):
+        #mobility related with the magnetic field (now silicon useless)
+        self.muhh=1650.0   
+        self.muhe=310.0
+        self.BB=np.array([0,0,0])
+        self.sstep=dset.steplength #drift step
+        self.det_dic = dset.detector
+        self.kboltz=8.617385e-5 #eV/K
+        self.max_drift_len=1e9 #maximum diftlenght [um]
+        self.parameters(my_l)
+        self.ionized_drift(my_f,my_d,my_l)
+        if (self.det_dic['det_model'] == "lgad3D"):
+            self.ionized_drift_gain(my_f,my_d)
+        else:
+            pass
+
+    def parameters(self, my_l):
+        """" Define the output dictionary """   
+        self.d_dic_n = {}
+        self.d_dic_p = {}
+        self.gain_dic_p = [ [] for n in range(5) ]
+        self.gain_cu_p = {}
+        self.gain_cu_n = {}
+        self.tracks_p = my_l.track_position
+        for n in range(len(self.tracks_p)-1):
+            self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
+            self.d_dic_p["tk_"+str(n+1)] = [ [] for n in range(5) ]
+
+    def ionized_drift(self,my_f,my_d,my_l):
+        for i in range(len(self.tracks_p)-1):
+            self.n_track=i+1
+            self.ionized_pairs=my_l.ionized_pairs[i]
+            for j in range(2):
+                if (j==0):
+                    self.eorh=1 #hole
+                if (j==1):
+                    self.eorh=-1 #electron 
+                self.loop_electon_hole(my_f,my_d,i)
+        self.get_current(my_d,my_l)
+
+    def get_current(self,my_d,my_l):
+        """ Charge distribution to initial current"""
+        self.reset_start(my_d)
+        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
+        total_pairs=0
+        for j in range(len(self.tracks_p)-2):
+            test_p,test_n = self.get_trackspn(my_d, test_p, test_n, j)   
+            n_pairs=my_l.ionized_pairs[j]
+            total_pairs+=n_pairs
+            test_p.Scale(n_pairs)
+            test_n.Scale(n_pairs)            
+            my_d.positive_cu.Add(test_p)
+            my_d.negative_cu.Add(test_n)
+            test_p.Reset()
+            test_n.Reset()
+
+        if self.det_dic['det_model']=="lgad3D":
+            pass
+        else:
+            my_d.sum_cu.Add(my_d.positive_cu)
+            my_d.sum_cu.Add(my_d.negative_cu)
 
 # # # mobility model
 def sic_mobility(charge,aver_e,my_d,det_dic,z):
