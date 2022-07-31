@@ -476,6 +476,7 @@ class CalCurrentLaser(CalCurrent):
         self.ionized_drift(my_f,my_d,my_l)
         if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
+            self.gain_efficiency_calculate(my_d)
         else:
             pass
 
@@ -520,11 +521,8 @@ class CalCurrentLaser(CalCurrent):
             test_p.Reset()
             test_n.Reset()
 
-        if self.det_dic['det_model']=="lgad3D":
-            pass
-        else:
-            my_d.sum_cu.Add(my_d.positive_cu)
-            my_d.sum_cu.Add(my_d.negative_cu)
+        my_d.sum_cu.Add(my_d.positive_cu)
+        my_d.sum_cu.Add(my_d.negative_cu)
 
 # # # mobility model
 def sic_mobility(charge,aver_e,my_d,det_dic,z):

@@ -44,7 +44,7 @@
         "ly" : 1000,
         "lz" : 50,
         "part" : 2,
-        "doping1" : 8e5,
+        "doping1" : 6.5e5,
         "doping2" : 2.5e2,
         "bond1" : 1.0,
         "voltage" : -2000,
