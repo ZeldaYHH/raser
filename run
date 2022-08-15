@@ -46,6 +46,8 @@ usage_2_1() {
 usage_3_1() { 
 	printf "\n\t%-5s  %-40s\n"  "3.1.0"    "Loading TRACK into Singularity..." 
     printf "\n\t%-5s  %-40s\n"  "3.1.1"    "SiC-PIN top-TCT basic information ..."
+ printf "\n\t%-5s  %-40s\n"  "3.1.2"    "SiC-PIN edge-TCT basic information ..."
+
 }
 
 if [[ $# -eq 0 ]]; then
@@ -154,6 +156,18 @@ case $option in
         geant4 
         ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
         ;;
+    3.1.2) echo "SiC-PIN edge-TCT basic information ..."
+        geant4
+        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+    3.1.3) echo "SiC-PIN edge-TCT basic information ..."
+        geant4
+        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+
+
+
+
         esac
 }
 
@@ -197,4 +211,5 @@ case $option in
     3.1.*) echo "RASER simulate top-TCT"
         sub_3_1 option
         ;;
+
 		esac
