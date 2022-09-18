@@ -172,18 +172,6 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 material_O = "O",
                                 colour = [0,0.5,0.8],   
                                 mother = 'world')
-
-        if "plugin3D" in sensor_model:
-            self.create_sic_box(
-                                name = "SiC_sub",
-                                sidex = my_d.l_x*g4b.um,
-                                sidey = my_d.l_y*g4b.um,
-                                sidez = 350.0*g4b.um,
-                                translation = [tx_all,ty_all,-175.0*g4b.um],
-                                material_Si = "Si",
-                                material_c = "C",
-                                colour = [0,1,1],
-                                mother = 'world')
         self.maxStep = maxStep*g4b.um
         self.fStepLimit = g4b.G4UserLimits(self.maxStep)
         self.logical["Device"].SetUserLimits(self.fStepLimit)

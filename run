@@ -30,10 +30,10 @@ usage_1_1() {
 usage_1_2() { 
 	printf "\n\t%-5s  %-40s\n"  "1.2.0"    "Loading TRACK into Singularity..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.1"    "3D-SiC-PIN basic information for RASER simulation ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "pre-run 3D-SiC batch model with total number, split with step number ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.3"    "run 3D-SiC batch model with total number, split with step number ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.4"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.5"    "get time resolution vs draw voltage ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.2.T"  "pre-run 3D-SiC batch model with total number, split with step number ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "run 3D-SiC batch model with total number, split with step number ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.3"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.4"    "get time resolution vs draw voltage ..." 
 }
 
 usage_2_1() { 
@@ -41,6 +41,7 @@ usage_2_1() {
     printf "\n\t%-5s  %-40s\n"  "2.1.1"    "SiC-LGAD basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
+    printf "\n\t%-5s  %-40s\n"  "2.1.4"    "get time resolution vs doping ..." 
 }
 
 usage_3_1() { 
@@ -105,21 +106,21 @@ case $option in
         geant4 
         ./python/gsignal.py  det_model=plugin3D parfile=setting.json
         ;;
-    1.2.2) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
+    1.2.2.T) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_model=plugin3D step=200 total=400  \
 							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10
 		;; 
-    1.2.3) echo "run 3D-SiC batch model with total number, split with step number ..."
+    1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_model=plugin3D step=20000 total=40000  \
 							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10 
         ;;
-	1.2.4) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
         ./python/time_scan.py  out/plugin3Dthick_20220608 scan
 			;;
-	1.2.5) echo "get time resolution vs draw voltage"
-		./python/time_scan.py  out/plugin3Dthick_20220608/time_resolution_scan1.csv draw_voltage 0
+	1.2.4) echo "get time resolution vs draw voltage"
+		./python/time_scan.py  out/plugin3Dthick_20220608/time_resolution_scan.csv draw_voltage 0
 			;;
         esac
 }
@@ -136,13 +137,19 @@ case $option in
 
 	2.1.2) echo "batch model with total number, split with step number"
 		hepjob
-		./python/run_batchjob.py det_model=lgad3D  step=20000 total=40000 \
-							 instance=0 output=out/lgad3Dscan/20220323_3D/ batch=True para_name=scan_doping para_number=8
+		./python/run_batchjob.py det_model=lgad3D  step=200000 total=400000 \
+							 instance=0 output=out/lgad3Dscan/ batch=True para_name=scan_doping para_number=8
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
-        ./python/time_scan.py  out/lgad3Dscan/20220323_3D scan
+        hepjob
+        ./python/time_scan.py  out/lgad3Dscan scan
         ;;
+
+    2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"
+		./python/time_scan.py  out/lgad3Dscan/time_resolution_scan.csv draw_doping 0
+        ./python/time_scan.py  out/lgad3Dscan/gain_efficiency_scan.csv gain_doping 0
+		;;
     esac
 }
 
