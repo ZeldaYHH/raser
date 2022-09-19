@@ -159,8 +159,7 @@ def modify_json(input,name):
                     json_str = json.dumps([para], indent=4)
                     with open(outfile,"w") as f:
                         f.write(json_str)
-                        f.close()
-                               
+                        f.close()        
             else:
                 pass
 

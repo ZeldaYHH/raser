@@ -375,7 +375,7 @@ class FenicsCal:
            Judge whether (x,y,z) position is in sensor fenics range
         @reture:
             False: not
-            Ture:  in
+            True:  in
         @Modify:
             2021/08/31
         """
