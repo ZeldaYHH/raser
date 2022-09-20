@@ -18,11 +18,11 @@
 
         "maxstep" : 2,
         "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
+        "par_inx" : 2500,
+        "par_iny" : 2500,
         "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
+        "par_outx" : 2500,
+        "par_outy" : 2500,
         "par_outz" : 0.0,
 
         "t_rise" : 0.7,
