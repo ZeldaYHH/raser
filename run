@@ -65,8 +65,7 @@ else
 fi
 
 track(){
-    # cd 
-    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.2.sif 
+    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
 }
 
 geant4(){
