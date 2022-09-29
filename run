@@ -187,7 +187,7 @@ case $option in
         ;; 
     4.1.1) echo "SiC-PIN edge-TCT basic information ..."
         geant4 
-        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT laser_parfile=laser_setting.json
+        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
         ;;
         esac
 }
