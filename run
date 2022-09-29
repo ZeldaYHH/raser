@@ -55,6 +55,13 @@ usage_3_1() {
     printf "\n\n" 
 }
 
+usage_4_1() { 
+	printf "\n\t%-5s  %-40s\n"  "4.1.0"    "Loading TRACK into Singularity..." 
+    printf "\n\t%-5s  %-40s\n"  "4.1.1"    "SiC-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "4.1.2"    "SiC-LGAD edge-TCT basic information ..."
+    printf "\n\n" 
+}
+
 if [[ $# -eq 0 ]]; then
     usage
     echo "Please enter your option: "
@@ -173,6 +180,18 @@ case $option in
         esac
 }
 
+sub_4_1(){
+case $option in 
+    4.1.0) echo "Loading TRACK into Singularity..."
+        track 
+        ;; 
+    4.1.1) echo "SiC-PIN edge-TCT basic information ..."
+        geant4 
+        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+        esac
+}
+
 case $option in 
     1.1) echo "RASER simulate NJU-SiC-PIN"
         usage_1_1
@@ -213,4 +232,15 @@ case $option in
     3.1.*) echo "RASER simulate top-TCT"
         sub_3_1 option
         ;;
+
+    4.1) echo "RASER simulate edge-TCT"
+        usage_4_1
+        echo "Please enter your option: " 
+        read option 
+        sub_4_1 option 
+        ;;
+    4.1.*) echo "RASER simulate edge-TCT"
+        sub_4_1 option
+        ;;
+
 		esac
