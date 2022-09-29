@@ -71,9 +71,6 @@ h_noise_height.clear()
 # The judge parameter configuration and read data
 class NoiseSetting:
     def __init__(self):
-        pass
-    
-    def loop_out_p(self):
         """
         @description: The judge parameter configuration
          
@@ -87,11 +84,16 @@ class NoiseSetting:
         """
         self.thre_vth=18 # mv
         self.CFD=0.5
-        self.i=0
+        self.effective_event_number=0
         self.CFD_BB_time=[]
         self.CFD_CSA_time=[]
         self.CFD_BB_jitter=[]
         self.CFD_CSA_jitter=[]
+
+        self.max_voltage_BB=[]
+        self.max_voltage_CSA=[]
+        self.current_integral_BB=[]
+        self.current_integral_CSA=[]
         
     def create_outpath(self,path):
         """
@@ -207,6 +209,7 @@ class AddNoise:
                                               /len(self.noise_height_list))
         h_noise_height_RMS[0]=self.noise_height_RMS
         self.get_max()
+        self.get_integral()
         self.fill_dic()
 
     def get_max(self):
@@ -234,6 +237,29 @@ class AddNoise:
         self.max_BB_s_index=self.ampl_BB_s_list.index(max(self.ampl_BB_s_list))
         self.max_BB_s_time=self.time_list[self.max_BB_s_index]
 
+    def get_integral(self):
+        """
+        @description: 
+            Get the time integral of the waveform
+        @param:
+            None
+        @Returns:
+            None
+        @Modify:
+            2022/08/08
+        """
+        self.integral_CSA_nps_height=0.
+        self.integral_CSA_s_height=0.
+
+        self.integral_BB_nps_height=0.
+        self.integral_BB_s_height=0.
+
+        for i in range(len(self.time_list)-1):
+            self.integral_CSA_nps_height+=self.ampl_CSA_nps_list[i]*(self.time_list[i+1]-self.time_list[i])
+            self.integral_CSA_s_height+=self.ampl_CSA_s_list[i]*(self.time_list[i+1]-self.time_list[i])
+            self.integral_BB_nps_height+=self.ampl_BB_nps_list[i]*(self.time_list[i+1]-self.time_list[i])
+            self.integral_BB_s_height+=self.ampl_BB_s_list[i]*(self.time_list[i+1]-self.time_list[i])
+        
     def fill_dic(self):
         """
         @description: 
@@ -251,6 +277,8 @@ class AddNoise:
         self.ampl_paras["ampl_CSA_s_list"] =    self.ampl_CSA_s_list
         self.ampl_paras["max_CSA_s_height"] =   self.max_CSA_s_height
         self.ampl_paras["max_CSA_s_time"] =     self.max_CSA_s_time
+        self.ampl_paras["integral_CSA_nps_height"] = self.integral_CSA_nps_height
+        self.ampl_paras["integral_CSA_s_height"] = self.integral_CSA_s_height
 
         self.ampl_paras["max_BB_nps_height"] = self.max_BB_nps_height
         self.ampl_paras["max_BB_pulse_time"] = self.max_BB_pulse_time
@@ -258,8 +286,10 @@ class AddNoise:
         self.ampl_paras["ampl_BB_s_list"] =    self.ampl_BB_s_list
         self.ampl_paras["max_BB_s_height"] =   self.max_BB_s_height
         self.ampl_paras["max_BB_s_time"] =     self.max_BB_s_time
-        self.ampl_paras["time_list"] =         self.time_list
+        self.ampl_paras["integral_BB_nps_height"] = self.integral_BB_nps_height
+        self.ampl_paras["integral_BB_s_height"] = self.integral_BB_s_height
 
+        self.ampl_paras["time_list"] =         self.time_list
         self.ampl_paras["noise_height_list"] = self.noise_height_list
 
 # Root file init definition and fill
@@ -338,8 +368,12 @@ class RootFile:
         h_BB_max_nps_height[0]=addNoise.ampl_paras[max_height]
         h_BB_max_pulse_time[0]=addNoise.ampl_paras[max_time]                      
         h_BB_time_resolution[0]=addNoise.CFD_time_r["BB"]
+
         rset.CFD_BB_time.append(addNoise.CFD_time_r["BB"])
         rset.CFD_BB_jitter.append(addNoise.noist_height_jitter["BB"])
+        rset.max_voltage_BB.append(addNoise.ampl_paras["max_BB_s_height"])
+        rset.current_integral_BB.append(addNoise.ampl_paras["integral_BB_s_height"])
+
         h_BB_dVdt[0]=addNoise.dVdt["BB"]
         h_noise_BB_height_jitter[0]=addNoise.noist_height_jitter["BB"]
         h_BB_per80_20_dvdt[0]=addNoise.per80_20_dvdt["BB"]
@@ -348,15 +382,19 @@ class RootFile:
           
     def fill_ampl_CSA(self,addNoise,rset,max_height,max_time):
         """ Fill parameters from CSA """
-        h_noise_CSA_height_jitter[0]=addNoise.noist_height_jitter["CSA"]
-        h_CSA_dVdt[0]=addNoise.dVdt["CSA"]
-        rset.CFD_CSA_time.append(addNoise.CFD_time_r["CSA"])
-        rset.CFD_CSA_jitter.append(addNoise.noist_height_jitter["CSA"])
         h_CSA_max_nps_height[0]=addNoise.ampl_paras[max_height]
         h_CSA_max_pulse_time[0]=addNoise.ampl_paras[max_time]                      
         h_CSA_time_resolution[0]=addNoise.CFD_time_r["CSA"]
-        h_BB_per80_20_dvdt[0]=addNoise.per80_20_dvdt["CSA"]
-        h_BB_per80_20_time[0]=addNoise.per80_20_time["CSA"]
+
+        rset.CFD_CSA_time.append(addNoise.CFD_time_r["CSA"])
+        rset.CFD_CSA_jitter.append(addNoise.noist_height_jitter["CSA"])
+        rset.max_voltage_CSA.append(addNoise.ampl_paras["max_CSA_s_height"])
+        rset.current_integral_CSA.append(addNoise.ampl_paras["integral_CSA_s_height"])
+        
+        h_CSA_dVdt[0]=addNoise.dVdt["CSA"]
+        h_noise_CSA_height_jitter[0]=addNoise.noist_height_jitter["CSA"]
+        h_CSA_per80_20_dvdt[0]=addNoise.per80_20_dvdt["CSA"]
+        h_CSA_per80_20_time[0]=addNoise.per80_20_time["CSA"]
         addNoise.CSA_Fv=1  
               
     def fill_vector(self,rset,addNoise):
@@ -582,9 +620,11 @@ def draw_2D_CFD_time(CFD_time,out_put,model):
             if CFD_time[i]>0:
                 histo.Fill(CFD_time[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,model)
-    histo=th1f_define(histo)
-    # Lengend setting
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)# in nanosecond
+    sigma=sigma*1000 # in picosecond
+    error=error*1000
+    histo=ToA_TH1F_define(histo)
+    # Legend setting
     leg.AddEntry(fit_func_1,"Fit","L")
     leg.AddEntry(histo,"Sim","L")
     # Draw
@@ -592,43 +632,123 @@ def draw_2D_CFD_time(CFD_time,out_put,model):
     fit_func_1.Draw("same")
     leg.Draw("same")
     # Text set
-    root_tex(sigma,error,model)
+    root_tex_time_resolution(sigma,error)
     # Save
     c1.SaveAs(out_put+model+".pdf")
     c1.SaveAs(out_put+model+".C")
     del c1
     return sigma, error
 
-# def save_root_time(histo,out_put,model):
-#     c2 =  ROOT.TCanvas("c2","c2",200,10,800,600)
-#     ROOT.gStyle.SetOptStat(0)
-#     c2.SetGrid()
-#     c2.SetLeftMargin(0.2)
-#     c2.SetTopMargin(0.12)
-#     c2.SetBottomMargin(0.2)
-#     histo.Draw()
-#     c2.SaveAs(out_put+model+".C")
+def draw_max_voltage(max_voltage_list,out_put,model):
+    """
+    @description: 
+        Draw and fit max voltage, mainly for getting gain efficiency for CSA
+    @param:
+        None
+    @Returns:
+        None
+    @Modify:
+        2022/08/08
+    """
+    c1 =  ROOT.TCanvas("c1"+model,"c1"+model,200,10,800,600)
+    ROOT.gStyle.SetOptStat(0)
+    c1.SetGrid()
+    c1.SetLeftMargin(0.2)
+    c1.SetTopMargin(0.12)
+    c1.SetBottomMargin(0.2)
+    # Define lengend th1f and root gstyle
+    leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
+    x2_min = min(max_voltage_list)
+    # Exclude data with great deviation
+    x2_max = sorted(max_voltage_list)[int(len(max_voltage_list)*0.95)]
+
+    n2_bin = 100
+    #test
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+    for i in range(0,len(max_voltage_list)):
+        if max_voltage_list[i]>0:
+            histo.Fill(max_voltage_list[i])
+    # Fit data
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
+    histo=max_voltage_TH1F_define(histo)
+    # Legend setting
+    leg.AddEntry(fit_func_1,"Fit","L")
+    leg.AddEntry(histo,"Sim","L")
+    # Draw
+    histo.Draw()
+    fit_func_1.Draw("same")
+    leg.Draw("same")
+    # Text set
+    root_tex_max_voltage(sigma,error)
+    # Save
+    c1.SaveAs(out_put+model+"_max_voltage.pdf")
+    c1.SaveAs(out_put+model+"_max_voltage.C")
+    del c1
+    return sigma, error
     
-def fit_data(histo,model):
-    """ Fit data of time distribution and get the time resolution """
-    if "jitter" in model:
-        fit_func_1 = ROOT.TF1('fit_func_1','gaus',-0.2,0.2)
-        histo.Fit("fit_func_1","ROQ+","",-0.2,0.2)        
-    else:
-        fit_func_1 = ROOT.TF1('fit_func_1','gaus',4.8,5.6)
-        histo.Fit("fit_func_1","ROQ+","",4.8,5.6)
+def draw_current_integral(current_integral_list,out_put,model):
+    """
+    @description: 
+        Draw and fit current integral, mainly for getting gain efficiency for BB
+    @param:
+        None
+    @Returns:
+        None
+    @Modify:
+        2022/08/08
+    """
+    c1 =  ROOT.TCanvas("c1"+model,"c1"+model,200,10,800,600)
+    ROOT.gStyle.SetOptStat(0)
+    c1.SetGrid()
+    c1.SetLeftMargin(0.2)
+    c1.SetTopMargin(0.12)
+    c1.SetBottomMargin(0.2)
+    # Define lengend th1f and root gstyle
+    leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
+    x2_min = min(current_integral_list)
+    # Exclude data with great deviation
+    x2_max = sorted(current_integral_list)[int(len(current_integral_list)*0.95)]
+    n2_bin = 100
+    #test
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+    for i in range(0,len(current_integral_list)):
+        if current_integral_list[i]>0:
+            histo.Fill(current_integral_list[i])
+    # Fit data
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
+    histo=current_integral_TH1F_define(histo)
+    # Legend setting
+    leg.AddEntry(fit_func_1,"Fit","L")
+    leg.AddEntry(histo,"Sim","L")
+    # Draw
+    histo.Draw()
+    fit_func_1.Draw("same")
+    leg.Draw("same")
+    # Text set
+    root_tex_current_integral(sigma,error)
+    # Save
+    c1.SaveAs(out_put+model+"_current_integral.pdf")
+    c1.SaveAs(out_put+model+"_current_integral.C")
+    del c1
+    return sigma, error    
+
+def fit_data_normal(histo,x_min,x_max):
+    """ Fit data distribution """
+    fit_func_1 = ROOT.TF1('fit_func_1','gaus',x_min,x_max)
+    histo.Fit("fit_func_1","ROQ+","",x_min,x_max)
+
     print("constant:%s"%fit_func_1.GetParameter(0))
     print("constant_error:%s"%fit_func_1.GetParError(0))
     print("mean:%s"%fit_func_1.GetParameter(1))
     print("mean_error:%s"%fit_func_1.GetParError(1))
     print("sigma:%s"%fit_func_1.GetParameter(2))
     print("sigma_error:%s"%fit_func_1.GetParError(2))
-    sigma=fit_func_1.GetParameter(2)*1000
-    error=fit_func_1.GetParError(2)*1000
+    sigma=fit_func_1.GetParameter(2)
+    error=fit_func_1.GetParError(2)
     fit_func_1.SetLineWidth(2)
     return fit_func_1,sigma,error
 
-def th1f_define(histo):
+def ToA_TH1F_define(histo):
     """ TH1f definition """
     histo.GetXaxis().SetTitle("ToA [ns]")
     histo.GetYaxis().SetTitle("Events")
@@ -645,16 +765,64 @@ def th1f_define(histo):
     histo.SetLineWidth(2)
     return histo
 
-def root_tex(sigma,error,model):
+def max_voltage_TH1F_define(histo):
+    """ TH1f definition """
+    histo.GetXaxis().SetTitle("max voltage [V]")
+    histo.GetYaxis().SetTitle("Events")
+    histo.GetXaxis().SetTitleOffset(1.2)
+    histo.GetXaxis().SetTitleSize(0.07)
+    histo.GetXaxis().SetLabelSize(0.05)
+    histo.GetXaxis().SetNdivisions(510)
+    histo.GetYaxis().SetTitleOffset(1.1)
+    histo.GetYaxis().SetTitleSize(0.07)
+    histo.GetYaxis().SetLabelSize(0.05)
+    histo.GetYaxis().SetNdivisions(505)
+    histo.GetXaxis().CenterTitle()
+    histo.GetYaxis().CenterTitle()
+    histo.SetLineWidth(2)
+    return histo
+
+def current_integral_TH1F_define(histo):
+    """ TH1f definition """
+    histo.GetXaxis().SetTitle("current integral [a.u.]")
+    histo.GetYaxis().SetTitle("Events")
+    histo.GetXaxis().SetTitleOffset(1.2)
+    histo.GetXaxis().SetTitleSize(0.07)
+    histo.GetXaxis().SetLabelSize(0.05)
+    histo.GetXaxis().SetNdivisions(510)
+    histo.GetYaxis().SetTitleOffset(1.1)
+    histo.GetYaxis().SetTitleSize(0.07)
+    histo.GetYaxis().SetLabelSize(0.05)
+    histo.GetYaxis().SetNdivisions(505)
+    histo.GetXaxis().CenterTitle()
+    histo.GetYaxis().CenterTitle()
+    histo.SetLineWidth(2)
+    return histo
+
+def root_tex_time_resolution(sigma,error):
     """　Latex definition """
     tex = ROOT.TLatex()
     tex.SetNDC(1)
     tex.SetTextFont(43)
     tex.SetTextSize(25)
-    # tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5"+" "+model+"ampl")
-    # tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.0f #pm %.0f ps"%(sigma,error))
     tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
     tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.1f #pm %.1f ps"%(sigma,error))
+
+def root_tex_max_voltage(sigma,error):
+    """　Latex definition """
+    tex = ROOT.TLatex()
+    tex.SetNDC(1)
+    tex.SetTextFont(43)
+    tex.SetTextSize(25)
+    tex.DrawLatexNDC(0.65, 0.6, "V_{max}= %.1f #pm %.1f V"%(sigma,error))
+
+def root_tex_current_integral(sigma,error):
+    """　Latex definition """
+    tex = ROOT.TLatex()
+    tex.SetNDC(1)
+    tex.SetTextFont(43)
+    tex.SetTextSize(25)
+    tex.DrawLatexNDC(0.65, 0.6, "Q = %.2g #pm %.1g a.u."%(sigma,error))
 
 def root_set():
     """ ROOT gstyle setting"""
@@ -662,39 +830,41 @@ def root_set():
     ROOT.gStyle.SetOptStat(0)
     ROOT.gROOT.SetBatch(1)
 
-def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing,outnumer):
-    o_ls=input_file.split("/")[:]
-    out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"+str(outnumer)+".csv"
-    in_list = o_ls[2].split("_")
-
-    with open(out_file,"a") as f:
-        keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
-        values = [in_list[i].split("=")[1] for i in range(1,len(in_list))]
-        f.write(keys[0]+","+keys[1]+","+keys[2]+","+keys[3]+","+keys[4]+","
-                + "CSA,BB,CSA_e,BB_e,efficiency,jitter,Landau_timing \n")
-        f.write(values[0]+","+values[1]+","+values[2]+","+values[3]+","
-                + values[4]+","+str(sigma_CSA)+","+str(sigma_BB)
-                +","+ str(error_CSA) +","+ str(error_BB) +","+ str(efficiency) +","+ str(sigma_jitter) +","+ str(Landau_timing) + "\n")
-        print("sigmaBB:%s"%sigma_BB)
-        print("temperature:%s"%values[4])
-
-def save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency):
+def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing):
     o_ls=input_file.split("/")[:]
     out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan.csv"
     in_list = o_ls[2].split("_")
 
     with open(out_file,"a") as f:
-        f.write("CSA,BB,CSA_e,BB_e,efficiency \n")
-        f.write(str(sigma_CSA)+","+str(sigma_BB)
-                +","+ str(error_CSA) +","+ str(error_BB) +","+ str(efficiency) + "\n")
+        keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
+        values = [in_list[i].split("=")[1] for i in range(1,len(in_list))]
+        f.write(keys[0] + "," + keys[1] + "," + keys[2] + "," + keys[3] + "," + keys[4] + ","
+                + "CSA,BB,CSA_e,BB_e,efficiency,jitter,Landau_timing \n")
+        f.write(values[0] + "," + values[1] + "," + values[2] + "," + values[3] + "," + values[4] + ","
+                + str(sigma_CSA) + "," + str(sigma_BB) + "," + str(error_CSA) + "," + str(error_BB) + ","
+                + str(efficiency) + "," + str(sigma_jitter) + "," + str(Landau_timing) + "\n")
+
+def save_gain_efficiency(input_file, max_voltage_CSA, error_max_voltage_CSA, current_integral_BB, error_current_integral_BB):
+    o_ls=input_file.split("/")[:]
+    out_file=o_ls[0]+"/"+o_ls[1]+"/gain_efficiency_scan.csv"
+    in_list = o_ls[2].split("_")
+
+    with open(out_file,"a") as f:
+        keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
+        values = [in_list[i].split("=")[1] for i in range(1,len(in_list))]
+        f.write(keys[0] + "," + keys[1] + "," + keys[2] + "," + keys[3] + "," + keys[4] + ","
+                + "max_voltage_CSA, error_max_voltage_CSA, current_integral_BB, error_current_integral_BB \n")
+        f.write(values[0] + "," + values[1] + "," + values[2] + "," + values[3]+ "," + values[4] + ","
+                + str(max_voltage_CSA)+ "," + str(error_max_voltage_CSA) + ","
+                + str(current_integral_BB) + ","+ str(error_current_integral_BB) + "\n")
                 
 # Loop and add noise in the raser
-def loop_addNoise(input_file,rset,tree_class,out_file):
+def loop_addNoise(input_file,rset,tree_class,model):
     for root,dirs,files in os.walk(input_file):
         for file in files:    
-            if rset.i<100000:    
+            if rset.effective_event_number<100000:    
                 print("................events:%s..............."%(Events[0])) 
-                print("................Save events:%s..............."%rset.i)
+                print("................Save events:%s..............."%rset.effective_event_number)
                 path = os.path.join(input_file, file)
                 Events[0]+=1
 
@@ -702,48 +872,48 @@ def loop_addNoise(input_file,rset,tree_class,out_file):
                 rset.write_list(path,addNoise.list_c)
                 if len(addNoise.list_c)>5:
                     addNoise.add_n(addNoise.list_c) 
-                    if addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
-                        and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9:
-                        # and addNoise.ampl_paras["max_BB_pulse_time"] < 4e-9:
+                    if "plugin3D" not in model \
+                        or (addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
+                        and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9):
 
                         judge_threshold(addNoise,rset,tree_class,"BB") 
                         judge_threshold(addNoise,rset,tree_class,"CSA")
                         tree_class.fill_vector(rset,addNoise) 
-                        #if (addNoise.CFD_time_r["BB"]>0 or addNoise.CFD_time_r["CSA"]>0):
-                        #     rset.i=save_waveform_threshold(out_file,rset.i,addNoise)
                         if addNoise.CFD_time_r["BB"]>0:      
                             tree_class.tree_out.Fill()
-                            rset.i += 1
+                            rset.effective_event_number += 1
                         tree_class.init_parameter()
             else:
                 break
-    efficiency = rset.i / Events[0]
+    efficiency = rset.effective_event_number / Events[0]
     return efficiency
 
 if __name__ == '__main__':
     args = sys.argv[1:]
     input_file=args[0]
-    outnumer = args[1]
     o_ls=input_file.split("/")[:]
+    model=o_ls[1]
     # Outfilename and init_parameter
     rset = NoiseSetting()
     out_file=o_ls[0]+"/"+o_ls[1]+"/"+"outfile:"+o_ls[2]+"/"
     rset.create_outpath(out_file)
-    rset.loop_out_p()
     # Root defined
     out_root_f=ROOT.TFile(out_file+"out.root","RECREATE")
     tree_class=RootFile()
     tree_class.root_define()
     # Add noise
-    efficiency = loop_addNoise(input_file,rset,tree_class,out_file)
-    # Draw get time resolution for constant CFD
+    efficiency = loop_addNoise(input_file,rset,tree_class,model)
+    # Draw time resolution for constant CFD
     sigma_BB, error_BB=draw_2D_CFD_time(rset.CFD_BB_time,out_file,"BB")
     sigma_CSA, error_CSA=draw_2D_CFD_time(rset.CFD_CSA_time,out_file,"CSA")
     sigma_jitter, error_jitter=draw_2D_CFD_time(rset.CFD_BB_jitter,out_file,"BBjitter")
     Landau_timing = math.sqrt(abs(sigma_BB*sigma_BB-sigma_jitter*sigma_jitter))
     tree_class.tree_out.Write()
     out_root_f.Close()
-    if "plugin3D" in o_ls[1]:
-        save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing,outnumer)  
-    else:
-        save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency) 
+    save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing)  
+
+    if "lgad3D" in model:
+        # Draw gain efficiency, max voltage for CSA and current integral for BB
+        max_voltage_CSA, error_max_voltage_CSA = draw_max_voltage(rset.max_voltage_CSA,out_file,"CSA")
+        current_integral_BB, error_current_integral_BB = draw_current_integral(rset.current_integral_BB,out_file,"BB")
+        save_gain_efficiency(input_file, max_voltage_CSA, error_max_voltage_CSA, current_integral_BB, error_current_integral_BB)

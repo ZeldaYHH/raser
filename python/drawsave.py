@@ -26,11 +26,11 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     now = time.strftime("%Y_%m%d_%H%M")
     path = "fig/" + now + "/"
-    create_path(path)
-    #draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
-    #draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
-    #draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
-    draw_ele_field_1D(my_d,my_f,path)
+    create_path(path) 
+    if "plugin" in my_d.det_model:
+        draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
+    else:
+        draw_ele_field_1D(my_d,my_f,path)
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
@@ -52,6 +52,27 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
+def save(ele_current):
+#    now = time.strftime("%Y_%m%d_%H%M")
+#    path = "fig/" + now + "/"
+    volt = array('d', [999.])
+    time = array('d', [999.])
+#time= float(list(filter(None,list_c[j].split(",")))[0])
+    volt = array('d', [999.])
+    time = array('d', [999.])
+    fout = ROOT.TFile("sim-TCT.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("volt", volt, "volt/D")
+    t_out.Branch("time", time, "time/D")
+#ele_current = raser.Amplifier(my_d, dset.amplifier)
+    for i in range(ele_current.BB_ele.GetNbinsX()):
+          time[0]=i*ele_current.time_unit
+          volt[0]=ele_current.BB_ele[i]
+          t_out.Fill()
+    t_out.Write()
+    fout.Close()
+
+
 def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
@@ -64,12 +85,14 @@ def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
         output_path = (output + "_d="+str(my_d.d_neff) 
                        + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) )
+                       + "_thick="+str(my_d.l_z)
+                       + "_radius=None" )
     elif "lgad" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.lgad_dic['doping1']) 
                        + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) )
+                       + "_thick="+str(my_d.l_z) 
+                       + "_radius=None")
     
     create_path(output_path)
     save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
@@ -225,7 +248,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
     @param:
         "E" -- electric
         "P" -- potential
-        "WP" -- weigthing potential    
+        "WP" -- weighting potential    
     @Returns:
         None
     @Modify:
@@ -250,7 +273,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
         e_v.SetTitle("potential "+d_r[4])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weigthing potential "+d_r[4]) 
+        e_v.SetTitle("weighting potential "+d_r[4]) 
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
@@ -265,7 +288,7 @@ def get_f_v_1D(i_x,i_y,i_z,model,my_f,e_v,d_r):
         e_v.SetTitle("potential "+d_r[2])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weigthing potential "+d_r[2]) 
+        e_v.SetTitle("weighting potential "+d_r[2]) 
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
@@ -449,9 +472,9 @@ def draw_drift_path(my_d,my_f,my_current,path):
                 except RuntimeError:
                     structure.SetBinContent(i+1,j+1,k+1,1)
     structure.SetFillColor(1)
-    structure.GetXaxis().SetTitle("x aixs")
-    structure.GetYaxis().SetTitle("y aixs")
-    structure.GetZaxis().SetTitle("z aixs")
+    structure.GetXaxis().SetTitle("x axis")
+    structure.GetYaxis().SetTitle("y axis")
+    structure.GetZaxis().SetTitle("z axis")
     structure.GetXaxis().CenterTitle()
     structure.GetYaxis().CenterTitle() 
     structure.GetZaxis().CenterTitle() 
@@ -502,8 +525,8 @@ def draw_drift_path(my_d,my_f,my_current,path):
             del z_array[:]
     c1.cd(2)
     mg.Draw("APL")
-    mg.GetXaxis().SetTitle("x aixs")
-    mg.GetYaxis().SetTitle("z aixs")
+    mg.GetXaxis().SetTitle("x axis")
+    mg.GetYaxis().SetTitle("z axis")
     c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
     c1.SaveAs(path+my_d.det_model+"_drift_path.root")
     del c1

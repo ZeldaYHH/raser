@@ -26,19 +26,29 @@ def main():
     elif args[1] == "draw_thick":
         draw_scan(args[0],4,args[1],args[2])
 
+    elif args[1] == "gain_voltage":
+        draw_scan_gain(args[0],1,args[1],args[2])
+    elif args[1] == "gain_tmp":
+        draw_scan_gain(args[0],3,args[1],args[2])
+    elif args[1] == "gain_doping":
+        draw_scan_gain(args[0],0,args[1],args[2])
+    elif args[1] == "gain_gap":
+        pass
+    elif args[1] == "gain_thick":
+        draw_scan_gain(args[0],4,args[1],args[2])
+
 def time_scan(args):
-    """ Time scan add noise for some fiels in one dictionary """
+    """ Time scan add noise for some files in one dictionary """
     path_list = []
     for root,dirs,files in os.walk(args[0]):
         for dir in dirs:
             if "outfile" not in dir and "_d" in dir :
                 path_list.append(root+"/"+dir)
     o_ls=args[0].split("/")[:]		
-    k=1
     for file in path_list:
-        out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"+str(k)+".csv"
+        # out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"+".csv"
         job_name = str(time.time())
-        job_command = "./python/add_noise_raser.py " + file + " " + str(k)
+        job_command = "./python/add_noise_raser.py " + file
         runcmd("mkdir job/trash/ -p")
         with open('job/trash/'+job_name+".sh","w") as f:
             f.write(job_command)
@@ -62,66 +72,66 @@ def draw_scan(input,index,model,eff):
     za_error = array( 'f' )
     za1_error = array( 'f' )
     za2_error = array( 'f' )
-    x_axis = []
-    y_axis = []
-    z_axis = []
-    z1_axis = []
-    z2_axis = []
-    x_error = []
-    y_error = []
-    z_error = []
-    z1_error = []
-    z2_error = []
+    x_list = []
+    y_list = []
+    z_list = []
+    z1_list = []
+    z2_list = []
+    x_error_list = []
+    y_error_list = []
+    z_error_list = []
+    z1_error_list = []
+    z2_error_list = []
     if eff == "0":
         with open(input) as f:
             reader = csv.reader(f)
             for row in reader:
                 if is_number(row[index]):
-                    x_axis.append(abs(float(row[index])))
-                    y_axis.append(float(row[5]))
-                    z_axis.append(float(row[6]))
-                    z1_axis.append(float(row[10]))
-                    z2_axis.append(float(row[11]))
-                    x_error.append(0)
-                    y_error.append(float(row[7]))
-                    z_error.append(float(row[8]))
-                    z1_error.append(0)
-                    z2_error.append(0)
-        x_axis, y_axis, z_axis, z1_axis, z2_axis, x_error, y_error, z_error, z1_error, z2_error\
-            = zip(*sorted(zip(x_axis, y_axis, z_axis, z1_axis, z2_axis, x_error, y_error, z_error, z1_error, z2_error)))
-        xa_axis.extend(x_axis)
-        ya_axis.extend(y_axis)
-        za_axis.extend(z_axis)
-        za1_axis.extend(z1_axis)
-        za2_axis.extend(z2_axis)
-        xa_error.extend(x_error)
-        ya_error.extend(y_error)
-        za_error.extend(z_error)
-        za1_error.extend(z1_error)
-        za2_error.extend(z2_error)
+                    x_list.append(abs(float(row[index])))
+                    y_list.append(float(row[5]))# CSA time resolution
+                    z_list.append(float(row[6]))# BB time resolution
+                    z1_list.append(float(row[10]))# jitter
+                    z2_list.append(float(row[11]))# Landau timing
+                    x_error_list.append(0)
+                    y_error_list.append(float(row[7]))# CSA time resolution error
+                    z_error_list.append(float(row[8]))# BB time resolution error
+                    z1_error_list.append(0)
+                    z2_error_list.append(0)
+        x_list, y_list, z_list, z1_list, z2_list, x_error_list, y_error_list, z_error_list, z1_error_list, z2_error_list\
+            = zip(*sorted(zip(x_list, y_list, z_list, z1_list, z2_list, x_error_list, y_error_list, z_error_list, z1_error_list, z2_error_list)))
+        xa_axis.extend(x_list)
+        ya_axis.extend(y_list)
+        za_axis.extend(z_list)
+        za1_axis.extend(z1_list)
+        za2_axis.extend(z2_list)
+        xa_error.extend(x_error_list)
+        ya_error.extend(y_error_list)
+        za_error.extend(z_error_list)
+        za1_error.extend(z1_error_list)
+        za2_error.extend(z2_error_list)
 
         gr3 = ROOT.TGraphErrors(len(xa_axis), xa_axis, ya_axis, xa_error, ya_error)
-        gr3 = graph_set(gr3,model,eff)
+        gr3 = graph_set_time_resolution(gr3,model,eff)
         gr3.SetTitle("CSA")   
         gr4 = ROOT.TGraphErrors(len(xa_axis), xa_axis, za_axis, xa_error, za_error)
-        gr4 = graph_set(gr4,model,eff)    
+        gr4 = graph_set_time_resolution(gr4,model,eff)    
         gr4.SetTitle("") 
         gr5 = ROOT.TGraphErrors(len(xa_axis), xa_axis, za1_axis, xa_error, za1_error)
-        gr5 = graph_set(gr5,model,eff)   
+        gr5 = graph_set_time_resolution(gr5,model,eff)   
         gr6 = ROOT.TGraphErrors(len(xa_axis), xa_axis, za2_axis, xa_error, za2_error)
-        gr6 = graph_set(gr6,model,eff)     
+        gr6 = graph_set_time_resolution(gr6,model,eff)     
     else:
         with open(input) as f:
             reader = csv.reader(f)
             for row in reader:
                 if is_number(row[index]):
-                    x_axis.append(abs(float(row[index])))
-                    y_axis.append(float(row[-3])*100)
-        x_axis, y_axis = zip(*sorted(zip(x_axis, y_axis))) 
-        xa_axis.extend(x_axis)
-        ya_axis.extend(y_axis)   
+                    x_list.append(abs(float(row[index])))
+                    y_list.append(float(row[-3])*100)
+        x_list, y_list = zip(*sorted(zip(x_list, y_list))) 
+        xa_axis.extend(x_list)
+        ya_axis.extend(y_list)   
         gr4 = ROOT.TGraphErrors(len(xa_axis), xa_axis, ya_axis)
-        gr4 = graph_set(gr4,model,eff)     
+        gr4 = graph_set_time_resolution(gr4,model,eff)     
         gr4.SetTitle(" ") 
     c1 = ROOT.TCanvas("c1", "c1",200,10,1200,1600)
     ROOT.gStyle.SetOptStat(0)
@@ -129,14 +139,6 @@ def draw_scan(input,index,model,eff):
     c1.SetRightMargin(0.12)
     c1.SetLeftMargin(0.16)
     c1.SetBottomMargin(0.16)
-    # c1.Divide(1,2)
-    # c1.cd(1)
-    # c1.GetPad(1).SetLeftMargin(0.15)
-    # c1.GetPad(1).SetBottomMargin(0.15)
-    # gr3.Draw("APL")
-    # c1.cd(2)
-    # c1.GetPad(2).SetLeftMargin(0.15)
-    # c1.GetPad(2).SetBottomMargin(0.15)
     gr4.Draw("APL")
 
     c1.SaveAs(out_file+eff+".pdf")
@@ -176,7 +178,74 @@ def draw_scan(input,index,model,eff):
         c2.SaveAs(out_file+eff+"2.pdf")
         c2.SaveAs(out_file+eff+"2.C")
 
-def graph_set(gr,model,eff):
+def draw_scan_gain(input,index,model,eff):
+    o_ls=input.split("/")[:]	
+    out_file=o_ls[0]+"/"+o_ls[1]+"/gain_efficiency_scan"
+
+    xa_axis = array( 'f' )
+    ya_axis = array( 'f' )
+    za_axis = array( 'f' )
+    xa_error = array( 'f' )
+    ya_error = array( 'f' )
+    za_error = array( 'f' )
+    x_list = []
+    y_list = []
+    z_list = []
+    x_error_list = []
+    y_error_list = []
+    z_error_list = []
+    if eff == "0":
+        with open(input) as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if is_number(row[index]):
+                    x_list.append(abs(float(row[index])))
+                    y_list.append(float(row[5]))# CSA max voltage
+                    z_list.append(float(row[7]))# BB current integral
+                    x_error_list.append(0)
+                    y_error_list.append(float(row[6]))# CSA max voltage error
+                    z_error_list.append(float(row[8]))# BB current integral error
+        x_list, y_list, z_list, x_error_list, y_error_list, z_error_list\
+            = zip(*sorted(zip(x_list, y_list, z_list, x_error_list, y_error_list, z_error_list)))
+        xa_axis.extend(x_list)
+        ya_axis.extend(y_list)
+        za_axis.extend(z_list)
+        xa_error.extend(x_error_list)
+        ya_error.extend(y_error_list)
+        za_error.extend(z_error_list)
+
+        gr3 = ROOT.TGraphErrors(len(xa_axis), xa_axis, ya_axis, xa_error, ya_error)
+        gr3 = graph_set_gain_efficiency(gr3,model,eff)
+        gr3.SetTitle("CSA")   
+        gr4 = ROOT.TGraphErrors(len(xa_axis), xa_axis, za_axis, xa_error, za_error)
+        gr4 = graph_set_gain_efficiency(gr4,model,eff)    
+        gr4.SetTitle("BB") 
+
+    c1 = ROOT.TCanvas("c1", "c1",200,10,1200,1600)
+    ROOT.gStyle.SetOptStat(0)
+    c1.SetTopMargin(0.05)
+    c1.SetRightMargin(0.12)
+    c1.SetLeftMargin(0.16)
+    c1.SetBottomMargin(0.16)
+    gr3.Draw("APL")
+
+    c1.SaveAs(out_file+"_CSA.pdf")
+    c1.SaveAs(out_file+"_CSA.C")
+    c1.SaveAs(out_file+"_CSA.root")
+
+    c2 = ROOT.TCanvas("c2", "c2",200,10,1200,1600)
+    ROOT.gStyle.SetOptStat(0)
+    c2.SetTopMargin(0.05)
+    c2.SetRightMargin(0.12)
+    c2.SetLeftMargin(0.16)
+    c2.SetBottomMargin(0.16)
+    gr4.Draw("APL")
+
+    c2.SaveAs(out_file+"_BB.pdf")
+    c2.SaveAs(out_file+"_BB.C")
+    c2.SaveAs(out_file+"_BB.root")
+
+def graph_set_time_resolution(gr,model,eff):
     gr.SetMarkerStyle(8)
     gr.SetMarkerColor(1)
     gr.SetLineColor(1)  
@@ -215,13 +284,50 @@ def graph_set(gr,model,eff):
     else:
         gr.GetYaxis().SetTitle("Time Resolution [ps]")
     return gr
-def mggraph_set(gr,model):
 
+def graph_set_gain_efficiency(gr,model,eff):
+    gr.SetMarkerStyle(8)
+    gr.SetMarkerColor(1)
+    gr.SetLineColor(1)  
+    gr.SetLineWidth(2)
+    gr.SetMarkerSize(2)
+    gr.GetHistogram().GetYaxis().CenterTitle()
+    gr.GetHistogram().GetXaxis().CenterTitle() 
+    gr.GetXaxis().SetTitleOffset(1.4)
+    gr.GetXaxis().SetTitleSize(0.05)
+    gr.GetXaxis().SetLabelSize(0.05)
+    gr.GetXaxis().SetNdivisions(510)
+    gr.GetYaxis().SetTitleOffset(1.4)
+    gr.GetYaxis().SetTitleSize(0.05)
+    gr.GetYaxis().SetLabelSize(0.05)
+    gr.GetYaxis().SetNdivisions(510)
+    if model == "gain_voltage":
+        gr.GetXaxis().SetTitle("Voltage [V]")
+        if eff == "1":
+            pass
+        else:
+            gr.GetYaxis().SetRangeUser(30,60)
+    elif model == "gain_tmp":
+        gr.GetXaxis().SetTitle("Temperature [K]")
+        if eff == "1":
+            pass
+        else:
+            gr.GetYaxis().SetRangeUser(30,60)
+    elif model == "gain_doping":
+        gr.GetXaxis().SetTitle("Doping Concentration [1e12 cm^{-3}]")
+    elif model == "gain_thick":
+        gr.GetXaxis().SetTitle("Thickness [ #mum]")
+    elif model == "gain_gap":
+        gr.GetXaxis().SetTitle("Column Spacing [ #mum]")
+    if eff == "1":
+        gr.GetYaxis().SetTitle("Efficiency [%]")        
+    else:
+        gr.GetYaxis().SetTitle("Gain efficiency [a.u.]")
+    return gr
+
+def mggraph_set(gr,model):
     if model == "draw_voltage":
         gr.GetXaxis().SetTitle("Voltage [V]")
-        # if eff == "1":
-        #     pass
-        # else:
         gr.GetYaxis().SetRangeUser(20,55)
     elif model == "draw_tmp":
         gr.GetXaxis().SetTitle("Temperature [K]")
