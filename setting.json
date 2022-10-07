@@ -2,7 +2,7 @@
     {
         "steplength" : 0.1,
         "total_events" : 1000,
-        "name" : "NJU-PIN",
+        "det_name" : "NJU-PIN",
         "det_model" : "planar3D",
 
         "lx" : 1000,
@@ -38,7 +38,7 @@
     {
         "steplength" : 0.1,
         "total_events" : 10000,
-        "name" : "SICAR-1",
+        "det_name" : "SICAR-1",
         "det_model" : "lgad3D",
         "lx" : 1000,
         "ly" : 1000,
@@ -76,7 +76,7 @@
     {
         "steplength" : 0.2,
         "total_events" : 10000,
-        "name" : "plugin3D",
+        "det_name" : "plugin3D",
         "det_model" : "plugin3D",
         "custom_electrode" : "True",
         "lx" : 10000,

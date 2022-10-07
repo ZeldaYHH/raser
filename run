@@ -11,15 +11,14 @@ usage() {
     printf "\n\t%-5s\n" "./run [OPTION]" 
     printf "\nOPTIONS\n"    
 
-    printf "\n\t%-9s  %-40s"  "1.1"       "SiC-PIN\n"
+    printf "\n\t%-9s  %-40s"  "1.1"       "SiC-PIN"
+    printf "\n\t%-9s  %-40s\n"  "1.2"       "SiC-3D"
 
-    printf "\n\t%-9s  %-40s"  "1.2"       "SiC-3D\n"
+    printf "\n\t%-9s  %-40s\n"  "2.1"       "SiC-LGAD"
 
-    printf "\n\t%-9s  %-40s"  "2.1"       "SiC-LGAD\n"
-
-    printf "\n\t%-9s  %-40s"  "3.1"       "top-TCT\n"
-    
-    printf "\n\n" 
+    printf "\n\t%-9s  %-40s"  "3.1"       "top-TCT"
+    printf "\n\t%-9s  %-40s\n"  "3.2"       "edge-TCT"
+    printf "\n"
 }
 
 usage_1_1() { 
@@ -27,16 +26,16 @@ usage_1_1() {
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-SiC-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-SiC-PIN" 
-    printf "\n\n" 
+    printf "\n"
 }
 usage_1_2() { 
 	printf "\n\t%-5s  %-40s\n"  "1.2.0"    "Loading TRACK into Singularity..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.1"    "3D-SiC-PIN basic information for RASER simulation ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.1"    "3D-SiC basic information for RASER simulation ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.2.T"  "pre-run 3D-SiC batch model with total number, split with step number ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "run 3D-SiC batch model with total number, split with step number ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.3"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.4"    "get time resolution vs draw voltage ..." 
-    printf "\n\n"
+    printf "\n"
 }
 
 usage_2_1() { 
@@ -45,21 +44,21 @@ usage_2_1() {
     printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
     printf "\n\t%-5s  %-40s\n"  "2.1.4"    "get time resolution vs doping ..." 
-    printf "\n\n" 
+    printf "\n"
 }
 
 usage_3_1() { 
 	printf "\n\t%-5s  %-40s\n"  "3.1.0"    "Loading TRACK into Singularity..." 
     printf "\n\t%-5s  %-40s\n"  "3.1.1"    "SiC-PIN top-TCT basic information ..."
     printf "\n\t%-5s  %-40s\n"  "3.1.2"    "SiC-LGAD top-TCT basic information ..."
-    printf "\n\n" 
+    printf "\n"
 }
 
-usage_4_1() { 
-	printf "\n\t%-5s  %-40s\n"  "4.1.0"    "Loading TRACK into Singularity..." 
-    printf "\n\t%-5s  %-40s\n"  "4.1.1"    "SiC-PIN edge-TCT basic information ..."
-    printf "\n\t%-5s  %-40s\n"  "4.1.2"    "SiC-LGAD edge-TCT basic information ..."
-    printf "\n\n" 
+usage_3_2() { 
+	printf "\n\t%-5s  %-40s\n"  "3.2.0"    "Loading TRACK into Singularity..." 
+    printf "\n\t%-5s  %-40s\n"  "3.2.1"    "SiC-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.2.2"    "SiC-LGAD edge-TCT basic information ..."
+    printf "\n"
 }
 
 if [[ $# -eq 0 ]]; then
@@ -93,17 +92,17 @@ case $option in
         ;; 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..."
         geant4 
-        ./python/gsignal.py det_model=planar3D parfile=setting.json
+        ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
 		hepjob
-		./python/run_batchjob.py det_model=planar3D  step=100000 total=2000000 \
+		./python/run_batchjob.py det_name=NJU-PIN step=100000 total=2000000 \
 							 instance=0 output=out/planar3Dscan/20220323_3D/ batch=True para_name="NO" para_number=1 
         ;;
 
-    1.1.3) echo "get time resolution for NJU-SiC-PIN"
-        ./python/add_noise_raser.py  out/planar3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
+    1.1.3) echo "get time resolution for SiC-PIN"
+        ./python/add_noise_raser.py out/planar3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
         ;;
         esac
 }
@@ -115,16 +114,16 @@ case $option in
         ;; 
     1.2.1) echo "3D-SiC basic information for RASER simulation ..."
         geant4 
-        ./python/gsignal.py  det_model=plugin3D parfile=setting.json
+        ./python/gsignal.py det_name=plugin3D parfile=setting.json
         ;;
     1.2.2.T) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
         hepjob
-		./python/run_batchjob.py det_model=plugin3D step=200 total=400  \
+		./python/run_batchjob.py det_name=plugin3D step=200 total=400  \
 							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10
 		;; 
     1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
         hepjob
-		./python/run_batchjob.py det_model=plugin3D step=20000 total=40000  \
+		./python/run_batchjob.py det_name=plugin3D step=20000 total=40000  \
 							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10 
         ;;
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
@@ -143,12 +142,12 @@ case $option in
         ;; 
     2.1.1) echo "SiC-LGAD basic information for RASER simulation ..."
         geant4 
-        ./python/gsignal.py det_model=lgad3D parfile=setting.json
+        ./python/gsignal.py det_name=SICAR-1 parfile=setting.json
         ;;
 
 	2.1.2) echo "batch model with total number, split with step number"
 		hepjob
-		./python/run_batchjob.py det_model=lgad3D  step=200000 total=400000 \
+		./python/run_batchjob.py det_name=SICAR-1  step=200000 total=400000 \
 							 instance=0 output=out/lgad3Dscan/ batch=True para_name=scan_doping para_number=8
         ;;
 
@@ -171,23 +170,23 @@ case $option in
         ;; 
     3.1.1) echo "SiC-PIN top-TCT basic information ..."
         geant4 
-        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
+        ./python/TCTtest.py det_name=NJU-PIN parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
         ;;
     3.1.2) echo "SiC-LGAD top-TCT basic information ..."
         geant4 
-        ./python/TCTtest.py det_model=lgad3D parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
+        ./python/TCTtest.py det_name=SICAR-1 parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
         ;;
         esac
 }
 
-sub_4_1(){
+sub_3_2(){
 case $option in 
-    4.1.0) echo "Loading TRACK into Singularity..."
+    3.2.0) echo "Loading TRACK into Singularity..."
         track 
         ;; 
-    4.1.1) echo "SiC-PIN edge-TCT basic information ..."
+    3.2.1) echo "SiC-PIN edge-TCT basic information ..."
         geant4 
-        ./python/TCTtest.py det_model=planar3D parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ./python/TCTtest.py det_name=NJU-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
         ;;
         esac
 }
@@ -233,14 +232,14 @@ case $option in
         sub_3_1 option
         ;;
 
-    4.1) echo "RASER simulate edge-TCT"
-        usage_4_1
+    3.2) echo "RASER simulate edge-TCT"
+        usage_3_2
         echo "Please enter your option: " 
         read option 
-        sub_4_1 option 
+        sub_3_2 option 
         ;;
-    4.1.*) echo "RASER simulate edge-TCT"
-        sub_4_1 option
+    3.2.*) echo "RASER simulate edge-TCT"
+        sub_3_2 option
         ;;
 
 		esac

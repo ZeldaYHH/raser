@@ -32,7 +32,7 @@ class Setting:
         """
         self._pardic = {}
         self.input2dic(parameters)
-        self.det_model = self._pardic['det_model']
+        self.det_name = self._pardic['det_name']
         self.read_par(self._pardic['parfile'])
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
@@ -50,7 +50,8 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['det_model'] in self.det_model:
+            if self.det_name == dic_par['det_name']:
+                self.det_model = dic_par['det_model']
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
         for x in paras: 

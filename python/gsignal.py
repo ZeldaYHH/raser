@@ -45,7 +45,7 @@ def main():
     my_d = raser.R3dDetector(dset)
     my_f = raser.FenicsCal(my_d,dset.fenics)
     my_g4p = raser.Particles(my_d, my_f, dset)
-    if "3Dscan" not in dset.det_model:
+    if "scan=True" not in args:
         my_current = raser.CalCurrent(my_d, my_f, my_g4p, dset)
         if "lgad" in dset.det_model:
             print("gain_efficiency="+str(my_current.gain_efficiency))
