@@ -30,14 +30,7 @@ class Input_parameters:
 def main():
     args = sys.argv[1:]
     input=Input_parameters(args)
-    if "plugin3D" in input.model:
-        job_name=write_job(input,run_code="./python/gsignal.py det_model=plugin3Dscan")
-    elif "planar3D" in input.model:
-        job_name=write_job(input,run_code="./python/gsignal.py det_model=planar3Dscan")
-    elif "lgad3D" in input.model:
-        job_name=write_job(input,run_code="./python/gsignal.py det_model=lgad3Dscan")
-    else:
-        print("the scan model is wrong")
+    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.model)
     if input.run_mode == "True":
         run_job(job_name)
 
@@ -52,16 +45,16 @@ def write_job(input,run_code):
         mm = 1
         for i in range(input.instance_number):
             e_number=input.events_each_run*(i+1)
-            para_code = " total_e=%s instan=%s output=%s"%(input.events_each_run, 
+            para_code = "total_e=%s instan=%s output=%s"%(input.events_each_run, 
                                                         input.instance_in+i, 
                                                         os.getcwd()+"/"+input.output_path)
             f1 = open(path+str(k)+".sh","w")
-            parfile=" parfile="+os.getcwd()+"/"+path+"setting%s.json "%(j)
+            parfile="parfile="+os.getcwd()+"/"+path+"setting%s.json"%(j)
             f1.write("#!/bin/bash \n")
             f1.write(" export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install \n")
             f1.write(" source $GEANT4_INSTALL/bin/geant4.sh \n")
             f1.write(" export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  \n")
-            f1.write(run_code+parfile+para_code)
+            f1.write(run_code+""+parfile+""+para_code+""+"scan=True")
             f1.close()
             runcmd("chmod u+x "+path+"*")
             if input.run_mode == "False" and mm == 1:
