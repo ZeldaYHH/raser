@@ -34,6 +34,8 @@ def main():
     """
     args = sys.argv[1:]
     dset = raser.Setting(args)
+    if "scan=True" in args:
+        dset.scan_variation()
     det_dic = dset.detector
     if "plugin3D" in det_dic['det_model']:
         if det_dic['custom_electrode'] == "False":

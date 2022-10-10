@@ -54,7 +54,7 @@ def write_job(input,run_code):
             f1.write(" export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install \n")
             f1.write(" source $GEANT4_INSTALL/bin/geant4.sh \n")
             f1.write(" export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  \n")
-            f1.write(run_code+""+parfile+""+para_code+""+"scan=True")
+            f1.write(run_code+" "+parfile+" "+para_code+" "+"scan=True")
             f1.close()
             runcmd("chmod u+x "+path+"*")
             if input.run_mode == "False" and mm == 1:
@@ -71,7 +71,7 @@ def run_job(job_name):
         for file in files:
             if ".sh" in file:
                 path = os.path.join(job_name, file)
-                job_command = "hep_sub "+ path +" -image raser-2.1.simg -wn bws0765.ihep.ac.cn"
+                job_command = "hep_sub "+ path +" -image track-1.2.sif -wn bws0765.ihep.ac.cn"
                 print(job_command)
                 runcmd(job_command)
 
