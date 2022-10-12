@@ -97,8 +97,8 @@ def batch_loop(dset,my_d, my_f, my_g4p):
         2021/09/07
     """   
     drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
-    start_n = dset.intance_number * dset.total_events
-    end_n = (dset.intance_number + 1) * dset.total_events
+    start_n = dset.instance_number * dset.total_events
+    end_n = (dset.instance_number + 1) * dset.total_events
     effective_number = 0
     for event in range(start_n,end_n):
         print("run events number:%s"%(event))
