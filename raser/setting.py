@@ -37,6 +37,10 @@ class Setting:
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
             self.read_par_laser(self._pardic['laser_parfile'])
+        
+        p = self.paras
+        self.total_events = int(p['total_events'])
+        self.g4seed = 0 
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
@@ -297,8 +301,8 @@ class Setting:
     def scan_variation(self):
         " Define parameters of batch mode"
         self.total_events = int(self._pardic['total_e'])
-        self.intance_number = int(self._pardic['instan'])
-        self.g4seed = self.intance_number * self.total_events
+        self.instance_number = int(self._pardic['instan'])
+        self.g4seed = self.instance_number * self.total_events
         self.output = self._pardic["output"]
 
     def is_number(self,s):
