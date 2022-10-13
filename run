@@ -231,8 +231,8 @@ case $option in
     3.1.*) echo "RASER simulate top-TCT"
         sub_3_1 option
         ;;
-<<<<<<< HEAD
-=======
+
+
 
     3.2) echo "RASER simulate edge-TCT"
         usage_3_2
@@ -244,5 +244,5 @@ case $option in
         sub_3_2 option
         ;;
 
->>>>>>> home/main
+
 		esac
