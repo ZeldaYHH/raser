@@ -30,7 +30,7 @@ class Input_parameters:
 def main():
     args = sys.argv[1:]
     input=Input_parameters(args)
-    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.model)
+    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.name)
     if input.run_mode == "True":
         run_job(job_name)
 
