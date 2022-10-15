@@ -30,7 +30,7 @@ class Input_parameters:
 def main():
     args = sys.argv[1:]
     input=Input_parameters(args)
-    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.model)
+    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.name)
     if input.run_mode == "True":
         run_job(job_name)
 
@@ -88,7 +88,7 @@ def modify_json(input,name):
     with open(path_file) as f:
         paras = json.load(f)
         for para in paras:
-            if input.name == para['name'] and para['det_model'] in "plugin3D":
+            if input.name == para['det_name'] and para['det_model'] in "plugin3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
@@ -112,7 +112,7 @@ def modify_json(input,name):
                         f.write(json_str)
                         f.close()
 
-            elif input.name == para['name'] and para['det_model'] in "planar3D":
+            elif input.name == para['det_name'] and para['det_model'] in "planar3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
@@ -133,7 +133,7 @@ def modify_json(input,name):
                         f.write(json_str)
                         f.close()
 
-            elif input.name == para['name'] and para['det_model'] in "lgad3Dscan":
+            elif input.name == para['det_name'] and para['det_model'] in "lgad3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
