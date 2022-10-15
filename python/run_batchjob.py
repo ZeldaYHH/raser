@@ -133,7 +133,7 @@ def modify_json(input,name):
                         f.write(json_str)
                         f.close()
 
-            elif input.name == para['det_name'] and para['det_model'] in "lgad3Dscan":
+            elif input.name == para['det_name'] and para['det_model'] in "lgad3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
