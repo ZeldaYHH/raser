@@ -15,7 +15,7 @@ import subprocess
 
 class Input_parameters:
     def __init__(self,args):
-        self.model = args[0].split("=")[-1] # model name
+        self.name = args[0].split("=")[-1] # model name
         self.events_each_run = int(args[1].split("=")[-1]) # events/run
         self.events_total = int(args[2].split("=")[-1]) # events/total
         self.instance_in = int(args[3].split("=")[-1]) #singularity instance start number
@@ -88,7 +88,7 @@ def modify_json(input,name):
     with open(path_file) as f:
         paras = json.load(f)
         for para in paras:
-            if input.model in "plugin3Dscan" and para['det_model'] in "plugin3Dscan":
+            if input.name == para['name'] and para['det_model'] in "plugin3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
@@ -112,7 +112,7 @@ def modify_json(input,name):
                         f.write(json_str)
                         f.close()
 
-            elif input.model in "planar3Dscan" and para['det_model'] in "planar3Dscan":
+            elif input.name == para['name'] and para['det_model'] in "planar3D":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
@@ -133,7 +133,7 @@ def modify_json(input,name):
                         f.write(json_str)
                         f.close()
 
-            elif input.model in "lgad3Dscan" and para['det_model'] in "lgad3Dscan":
+            elif input.name == para['name'] and para['det_model'] in "lgad3Dscan":
                 for i in range(input.para_number):
                     if input.para_name == "NO":
                         pass
