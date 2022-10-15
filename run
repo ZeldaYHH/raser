@@ -98,11 +98,11 @@ case $option in
 	1.1.2) echo "batch model with total number, split with step number"
 		hepjob
 		./python/run_batchjob.py det_name=NJU-PIN step=100000 total=2000000 \
-							 instance=0 output=out/planar3Dscan/20220323_3D/ batch=True para_name="NO" para_number=1 
+							 instance=0 output=out/NJU-PIN/ batch=True para_name="NO" para_number=1 
         ;;
 
     1.1.3) echo "get time resolution for SiC-PIN"
-        ./python/add_noise_raser.py out/planar3Dscan/20220323_3D/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
+        ./python/add_noise_raser.py out/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0 1
         ;;
         esac
 }
@@ -119,18 +119,18 @@ case $option in
     1.2.2.T) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_name=plugin3D step=200 total=400  \
-							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10
+							 instance=0 output=out/plugin3D/ batch=True para_name=scan_voltage para_number=10
 		;; 
     1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_name=plugin3D step=20000 total=40000  \
-							 instance=0 output=out/plugin3Dthick_20220608/ batch=True para_name=scan_voltage para_number=10 
+							 instance=0 output=out/plugin3D/ batch=True para_name=scan_voltage para_number=10 
         ;;
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        ./python/time_scan.py  out/plugin3Dthick_20220608 scan
+        ./python/time_scan.py  out/plugin3D scan
 			;;
 	1.2.4) echo "get time resolution vs draw voltage"
-		./python/time_scan.py  out/plugin3Dthick_20220608/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3D/time_resolution_scan.csv draw_voltage 0
 			;;
         esac
 }
@@ -148,17 +148,17 @@ case $option in
 	2.1.2) echo "batch model with total number, split with step number"
 		hepjob
 		./python/run_batchjob.py det_name=SICAR-1  step=200000 total=400000 \
-							 instance=0 output=out/lgad3Dscan/ batch=True para_name=scan_doping para_number=8
+							 instance=0 output=out/SICAR-1/ batch=True para_name=scan_doping para_number=8
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
         hepjob
-        ./python/time_scan.py  out/lgad3Dscan scan
+        ./python/time_scan.py  out/SICAR-1 scan
         ;;
 
     2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"
-		./python/time_scan.py  out/lgad3Dscan/time_resolution_scan.csv draw_doping 0
-        ./python/time_scan.py  out/lgad3Dscan/gain_efficiency_scan.csv gain_doping 0
+		./python/time_scan.py  out/SICAR-1/time_resolution_scan.csv draw_doping 0
+        ./python/time_scan.py  out/SICAR-1/gain_efficiency_scan.csv gain_doping 0
 		;;
     esac
 }
