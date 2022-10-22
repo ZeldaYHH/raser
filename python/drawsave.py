@@ -77,19 +77,19 @@ def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)+"_g="+str(my_d.e_gap)
+                       + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_r) )
     elif "planar" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)
+                       + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
     elif "lgad" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.lgad_dic['doping1']) 
-                       + "_v="+str(my_d.v_voltage)
+                       + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 
                        + "_radius=None")

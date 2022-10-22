@@ -336,8 +336,8 @@ class CalCurrent:
 
     def save_inf_track(self,my_d):
         """ Save the information in the dictionary """
-        if(((self.charge<0 and my_d.v_voltage<0)  
-             or (self.charge>0 and my_d.v_voltage>0))): 
+        if(((self.charge<0 and my_d.voltage<0)  
+             or (self.charge>0 and my_d.voltage>0))): 
             if(self.eorh>0):
                 self.d_dic_p["tk_"+str(self.n_track)][0].append(self.d_x)
                 self.d_dic_p["tk_"+str(self.n_track)][1].append(self.d_y)

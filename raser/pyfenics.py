@@ -265,7 +265,7 @@ class FenicsCal:
         """       
         bc_l=[]
         if model == "Possion":
-            p_ele = my_d.v_voltage
+            p_ele = my_d.voltage
             n_ele = 0.0
         elif model == "Laplace":
             p_ele = 0.0
