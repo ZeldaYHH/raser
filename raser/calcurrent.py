@@ -96,19 +96,21 @@ class CalCurrent:
         Description:
             The drift simulation of gain tracks
         """
-        for i in range(len(self.gain_dic_p[0])-1):
+        i=0
+        for gain_particle in self.gain_dic_p[0]:
             self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
             self.n_track = i+1
-            charges = math.floor(self.gain_dic_p[1][i])
-            if charges == 0:
+            self.ionized_pairs = math.floor(self.gain_dic_p[1][i])
+            if self.ionized_pairs == 0:
+                i=i+1
                 continue
             for j in range(2):
                 self.initial_parameter()
                 if (j==0):
-                    self.eorh = charges #hole
+                    self.eorh = self.ionized_pairs #hole
                 if (j==1):
-                    self.eorh = charges #electron 
+                    self.eorh = -self.ionized_pairs #electron 
                 self.d_time = self.gain_dic_p[0][i]
                 self.d_x = self.gain_dic_p[2][i]
                 self.d_y = self.gain_dic_p[3][i]
@@ -120,10 +122,14 @@ class CalCurrent:
                         self.delta_p() #delta_poisiton               
                         self.drift_v(my_d,my_f) #drift_position                   
                         self.drift_s_step(my_d) #drift_next_posiiton
-                        self.charge_collection(my_f)             
+                        self.charge_collection(my_f)  
+                        self.update_gain_track()           
                         self.save_gain_track() 
                         self.drift_end_condition()
                     self.n_step+=1 
+            i=i+1
+            if i>10*len(self.gain_dic_p[0]):
+                raise ValueError
         self.get_current_gain(my_d)
 
     def energy_deposition(self,my_d,j):
@@ -171,7 +177,7 @@ class CalCurrent:
         self.charge=0
         self.gain_charge=0
         self.gain_time=0
-        self.s_gain=0
+        self.s_gain=1
 
     def judge_whether_insensor(self,my_d,my_f):
         """
@@ -183,9 +189,9 @@ class CalCurrent:
                                         self.d_y,
                                         self.d_z)
         # modify this part										
-        if (self.d_y>=(my_d.l_y-1.0) or self.d_x>=(my_d.l_x-1.0) or self.d_z>=(my_d.l_z-1.0)):
+        if (self.d_y>=(my_d.l_y) or self.d_x>=(my_d.l_x) or self.d_z>=(my_d.l_z)):
             self.end_cond=3  
-        elif (self.d_y<=(1.0) or self.d_x<=(1.0) or self.d_z<=(1.0)):
+        elif (self.d_y<=(0.0) or self.d_x<=(0.0) or self.d_z<=(0.0)):
             self.end_cond=8                    
         elif (self.e_field[0]==0 and self.e_field[1]==0 and self.e_field[1]==0):
             self.end_cond=9
@@ -306,8 +312,8 @@ class CalCurrent:
     def update_gain_track(self):
         """ update the gain track"""
         if self.det_dic['det_model']=="lgad3D":
-            if (self.eorh>0) and (self.s_gain>1):
-                self.gain_charge = self.ionized_pairs*self.eorh*self.s_gain
+            if self.s_gain>2:
+                self.gain_charge = self.ionized_pairs*self.eorh*(self.s_gain-1)
                 self.gain_time=self.d_time
                 self.gain_dic_p[0].append(self.gain_time)
                 self.gain_dic_p[1].append(self.gain_charge)
@@ -323,11 +329,11 @@ class CalCurrent:
         """ Judge whether the drift loop should end """
         if(self.wpot>(1-1e-5)):
             self.end_cond=1
-        if(self.d_x<=1.0):
+        if(self.d_x<=0.0):
             self.end_cond=2
-        if(self.d_y<=1.0):
+        if(self.d_y<=0.0):
             self.end_cond=4
-        if(self.d_z<=1.0):
+        if(self.d_z<=0.0):
             self.end_cond=5
         if(self.path_len>self.max_drift_len):
             self.end_cond=6
@@ -427,9 +433,9 @@ class CalCurrent:
             original_charge += x
 
         if original_charge != 0:
-            self.gain_efficiency = gain_charge/original_charge
+            self.gain_efficiency = gain_charge/original_charge + 1
         else:
-            self.gain_efficiency = 0
+            self.gain_efficiency = 1
 
     def reset_start(self,my_d):
         """ Reset th1f """
