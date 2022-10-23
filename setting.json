@@ -164,7 +164,7 @@
         "material" : "Si",
         "Avalanche" : "vanOverstraeten",
 
-        "mesh" : 32,
+        "mesh" : 500,
         "xyscale" : 50,
         "maxstep" : 1,
         "g4_vis" : 0,

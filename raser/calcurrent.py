@@ -555,7 +555,8 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
             else:
                 Neff = det_dic['doping2']
     else:
-        Neff=abs(my_d.d_neff)
+        Neff = my_d.d_neff
+        Neff = abs(Neff)
 
     if my_d.material == "Si":
         alpha = 0.72*math.pow(T/300.0,0.065)

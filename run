@@ -88,8 +88,8 @@ geant4(){
 }
 
 hepjob(){
-export HepcMyImage=track-1.2.sif
-export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
+    export HepcMyImage=track-1.2.sif
+    export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
 sub_1_1(){
@@ -241,6 +241,16 @@ case $option in
         ;;
     2.1.*) echo "RASER simulate SiC-LGAD"
         sub_2_1 option
+        ;;
+
+    2.2) echo "RASER simulate Si-LGAD"
+        usage_2_2
+        echo "Please enter your option: " 
+        read option 
+        sub_2_2 option 
+        ;;
+    2.2.*) echo "RASER simulate Si-LGAD"
+        sub_2_2 option
         ;;
 
     3.1) echo "RASER simulate top-TCT"
