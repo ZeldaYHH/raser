@@ -156,7 +156,7 @@
         "ly" : 1300,
         "lz" : 50,
         "part" : 2,
-        "doping1" : 2e4,
+        "doping1" : -2e4,
         "doping2" : -1,
         "bond1" : 1.0,
         "voltage" : 200,
