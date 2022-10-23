@@ -31,15 +31,14 @@ class FenicsCal:
             else:
                 raise NameError
         self.fl_z=my_d.l_z
-
         self.tol = 1e-14
-        m_sensor_box=self.fenics_space(my_d)
-        self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])
+
+        self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.fenics_p_electric(my_d)
         self.fenics_p_w_electric(my_d)
 
-    def fenics_space(self,my_d):
+    def generate_mesh(self,my_d,mesh_number):
         """
         @description: 
             Define the fenics solver space 
@@ -52,21 +51,28 @@ class FenicsCal:
         """
         if "plugin3D" in self.det_model:
             self.sensor_range_confirm(my_d)
-            m_sensor =  mshr.Box(fenics.Point(self.sx_l,self.sy_l, 0), 
-                                 fenics.Point(self.sx_r,self.sy_r, self.fl_z))
+            m_sensor = mshr.Box(fenics.Point(self.sx_l,self.sy_l, 0), 
+                                fenics.Point(self.sx_r,self.sy_r, self.fl_z))
             for i in range(len(my_d.e_tr)):
                 e_t_i = my_d.e_tr[i]
-                elec_n=mshr.Cylinder(fenics.Point(e_t_i[0],e_t_i[1],e_t_i[3]), 
-                                     fenics.Point(e_t_i[0],e_t_i[1],e_t_i[4]),
-                                     e_t_i[2],e_t_i[2])
-                m_sensor =m_sensor - elec_n 
-        elif "planar3D" or "lgad3D"in self.det_model:
-            m_sensor =  mshr.Box(fenics.Point(0, 0, 0), 
-                                 fenics.Point(self.fl_x, self.fl_y, self.fl_z))
+                elec_n = mshr.Cylinder(fenics.Point(e_t_i[0],e_t_i[1],e_t_i[3]), 
+                                       fenics.Point(e_t_i[0],e_t_i[1],e_t_i[4]),
+                                       e_t_i[2],e_t_i[2])
+                m_sensor = m_sensor - elec_n 
+            self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
+
+        elif "planar3D" in self.det_model:
+            m_sensor = mshr.Box(fenics.Point(0, 0, 0), 
+                                fenics.Point(self.fl_x, self.fl_y, self.fl_z))
+            self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
+
+        elif "lgad3D" in self.det_model: # under construction
+            self.mesh3D = fenics.BoxMesh(fenics.Point(0, 0, 0),
+                                         fenics.Point(self.fl_x, self.fl_y, self.fl_z), 
+                                         5, 5, int(mesh_number))
+        
         else:
-            print("sensor model is wrong")
-            sys.exit()
-        return m_sensor            
+            raise(NameError)        
         
     def sensor_range_confirm(self,my_d):
         """
@@ -135,7 +141,7 @@ class FenicsCal:
                 doping_avalanche = self.f_value(my_d,self.lgad_dic['doping1'])
                 doping = self.f_value(my_d,self.lgad_dic['doping2'])
                 f = fenics.Expression('x[2] < width + tol ? doping1 : doping2',\
-                    degree=1,width=bond,doping1=doping_avalanche,doping2=doping, tol = self.tol)
+                    degree = 0, width = bond, doping1 = doping_avalanche, doping2 = doping, tol = self.tol)
             elif self.lgad_dic['part'] == 3:
                 bond1 = self.lgad_dic['bond1']
                 bond2 = self.lgad_dic['bond2']
@@ -143,7 +149,7 @@ class FenicsCal:
                 doping2 = self.f_value(my_d,self.lgad_dic['doping2'])
                 doping3 = self.f_value(my_d,self.lgad_dic['doping3'])
                 f = fenics.Expression('x[2] < bonda - tol ? dopinga : (x[2] > bondb + tol ? dopingc : dopingb)',\
-                    degree = 1, bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3, tol = self.tol)
+                    degree = 0, bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3, tol = self.tol)
             else:
                 print("The structure of lgad is wrong.")
         else:
@@ -225,8 +231,8 @@ class FenicsCal:
         """
         p_ele,n_ele=self.model_para(my_d,model)
         u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
-                                degree=2, tol=1E-14,
-                                p_1=p_ele, p_2=n_ele)
+                                degree = 2, tol = 1E-14,
+                                p_1 = p_ele, p_2 = n_ele)
         def boundary(x, on_boundary):
             return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
@@ -259,7 +265,7 @@ class FenicsCal:
         """       
         bc_l=[]
         if model == "Possion":
-            p_ele = my_d.v_voltage
+            p_ele = my_d.voltage
             n_ele = 0.0
         elif model == "Laplace":
             p_ele = 0.0

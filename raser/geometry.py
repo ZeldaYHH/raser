@@ -35,7 +35,7 @@ class R3dDetector:
         else:
             self.d_neff = det_dic['doping'] 
         
-        self.v_voltage = det_dic['voltage'] 
+        self.voltage = det_dic['voltage'] 
         self.temperature = det_dic['temp']
         self.material = det_dic['material']
         self.det_model = dset.det_model

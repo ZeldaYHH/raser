@@ -52,44 +52,45 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(ele_current):
-#    now = time.strftime("%Y_%m%d_%H%M")
-#    path = "fig/" + now + "/"
+def save(ele_current,my_l,my_d):
+    U=my_d.voltage
+    L=my_l.fz_abs
     volt = array('d', [999.])
     time = array('d', [999.])
-#time= float(list(filter(None,list_c[j].split(",")))[0])
-    volt = array('d', [999.])
-    time = array('d', [999.])
-    fout = ROOT.TFile("sim-TCT.root", "RECREATE")
+    z = array('d', [999.])
+    Vbias = array('d', [999.])
+    fout = ROOT.TFile("sim-TCT"+str(L)+"um"+str(U)+"V"+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
-#ele_current = raser.Amplifier(my_d, dset.amplifier)
+    t_out.Branch("z", z, "z/D")
+    t_out.Branch("Vbias", Vbias, "Vbias/D")
     for i in range(ele_current.BB_ele.GetNbinsX()):
           time[0]=i*ele_current.time_unit
           volt[0]=ele_current.BB_ele[i]
+          z[0]=L
+          Vbias[0]=U
           t_out.Fill()
     t_out.Write()
     fout.Close()
-
 
 def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)+"_g="+str(my_d.e_gap)
+                       + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_r) )
     elif "planar" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.v_voltage)
+                       + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
     elif "lgad" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.lgad_dic['doping1']) 
-                       + "_v="+str(my_d.v_voltage)
+                       + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 
                        + "_radius=None")

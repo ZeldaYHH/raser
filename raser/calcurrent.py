@@ -23,7 +23,7 @@ class CalCurrent:
         self.sstep=dset.steplength #drift step
         self.det_dic = dset.detector
         self.max_drift_len=1e9 #maximum driftlength [um]
-        self.parameters(my_g4p, my_d, batch)
+        self.parameters(my_g4p, batch)
         self.ionized_drift(my_f,my_d)
         if (self.det_dic['det_model'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
@@ -31,7 +31,7 @@ class CalCurrent:
         else:
             pass
             
-    def parameters(self,my_g4p, my_d, batch): 
+    def parameters(self,my_g4p, batch): 
         """" Define the output dictionary """   
         self.d_dic_n = {}
         self.d_dic_p = {}
@@ -336,8 +336,8 @@ class CalCurrent:
 
     def save_inf_track(self,my_d):
         """ Save the information in the dictionary """
-        if(((self.charge<0 and my_d.v_voltage<0)  
-             or (self.charge>0 and my_d.v_voltage>0))): 
+        if(((self.charge<0 and my_d.voltage<0)  
+             or (self.charge>0 and my_d.voltage>0))): 
             if(self.eorh>0):
                 self.d_dic_p["tk_"+str(self.n_track)][0].append(self.d_x)
                 self.d_dic_p["tk_"+str(self.n_track)][1].append(self.d_y)
