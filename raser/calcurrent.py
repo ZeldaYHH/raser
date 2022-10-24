@@ -128,8 +128,6 @@ class CalCurrent:
                         self.drift_end_condition()
                     self.n_step+=1 
             i=i+1
-            if i>10*len(self.gain_dic_p[0]):
-                raise ValueError
         self.get_current_gain(my_d)
 
     def energy_deposition(self,my_d,j):
@@ -313,11 +311,11 @@ class CalCurrent:
         """ update the gain track"""
         if self.det_dic['det_model']=="lgad3D":
             if self.s_gain>2:
-                self.gain_charge = self.ionized_pairs*self.eorh*(self.s_gain-1)
+                self.gain_charge = self.ionized_pairs*abs(self.eorh)*(self.s_gain-1)
                 self.gain_time=self.d_time
                 self.gain_dic_p[0].append(self.gain_time)
                 self.gain_dic_p[1].append(self.gain_charge)
-                self.gain_dic_p[2].append(self.d_x)
+                self.gain_dic_p[2].append(self.d_x) # CalCurrent.d_x 是什么？？？
                 self.gain_dic_p[3].append(self.d_y)
                 self.gain_dic_p[4].append(self.d_z)
             else:
