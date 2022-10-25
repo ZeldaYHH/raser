@@ -1,0 +1,42 @@
+#Bootstrap: docker
+#From: library/debian:11.5   
+
+Bootstrap: localimage
+From: raser-dev.sif  
+
+%post
+    ## Use huaweicloud  
+    #sed -i "s@http://deb.debian.org@http://repo.huaweicloud.com@g" /etc/apt/sources.list
+    #apt update 
+
+    ## Build 
+    #apt -y install apt-utils git wget vim  
+    #apt -y install build-essential libboost-all-dev 
+
+    ## FEniCS 
+    #apt -y install petsc-dev 
+    #apt -y install --no-install-recommends fenics 
+
+    ## ROOT 
+    #apt -y install llvm libxpm-dev libxft-dev libxext-dev libgif-dev 
+    #cd /usr/local/share
+    #mkdir root_build root_install 
+    #wget https://root.cern/download/root_v6.26.06.source.tar.gz
+    #tar xzf root_v6.26.06.source.tar.gz 
+    #mv root-6.26.06 root_src 
+    #rm -rf root_v6.26.06.source.tar.gz 
+    #cd /usr/local/share/root_build
+    #cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src 
+    #cmake --build . -- install -j24   
+    
+
+    ## Geant4-pybind    
+    #ln -sf /usr/bin/python3 /usr/bin/python 
+    #apt -y install python3-pip libice6 libsm6  
+    #pip install matplotlib scipy pandas geant4-pybind 
+
+    ## DevSim    
+    #pip install mkl devsim 
+
+
+
