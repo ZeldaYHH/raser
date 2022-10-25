@@ -11,7 +11,7 @@ usage() {
     printf "\n\t%-5s\n" "./run [OPTION]" 
     printf "\nOPTIONS\n"    
 
-    printf "\n\t%-9s  %-40s\n"  "track"    "Load TRACK" 
+    printf "\n\t%-9s  %-40s\n"  "raser"    "Load RASER" 
 
     printf "\n\t%-9s  %-40s"    "1.1"       "SiC-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.2"       "SiC-3D"
@@ -67,9 +67,9 @@ else
 	input_para=$* 
 fi
 
-track(){
-    # apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
-    apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-dev.sif   
+raser(){
+    # apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs,/scratch /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
+    apptainer shell --env PS1="\u_RASER> " -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/raser/raser-dev.sif   
 }
 
 
@@ -95,7 +95,7 @@ case $option in
 	1.1.2) echo "batch model with total number, split with step number"
 		hepjob
 		./python/run_batchjob.py det_name=NJU-PIN step=100000 total=2000000 \
-							 instance=0 output=out/NJU-PIN/ batch=True para_name="NO" para_number=1 
+		instance=0 output=out/NJU-PIN/ batch=True para_name="NO" para_number=1 
         ;;
 
     1.1.3) echo "get time resolution for SiC-PIN"
@@ -177,8 +177,8 @@ case $option in
 }
 
 case $option in 
-    track) echo "Loading TRACK..."
-        track 
+    raser) echo "Loading RASER..."
+        raser
         ;; 
 
     1.1) echo "RASER simulate NJU-SiC-PIN"
