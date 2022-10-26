@@ -191,7 +191,7 @@ class CalCurrent:
             self.end_cond=3  
         elif (self.d_y<=(0.0) or self.d_x<=(0.0) or self.d_z<=(0.0)):
             self.end_cond=8                    
-        elif (self.e_field[0]==0 and self.e_field[1]==0 and self.e_field[1]==0):
+        elif (self.e_field[0]==0 and self.e_field[1]==0 and self.e_field[2]==0):
             self.end_cond=9
         return self.end_cond
 
