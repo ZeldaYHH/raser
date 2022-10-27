@@ -17,12 +17,11 @@ contactcharge_node="contactcharge_node"
 contactcharge_edge="contactcharge_edge"
 ece_name="ElectronContinuityEquation"
 hce_name="HoleContinuityEquation"
-#celec_model = "(1e-10 + 0.5*abs(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
-#chole_model = "(1e-10 + 0.5*abs(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
+celec_model = "(1e-10 + 0.5*abs(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
+chole_model = "(1e-10 + 0.5*abs(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
 #celec_model = "(0.5*abs(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
 #chole_model = "(0.5*abs(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
-celec_model = "((1e-10)/n_i + 0.5*abs(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
-chole_model = "((1e-10)/n_i + 0.5*abs(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
+
 
 def GetContactBiasName(contact):
     return "{0}_bias".format(contact)
@@ -183,11 +182,8 @@ def CreateImpactGeneration(device, region):
 
 def CreateNetGeneration(device, region):
 
-    #Gn = "-q * (USRH - 1e12)"
-    #Gp = "+q * (USRH - 1e12)"
-
-    Gn = "-q * (USRH - (1e12)/2.8068322694227555e-24)"
-    Gp = "+q * (USRH - (1e12)/2.8068322694227555e-24)"
+    Gn = "-q * (USRH - 1e12)"
+    Gp = "+q * (USRH - 1e12)"
 
     #Gn = "-q * (USRH - 1e18*x*x)"
     #Gp = "+q * (USRH - 1e18*x*x)"
@@ -243,7 +239,7 @@ def CreateECE(device, region, mu_n):
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", 
              node_model="ElectronGeneration", 
-             #edge_volume_model="ImpactGen_n"
+             edge_volume_model="ImpactGen_n"
              )
 
 
@@ -259,7 +255,7 @@ def CreateHCE(device, region, mu_p):
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", 
              node_model="HoleGeneration", 
-             #edge_volume_model="ImpactGen_p"
+             edge_volume_model="ImpactGen_p"
              )
 
 
