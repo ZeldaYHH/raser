@@ -57,7 +57,7 @@ class Carrier:
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
         mobility = Mobility(my_d.material)
         mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
-        velocity = mu*average_intensity #cm/s
+        velocity = mu*average_intensity
 
         # get diffution from mobility and temperature
         if(velocity==0):
@@ -65,7 +65,7 @@ class Carrier:
             return
 
         else:
-            delta_t = step*1e-4/velocity #s
+            delta_t = step*1e-4/velocity
             kboltz=8.617385e-5 #eV/K
             diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
             dif_x=random.gauss(0.0,diffusion)*1e4
@@ -109,8 +109,8 @@ class Carrier:
             e0 = 1.60217733e-19
             q = self.charge * e0
             dU_w = U_w_2 - U_w_1
-            # dt = self.path[i+1][3]-self.path[i][3]
-            dt = 50e-12
+            #dt = self.path[i+1][3]-self.path[i][3]
+            dt = 50e-12 #保证输入输出一致
             self.signal.append(q*dU_w/dt)
 
     def drift_end(self,my_f):
