@@ -95,8 +95,11 @@ def batch_loop(dset,my_d, my_f, my_g4p):
     @Modify:
     ---------
         2021/09/07
-    """   
-    drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
+    """
+    if "plugin" in dset.det_model:
+        drawsave.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,dset.output)
+    else:
+        drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
     start_n = dset.instance_number * dset.total_events
     end_n = (dset.instance_number + 1) * dset.total_events
     effective_number = 0

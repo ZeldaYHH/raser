@@ -15,7 +15,7 @@ import subprocess
 
 class Input_parameters:
     def __init__(self,args):
-        self.name = args[0].split("=")[-1] # model name
+        self.name = args[0].split("=")[-1] # detector name
         self.events_each_run = int(args[1].split("=")[-1]) # events/run
         self.events_total = int(args[2].split("=")[-1]) # events/total
         self.instance_in = int(args[3].split("=")[-1]) #singularity instance start number
