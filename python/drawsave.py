@@ -487,12 +487,12 @@ def draw_drift_path(my_d,my_f,my_current,path):
     x_array=array('f')
     y_array=array('f')
     z_array=array('f')
-    for i in range(len(my_current.d_dic_p)):
-        n=len(my_current.d_dic_p["tk_"+str(i+1)][0])
+    for hole in my_current.holes:
+        n=len(hole.path)
         if(n>0):
-            x_array.extend(my_current.d_dic_p["tk_"+str(i+1)][0])
-            y_array.extend(my_current.d_dic_p["tk_"+str(i+1)][1]) 
-            z_array.extend(my_current.d_dic_p["tk_"+str(i+1)][2])              
+            x_array.extend([step[0] for step in hole.path])
+            y_array.extend([step[1] for step in hole.path]) 
+            z_array.extend([step[2] for step in hole.path])              
             gr_p = ROOT.TPolyLine3D(n,x_array,y_array,z_array)
             gr_p.SetLineColor(2)
             gr_p.SetLineStyle(1)
@@ -505,12 +505,12 @@ def draw_drift_path(my_d,my_f,my_current,path):
             del x_array[:]
             del y_array[:]
             del z_array[:]
-    for j in range(len(my_current.d_dic_n)):
-        m=len(my_current.d_dic_n["tk_"+str(j+1)][0])
+    for electron in my_current.electrons:
+        m=len(electron.path)
         if(m>0):
-            x_array.extend(my_current.d_dic_n["tk_"+str(j+1)][0])
-            y_array.extend(my_current.d_dic_n["tk_"+str(j+1)][1])
-            z_array.extend(my_current.d_dic_n["tk_"+str(j+1)][2])                
+            x_array.extend([step[0] for step in electron.path])
+            y_array.extend([step[1] for step in electron.path])
+            z_array.extend([step[2] for step in electron.path])                
             gr_n = ROOT.TPolyLine3D(m,x_array,y_array,z_array)
             gr_n.SetLineColor(4)
             gr_n.SetLineStyle(1)

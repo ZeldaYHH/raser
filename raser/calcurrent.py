@@ -1,596 +1,220 @@
 # -*- encoding: utf-8 -*-
 '''
-Description:  Simulate the e-h pairs drift and calculate induced current     
+Description:  Simulate e-h pairs drifting and calculate induced current
 @Date       : 2021/09/02 14:01:46
-@Author     : tanyuhang
-@version    : 1.0
+@Author     : Yuhang Tan, Chenxi Fu
+@version    : 2.0
 '''
-
 import random
-import numpy as np
 import ROOT
-import math
 from raser.model import Mobility
 from raser.model import Avalanche
+from raser.model import Vector
 
-#The drift of generated particles
-class CalCurrent:
-    def __init__(self, my_d, my_f, my_g4p, dset, batch=0):
-        #mobility related with the magnetic field
-        self.muhh=1650.0   
-        self.muhe=310.0
-        self.BB=np.array([0,0,0])
-        self.sstep=dset.steplength #drift step
-        self.det_dic = dset.detector
-        self.max_drift_len=1e9 #maximum driftlength [um]
-        self.parameters(my_g4p, batch)
-        self.ionized_drift(my_f,my_d)
-        if (self.det_dic['det_model'] == "lgad3D"):
-            self.ionized_drift_gain(my_f,my_d)
-            self.gain_efficiency_calculate(my_d)
+class Carrier:
+    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge):
+        self.d_x = d_x_init
+        self.d_y = d_y_init
+        self.d_z = d_z_init
+        self.t = t_init
+        self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
+        self.charge = charge
+        self.signal = []
+        
+        if self.charge == 0:
+            self.end_condition = "zero charge"
         else:
-            pass
-            
-    def parameters(self,my_g4p, batch): 
-        """" Define the output dictionary """   
-        self.d_dic_n = {}
-        self.d_dic_p = {}
-        self.gain_dic_p = [ [] for n in range(5) ]
-        self.gain_cu_p = {}
-        self.gain_cu_n = {}
-        self.events_position(my_g4p, batch) 
-        for n in range(len(self.tracks_p)-1):
-            self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
-            self.d_dic_p["tk_"+str(n+1)] = [ [] for n in range(5) ]
-           
-    def events_position(self,my_g4p, batch):
+            self.end_condition = 0
+
+    def not_in_sensor(self,my_d):
+        if (self.d_x<=1e-4) or (self.d_x>=my_d.l_x-1e-4)\
+            or (self.d_y<=1e-4) or (self.d_y>=my_d.l_y-1e-4)\
+            or (self.d_z<=1e-4) or (self.d_z>=my_d.l_z-1e-4):
+            self.end_condition = "out of bound"
+        return self.end_condition
+
+    def drift_single_step(self,step,my_d,my_f):
+        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+        intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
+        if(intensity!=0):
+            #project steplength on the direction of electric field
+            if(self.charge>0):
+                delta_x=step*e_field[0]/intensity
+                delta_y=step*e_field[1]/intensity
+                delta_z=step*e_field[2]/intensity
+            else:
+                delta_x=-step*e_field[0]/intensity
+                delta_y=-step*e_field[1]/intensity
+                delta_z=-step*e_field[2]/intensity
+        else:
+            delta_x=0.0
+            delta_y=0.0
+            delta_z=0.0
+
+        # get velocity from electric field
+        e_field_prime = my_f.get_e_field(self.d_x+delta_x,self.d_y+delta_y,self.d_z+delta_z)
+        intensity_prime = Vector(e_field_prime[0],e_field_prime[1],e_field_prime[2]).get_length()
+        average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
+        mobility = Mobility(my_d.material)
+        mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
+        velocity = mu*average_intensity
+
+        # get diffution from mobility and temperature
+        if(velocity==0):
+            self.end_condition = "zero velocity"
+            return
+
+        else:
+            delta_t = step*1e-4/velocity
+            kboltz=8.617385e-5 #eV/K
+            diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
+            dif_x=random.gauss(0.0,diffusion)*1e4
+            dif_y=random.gauss(0.0,diffusion)*1e4
+            dif_z=random.gauss(0.0,diffusion)*1e4
+
+        # sum up
+        # x axis   
+        if((self.d_x+delta_x+dif_x)>=my_d.l_x): 
+            self.d_x = my_d.l_x
+        elif((self.d_x+delta_x+dif_x)<0):
+            self.d_x = 0
+        else:
+            self.d_x = self.d_x+delta_x+dif_x
+        # y axis
+        if((self.d_y+delta_y+dif_y)>=my_d.l_y): 
+            self.d_y = my_d.l_y
+        elif((self.d_y+delta_y+dif_y)<0):
+            self.d_y = 0
+        else:
+            self.d_y = self.d_y+delta_y+dif_y
+        # z axis
+        if((self.d_z+delta_z+dif_z)>=my_d.l_z): 
+            self.d_z = my_d.l_z
+        elif((self.d_z+delta_z+dif_z)<0):
+            self.d_z = 0
+        else:
+            self.d_z = self.d_z+delta_z+dif_z
+        #time
+        self.t = self.t+delta_t
+
+        #record
+        self.path.append([self.d_x,self.d_y,self.d_z,self.t])
+
+    def get_signal(self,my_f):
+        """Calculate signal from carrier path"""
+        # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
+        for i in range(len(self.path)-1): # differentiate of weighting potential
+            U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2]) # x,y,z
+            U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2])
+            e0 = 1.60217733e-19
+            q = self.charge * e0
+            dU_w = U_w_2 - U_w_1
+            #dt = self.path[i+1][3]-self.path[i][3]
+            dt = 50e-12 #保证输入输出一致
+            self.signal.append(q*dU_w/dt)
+
+    def drift_end(self,my_f):
+        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+        wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
+            self.end_condition = "zero velocity"
+        elif wpot>(1-1e-5) or wpot<1e-5:
+            self.end_condition = "reached electrode"
+        elif(len(self.path)>10000):
+            self.end_condition = "reciprocate"
+        return self.end_condition
+
+class CalCurrent:
+    def __init__(self, my_d, my_f, ionized_pairs, track_position):
+        self.electrons = []
+        self.holes = []
+        for i in range(len(track_position)):
+            self.electrons.append(Carrier(track_position[i][0],\
+                                          track_position[i][1],\
+                                          track_position[i][2],\
+                                          1e-9,\
+                                          -1*ionized_pairs[i]))
+            self.holes.append(Carrier(track_position[i][0],\
+                                      track_position[i][1],\
+                                      track_position[i][2],\
+                                      1e-9,\
+                                      ionized_pairs[i]))
+
+        #drifting loop
+        for electron in self.electrons:
+            while not electron.not_in_sensor(my_d):
+                electron.drift_single_step(my_d.steplength,my_d,my_f)
+                electron.drift_end(my_f)
+            electron.get_signal(my_f)
+        for hole in self.holes:
+            while not hole.not_in_sensor(my_d):
+                hole.drift_single_step(my_d.steplength,my_d,my_f)
+                hole.drift_end(my_f)
+            hole.get_signal(my_f)
+        
+        #get current
+        my_d.positive_cu.Reset()
+        my_d.negative_cu.Reset()
+        my_d.sum_cu.Reset()
+
+        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        for hole in self.holes:
+            for i in range(len(hole.path)-1):
+                test_p.Fill(hole.path[i][3],hole.signal[i])# time,signal
+            my_d.positive_cu.Add(test_p)
+            test_p.Reset()
+
+        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
+        for electron in self.electrons:             
+            for i in range(len(electron.path)-1):
+                test_n.Fill(electron.path[i][3],electron.signal[i])# time,signal
+            my_d.negative_cu.Add(test_n)
+            test_n.Reset()
+
+        my_d.sum_cu.Add(my_d.positive_cu)
+        my_d.sum_cu.Add(my_d.negative_cu)
+
+class CalCurrentG4P(CalCurrent):
+    def __init__(self, my_d, my_f, my_g4p, batch):
+        G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
+        super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
+
+class CalCurrentLaser(CalCurrent):
+    def __init__(self, my_d, my_f, my_l):
+        super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
+
+class CarrierListFromG4P:
+    def __init__(self, material, my_g4p, batch):
         """
         Description:
             Events position and energy depositon
         Parameters:
-        ---------
-        batch : int
-            batch = 0: Single event, choose hit electron
-            batch != 0: Multi event, batch is the number of electron     
-        @Modify:
-        ---------
-            2021/09/13
-        """     
+            batch : int
+                batch = 0: Single event, select particle with long enough track
+                batch != 0: Multi event, assign particle with batch number
+        Modify:
+            2022/10/25
+        """
+        if (material == "SiC"):
+            self.energy_loss = 8.4 #ev
+        elif (material == "Si"):
+            self.energy_loss = 3.6 #ev
+
         if batch == 0:
             for j in range(len(my_g4p.p_steps_current)):
-                if len(my_g4p.p_steps_current[j])>10 and batch == 0:
-                    self.beam_number = j
-                    self.tracks_p = my_g4p.p_steps_current[j]
-                    self.tracks_step_edep = my_g4p.energy_steps[j]
-                    self.tracks_t_edep = my_g4p.edep_devices[j]
-                    batch+=1
+                if len(my_g4p.p_steps_current[j])>10 and batch == 0: # selecting particle with long enough track
+                    self.batch_def(my_g4p,j)
+                    batch=1
                     break
             if batch == 0:
                 print("the sensor didn't have particles hitted")
                 raise ValueError
         else:
-            self.beam_number = batch
-            self.tracks_p = my_g4p.p_steps_current[batch]
-            self.tracks_step_edep = my_g4p.energy_steps[batch]
-            self.tracks_t_edep = my_g4p.edep_devices[batch]
+            self.batch_def(my_g4p,batch)
 
-    def ionized_drift(self,my_f,my_d):
-        """
-        Description:
-            The drift simulation of all tracks
-            One track is corresponding to one electron-hole pair 
-        """
-        for i in range(len(self.tracks_p)-1):
-            self.n_track=i+1
-            self.ionized_pairs=self.energy_deposition(my_d,i)
-            for j in range(2):
-                if (j==0):
-                    self.eorh=1 #hole
-                if (j==1):
-                    self.eorh=-1 #electron 
-                self.loop_electon_hole(my_f,my_d,i)
-        self.get_current(my_d)
-
-    def ionized_drift_gain(self,my_f,my_d):
-        """
-        Description:
-            The drift simulation of gain tracks
-        """
-        i=0
-        for gain_particle in self.gain_dic_p[0]:
-            self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
-            self.gain_cu_n["tk_"+str(i+1)] = [ [] for n in range(5) ]
-            self.n_track = i+1
-            self.ionized_pairs = math.floor(self.gain_dic_p[1][i])
-            if self.ionized_pairs == 0:
-                i=i+1
-                continue
-            for j in range(2):
-                self.initial_parameter()
-                if (j==0):
-                    self.eorh = self.ionized_pairs #hole
-                if (j==1):
-                    self.eorh = -self.ionized_pairs #electron 
-                self.d_time = self.gain_dic_p[0][i]
-                self.d_x = self.gain_dic_p[2][i]
-                self.d_y = self.gain_dic_p[3][i]
-                self.d_z = self.gain_dic_p[4][i]
-                while (self.end_cond == 0):
-                    if self.judge_whether_insensor(my_d,my_f):               
-                        pass
-                    else:                                                                     
-                        self.delta_p() #delta_poisiton               
-                        self.drift_v(my_d,my_f) #drift_position                   
-                        self.drift_s_step(my_d) #drift_next_posiiton
-                        self.charge_collection(my_f)  
-                        self.update_gain_track()           
-                        self.save_gain_track() 
-                        self.drift_end_condition()
-                    self.n_step+=1 
-            i=i+1
-        self.get_current_gain(my_d)
-
-    def energy_deposition(self,my_d,j):
-        """" Deposition energy and generate e-h pair """
-        sic_loss_e=self.meter_choose(my_d)
-        n_pairs=self.tracks_step_edep[j]*1e6/sic_loss_e
-        return n_pairs 
-
-    def loop_electon_hole(self,my_f,my_d,i):
-        """
-        Description:
-            Loop and record the induced cuurent of each eletron or holes         
-        Parameters:
-        ---------
-        arg1 : int
-            
-        @Modify:
-        ---------
-            2021/09/13
-        """
-        self.initial_parameter()
-        self.d_x=self.tracks_p[i+1][0]
-        self.d_y=self.tracks_p[i+1][1]
-        self.d_z=self.tracks_p[i+1][2]
-        while (self.end_cond == 0):
-            if self.judge_whether_insensor(my_d,my_f):               
-                pass
-            else:                                                                     
-                self.delta_p() #delta_poisiton               
-                self.drift_v(my_d,my_f) #drift_position                   
-                self.drift_s_step(my_d) #drift_next_posiiton
-                self.charge_collection(my_f)
-                self.update_gain_track()
-                self.save_inf_track(my_d) 
-                self.drift_end_condition()
-            self.n_step+=1 
-        
-        
-    def initial_parameter(self):
-        """ initial the parameter in the drift """
-        self.end_cond=0
-        self.d_time=1.0e-9
-        self.path_len=0
-        self.n_step=0
-        self.charge=0
-        self.gain_charge=0
-        self.gain_time=0
-        self.s_gain=1
-
-    def judge_whether_insensor(self,my_d,my_f):
-        """
-        Judge the whether the point(x,y,z) is in the sensor
-        and whether the electric field is zero
-        """
-        # electic field of the position
-        self.e_field = my_f.get_e_field(self.d_x,
-                                        self.d_y,
-                                        self.d_z)
-        # modify this part										
-        if (self.d_y>=(my_d.l_y) or self.d_x>=(my_d.l_x) or self.d_z>=(my_d.l_z)):
-            self.end_cond=3  
-        elif (self.d_y<=(0.0) or self.d_x<=(0.0) or self.d_z<=(0.0)):
-            self.end_cond=8                    
-        elif (self.e_field[0]==0 and self.e_field[1]==0 and self.e_field[2]==0):
-            self.end_cond=9
-        return self.end_cond
-
-    def delta_p(self):
-        """ sstep(1um) split to three position """
-        if(self.eorh)>0:
-            eorh = 1
-            FF=self.list_add(self.e_field,
-                             self.cross(self.e_field,self.BB,self.muhh))
-        else:
-            eorh =-1
-            FF=self.list_sub(self.e_field,
-                             self.cross(self.e_field,self.BB,self.muhe))   
-        total_ef = self.root_mean_square(FF)
-        if(total_ef!=0):
-            self.delta_x=-self.sstep*eorh*FF[0]/total_ef
-            self.delta_y=-self.sstep*eorh*FF[1]/total_ef
-            self.delta_z=-self.sstep*eorh*FF[2]/total_ef
-        else:
-            self.delta_x=0.0
-            self.delta_y=0.0
-            self.delta_z=0.0
-
-    def cross(self,p1,p2,scale):
-        """ Get vector cross product of p1, p2 """
-        o1 = p1[1]*p2[2]-p1[2]*p2[1]
-        o2 = p1[2]*p2[0]-p1[0]*p2[2]
-        o3 = p1[0]*p2[1]-p1[1]*p2[0]
-        return [scale*o1,scale*o2,scale*o3]
-
-    def root_mean_square(self,p1):
-        " Return root_mean_square of p1"
-        return math.sqrt(p1[0]*p1[0]+p1[1]*p1[1]+p1[2]*p1[2])
-
-    def list_add(self,p1,p2):
-        " Return the added two lists. eg:[1,2,3]+[1,2,3] = [2,4,6]"
-        return [ a+b for a,b in zip(p1,p2) ]
-
-    def list_sub(self,p1,p2):
-        " Return the added two lists. eg:[1,2,3]-[1,2,3] = [0,0,0]"
-        return [ a-b for a,b in zip(p1,p2) ]
-
-    def drift_v(self,my_d,my_f):
-        """ The drift of e-h pairs at electric field """
-        e_delta_f = my_f.get_e_field(self.d_x+self.delta_x,
-                                     self.d_y+self.delta_y,
-                                     self.d_z+self.delta_z)
-        te_delta_f = self.root_mean_square(e_delta_f)
-        aver_e = (self.root_mean_square(self.e_field) 
-                  + te_delta_f)/2.0*1e4            # V/cm
-
-        if self.det_dic['det_model'] == "lgad3D":
-           self.choose_avalanche(my_d,aver_e)
-
-        mobility = sic_mobility(self.eorh,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
-        self.v_drift = mobility*aver_e 
-        #drift part
-        if(self.v_drift==0):
-            self.delta_x=0.0
-            self.delta_y=0.0
-            self.delta_z=0.0
-            self.dif_x=0.0
-            self.dif_y=0.0
-            self.dif_z=0.0
-            self.end_cond=9
-        else:
-            self.s_time = self.sstep*1e-4/self.v_drift
-            kboltz=8.617385e-5 #eV/K
-            s_sigma = math.sqrt(2.0*kboltz*mobility
-                                *my_d.temperature*self.s_time)
-            self.dif_x=random.gauss(0.0,s_sigma)*1e4
-            self.dif_y=random.gauss(0.0,s_sigma)*1e4
-            self.dif_z=random.gauss(0.0,s_sigma)*1e4
-
-    def drift_s_step(self,my_d):
-        """" Drift distance
-        d_x: raw position
-        delta_x: eletric field
-        dif_x thermal diffusion
-        """
-        # x axis   
-        if((self.d_x+self.delta_x+self.dif_x)>=my_d.l_x): 
-            self.d_cx = my_d.l_x
-        elif((self.d_x+self.delta_x+self.dif_x)<0):
-            self.d_cx = 0
-        else:
-            self.d_cx = self.d_x+self.delta_x+self.dif_x
-        # y axis
-        if((self.d_y+self.delta_y+self.dif_y)>=my_d.l_y): 
-            self.d_cy = my_d.l_y
-        elif((self.d_y+self.delta_y+self.dif_y)<0):
-            self.d_cy = 0
-        else:
-            self.d_cy = self.d_y+self.delta_y+self.dif_y
-        # z axis
-        if((self.d_z+self.delta_z+self.dif_z)>=my_d.l_z): 
-            self.d_cz = my_d.l_z
-        elif((self.d_z+self.delta_z+self.dif_z)<0):
-            self.d_cz = 0
-        else:
-            self.d_cz = self.d_z+self.delta_z+self.dif_z
-
-    def charge_collection(self,my_f):
-        """ Calculate charge collection """ 
-        self.wpot = my_f.get_w_p(self.d_cx,self.d_cy,self.d_cz)
-        delta_Uw = (self.wpot 
-                    - my_f.get_w_p(self.d_x,self.d_y,self.d_z))
-        self.charge=self.eorh*delta_Uw
-        if(self.v_drift!=0):
-            self.d_time=self.d_time+self.sstep*1e-4/self.v_drift
-            self.path_len+=self.sstep
-        self.d_x=self.d_cx
-        self.d_y=self.d_cy
-        self.d_z=self.d_cz
-
-    def update_gain_track(self):
-        """ update the gain track"""
-        if self.det_dic['det_model']=="lgad3D":
-            if self.s_gain>2:
-                self.gain_charge = self.ionized_pairs*abs(self.eorh)*(self.s_gain-1)
-                self.gain_time=self.d_time
-                self.gain_dic_p[0].append(self.gain_time)
-                self.gain_dic_p[1].append(self.gain_charge)
-                self.gain_dic_p[2].append(self.d_x) # CalCurrent.d_x 是什么？？？
-                self.gain_dic_p[3].append(self.d_y)
-                self.gain_dic_p[4].append(self.d_z)
-            else:
-                pass
-        else:
-            pass
-
-    def drift_end_condition(self): 
-        """ Judge whether the drift loop should end """
-        if(self.wpot>(1-1e-5)):
-            self.end_cond=1
-        if(self.d_x<=0.0):
-            self.end_cond=2
-        if(self.d_y<=0.0):
-            self.end_cond=4
-        if(self.d_z<=0.0):
-            self.end_cond=5
-        if(self.path_len>self.max_drift_len):
-            self.end_cond=6
-        if(self.n_step>10000):
-            self.end_cond=7
-
-    def save_inf_track(self,my_d):
-        """ Save the information in the dictionary """
-        if(((self.charge<0 and my_d.voltage<0)  
-             or (self.charge>0 and my_d.voltage>0))): 
-            if(self.eorh>0):
-                self.d_dic_p["tk_"+str(self.n_track)][0].append(self.d_x)
-                self.d_dic_p["tk_"+str(self.n_track)][1].append(self.d_y)
-                self.d_dic_p["tk_"+str(self.n_track)][2].append(self.d_z)
-                self.d_dic_p["tk_"+str(self.n_track)][3].append(self.charge)
-                self.d_dic_p["tk_"+str(self.n_track)][4].append(self.d_time)
-            else:
-                self.d_dic_n["tk_"+str(self.n_track)][0].append(self.d_x)
-                self.d_dic_n["tk_"+str(self.n_track)][1].append(self.d_y)
-                self.d_dic_n["tk_"+str(self.n_track)][2].append(self.d_z)
-                self.d_dic_n["tk_"+str(self.n_track)][3].append(self.charge)
-                self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
-
-    def save_gain_track(self):
-        """ Save the gain carrier information in the dictionary """
-        if (self.eorh>0):
-            self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
-            self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
-            self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
-            self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
-            self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
-        else:
-            self.gain_cu_n["tk_"+str(self.n_track)][0].append(self.d_x)
-            self.gain_cu_n["tk_"+str(self.n_track)][1].append(self.d_y)
-            self.gain_cu_n["tk_"+str(self.n_track)][2].append(self.d_z)
-            self.gain_cu_n["tk_"+str(self.n_track)][3].append(self.charge)
-            self.gain_cu_n["tk_"+str(self.n_track)][4].append(self.d_time)
-
-    def get_current(self,my_d):
-        """ Charge distribution to initial current"""
-        self.reset_start(my_d)
-        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
-        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
-        total_pairs=0
-        sic_loss_e=self.meter_choose(my_d)
-        for j in range(len(self.tracks_p)-2):
-            test_p,test_n = self.get_trackspn(my_d, test_p, test_n, j)   
-            n_pairs=self.tracks_step_edep[j]*1e6/sic_loss_e
-            total_pairs+=n_pairs
-            test_p.Scale(n_pairs)
-            test_n.Scale(n_pairs)            
-            my_d.positive_cu.Add(test_p)
-            my_d.negative_cu.Add(test_n)
-            test_p.Reset()
-            test_n.Reset()
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
-
-    def get_current_gain(self,my_d):
-        """ Charge distribution to gain current"""
-        my_d.gain_positive_cu.Reset()
-        my_d.gain_negative_cu.Reset()
-        test_p_gain = ROOT.TH1F("testgain+","testgain+",my_d.n_bin,my_d.t_start,my_d.t_end)
-        test_n_gain = ROOT.TH1F("testgain-","testgain-",my_d.n_bin,my_d.t_start,my_d.t_end)
-        e0 = 1.60217733e-19
-        for j in range(len(self.gain_dic_p[0])-2):
-            for i in range(len(self.gain_cu_p["tk_"+str(j+1)][2])):
-                test_p_gain.Fill(self.gain_cu_p["tk_"+str(j+1)][4][i],
-                        self.gain_cu_p["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
-            for i in range(len(self.gain_cu_n["tk_"+str(j+1)][2])):
-                test_n_gain.Fill(self.gain_cu_n["tk_"+str(j+1)][4][i],
-                        self.gain_cu_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
-            my_d.gain_positive_cu.Add(test_p_gain)
-            my_d.gain_negative_cu.Add(test_n_gain)
-            test_p_gain.Reset()
-            test_n_gain.Reset()
-        my_d.sum_cu.Add(my_d.gain_positive_cu)
-        my_d.sum_cu.Add(my_d.gain_negative_cu)
-
-    def gain_efficiency_calculate(self,my_d):
-        """Compare the charge collection amount induced by original and gain current"""
-        gain_cu = ROOT.TH1F("gain_cu","gain_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
-        original_cu = ROOT.TH1F("original_cu","original_cu",my_d.n_bin,my_d.t_start,my_d.t_end)
-        gain_cu.Reset()
-        original_cu.Reset()
-
-        gain_cu.Add(my_d.gain_positive_cu)
-        gain_cu.Add(my_d.gain_negative_cu)
-        original_cu.Add(my_d.positive_cu)
-        original_cu.Add(my_d.negative_cu)
-
-        gain_charge = 0
-        for x in gain_cu:
-            gain_charge += x
-        original_charge = 0
-        for x in original_cu:
-            original_charge += x
-
-        if original_charge != 0:
-            self.gain_efficiency = gain_charge/original_charge + 1
-        else:
-            self.gain_efficiency = 1
-
-    def reset_start(self,my_d):
-        """ Reset th1f """
-        my_d.positive_cu.Reset()
-        my_d.negative_cu.Reset()
-        my_d.sum_cu.Reset()
-
-    def meter_choose(self,my_d):
-        """ Judge the material of sensor """
-        if (my_d.material == "SiC"):
-            sic_loss_e = 8.4 #ev
-        elif (my_d.material == "Si"):
-            sic_loss_e = 3.6 #ev
-        return sic_loss_e
-
-    def choose_avalanche(self,my_d,aver_e):
-        """Choose the avalanche model"""
-        my_avalanche = Avalanche(self.det_dic['Avalanche'])
-        tmp_coefficient = my_avalanche.cal_coefficient(aver_e,self.eorh,my_d.temperature) #cm-1
-        self.s_gain = math.exp(self.sstep*1e-4*tmp_coefficient)
-
-    def get_trackspn(self, my_d, test_p, test_n, j):
-        """ Total current of each e-h pair"""
-        e0 = 1.60217733e-19
-        for i in range(len(self.d_dic_p["tk_"+str(j+1)][2])):
-            test_p.Fill(self.d_dic_p["tk_"+str(j+1)][4][i],
-                        self.d_dic_p["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)   
-        for i in range(len(self.d_dic_n["tk_"+str(j+1)][2])):
-            test_n.Fill(self.d_dic_n["tk_"+str(j+1)][4][i],
-                        self.d_dic_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
-        return test_p, test_n
-
-class CalCurrentLaser(CalCurrent):
-    def __init__(self, my_d, my_f, my_l, dset):
-        #mobility related with the magnetic field (now silicon useless)
-        self.muhh=1650.0   
-        self.muhe=310.0
-        self.BB=np.array([0,0,0])
-        self.sstep=dset.steplength #drift step
-        self.det_dic = dset.detector
-        self.kboltz=8.617385e-5 #eV/K
-        self.max_drift_len=1e9 #maximum diftlenght [um]
-        self.parameters(my_l)
-        self.ionized_drift(my_f,my_d,my_l)
-        if (self.det_dic['det_model'] == "lgad3D"):
-            self.ionized_drift_gain(my_f,my_d)
-            self.gain_efficiency_calculate(my_d)
-        else:
-            pass
-
-    def parameters(self, my_l):
-        """" Define the output dictionary """   
-        self.d_dic_n = {}
-        self.d_dic_p = {}
-        self.gain_dic_p = [ [] for n in range(5) ]
-        self.gain_cu_p = {}
-        self.gain_cu_n = {}
-        self.tracks_p = my_l.track_position
-        for n in range(len(self.tracks_p)-1):
-            self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
-            self.d_dic_p["tk_"+str(n+1)] = [ [] for n in range(5) ]
-
-    def ionized_drift(self,my_f,my_d,my_l):
-        for i in range(len(self.tracks_p)-1):
-            self.n_track=i+1
-            self.ionized_pairs=my_l.ionized_pairs[i]
-            for j in range(2):
-                if (j==0):
-                    self.eorh=1 #hole
-                if (j==1):
-                    self.eorh=-1 #electron 
-                self.loop_electon_hole(my_f,my_d,i)
-        self.get_current(my_d,my_l)
-
-    def get_current(self,my_d,my_l):
-        """ Charge distribution to initial current"""
-        self.reset_start(my_d)
-        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
-        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
-        total_pairs=0
-        for j in range(len(self.tracks_p)-2):
-            test_p,test_n = self.get_trackspn(my_d, test_p, test_n, j)   
-            n_pairs=my_l.ionized_pairs[j]
-            total_pairs+=n_pairs
-            test_p.Scale(n_pairs)
-            test_n.Scale(n_pairs)            
-            my_d.positive_cu.Add(test_p)
-            my_d.negative_cu.Add(test_n)
-            test_p.Reset()
-            test_n.Reset()
-
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
-
-# # # mobility model
-def sic_mobility(charge,aver_e,my_d,det_dic,z):
-    """ SiC mobility model 
-    SiC reference: TCAD SIMULATION FOR ALPHA-PARTICLE SPECTROSCOPY USING SIC SCHOTTKY DIODE
-    Si  reference: Signal development in irradiated silicon detectors
-    """
-    T=my_d.temperature
-    E=aver_e
-    if det_dic['det_model'] == "lgad3D":
-        if det_dic['part'] == 2:
-            bond = det_dic['bond1']
-            if (z < bond):
-                Neff = det_dic['doping1']
-            else:
-                Neff = det_dic['doping2']
-        elif det_dic['part'] == 3:
-            bond1 = det_dic['bond1']
-            bond2 = det_dic['bond2']
-            if (z < bond1):
-                Neff = det_dic['doping1']
-            elif (z > bond2):
-                Neff = det_dic['doping3']
-            else:
-                Neff = det_dic['doping2']
-    else:
-        Neff = my_d.d_neff
-    Neff = abs(Neff)
-
-    if my_d.material == "Si":
-        alpha = 0.72*math.pow(T/300.0,0.065)
-        if(charge>0):
-            ulp = 460.0 * math.pow(T / 300.0, -2.18)
-            uminp = 45.0*math.pow(T / 300.0, -0.45)
-            Crefp = 2.23e17*math.pow(T / 300.0, 3.2)
-            betap = 1.0
-            vsatp = 9.05e6 * math.sqrt(math.tanh(312.0/T))
-            lfm = uminp + (ulp-uminp)/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-            hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatp, betap), 1.0 / betap))                        
-        else:
-            uln = 1430.0 * math.pow(T / 300.0, -2.0)
-            uminn = 80.0*math.pow(T / 300.0, -0.45)
-            Crefn = 1.12e17*math.pow(T/300.0,3.2)
-            betan = 2
-            vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
-            lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
-            hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
-
-    elif my_d.material == "SiC":
-        if(charge>0):
-            alpha = 0.34
-            ulp = 124.0 * math.pow(T / 300.0, -2.0)
-            uminp = 15.9
-            Crefp = 1.76e19
-            betap = 1.213 * math.pow(T / 300.0, 0.17)
-            vsatp = 2e7 * math.pow(T / 300.0, 0.52)
-            lfm = uminp + ulp/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-            hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0 / betap))                        
-        else:
-            alpha = 0.61
-            ulp = 947.0 * math.pow(T / 300.0, -2)
-            Crefp = 1.94e19
-            betap = 1.0 * math.pow(T / 300.0, 0.66)
-            vsatp = 2e7 * math.pow(T / 300.0, 0.87)
-            lfm = ulp/ (1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-            hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0/betap))                      
-    return hfm
+    def batch_def(self,my_g4p,j):
+        self.beam_number = j
+        self.track_position = my_g4p.p_steps_current[j]
+        self.tracks_step = my_g4p.energy_steps[j]
+        self.tracks_t_energy_deposition = my_g4p.edep_devices[j] #为什么不使用？
+        self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]

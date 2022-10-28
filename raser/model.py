@@ -43,19 +43,12 @@ class Mobility:
     def __init__(self,mat_name):
         self.mat_name = mat_name
 
-    def cal_mobility(self, det, position, charge, electric_field):
+    def cal_mobility(self, det, Neff, charge, electric_field):
 
-        x = position[0]
-        y = position[1]
         T = det.temperature # K
         E = electric_field  # V/cm
 
-        doping_expr = det.doping_epr
-        doping_expr = doping_expr.replace("x[1]","y")
-        doping_expr = doping_expr.replace("sqrt","math.sqrt")
-        doping_expr = doping_expr.replace("exp","math.exp")
-        #print(doping_expr)
-        Neff = abs(eval(doping_expr))
+        Neff = abs(Neff)
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
@@ -68,8 +61,7 @@ class Mobility:
                 vsatp = 2e7 * math.pow(T / 300.0, 0.52)
                 lfm = uminp + ulp/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
                 hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0 / betap))  
-
-            if(charge<0):
+            else:
                 alpha = 0.61
                 ulp = 947 * math.pow(T / 300, -2)
                 Crefp = 1.94e19
@@ -104,8 +96,7 @@ class Mobility:
 
 """ Define Avalanche Model """
 
-class Avalanche:
-        
+class Avalanche:      
     def __init__(self,model_name):
         self.model_name = model_name
 
@@ -165,8 +156,6 @@ class Avalanche:
             else:
                 coefficient = 0.
 
-    
-
         if(self.model_name == 'Okuto'):
 
             T0 = 300.0 # K
@@ -197,7 +186,6 @@ class Avalanche:
                 coefficient = a*(1+c*(T-T0))*pow(E,_gamma)*math.exp(-(b*(1+d*(T-T0)))/E)
             else:
                 coefficient = 0.
-
 
         if(self.model_name == 'Hatakeyama'):
             '''
@@ -231,3 +219,32 @@ class Avalanche:
 
 
         return coefficient
+
+class Vector:
+    def __init__(self,a1,a2,a3):
+        self.components = [a1,a2,a3]
+        
+    def cross(self,Vector_b):
+        """ Get vector cross product of self and another Vector"""
+        o1 = self.components[1]*Vector_b.components[2]-self.components[2]*Vector_b.components[1]
+        o2 = self.components[2]*Vector_b.components[0]-self.components[0]*Vector_b.components[2]
+        o3 = self.components[0]*Vector_b.components[1]-self.components[1]*Vector_b.components[0]
+        return Vector(o1,o2,o3)
+
+    def get_length(self):
+        " Return length of self"
+        return math.sqrt(self.components[0]*self.components[0]+self.components[1]*self.components[1]+self.components[2]*self.components[2])
+
+    def add(self,Vector_b):
+        " Return the added two Vectors. eg:[1,2,3]+[1,2,3] = [2,4,6]"
+        o1 = self.components[0]+Vector_b.components[0]
+        o2 = self.components[1]+Vector_b.components[1]
+        o3 = self.components[2]+Vector_b.components[2]
+        return Vector(o1,o2,o3)
+
+    def sub(self,Vector_b):
+        " Return the subtracted two Vectors. eg:[1,2,3]-[1,2,3] = [0,0,0]"
+        o1 = self.components[0]-Vector_b.components[0]
+        o2 = self.components[1]-Vector_b.components[1]
+        o3 = self.components[2]-Vector_b.components[2]
+        return Vector(o1,o2,o3)
