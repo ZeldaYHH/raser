@@ -161,9 +161,9 @@ class FenicsCal:
         fenics.solve(a == L, self.u, bc_l,
                      solver_parameters=dict(linear_solver='gmres',
                                             preconditioner='ilu'))
-        #calculate electric field
+        # Calculate electric field
         W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
-        self.E_field = fenics.project(fenics.as_vector((self.u.dx(0),
+        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
                                                         self.u.dx(1),
                                                         self.u.dx(2))),W)
 
@@ -315,12 +315,14 @@ class FenicsCal:
         if out_range:   
             x_value,y_value,z_value = 0,0,0
         else:
-            E_scale=1
             scale_px=px%self.fl_x
             scale_py=py%self.fl_y
             scale_pz=pz
             try:
-                x_value,y_value,z_value = E_scale*self.E_field(scale_px,scale_py,scale_pz)
+                x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
+                x_value = x_value* -1
+                y_value = y_value* -1
+                z_value = z_value* -1
             except RuntimeError:
                 x_value,y_value,z_value = 0,0,0
         return x_value,y_value,z_value

@@ -48,7 +48,7 @@ def main():
     my_f = raser.FenicsCal(my_d,dset.fenics)
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
-        my_current = raser.CalCurrent(my_d, my_f, my_g4p, dset)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         if "lgad" in dset.det_model:
             print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = raser.Amplifier(my_d, dset.amplifier)
@@ -77,7 +77,7 @@ def set_electrodes(det_dic,dset):
     dset.electron_custom(e_tr)
 
 
-def batch_loop(dset,my_d, my_f, my_g4p):
+def batch_loop(dset, my_d, my_f, my_g4p):
     """
     Description:
         Batch run some events to get time resolution
@@ -107,7 +107,7 @@ def batch_loop(dset,my_d, my_f, my_g4p):
         print("run events number:%s"%(event))
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
-            my_current = raser.CalCurrent(my_d, my_f, my_g4p, dset, event-start_n)
+            my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
             ele_current = raser.Amplifier(my_d, dset.amplifier)
             drawsave.savedata(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current

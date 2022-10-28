@@ -22,8 +22,6 @@ class Setting:
             Define the sensor models for simulation.eg. planar-3D plugin-3D
         _pardic : dictionaries
             Storage the input parameters
-        steplength : float
-            The length of single step for e-h pairs to drift
         laser_model : str
             Define the absorption pattern of laser
         @Modify:
@@ -55,7 +53,6 @@ class Setting:
         for dic_par in dic_pars:
             if self.det_name == dic_par['det_name']:
                 self.det_model = dic_par['det_model']
-                self.steplength = float(dic_par['steplength'])
                 paras = dic_par
         for x in paras: 
             if self.is_number(paras[x]):          
@@ -94,6 +91,8 @@ class Setting:
             -- P-type is negetive (positive volatge applied)
         temp : float
             Tempareture
+        steplength : float
+            The length of single step for e-h pairs to drift
         e_r : float
             Radius of electrode in 3D
         e_gap : float
@@ -109,13 +108,13 @@ class Setting:
         if "planar3D" in self.det_model:
             detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
-                        'doping':p['doping'], 
+                        'doping':p['doping'], 'steplength':p['steplength']
                         }
             
         if "plugin3D" in self.det_model:
             detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
                         'material':p['material'],'voltage':p['voltage'], 'temp':p['temp'], 
-                        'doping':p['doping'], 
+                        'doping':p['doping'], 'steplength':p['steplength'],
                         'e_r':p['e_r'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
                         }
         if "lgad3D" in self.det_model:
@@ -124,14 +123,14 @@ class Setting:
                             'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                             'part':p['part'], 'bond1':p['bond1'], 
                             'doping1':p['doping1'], 'doping2':p['doping2'],
-                            'Avalanche':p['Avalanche']
+                            'steplength':p['steplength'], 'Avalanche':p['Avalanche']
                             }
             if p['part']==3:
                 detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
                             'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                             'part':p['part'], 'bond1':p['bond1'], 'bond2':p['bond2'], 
                             'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
-                            'Avalanche':p['Avalanche']
+                            'steplength':p['steplength'], 'Avalanche':p['Avalanche']
                             }
         return detector
 
