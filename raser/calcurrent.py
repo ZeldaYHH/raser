@@ -177,8 +177,13 @@ class CalCurrent:
                                       track_position[i][2],\
                                       1e-9,\
                                       ionized_pairs[i]))
+        
+        self.drifting_loop(my_d,my_f)
+        self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
+        if my_d.det_model == "lgad3D":
+            gain_current = CalCurrentGain(my_d, my_f, self)
 
-        #drifting loop
+    def drifting_loop(self,my_d,my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
                 electron.drift_single_step(my_d.steplength,my_d,my_f)
@@ -190,27 +195,27 @@ class CalCurrent:
                 hole.drift_end(my_f)
             hole.get_signal(my_f)
         
-        #get current
-        my_d.positive_cu.Reset()
-        my_d.negative_cu.Reset()
+    def get_current(self, my_d, positive_cu, negative_cu):
+        positive_cu.Reset()
+        negative_cu.Reset()
         my_d.sum_cu.Reset()
 
         test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
         for hole in self.holes:
             for i in range(len(hole.path)-1):
                 test_p.Fill(hole.path[i][3],hole.signal[i])# time,signal
-            my_d.positive_cu.Add(test_p)
+            positive_cu.Add(test_p)
             test_p.Reset()
 
         test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
         for electron in self.electrons:             
             for i in range(len(electron.path)-1):
                 test_n.Fill(electron.path[i][3],electron.signal[i])# time,signal
-            my_d.negative_cu.Add(test_n)
+            negative_cu.Add(test_n)
             test_n.Reset()
 
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
+        my_d.sum_cu.Add(positive_cu)
+        my_d.sum_cu.Add(negative_cu)
 
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
