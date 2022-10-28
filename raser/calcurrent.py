@@ -12,6 +12,28 @@ from raser.model import Avalanche
 from raser.model import Vector
 
 class Carrier:
+    """
+    Description:
+        Definition of carriers and the record of their movement
+    Parameters:
+        d_x_init, d_y_init, d_z_init, t_init : float
+            initial space and time coordinates in um and s
+        charge : float
+            a set of drifting carriers, absolute value for number, sign for charge
+    Attributes:
+        d_x, d_y, d_z, t : float
+            space and time coordinates in um and s
+        path : float[]
+            recording the carrier path in [d_x, d_y, d_z, t]
+        charge : float
+            a set of drifting carriers, absolute value for number, sign for charge
+        signal : float[]
+            the generated signal current on the reading electrode
+        end_condition : 0/string
+            tag of how the carrier ended drifting
+    Modify:
+        2022/10/28
+    """
     def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge):
         self.d_x = d_x_init
         self.d_y = d_y_init
@@ -125,6 +147,22 @@ class Carrier:
         return self.end_condition
 
 class CalCurrent:
+    """
+    Description:
+        Calculate sum of the generated current by carriers drifting
+    Parameters:
+        my_d : R3dDetector
+        my_f : FenicsCal 
+        ionized_pairs : float[]
+            the generated carrier amount from MIP or laser
+        track_position : float[]
+            position of the generated carriers
+    Attributes:
+        electrons, holes : Carrier[]
+            the generated carriers, able to calculate their movement
+    Modify:
+        2022/10/28
+    """
     def __init__(self, my_d, my_f, ionized_pairs, track_position):
         self.electrons = []
         self.holes = []
@@ -189,6 +227,9 @@ class CarrierListFromG4P:
         Description:
             Events position and energy depositon
         Parameters:
+            material : string
+                deciding the energy loss of MIP
+            my_g4p : Particles
             batch : int
                 batch = 0: Single event, select particle with long enough track
                 batch != 0: Multi event, assign particle with batch number
