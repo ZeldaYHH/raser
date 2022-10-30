@@ -12,6 +12,28 @@ from raser.model import Avalanche
 from raser.model import Vector
 
 class Carrier:
+    """
+    Description:
+        Definition of carriers and the record of their movement
+    Parameters:
+        d_x_init, d_y_init, d_z_init, t_init : float
+            initial space and time coordinates in um and s
+        charge : float
+            a set of drifting carriers, absolute value for number, sign for charge
+    Attributes:
+        d_x, d_y, d_z, t : float
+            space and time coordinates in um and s
+        path : float[]
+            recording the carrier path in [d_x, d_y, d_z, t]
+        charge : float
+            a set of drifting carriers, absolute value for number, sign for charge
+        signal : float[]
+            the generated signal current on the reading electrode
+        end_condition : 0/string
+            tag of how the carrier ended drifting
+    Modify:
+        2022/10/28
+    """
     def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge):
         self.d_x = d_x_init
         self.d_y = d_y_init
@@ -125,6 +147,22 @@ class Carrier:
         return self.end_condition
 
 class CalCurrent:
+    """
+    Description:
+        Calculate sum of the generated current by carriers drifting
+    Parameters:
+        my_d : R3dDetector
+        my_f : FenicsCal 
+        ionized_pairs : float[]
+            the generated carrier amount from MIP or laser
+        track_position : float[]
+            position of the generated carriers
+    Attributes:
+        electrons, holes : Carrier[]
+            the generated carriers, able to calculate their movement
+    Modify:
+        2022/10/28
+    """
     def __init__(self, my_d, my_f, ionized_pairs, track_position):
         self.electrons = []
         self.holes = []
@@ -139,8 +177,13 @@ class CalCurrent:
                                       track_position[i][2],\
                                       1e-9,\
                                       ionized_pairs[i]))
+        
+        self.drifting_loop(my_d,my_f)
+        self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
+        if my_d.det_model == "lgad3D":
+            gain_current = CalCurrentGain(my_d, my_f, self)
 
-        #drifting loop
+    def drifting_loop(self,my_d,my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
                 electron.drift_single_step(my_d.steplength,my_d,my_f)
@@ -152,27 +195,27 @@ class CalCurrent:
                 hole.drift_end(my_f)
             hole.get_signal(my_f)
         
-        #get current
-        my_d.positive_cu.Reset()
-        my_d.negative_cu.Reset()
+    def get_current(self, my_d, positive_cu, negative_cu):
+        positive_cu.Reset()
+        negative_cu.Reset()
         my_d.sum_cu.Reset()
 
         test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
         for hole in self.holes:
             for i in range(len(hole.path)-1):
                 test_p.Fill(hole.path[i][3],hole.signal[i])# time,signal
-            my_d.positive_cu.Add(test_p)
+            positive_cu.Add(test_p)
             test_p.Reset()
 
         test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
         for electron in self.electrons:             
             for i in range(len(electron.path)-1):
                 test_n.Fill(electron.path[i][3],electron.signal[i])# time,signal
-            my_d.negative_cu.Add(test_n)
+            negative_cu.Add(test_n)
             test_n.Reset()
 
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
+        my_d.sum_cu.Add(positive_cu)
+        my_d.sum_cu.Add(negative_cu)
 
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
@@ -189,6 +232,9 @@ class CarrierListFromG4P:
         Description:
             Events position and energy depositon
         Parameters:
+            material : string
+                deciding the energy loss of MIP
+            my_g4p : Particles
             batch : int
                 batch = 0: Single event, select particle with long enough track
                 batch != 0: Multi event, assign particle with batch number
