@@ -35,13 +35,27 @@ class R3dDetector:
         self.temperature = det_dic['temp']
         self.steplength = det_dic['steplength']
         self.material = det_dic['material']
-
         self.det_model = det_dic['det_model']
+
+        self.current_define()
+
         if self.det_model == "lgad3D":
-            self.lgad_dic = det_dic
+            self.part = det_dic['part']
+            if self.part == 2:
+                self.avalanche_bond = det_dic['avalanche_bond']
+                self.doping1 = det_dic['doping1']
+                self.doping2 = det_dic['doping2']
+            elif self.part == 3:
+                self.control_bond = det_dic['control_bond']
+                self.avalanche_bond = det_dic['avalanche_bond']
+                self.doping1 = det_dic['doping1']
+                self.doping2 = det_dic['doping2']
+                self.doping3 = det_dic['doping3']
+            else:
+                raise ValueError
         else:
             self.d_neff = det_dic['doping'] 
-        self.current_define()
+            
         if 'plugin3D' in self.det_model: 
             self.e_r = det_dic['e_r']
             self.e_gap = det_dic['e_gap']
@@ -130,21 +144,18 @@ class R3dDetector:
 
     def Neff(self,z):
         if self.det_model == "lgad3D":
-            if self.lgad_dic['part'] == 2:
-                bond = self.lgad_dic['bond1']
-                if (z < bond):
-                    Neff = self.lgad_dic['doping1']
+            if self.part == 2:
+                if (z < self.avalanche_bond):
+                    Neff = self.doping1
                 else:
-                    Neff = self.lgad_dic['doping2']
-            elif self.lgad_dic['part'] == 3:
-                bond1 = self.lgad_dic['bond1']
-                bond2 = self.lgad_dic['bond2']
-                if (z < bond1):
-                    Neff = self.lgad_dic['doping1']
-                elif (z > bond2):
-                    Neff = self.lgad_dic['doping3']
+                    Neff = self.doping2
+            elif self.part == 3:
+                if (z < self.control_bond):
+                    Neff = self.doping1
+                elif (z > self.avalanche_bond):
+                    Neff = self.doping3
                 else:
-                    Neff = self.lgad_dic['doping2']
+                    Neff = self.doping2
         else:
             Neff = self.d_neff
-            return(Neff)
+        return Neff

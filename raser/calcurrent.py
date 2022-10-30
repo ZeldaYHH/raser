@@ -49,9 +49,9 @@ class Carrier:
             self.end_condition = 0
 
     def not_in_sensor(self,my_d):
-        if (self.d_x<=1e-4) or (self.d_x>=my_d.l_x-1e-4)\
-            or (self.d_y<=1e-4) or (self.d_y>=my_d.l_y-1e-4)\
-            or (self.d_z<=1e-4) or (self.d_z>=my_d.l_z-1e-4):
+        if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
+            or (self.d_y<=0) or (self.d_y>=my_d.l_y)\
+            or (self.d_z<=0) or (self.d_z>=my_d.l_z):
             self.end_condition = "out of bound"
         return self.end_condition
 
@@ -125,23 +125,24 @@ class Carrier:
     def get_signal(self,my_f):
         """Calculate signal from carrier path"""
         # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
+        # signal = i*dt = q*dU_w(x)
         for i in range(len(self.path)-1): # differentiate of weighting potential
             U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2]) # x,y,z
             U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2])
             e0 = 1.60217733e-19
             q = self.charge * e0
             dU_w = U_w_2 - U_w_1
-            #dt = self.path[i+1][3]-self.path[i][3]
-            dt = 50e-12 #保证输入输出一致
-            self.signal.append(q*dU_w/dt)
+            self.signal.append(q*dU_w)
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
         if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
             self.end_condition = "zero velocity"
-        elif wpot>(1-1e-5) or wpot<1e-5:
-            self.end_condition = "reached electrode"
+        elif wpot>(1-1e-5):
+            self.end_condition = "reached cathode"
+        elif wpot<1e-5:
+            self.end_condition = "reached anode"
         elif(len(self.path)>10000):
             self.end_condition = "reciprocate"
         return self.end_condition
@@ -178,44 +179,68 @@ class CalCurrent:
                                       1e-9,\
                                       ionized_pairs[i]))
         
-        self.drifting_loop(my_d,my_f)
+        self.drifting_loop(my_d, my_f)
         self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
         if my_d.det_model == "lgad3D":
             gain_current = CalCurrentGain(my_d, my_f, self)
 
-    def drifting_loop(self,my_d,my_f):
+    def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
-                electron.drift_single_step(my_d.steplength,my_d,my_f)
+                electron.drift_single_step(my_d.steplength, my_d, my_f)
                 electron.drift_end(my_f)
             electron.get_signal(my_f)
         for hole in self.holes:
             while not hole.not_in_sensor(my_d):
-                hole.drift_single_step(my_d.steplength,my_d,my_f)
+                hole.drift_single_step(my_d.steplength, my_d, my_f)
                 hole.drift_end(my_f)
             hole.get_signal(my_f)
         
     def get_current(self, my_d, positive_cu, negative_cu):
-        positive_cu.Reset()
-        negative_cu.Reset()
-        my_d.sum_cu.Reset()
-
         test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
         for hole in self.holes:
             for i in range(len(hole.path)-1):
-                test_p.Fill(hole.path[i][3],hole.signal[i])# time,signal
+                test_p.Fill(hole.path[i][3],hole.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
             positive_cu.Add(test_p)
             test_p.Reset()
 
         test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
         for electron in self.electrons:             
             for i in range(len(electron.path)-1):
-                test_n.Fill(electron.path[i][3],electron.signal[i])# time,signal
+                test_n.Fill(electron.path[i][3],electron.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
             negative_cu.Add(test_n)
             test_n.Reset()
 
         my_d.sum_cu.Add(positive_cu)
         my_d.sum_cu.Add(negative_cu)
+
+class CalCurrentGain(CalCurrent):
+    '''Calculation of gain carriers and gain current, simplified version'''
+    def __init__(self, my_d, my_f, my_current):
+        self.electrons = [] # gain carriers
+        self.holes = []
+        my_ava = Avalanche(my_d.material)
+        # assuming gain layer at d>0
+        if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
+            for hole in my_current.holes:
+                self.electrons.append(Carrier(hole.path[-1][0],\
+                                              hole.path[-1][1],\
+                                              my_d.avalanche_bond,\
+                                              hole.path[-1][3],\
+                                              #-1*hole.charge*my_ava.gain_rate(my_d,my_f)))
+                                              -1*hole.charge*10))
+
+        else : # n layer at d=0, electrons multiplicated into holes
+            for electron in my_current.electrons:
+                self.holes.append(Carrier(electron.path[-1][0],\
+                                          electron.path[-1][1],\
+                                          my_d.avalanche_bond,\
+                                          electron.path[-1][3],\
+                                          #-1*electron.charge*my_ava.gain_rate(my_d,my_f)))
+                                          -1*electron.charge*10))
+
+        self.drifting_loop(my_d, my_f)
+        self.get_current(my_d, my_d.gain_positive_cu, my_d.gain_negative_cu)
 
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
