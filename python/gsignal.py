@@ -49,8 +49,8 @@ def main():
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        if "lgad" in dset.det_model:
-            print("gain_efficiency="+str(my_current.gain_efficiency))
+        #if "lgad" in dset.det_model:
+        #   print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = raser.Amplifier(my_d, dset.amplifier)
         drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
     else:

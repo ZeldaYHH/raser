@@ -8,10 +8,6 @@
 
 import fenics
 import mshr
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
-from array import array
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
@@ -21,15 +17,6 @@ class FenicsCal:
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
-        if self.det_model == "lgad3D":
-            self.lgad_dic = my_d.lgad_dic
-            if self.lgad_dic['part']==2:
-                self.avalanche_bond = self.bond = self.lgad_dic['bond1']
-            elif self.lgad_dic['part'] == 3:
-                self.avalanche_bond = self.lgad_dic['bond1']
-                self.bond = self.lgad_dic['bond2']
-            else:
-                raise NameError
         self.fl_z=my_d.l_z
         self.tol = 1e-14
 
@@ -136,22 +123,21 @@ class FenicsCal:
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
         if "lgad3D" in self.det_model:
-            if self.lgad_dic['part']==2:
-                bond = self.lgad_dic['bond1']
-                doping_avalanche = self.f_value(my_d,self.lgad_dic['doping1'])
-                doping = self.f_value(my_d,self.lgad_dic['doping2'])
+            if my_d.part == 2:
                 f = fenics.Expression('x[2] < width + tol ? doping1 : doping2',\
-                    degree = 0, width = bond, doping1 = doping_avalanche, doping2 = doping, tol = self.tol)
-            elif self.lgad_dic['part'] == 3:
-                bond1 = self.lgad_dic['bond1']
-                bond2 = self.lgad_dic['bond2']
-                doping1 = self.f_value(my_d,self.lgad_dic['doping1'])
-                doping2 = self.f_value(my_d,self.lgad_dic['doping2'])
-                doping3 = self.f_value(my_d,self.lgad_dic['doping3'])
+                                      degree = 0, width = my_d.avalanche_bond,\
+                                      doping1 = self.f_value(my_d, my_d.doping1),\
+                                      doping2 = self.f_value(my_d, my_d.doping2),\
+                                      tol = self.tol)
+            elif my_d.part == 3:
                 f = fenics.Expression('x[2] < bonda - tol ? dopinga : (x[2] > bondb + tol ? dopingc : dopingb)',\
-                    degree = 0, bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3, tol = self.tol)
+                                      degree = 0, bonda = my_d.control_bond, bondb = my_d.avalanche_bond,\
+                                      dopinga = self.f_value(my_d, my_d.doping1),\
+                                      dopingb = self.f_value(my_d, my_d.doping2),\
+                                      dopingc = self.f_value(my_d, my_d.doping3),\
+                                      tol = self.tol)
             else:
-                print("The structure of lgad is wrong.")
+                raise ValueError
         else:
             f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
