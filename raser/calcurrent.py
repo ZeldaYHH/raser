@@ -6,6 +6,7 @@ Description:  Simulate e-h pairs drifting and calculate induced current
 @version    : 2.0
 '''
 import random
+import numpy as np
 import ROOT
 from raser.model import Mobility
 from raser.model import Avalanche
@@ -219,7 +220,9 @@ class CalCurrentGain(CalCurrent):
     def __init__(self, my_d, my_f, my_current):
         self.electrons = [] # gain carriers
         self.holes = []
-        my_ava = Avalanche(my_d.material)
+        my_ava = Avalanche(my_d.avalanche_model)
+        gain_rate = self.gain_rate(my_d,my_f,my_ava)
+        print("gain_rate="+str(gain_rate))
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
             for hole in my_current.holes:
@@ -227,8 +230,7 @@ class CalCurrentGain(CalCurrent):
                                               hole.path[-1][1],\
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
-                                              #-1*hole.charge*my_ava.gain_rate(my_d,my_f)))
-                                              -1*hole.charge*10))
+                                              -1*hole.charge*gain_rate))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
@@ -236,11 +238,56 @@ class CalCurrentGain(CalCurrent):
                                           electron.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
-                                          #-1*electron.charge*my_ava.gain_rate(my_d,my_f)))
-                                          -1*electron.charge*10))
+                                          -1*electron.charge*gain_rate))
 
         self.drifting_loop(my_d, my_f)
         self.get_current(my_d, my_d.gain_positive_cu, my_d.gain_negative_cu)
+
+    def gain_rate(self, my_d, my_f, my_ava):
+
+        # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
+        # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
+
+        n = 1001
+        z_list = np.linspace(0, my_d.avalanche_bond * 1e-4, n) # in cm
+        alpha_n_list = np.zeros(n)
+        alpha_p_list = np.zeros(n)
+        for i in range(n):
+            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in um
+            E_field = Vector(Ex,Ey,Ez).get_length() * 1e4 # in V/cm
+            alpha_n = my_ava.cal_coefficient(E_field, -1, my_d.temperature)
+            alpha_p = my_ava.cal_coefficient(E_field, +1, my_d.temperature)
+            alpha_n_list[i] = alpha_n
+            alpha_p_list[i] = alpha_p
+
+        if my_d.voltage>0:
+            alpha_major_list = alpha_n_list # multiplication contributed mainly by electrons in Si
+            alpha_minor_list = alpha_p_list
+        elif my_d.voltage<0:
+            alpha_major_list = alpha_p_list # multiplication contributed mainly by holes in SiC
+            alpha_minor_list = alpha_n_list
+        diff_list = alpha_major_list - alpha_minor_list
+        int_alpha_list = np.zeros(n-1)
+
+        for i in range(1,n):
+            int_alpha = 0
+            for j in range(i):
+                int_alpha += (diff_list[j] + diff_list[j+1]) * (z_list[j+1] - z_list[j]) /2
+            int_alpha_list[i-1] = int_alpha
+        exp_list = np.exp(int_alpha_list)
+
+        det = 0 # determinant of breakdown
+        for i in range(0,n-1):
+            average_alpha_minor = (alpha_minor_list[i] + alpha_minor_list[i+1])/2
+            det_derivative = average_alpha_minor * exp_list[i]
+            det += det_derivative*(z_list[i+1]-z_list[i])        
+        if det>1:
+            print("det="+str(det))
+            print("The detector broke down")
+            raise(ValueError)
+        
+        gain_rate = exp_list[n-2]/(1-det) -1
+        return gain_rate
 
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):

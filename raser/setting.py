@@ -123,14 +123,14 @@ class Setting:
                             'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                             'part':p['part'], 'avalanche_bond':p['avalanche_bond'], 
                             'doping1':p['doping1'], 'doping2':p['doping2'],
-                            'steplength':p['steplength'], 'Avalanche':p['Avalanche']
+                            'steplength':p['steplength'], 'avalanche_model':p['avalanche_model']
                             }
             if p['part']==3:
                 detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
                             'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                             'part':p['part'], 'control_bond':p['control_bond'], 'avalanche_bond':p['avalanche_bond'], 
                             'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
-                            'steplength':p['steplength'], 'Avalanche':p['Avalanche']
+                            'steplength':p['steplength'], 'avalanche_model':p['avalanche_model']
                             }
         return detector
 
