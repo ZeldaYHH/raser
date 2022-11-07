@@ -40,6 +40,8 @@ class R3dDetector:
         self.current_define()
 
         if self.det_model == "lgad3D":
+            self.avalanche_model = det_dic['avalanche_model']
+
             self.part = det_dic['part']
             if self.part == 2:
                 self.avalanche_bond = det_dic['avalanche_bond']
