@@ -414,7 +414,7 @@ def draw_plot(my_d, ele_current, model, path):
 
     axis = ROOT.TGaxis(ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymin(), 
                        ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymax(), 
-                       min(0,rightmax), max(0,rightmax), 510)
+                       min(0,rightmax), max(0,rightmax), 510, "+L")
     axis.SetLineColor(2)
     axis.SetTextColor(2)
     #axis.SetTextSize(0.02)
