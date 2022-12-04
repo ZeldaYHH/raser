@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self,my_d,laser,min_carrier=0):
+    def __init__(self,my_d,laser):
         #technique used
         self.tech=laser["tech"]
         self.direction=laser["direction"]
@@ -55,44 +55,77 @@ class TCTTracks():
         self.r_step=laser["r_step"]#um
         self.h_step=laser["h_step"]#um
         self.t_step=laser["t_step"]#s
-        self.min_carrier=min_carrier
+        self.min_carrier=laser["min_carrier"]
         
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
-        self.r_char=self.widthBeamWaist
         if self.tech == "SPA":
+            self.r_char=min(my_d.l_x,my_d.l_y,my_d.l_z)
             self.h_char=max(my_d.l_x,my_d.l_y,my_d.l_z)
+
+            self.change_coordinate()
+            if self.fx_abs < 0.5 * self.x_char:
+                self.x_min = 0
+                self.x_max = self.x_char
+            elif self.fx_abs > my_d.l_x - 0.5 * self.x_char:
+                self.x_min = my_d.l_x - self.x_char
+                self.x_max = my_d.l_x
+            else :
+                self.x_min = self.fx_abs - 0.5 * self.x_char
+                self.x_max = self.fx_abs + 0.5 * self.x_char
+
+            if self.fy_abs < 0.5 * self.y_char:
+                self.y_min = 0
+                self.y_max = self.y_char
+            elif self.fy_abs > my_d.l_y - 0.5 * self.y_char:
+                self.y_min = my_d.l_y - self.y_char
+                self.y_max = my_d.l_y
+            else :
+                self.y_min = self.fy_abs - 0.5 * self.y_char
+                self.y_max = self.fy_abs + 0.5 * self.y_char
+
+            if self.fz_abs < 0.5 * self.z_char:
+                self.z_min = 0
+                self.z_max = self.z_char
+            elif self.fz_abs > my_d.l_z - 0.5 * self.z_char:
+                self.z_min = my_d.l_z - self.z_char
+                self.z_max = my_d.l_z
+            else :
+                self.z_min = self.fz_abs - 0.5 * self.z_char
+                self.z_max = self.fz_abs + 0.5 * self.z_char
 
         elif self.tech == "TPA":
             self.h_char=self.l_Rayleigh
+            self.r_char=self.widthBeamWaist
 
-        self.change_coordinate()
-        self.x_min,self.x_max=max(0,self.fx_abs-5*self.x_char),min(self.lx,self.fx_abs+5*self.x_char)
-        self.y_min,self.y_max=max(0,self.fy_abs-5*self.y_char),min(self.ly,self.fy_abs+5*self.y_char)
-        self.z_min,self.z_max=max(0,self.fz_abs-5*self.z_char),min(self.lz,self.fz_abs+5*self.z_char)
+            self.change_coordinate()
+            self.x_min,self.x_max=max(0,self.fx_abs-2*self.x_char),min(self.lx,self.fx_abs+2*self.x_char)
+            self.y_min,self.y_max=max(0,self.fy_abs-2*self.y_char),min(self.ly,self.fy_abs+2*self.y_char)
+            self.z_min,self.z_max=max(0,self.fz_abs-2*self.z_char),min(self.lz,self.fz_abs+2*self.z_char)
+
         self.t_min,self.t_max=1e-9-2*self.tau,1e-9+2*self.tau
-        xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step))
-        yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step))
-        zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step))
-        tArray = np.linspace(self.t_min,self.t_max,int((self.t_max-self.t_min)/self.t_step))
+        
+        xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step)+1)
+        yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step)+1)
+        zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step)+1)
+        tArray = np.linspace(self.t_min,self.t_max,int((self.t_max-self.t_min)/self.t_step)+1)
 
         Y,X,Z,T=np.meshgrid(yArray,xArray,zArray,tArray) #Feature of numpy.meshgrid
         self.projGrid=self._getCarrierDensity(X,Y,Z,T)\
             *self.x_step*self.y_step*self.z_step*1e-18*self.t_step
-        self.track_position = list(np.transpose(np.array([
+        self.original_track_position = list(np.transpose(np.array([
             list(np.ravel(X)),\
             list(np.ravel(Y)),\
             list(np.ravel(Z)),\
             list(np.ravel(T))])))
-        self.ionized_pairs = list(np.ravel(self.projGrid))
-        self.ionized_total_pairs = 0
-        for i in range(len(self.ionized_pairs)-1,-1,-1):
-            if self.ionized_pairs[i]<=self.min_carrier:
-                del self.ionized_pairs[i]
-                del self.track_position[i]
-            else:
-                self.ionized_total_pairs+=self.ionized_pairs[i]
+        self.original_ionized_pairs = list(np.ravel(self.projGrid))
+        self.track_position = []
+        self.ionized_pairs = []
+        for i in range(len(self.original_ionized_pairs)):
+            if self.original_ionized_pairs[i]>=self.min_carrier:
+                self.ionized_pairs.append(self.original_ionized_pairs[i])
+                self.track_position.append(self.original_track_position[i])
 
     def change_coordinate(self):
         #from cylindral coordinate (axis parallel with the beam, origin at focus)
@@ -138,7 +171,6 @@ class TCTTracks():
         if self.tech=="SPA":
             e0 = 1.60217733e-19
             return self.alpha*intensity*np.exp(-self.alpha*(h+depth)*1e-6)/(3.6*e0)
-            
         elif self.tech=="TPA":
             h_Planck = 6.626*1e-34
             speedofLight = 2.998*1e8

@@ -252,6 +252,7 @@ class Setting:
                     'refractionIndex':p['refractionIndex'],
                     "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
                     'r_step':p['r_step'],'h_step':p['h_step'],'t_step':p['t_step'],
+                    'min_carrier':p['min_carrier'],
                     'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
                     }
             if p['tech'] == "SPA":

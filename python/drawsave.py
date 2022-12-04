@@ -358,38 +358,44 @@ def draw_plot(my_d, ele_current, model, path):
     c.Update()
     c.SetLeftMargin(0.12)
     # c.SetTopMargin(0.12)
+    c.SetRightMargin(0.12)
     c.SetBottomMargin(0.14)
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptStat(0)
 
-    my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
-    my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
-    my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
+    #my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
+    #my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
+    #my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
     my_d.sum_cu.GetXaxis().SetNdivisions(510)
-    my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
-    my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
-    my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
+    #my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
+    #my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
+    #my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
     my_d.sum_cu.GetYaxis().SetNdivisions(505)
-    my_d.sum_cu.GetXaxis().CenterTitle()
-    my_d.sum_cu.GetYaxis().CenterTitle() 
+    #my_d.sum_cu.GetXaxis().CenterTitle()
+    #my_d.sum_cu.GetYaxis().CenterTitle() 
     my_d.sum_cu.GetXaxis().SetTitle("Time [s]")
     my_d.sum_cu.GetYaxis().SetTitle("Current [A]")
+
     my_d.sum_cu.Draw("HIST")
     my_d.positive_cu.Draw("SAME HIST")
     my_d.negative_cu.Draw("SAME HIST")
     my_d.gain_positive_cu.Draw("SAME HIST")
     my_d.gain_negative_cu.Draw("SAME HIST")
-    my_d.sum_cu.SetLineColor(3)
-    my_d.positive_cu.SetLineColor(2)
-    my_d.negative_cu.SetLineColor(4)
-    my_d.gain_positive_cu.SetLineColor(2)
-    my_d.gain_negative_cu.SetLineColor(4)
-    my_d.sum_cu.SetLineWidth(2)
+    my_d.sum_cu.Draw("SAME HIST")
+
+    my_d.positive_cu.SetLineColor(877)#kViolet-3
+    my_d.negative_cu.SetLineColor(600)#kBlue
+    my_d.gain_positive_cu.SetLineColor(617)#kMagneta+1
+    my_d.gain_negative_cu.SetLineColor(867)#kAzure+7
+    my_d.sum_cu.SetLineColor(418)#kGreen+2
+
     my_d.positive_cu.SetLineWidth(2)
     my_d.negative_cu.SetLineWidth(2)
-    my_d.gain_positive_cu.SetLineWidth(4)
-    my_d.gain_negative_cu.SetLineWidth(4)
+    my_d.gain_positive_cu.SetLineWidth(2)
+    my_d.gain_negative_cu.SetLineWidth(2)
+    my_d.sum_cu.SetLineWidth(2)
     c.Update()
+
     if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
@@ -403,22 +409,23 @@ def draw_plot(my_d, ele_current, model, path):
     ele_current.Scale(n_scale)
     ele_current.Draw("SAME HIST")
     ele_current.SetLineWidth(2)   
-    ele_current.SetLineColor(6)
+    ele_current.SetLineColor(8)
+    ele_current.SetLineColor(2)
     c.Update()
 
     axis = ROOT.TGaxis(ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymin(), 
                        ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymax(), 
                        min(0,rightmax), max(0,rightmax), 510, "+L")
-    axis.SetLineColor(6)
-    axis.SetTextColor(6)
-    axis.SetTextSize(0.02)
-    axis.SetLabelColor(6)
-    axis.SetLabelSize(0.02)
+    axis.SetLineColor(2)
+    axis.SetTextColor(2)
+    axis.SetTextSize(0.035)
+    axis.SetLabelColor(2)
+    axis.SetLabelSize(0.03)
     axis.SetTitle("Ampl [mV]")
-    axis.CenterTitle()
-    axis.Draw("same")
+    #axis.CenterTitle()
+    axis.Draw("SAME HIST")
 
-    legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)
+    legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
     legend.AddEntry(my_d.positive_cu, "hole", "l")
     legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
@@ -427,7 +434,7 @@ def draw_plot(my_d, ele_current, model, path):
     legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     legend.SetTextFont(43)
-    legend.SetTextSize(45)
+    #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
     c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
@@ -595,18 +602,43 @@ def draw_scat_angle(evnets_angle,angle,model):
     c1.SaveAs("scat_angle"+model+".pdf")
 
 def draw_nocarrier3D(path,my_l):
+    ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","pairs of carrier generation",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min-0.5*my_l.x_step,my_l.x_max+0.5*my_l.x_step,\
-        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min-0.5*my_l.y_step,my_l.y_max+0.5*my_l.y_step,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min-0.5*my_l.z_step,my_l.z_max+0.5*my_l.z_step)
+    h = ROOT.TH3D("h","Pairs of carrier generation",\
+        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min,my_l.x_max,\
+        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min,my_l.y_max,\
+        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min,my_l.z_max)
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw()
-    h.GetXaxis().SetTitle("Depth [μm]")
-    h.GetYaxis().SetTitle("Width [μm]")
-    h.GetZaxis().SetTitle("Thick [μm]")
+    h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetYaxis().SetTitle("Width [um]")
+    h.GetZaxis().SetTitle("Thick [um]")
+    h.GetXaxis().SetTitleOffset(1.8)
+    h.GetYaxis().SetTitleOffset(2.2)
+    h.GetZaxis().SetTitleOffset(1.4)
     c1.SaveAs(path+"nocarrier_"\
+        +str(round(my_l.fx_rel,5))+"_"\
+        +str(round(my_l.fy_rel,5))+"_"\
+        +str(round(my_l.fz_rel,5))+"_"\
+        +str(my_l.min_carrier)+".pdf")  
+
+def draw_nocarrier2D(path,my_l):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    c1.SetLeftMargin(0.12)
+    c1.SetRightMargin(0.2)
+    c1.SetBottomMargin(0.14)
+    c1.SetRightMargin(0.12)
+    h = ROOT.TH2D("h","Light Intensity",\
+        int((my_l.x_max-my_l.x_min)/my_l.x_step),my_l.x_min,my_l.x_max,\
+        int((my_l.z_max-my_l.z_min)/my_l.z_step),my_l.z_min,my_l.z_max)
+    for i in range(len(my_l.track_position)):
+        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
+    h.Draw("COLZ")
+    h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetYaxis().SetTitle("Thick [um]")
+    c1.SaveAs(path+"nocarrier2D_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
         +str(round(my_l.fz_rel,5))+"_"\
