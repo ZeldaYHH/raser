@@ -182,14 +182,14 @@ def CreateImpactGeneration(device, region):
 
 def CreateNetGeneration(device, region):
 
-    Gn = "-q * (USRH - 1e12)"
-    Gp = "+q * (USRH - 1e12)"
+    #Gn = "-q * (USRH - 1e12)"
+    #Gp = "+q * (USRH - 1e12)"
 
     #Gn = "-q * (USRH - 1e18*x*x)"
     #Gp = "+q * (USRH - 1e18*x*x)"
 
-    #Gn = "-q * (USRH)"
-    #Gp = "+q * (USRH)"
+    Gn = "-q * (USRH)"
+    Gp = "+q * (USRH)"
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
