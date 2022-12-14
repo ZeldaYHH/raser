@@ -37,6 +37,43 @@
 
     {
         "steplength" : 0.1,
+        "total_events" : 1000,
+        "det_name" : "NJU-SiC-PIN",
+        "det_model" : "planar3D",
+
+
+        "lx" : 5000,
+        "ly" : 5000,
+        "lz" : 100,
+        "doping" : 52,
+        "voltage" : -500,
+        "temp" : 300.0,
+        "material" : "SiC",
+
+        "mesh" : 32,
+        "xyscale" : 10,
+
+        "maxstep" : 2,
+        "g4_vis" : 0,
+        "par_inx" : 500,
+        "par_iny" : 500,
+        "par_inz" : 17000,
+        "par_outx" : 500,
+        "par_outy" : 500,
+        "par_outz" : 0.0,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 19500,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+    {
+        "steplength" : 0.1,
         "total_events" : 10000,
         "det_name" : "SICAR-1",
         "det_model" : "lgad3D",

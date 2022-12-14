@@ -16,7 +16,7 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_d, dset.amplifier)
 drawsave.drawplot(my_d,ele_current,my_f,None,my_current,my_l)
-drawsave.save(ele_current)
+drawsave.save(my_l,ele_current)
 
 # now = time.strftime("%Y_%m%d_%H%M")
 # path = "fig/" + now + "/"

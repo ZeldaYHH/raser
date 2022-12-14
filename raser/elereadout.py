@@ -152,8 +152,8 @@ class Amplifier:
                                 * math.exp(-j*self.time_unit/self.tau_BBA)
         self.BBGraph[i+j] = 1e+3 * self.BBGain * self.Iout_BB_RC[i+j]
         self.Vout_scope[i+j] = 50 * self.Iout_C50[i+j]
-        if (abs(self.BBGraph[i+j]) > 800):
-            self.BBGraph[i+j] = 800*self.BBGraph[i+j]/abs(self.BBGraph[i+j])
+#        if (abs(self.BBGraph[i+j]) > 800):
+#            self.BBGraph[i+j] = 800*self.BBGraph[i+j]/abs(self.BBGraph[i+j])
 
     def max_CSA(self,i):
         """ Get max out value of CSA"""               

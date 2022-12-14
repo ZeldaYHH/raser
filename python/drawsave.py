@@ -52,22 +52,21 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(ele_current):
-#    now = time.strftime("%Y_%m%d_%H%M")
-#    path = "fig/" + now + "/"
+def save(my_l,ele_current):
+    L=round(my_l.fz_abs)
     volt = array('d', [999.])
     time = array('d', [999.])
-#time= float(list(filter(None,list_c[j].split(",")))[0])
-    volt = array('d', [999.])
-    time = array('d', [999.])
-    fout = ROOT.TFile("sim-TCT.root", "RECREATE")
+    z = array('d', [999.])
+    fout = ROOT.TFile("sim-TCT"+str(L)+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
+    t_out.Branch("z", z, "z/D")
 #ele_current = raser.Amplifier(my_d, dset.amplifier)
     for i in range(ele_current.BB_ele.GetNbinsX()):
           time[0]=i*ele_current.time_unit
           volt[0]=ele_current.BB_ele[i]
+          z[0]=L
           t_out.Fill()
     t_out.Write()
     fout.Close()

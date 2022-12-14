@@ -75,6 +75,22 @@ usage_3_2() {
     printf "\n"
 }
 
+usage_5_1() {
+    printf "\n\t%-5s  %-40s\n"  "5.1.0"    "Loading TRACK into Singularity..."
+    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "Si-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "5.1.2"    "Si-LGAD edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "5.1.3"    "get volt-time for Si-PIN, multi points z [0,50]"
+    printf "\n\t%-5s  %-40s\n"  "5.1.4"    "get volt-time for Si-PIN, multi points Vbias [0,200]"
+    printf "\n\n"
+}
+
+usage_7_1() {
+    printf "\n\t%-5s  %-40s\n"  "7.1.0"    "Loading TRACK into Singularity..."
+    printf "\n\t%-5s  %-40s\n"  "7.1.1"    "SiC-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "7.1.2"    "get volt-time for Si-PIN, multi points z [0,50]"
+    printf "\n\n"
+}
+
 if [[ $# -eq 0 ]]; then
     usage
     echo "Please enter your option: "
@@ -83,6 +99,10 @@ else
     option=$1 
 	input_para=$* 
 fi
+
+track(){
+    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif
+}
 
 raser(){
     # apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs,/scratch /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
@@ -259,6 +279,51 @@ case $option in
         esac
 }
 
+sub_5_1(){
+case $option in
+    5.1.0) echo "Loading TRACK into Singularity..."
+        track
+        ;;
+    5.1.1) echo "Si-PIN edge-TCT basic information ..."
+        geant4
+        ./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+    5.1.2) echo "Si-LGAD edge-TCT basic information ..."
+        geant4
+        ./python/TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+    5.1.3) echo "get volt-time for Si-PIN edge-TCT, multi points z [0,50]"
+        hepjob
+        ./python/run_TCT_batchjob.py det_name=HPK-Si-LGAD step=1 total=1  \
+                                                                  instance=0 output=out/TCTtest/ batch=True para_name=scan_z para_number=10
+        ;;
+    5.1.4) echo "get volt-time for Si-PIN edge-TCT, multi points Vbias [0,200]"
+        hepjob
+        ./run_TCT_batchjob.py det_name=HPK-Si-PIN step=1 total=1  \
+                                                                  instance=0 output=out/TCTtest/ batch=True para_name=scan_voltage para_number=10
+        ;;
+
+        esac
+}
+
+sub_7_1(){
+case $option in
+    7.1.0) echo "Loading TRACK into Singularity..."
+        track
+        ;;
+    7.1.1) echo "SiC-PIN edge-TCT basic information ..."
+        geant4
+        ./python/TCTtest.py det_name=NJU-SiC-PIN parfile=setting.json laser_model=edge_TCT_SiC laser_parfile=laser_setting.json
+        ;;
+    7.1.2) echo "get volt-time for SiC-PIN edge-TCT, multi points z [0,50]"
+        hepjob
+        ./python/run_TCT_batchjob.py det_name=NJU-SiC-PIN step=1 total=1  \
+                                                                  instance=0 output=out/TCTtest/ batch=True para_name=scan_z para_number=50
+        ;;
+
+        esac
+}
+
 case $option in 
     raser) echo "Loading RASER..."
         raser
@@ -332,6 +397,26 @@ case $option in
         ;;
     3.2.*) echo "RASER simulate edge-TCT"
         sub_3_2 option
+        ;;
+
+    5.1) echo "edge-TCT measurement"
+        usage_5_1
+        echo "Please enter your option: "
+        read option
+        sub_5_1 option
+        ;;
+    5.1.*) echo "edge-TCT measurement"
+        sub_5_1 option
+        ;;
+
+    7.1) echo "RASER simulate edge-TCT"
+        usage_7_1
+        echo "Please enter your option: "
+        read option
+        sub_7_1 option
+        ;;
+    7.1.*) echo  "RASER simulate edge-TCT"
+        sub_7_1 option
         ;;
 
 		esac

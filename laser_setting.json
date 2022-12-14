@@ -92,6 +92,29 @@
     },
 
     {
+        "tech" : "SPA",
+        "direction" : "edge",
+        "laser_model" : "edge_TCT_SiC",
+
+        "alpha" : 21000,
+        "refractionIndex" : 3.124,
+
+        "wavelength" : 355,
+        "tau" : 350e-12,
+        "power" : 1e-11,
+        "widthBeamWaist" : 5,
+
+        "r_step" : 1,
+        "h_step" : 5,
+        "t_step" : 50e-12,
+        "min_carrier" : 500,
+
+        "fx_rel" : 0.0,
+        "fy_rel" : 0.5,
+        "fz_rel" : 0.5
+    },
+
+    {
         "tech" : "TPA",
         "direction" : "edge",
         "laser_model" : "TPA-TCT_Si",
