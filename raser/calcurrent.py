@@ -172,18 +172,21 @@ class CalCurrent:
             self.electrons.append(Carrier(track_position[i][0],\
                                           track_position[i][1],\
                                           track_position[i][2],\
-                                          1e-9,\
+                                          track_position[i][3],\
                                           -1*ionized_pairs[i]))
             self.holes.append(Carrier(track_position[i][0],\
                                       track_position[i][1],\
                                       track_position[i][2],\
-                                      1e-9,\
+                                      track_position[i][3],\
                                       ionized_pairs[i]))
         
         self.drifting_loop(my_d, my_f)
+        my_d.sum_cu.Reset()
+        my_d.positive_cu.Reset()
+        my_d.negative_cu.Reset()
         self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
         if my_d.det_model == "lgad3D":
-            gain_current = CalCurrentGain(my_d, my_f, self)
+            self.gain_current = CalCurrentGain(my_d, my_f, self)
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -199,6 +202,7 @@ class CalCurrent:
         
     def get_current(self, my_d, positive_cu, negative_cu):
         test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_p.Reset()
         for hole in self.holes:
             for i in range(len(hole.path)-1):
                 test_p.Fill(hole.path[i][3],hole.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
@@ -206,6 +210,7 @@ class CalCurrent:
             test_p.Reset()
 
         test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_n.Reset()
         for electron in self.electrons:             
             for i in range(len(electron.path)-1):
                 test_n.Fill(electron.path[i][3],electron.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
@@ -231,6 +236,12 @@ class CalCurrentGain(CalCurrent):
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
                                               -1*hole.charge*gain_rate))
+                if gain_rate>5:
+                    self.holes.append(Carrier(hole.path[-1][0],\
+                                              hole.path[-1][1],\
+                                              my_d.avalanche_bond,\
+                                              hole.path[-1][3],\
+                                              hole.charge*gain_rate/np.log(gain_rate)))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
@@ -239,8 +250,16 @@ class CalCurrentGain(CalCurrent):
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
                                           -1*electron.charge*gain_rate))
+                if gain_rate>5:
+                    self.electrons.append(Carrier(electron.path[-1][0],\
+                                                  electron.path[-1][1],\
+                                                  my_d.avalanche_bond,\
+                                                  electron.path[-1][3],\
+                                                  electron.charge*gain_rate/np.log(gain_rate)))
 
         self.drifting_loop(my_d, my_f)
+        my_d.gain_positive_cu.Reset()
+        my_d.gain_negative_cu.Reset()
         self.get_current(my_d, my_d.gain_positive_cu, my_d.gain_negative_cu)
 
     def gain_rate(self, my_d, my_f, my_ava):
@@ -332,7 +351,7 @@ class CarrierListFromG4P:
 
     def batch_def(self,my_g4p,j):
         self.beam_number = j
-        self.track_position = my_g4p.p_steps_current[j]
+        self.track_position = [[single_step[0],single_step[1],single_step[2],1e-9] for single_step in my_g4p.p_steps_current[j]]
         self.tracks_step = my_g4p.energy_steps[j]
         self.tracks_t_energy_deposition = my_g4p.edep_devices[j] #为什么不使用？
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]

@@ -21,120 +21,153 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self,my_d,laser,min_carrier=0):
+    def __init__(self, my_d, laser):
         #technique used
-        self.tech=laser["tech"]
-        self.direction=laser["direction"]
+        self.tech = laser["tech"]
+        self.direction = laser["direction"]
         #material parameters to certain wavelength of the beam
-        self.refractionIndex=laser["refractionIndex"]
+        self.refractionIndex = laser["refractionIndex"]
         if self.tech == "SPA":
-            self.alpha=laser["alpha"]
+            self.alpha = laser["alpha"]
         if self.tech == "TPA":
-            self.beta_2=laser["beta_2"]
+            self.beta_2 = laser["beta_2"]
         #laser parameters
-        self.wavelength=laser["wavelength"]*1e-3 #um
-        self.tau=laser["tau"]
-        self.power=laser["power"]
-        self.widthBeamWaist=laser["widthBeamWaist"]#um
+        self.wavelength = laser["wavelength"]*1e-3 #um
+        self.tau = laser["tau"]
+        self.power = laser["power"]
+        self.widthBeamWaist = laser["widthBeamWaist"]#um
         if "l_Reyleigh" not in laser:
             self.l_Rayleigh = np.pi*self.widthBeamWaist**2*self.refractionIndex/self.wavelength
         else:
             self.l_Rayleigh = laser["l_Rayleigh"]#um
         #the size of the detector
-        self.lx=my_d.l_x#um
-        self.ly=my_d.l_y
-        self.lz=my_d.l_z
+        self.lx = my_d.l_x#um
+        self.ly = my_d.l_y
+        self.lz = my_d.l_z
         #relative and absolute position of the focus
-        self.fx_rel=laser["fx_rel"]
-        self.fy_rel=laser["fy_rel"]
-        self.fz_rel=laser["fz_rel"]
-        self.fx_abs=self.fx_rel*self.lx
-        self.fy_abs=self.fy_rel*self.ly
-        self.fz_abs=self.fz_rel*self.lz
+        self.fx_rel = laser["fx_rel"]
+        self.fy_rel = laser["fy_rel"]
+        self.fz_rel = laser["fz_rel"]
+        self.fx_abs = self.fx_rel * self.lx
+        self.fy_abs = self.fy_rel * self.ly
+        self.fz_abs = self.fz_rel * self.lz
         #accuracy parameters
-        self.r_step=laser["r_step"]#um
-        self.h_step=laser["h_step"]#um
-        self.min_carrier=min_carrier
+        self.r_step = laser["r_step"]#um
+        self.h_step = laser["h_step"]#um
+        self.t_step = laser["t_step"]#s
         
-        self.mesh_definition()
+        self.mesh_definition(my_d)
 
-    def mesh_definition(self):
-        self.r_char=self.widthBeamWaist
+    def mesh_definition(self,my_d):
+        self.r_char = self.widthBeamWaist
         if self.tech == "SPA":
-            self.h_char=float('inf')
-
+            self.h_char = max(my_d.l_x, my_d.l_y, my_d.l_z)
         elif self.tech == "TPA":
-            self.h_char=self.l_Rayleigh
+            self.h_char = self.l_Rayleigh
+        else:
+            raise NameError(self.tech)
 
         self.change_coordinate()
-        self.x_min,self.x_max=max(0,self.fx_abs-5*self.x_char),min(self.lx,self.fx_abs+5*self.x_char)
-        self.y_min,self.y_max=max(0,self.fy_abs-5*self.y_char),min(self.ly,self.fy_abs+5*self.y_char)
-        self.z_min,self.z_max=max(0,self.fz_abs-5*self.z_char),min(self.lz,self.fz_abs+5*self.z_char)
-        xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step))
-        yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step))
-        zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step))
+        x_min = self.fx_abs - 1 * self.x_char
+        x_max = self.fx_abs + 1 * self.x_char
+        y_min = self.fy_abs - 1 * self.y_char
+        y_max = self.fy_abs + 1 * self.y_char
+        z_min = self.fz_abs - 1 * self.z_char
+        z_max = self.fz_abs + 1 * self.z_char
+        t_min = 1e-9 - 1 * self.tau
+        t_max = 1e-9 + 1 * self.tau
 
-        Y,X,Z=np.meshgrid(yArray,xArray,zArray) #Feature of numpy.meshgrid
-        self.projGrid=self._getCarrierDensity(X,Y,Z)\
-            *self.x_step*self.y_step*self.z_step*1e-18
+        #self.x_left_most, self.x_right_most = self.window(x_min, x_max, 0, my_d.l_x)
+        self.x_left_most, self.x_right_most =  0, my_d.l_x
+        #self.y_left_most, self.y_right_most = self.window(y_min, y_max, 0, my_d.l_y)
+        self.y_left_most, self.y_right_most = 625, 675
+        #self.z_left_most, self.z_right_most = self.window(z_min, z_max, 0, my_d.l_z)
+        self.z_left_most, self.z_right_most = 0, my_d.l_z
+        
+        xArray = np.linspace(x_min, x_max, int((x_max - x_min) / self.x_step) + 1)
+        yArray = np.linspace(y_min, y_max, int((y_max - y_min) / self.y_step) + 1)
+        zArray = np.linspace(z_min, z_max, int((z_max - z_min) / self.z_step) + 1)
+        tArray = np.linspace(t_min, t_max, int((t_max - t_min) / self.t_step) + 1)
+
+        xCenter = (xArray[:-1] + xArray[1:]) / 2
+        yCenter = (yArray[:-1] + yArray[1:]) / 2
+        zCenter = (zArray[:-1] + zArray[1:]) / 2
+        tCenter = (tArray[:-1] + tArray[1:]) / 2
+
+        xDiff = (xArray[:-1] - xArray[1:]) / 2
+        yDiff = (yArray[:-1] - yArray[1:]) / 2
+        zDiff = (zArray[:-1] - zArray[1:]) / 2
+        tDiff = (tArray[:-1] - tArray[1:]) / 2
+
+        YC, XC, ZC, TC = np.meshgrid(yCenter, xCenter, zCenter, tCenter) #Feature of numpy.meshgrid
+        YD, XD, ZD, TD = np.meshgrid(yDiff, xDiff, zDiff, tDiff)
+        self.projGrid = self._getCarrierDensity(XC, YC, ZC, TC)\
+            * XD * YD * ZD * 1e-18 * TD
         self.track_position = list(np.transpose(np.array([
-            list(np.ravel(X)),\
-            list(np.ravel(Y)),\
-            list(np.ravel(Z))])))
+            list(np.ravel(XC)),\
+            list(np.ravel(YC)),\
+            list(np.ravel(ZC)),\
+            list(np.ravel(TC))])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
-        self.ionized_total_pairs = 0
-        for i in range(len(self.ionized_pairs)-1,-1,-1):
-            if self.ionized_pairs[i]<=self.min_carrier:
-                del self.ionized_pairs[i]
-                del self.track_position[i]
-            else:
-                self.ionized_total_pairs+=self.ionized_pairs[i]
+        print(len(self.ionized_pairs))
 
     def change_coordinate(self):
         #from cylindral coordinate (axis parallel with the beam, origin at focus)
         #to rectilinear coordinate inside the detector
         if self.direction in ("top","bottom"):
-            self.z_step=self.h_step
-            self.z_char=self.h_char
-            self.x_step=self.y_step=self.r_step
-            self.x_char=self.y_char=self.r_char
+            self.z_step = self.h_step
+            self.z_char = self.h_char
+            self.x_step = self.y_step = self.r_step
+            self.x_char = self.y_char = self.r_char
             if self.direction == "top":
-                absorb_depth=self.lz*self.fz_rel
-                def _getCarrierDensity(x,y,z):
-                    return self.getCarrierDensity(z-self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2)
-                self._getCarrierDensity=_getCarrierDensity
+                absorb_depth = self.lz * self.fz_rel
+                def _getCarrierDensity(x, y, z, t):
+                    return self.getCarrierDensity(z - self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2, t - 1e-9)
+                self._getCarrierDensity = _getCarrierDensity
             if self.direction == "bottom":
-                absorb_depth=self.lz*(1-self.fz_rel)
-                def _getCarrierDensity(x,y,z):
-                    return self.getCarrierDensity(self.lz-z+self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2)
-                self._getCarrierDensity=_getCarrierDensity
+                absorb_depth = self.lz * (1 - self.fz_rel)
+                def _getCarrierDensity(x, y, z, t):
+                    return self.getCarrierDensity(self.lz - z + self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2, t - 1e-9)
+                self._getCarrierDensity = _getCarrierDensity
 
         elif self.direction == "edge":
-            self.x_step=self.h_step
-            self.x_char=self.h_char
-            self.y_step=self.z_step=self.r_step
-            self.y_char=self.z_char=self.r_char
+            self.x_step = self.h_step
+            self.x_char = self.h_char
+            self.y_step = self.z_step = self.r_step
+            self.y_char = self.z_char = self.r_char
 
-            absorb_depth=self.lx*self.fx_rel
-            def _getCarrierDensity(x,y,z):
-                return self.getCarrierDensity(x-self.fx_abs,absorb_depth,(y-self.fy_abs)**2+(z-self.fz_abs)**2)
-            self._getCarrierDensity=_getCarrierDensity
+            absorb_depth = self.lx * self.fx_rel
+            def _getCarrierDensity(x, y, z, t):
+                return self.getCarrierDensity(x - self.fx_abs, absorb_depth, (y - self.fy_abs) ** 2 + (z -self.fz_abs) ** 2, t - 1e-9)
+            self._getCarrierDensity = _getCarrierDensity
         else:
             raise NameError(self.direction)
 
-    def getCarrierDensity(self,h,depth,r2):
+    def window(self,inner_min,inner_max,outer_min,outer_max):
+        inner_length = inner_max - inner_min
+        if outer_max - outer_min < inner_length:
+            return outer_min, outer_max # range shrunk
+        else:
+            if inner_min > outer_min and inner_max < outer_max:
+                return inner_min, inner_max
+            elif inner_min < outer_min:
+                return outer_min, outer_min + inner_length
+            elif inner_max > outer_max:
+                return outer_max - inner_length, outer_max
+
+    def getCarrierDensity(self, h, depth, r2, t):
         #return the carrier density of a given point
         #referring to the vertical and horizontal distance from the focus 
-        widthSquared=(self.widthBeamWaist**2)*(1+(h/self.l_Rayleigh)**2)
+        widthSquared = (self.widthBeamWaist ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
+        intensity = ((self.power) / self.tau)\
+                    * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * widthSquared * 1e-12))\
+                    * np.exp((-2 * r2 / widthSquared))\
+                    * np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)
 
-        if self.tech=="SPA":
-            intensity = ((2*self.power)/(np.pi*widthSquared*1e-12))*np.exp((-2*r2/(widthSquared)))*np.exp(-self.alpha*(h+depth)*1e-6)
+        if self.tech == "SPA":
             e0 = 1.60217733e-19
-            return self.alpha*intensity/(3.6*e0)
-            
-        elif self.tech=="TPA":
-            k=(self.power**2)*8*np.log(2)/(self.tau*(np.pi**2.5)*(np.log(4))**0.5)
-            intensity_squared = k*np.exp(-4*r2/widthSquared)/((widthSquared**2)*1e-24)
+            return self.alpha * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (3.6 * e0)
+        elif self.tech == "TPA":
             h_Planck = 6.626*1e-34
             speedofLight = 2.998*1e8
-            return self.beta_2*self.wavelength*1e-6*intensity_squared/(2*h_Planck*speedofLight)
+            return self.beta_2 * self.wavelength * 1e-6 * intensity ** 2 / (2 * h_Planck * speedofLight)

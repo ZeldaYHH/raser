@@ -14,6 +14,7 @@
     
         "r_step" : 1,
         "h_step" : 1,
+        "t_step" : 50e-12,
     
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,
@@ -35,6 +36,7 @@
     
         "r_step" : 1,
         "h_step" : 1,
+        "t_step" : 50e-12,
     
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,
@@ -54,8 +56,9 @@
         "power" : 1e-11,
         "widthBeamWaist" : 5,
     
-        "r_step" : 1,
-        "h_step" : 5,
+        "r_step" : 2,
+        "h_step" : 10,
+        "t_step" : 50e-12,
     
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,
@@ -73,10 +76,11 @@
         "wavelength" : 1064,
         "tau" : 350e-12,
         "power" : 1e-11,
-        "widthBeamWaist" : 5,
+        "widthBeamWaist" : 8,
     
-        "r_step" : 1,
-        "h_step" : 5,
+        "r_step" : 4,
+        "h_step" : 100,
+        "t_step" : 50e-12,
     
         "fx_rel" : 0.0,
         "fy_rel" : 0.5,
@@ -99,6 +103,7 @@
         
         "r_step" : 1,
         "h_step" : 1,
+        "t_step" : 50e-12,
 
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,
