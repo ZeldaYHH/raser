@@ -25,6 +25,9 @@ def CreateGlobalConstant():
     devsim.add_db_entry(material="global",   parameter="k_T0",    value=k*T0,       unit="J",        description="k*T0")
     devsim.add_db_entry(material="global",   parameter="V_T0",    value=k*T0/q,     unit="J/coul",   description="k*T0/q")
 
+    T = 300.0         # K
+    devsim.add_db_entry(material="global",   parameter="T",    value=T,     unit="K",   description="T")
+
 
 
 def CreateSiliconCarbideConstant():
@@ -101,10 +104,21 @@ def CreateHatakeyamaImpact():
     p_b = p_b_0001
 
     devsim.add_db_entry(material="SiliconCarbide",   parameter="gamma",  value=gamma,   unit="1",     description="gamma for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_a",  value=n_a,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_b",  value=n_b,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_a",  value=p_a,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_b",  value=p_b,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    #devsim.add_db_entry(material="SiliconCarbide",   parameter="n_a",  value=n_a,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
+    #devsim.add_db_entry(material="SiliconCarbide",   parameter="n_b",  value=n_b,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
+    #devsim.add_db_entry(material="SiliconCarbide",   parameter="p_a",  value=p_a,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
+    #devsim.add_db_entry(material="SiliconCarbide",   parameter="p_b",  value=p_b,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="cutoff_angle",  value=4,   unit="degree",     description="cutoff_angle for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_a_0001",  value=n_a_0001,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_b_0001",  value=n_b_0001,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_a_0001",  value=p_a_0001,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_b_0001",  value=p_b_0001,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_a_1120",  value=n_a_1120,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="n_b_1120",  value=n_b_1120,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_a_1120",  value=p_a_1120,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="p_b_1120",  value=p_b_1120,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+
 
     def cal_impact_coefficient(electric_field):
         n_coeff = gamma*n_a*math.exp(-(gamma*n_b/electric_field))
