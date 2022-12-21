@@ -34,9 +34,10 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-    draw_drift_path(my_d,my_f,my_current,path)
     if my_l != None:
         draw_nocarrier3D(path,my_l)
+    else: 
+        draw_drift_path(my_d,my_f,my_current,path)
      
 def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     """

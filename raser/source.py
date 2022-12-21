@@ -59,7 +59,7 @@ class TCTTracks():
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
-        self.r_char = self.widthBeamWaist
+        self.r_char = self.widthBeamWaist / 2
         if self.tech == "SPA":
             self.h_char = max(my_d.l_x, my_d.l_y, my_d.l_z)
         elif self.tech == "TPA":
@@ -68,7 +68,8 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        x_min = self.fx_abs - 1 * self.x_char
+        #x_min = self.fx_abs - 1 * self.x_char
+        x_min = 0
         x_max = self.fx_abs + 1 * self.x_char
         y_min = self.fy_abs - 1 * self.y_char
         y_max = self.fy_abs + 1 * self.y_char
@@ -94,10 +95,10 @@ class TCTTracks():
         zCenter = (zArray[:-1] + zArray[1:]) / 2
         tCenter = (tArray[:-1] + tArray[1:]) / 2
 
-        xDiff = (xArray[:-1] - xArray[1:]) / 2
-        yDiff = (yArray[:-1] - yArray[1:]) / 2
-        zDiff = (zArray[:-1] - zArray[1:]) / 2
-        tDiff = (tArray[:-1] - tArray[1:]) / 2
+        xDiff = (xArray[:-1] - xArray[1:])
+        yDiff = (yArray[:-1] - yArray[1:])
+        zDiff = (zArray[:-1] - zArray[1:])
+        tDiff = (tArray[:-1] - tArray[1:])
 
         YC, XC, ZC, TC = np.meshgrid(yCenter, xCenter, zCenter, tCenter) #Feature of numpy.meshgrid
         YD, XD, ZD, TD = np.meshgrid(yDiff, xDiff, zDiff, tDiff)
@@ -158,10 +159,11 @@ class TCTTracks():
     def getCarrierDensity(self, h, depth, r2, t):
         #return the carrier density of a given point
         #referring to the vertical and horizontal distance from the focus 
-        widthSquared = (self.widthBeamWaist ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
+        w_0 = self.widthBeamWaist / 2
+        wSquared = (w_0 ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
         intensity = ((self.power) / self.tau)\
-                    * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * widthSquared * 1e-12))\
-                    * np.exp((-2 * r2 / widthSquared))\
+                    * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * wSquared * 1e-12))\
+                    * np.exp((-2 * r2 / wSquared))\
                     * np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)
 
         if self.tech == "SPA":

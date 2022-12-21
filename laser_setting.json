@@ -78,8 +78,8 @@
         "power" : 1e-11,
         "widthBeamWaist" : 8,
     
-        "r_step" : 4,
-        "h_step" : 100,
+        "r_step" : 1,
+        "h_step" : 50,
         "t_step" : 50e-12,
     
         "fx_rel" : 0.0,
