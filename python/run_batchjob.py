@@ -71,7 +71,7 @@ def run_job(job_name):
         for file in files:
             if ".sh" in file:
                 path = os.path.join(job_name, file)
-                job_command = "hep_sub "+ path +" -image track-1.2.sif -wn bws0765.ihep.ac.cn"
+                job_command = "hep_sub "+ path +" -image raser-1.2.sif -wn bws0765.ihep.ac.cn"
                 print(job_command)
                 runcmd(job_command)
 
@@ -139,7 +139,8 @@ def modify_json(input,name):
                         pass
                     else:
                         if input.para_name == "scan_voltage":
-                            para.update({'voltage':str(-200-i*30)})
+                            para.update({'voltage':str(-400-i*10)})
+                            #para.update({'voltage':str(200+i*10)})
                         elif input.para_name == "scan_doping":#triangle wall
                             para.update({'doping1':str(250+i*1e5)})
                         elif input.para_name == "scan_temp":
