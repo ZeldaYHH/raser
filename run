@@ -11,8 +11,6 @@ usage() {
     printf "\n\t%-5s\n" "./run [OPTION]" 
     printf "\nOPTIONS\n"    
 
-    printf "\n\t%-9s  %-40s\n"  "raser"    "Load RASER" 
-
     printf "\n\t%-9s  %-40s"    "1.1"       "SiC-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.2"       "SiC-3D"
     printf "\n\t%-9s  %-40s\n"  "1.3"       "DEVSIM"
@@ -84,38 +82,22 @@ else
 	input_para=$* 
 fi
 
+imagename=raser-1.2.sif
+
 raser(){
-    apptainer shell --env PS1="\u_RASER> " -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif 
+    apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
 }
-
-
-geant4(){
-    source /usr/local/share/root_install/bin/thisroot.sh 
-    export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
-    source $GEANT4_INSTALL/bin/geant4.sh
-    export PYTHONPATH=$HOME/raser:$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
-}
-
-
-devsim(){
-    source /usr/local/share/root_install/bin/thisroot.sh 
-    export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
-    source $GEANT4_INSTALL/bin/geant4.sh
-    export PYTHONPATH=$HOME/raser:$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages
-}
-
 
 hepjob(){
-    export HepcMyImage=raser-1.2.sif
+    # export HepcMyImage=raser-1.2.sif
+    export HepcMyImage=$imagename
     export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        # need to ./run raser first 
-        geant4 
-        ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
