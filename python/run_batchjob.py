@@ -150,7 +150,8 @@ def modify_json(input,name):
                         pass
                     else:
                         if input.para_name == "scan_voltage":
-                            para.update({'voltage':str(-200-i*30)})
+                            para.update({'voltage':str(-400-i*10)})
+                            #para.update({'voltage':str(200+i*10)})
                         elif input.para_name == "scan_doping":#triangle wall
                             para.update({'doping1':str(250+i*1e5)})
                         elif input.para_name == "scan_temp":

@@ -80,7 +80,7 @@ class R3dDetector:
             2021/08/31
         """
         self.t_bin = 50e-12
-        self.t_end = 6.0e-9
+        self.t_end = 5.0e-9
         self.t_start = 0
         self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
         

@@ -422,12 +422,12 @@ def judge_threshold(addNoise,rset,tree_class,model):
     """
     max_height = "max_repampl_nps_height".replace("repampl",model)
     max_time ="max_repampl_pulse_time".replace("repampl",model)
-    if (addNoise.ampl_paras[max_height]>rset.thre_vth and addNoise.ampl_paras[max_time]<80):
-        get_CFD_time(addNoise,addNoise.ampl_paras,rset,model)
-        if model == "BB":
-            tree_class.fill_ampl_BB(addNoise,rset,max_height,max_time)
-        elif model == "CSA":
-            tree_class.fill_ampl_CSA(addNoise,rset,max_height,max_time)
+    #if (addNoise.ampl_paras[max_height]>rset.thre_vth and addNoise.ampl_paras[max_time]<80):
+    get_CFD_time(addNoise,addNoise.ampl_paras,rset,model)
+    if model == "BB":
+        tree_class.fill_ampl_BB(addNoise,rset,max_height,max_time)
+    elif model == "CSA":
+        tree_class.fill_ampl_CSA(addNoise,rset,max_height,max_time)
 
 def get_CFD_time(addNoise,Ampl_paras,rset,model):
     """
@@ -461,13 +461,13 @@ def get_CFD_time(addNoise,Ampl_paras,rset,model):
     CFD20 = 0
     CFD80 = 0
     for i in range (0,len(time_list)):
-        if Ampl_paras[model_list][i]>=Ampl_paras[model_height]*rset.CFD \
+        if abs(Ampl_paras[model_list][i])>=abs(Ampl_paras[model_height]*rset.CFD) \
            and time_list[i]<Ampl_paras[max_time] and CFD50==0 \
            and time_list[i+3]<Ampl_paras[max_time] and time_list[i-3]>1.0e-9 :
             
             dVdt=(Ampl_paras[model_list][i+3]
                   -Ampl_paras[model_list][i-3]) \
-                  /(time_list[i+3]-time_list[i-3])/1e9/1.38
+                  /(time_list[i+3]-time_list[i-3])/1e9/1.38 # parameterized
                    
             if (dVdt!=0):
                 jitter=random_gauss(0,addNoise.noise_height_RMS/dVdt)
@@ -666,8 +666,8 @@ def draw_max_voltage(max_voltage_list,out_put,model):
     #test
     histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
     for i in range(0,len(max_voltage_list)):
-        if max_voltage_list[i]>0:
-            histo.Fill(max_voltage_list[i])
+        #if max_voltage_list[i]>0:
+        histo.Fill(max_voltage_list[i])
     # Fit data
     fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
     histo=max_voltage_TH1F_define(histo)
@@ -712,8 +712,8 @@ def draw_current_integral(current_integral_list,out_put,model):
     #test
     histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
     for i in range(0,len(current_integral_list)):
-        if current_integral_list[i]>0:
-            histo.Fill(current_integral_list[i])
+        #if current_integral_list[i]>0:
+        histo.Fill(current_integral_list[i])
     # Fit data
     fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
     histo=current_integral_TH1F_define(histo)
@@ -832,8 +832,8 @@ def root_set():
 
 def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing):
     o_ls=input_file.split("/")[:]
-    out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan.csv"
-    in_list = o_ls[2].split("_")
+    out_file=o_ls[0]+"/"+o_ls[1]+"/"+o_ls[2]+"/time_resolution_scan.csv"
+    in_list = o_ls[3].split("_")
 
     with open(out_file,"a") as f:
         keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
@@ -846,8 +846,8 @@ def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,effici
 
 def save_gain_efficiency(input_file, max_voltage_CSA, error_max_voltage_CSA, current_integral_BB, error_current_integral_BB):
     o_ls=input_file.split("/")[:]
-    out_file=o_ls[0]+"/"+o_ls[1]+"/gain_efficiency_scan.csv"
-    in_list = o_ls[2].split("_")
+    out_file=o_ls[0]+"/"+o_ls[1]+"/"+o_ls[2]+"/gain_efficiency_scan.csv"
+    in_list = o_ls[3].split("_")
 
     with open(out_file,"a") as f:
         keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
@@ -870,19 +870,19 @@ def loop_addNoise(input_file,rset,tree_class,model):
 
                 addNoise = AddNoise() 
                 rset.write_list(path,addNoise.list_c)
-                if len(addNoise.list_c)>5:
-                    addNoise.add_n(addNoise.list_c) 
-                    if "plugin3D" not in model \
-                        or (addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
-                        and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9):
+                #if len(addNoise.list_c)>5:
+                addNoise.add_n(addNoise.list_c) 
+                #if "plugin3D" not in model \
+                #or (addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
+                #and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9):
 
-                        judge_threshold(addNoise,rset,tree_class,"BB") 
-                        judge_threshold(addNoise,rset,tree_class,"CSA")
-                        tree_class.fill_vector(rset,addNoise) 
-                        if addNoise.CFD_time_r["BB"]>0:      
-                            tree_class.tree_out.Fill()
-                            rset.effective_event_number += 1
-                        tree_class.init_parameter()
+                judge_threshold(addNoise,rset,tree_class,"BB") 
+                judge_threshold(addNoise,rset,tree_class,"CSA")
+                tree_class.fill_vector(rset,addNoise) 
+                #if addNoise.CFD_time_r["BB"]>0:      
+                tree_class.tree_out.Fill()
+                rset.effective_event_number += 1
+                tree_class.init_parameter()
             else:
                 break
     efficiency = rset.effective_event_number / Events[0]
@@ -895,7 +895,7 @@ if __name__ == '__main__':
     model=o_ls[1]
     # Outfilename and init_parameter
     rset = NoiseSetting()
-    out_file=o_ls[0]+"/"+o_ls[1]+"/"+"outfile:"+o_ls[2]+"/"
+    out_file=o_ls[0]+"/"+o_ls[1]+"/"+o_ls[2]+"/"+"outfile:"+o_ls[3]+"/"
     rset.create_outpath(out_file)
     # Root defined
     out_root_f=ROOT.TFile(out_file+"out.root","RECREATE")

@@ -27,6 +27,9 @@ usage_1_1() {
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-SiC-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-SiC-PIN" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.4"    "HPK-Si-PIN basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution for HPK-Si-PIN" 
     printf "\n"
 }
 usage_1_2() { 
@@ -58,6 +61,9 @@ usage_2_1() {
 
 usage_2_2() { 
     printf "\n\t%-5s  %-40s\n"  "2.2.1"    "Si-LGAD basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for Si-LGAD, multi points voltage [200,250]"
+    printf "\n\t%-5s  %-40s\n"  "2.1.4"    "get time resolution vs voltage ..." 
     printf "\n"
 }
 
@@ -107,7 +113,22 @@ case $option in
         ;;
 
     1.1.3) echo "get time resolution for SiC-PIN"
-        ./python/add_noise_raser.py out/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
+        ./python/add_noise_raser.py out/pin3D/NJU-PIN/_d=10.0_v=-400.0_tmp=300.0_thick=100.0_radius=None 1
+        ;;
+
+    1.1.4) echo "Si-PIN basic information for RASER simulation ..."
+        geant4 
+        ./python/gsignal.py det_name=HPK-Si-PIN parfile=setting.json
+        ;;
+
+    1.1.5) echo "batch model with total number, split with step number"
+		hepjob
+		./python/run_batchjob.py det_name=HPK-Si-PIN step=10000 total=200000 \
+							 instance=0 output=out/pin3D/HPK-Si-PIN/ batch=True para_name="NO" para_number=1 
+        ;;
+
+    1.1.6) echo "get time resolution for Si-PIN"
+        ./python/add_noise_raser.py out/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
         esac
 }
@@ -118,21 +139,22 @@ case $option in
         geant4 
         ./python/gsignal.py det_name=plugin3D parfile=setting.json
         ;;
+
     1.2.2.T) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_name=plugin3D step=200 total=400  \
-							 instance=0 output=out/plugin3D/ batch=True para_name=scan_voltage para_number=10
+							 instance=0 output=out/plugin3D/plugin3D/ batch=True para_name=scan_voltage para_number=10
 		;; 
     1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
         hepjob
 		./python/run_batchjob.py det_name=plugin3D step=20000 total=40000  \
-							 instance=0 output=out/plugin3D/ batch=True para_name=scan_voltage para_number=10 
+							 instance=0 output=out/plugin3D/plugin3D/ batch=True para_name=scan_voltage para_number=10 
         ;;
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        ./python/time_scan.py  out/plugin3D scan
+        ./python/time_scan.py  out/plugin3D/plugin3D/ scan
 			;;
 	1.2.4) echo "get time resolution vs draw voltage"
-		./python/time_scan.py  out/plugin3D/time_resolution_scan.csv draw_voltage 0
+		./python/time_scan.py  out/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
 			;;
         esac
 }
@@ -181,18 +203,18 @@ case $option in
 
 	2.1.2) echo "batch model with total number, split with step number"
 		hepjob
-		./python/run_batchjob.py det_name=SICAR-1  step=200000 total=400000 \
-							 instance=0 output=out/SICAR-1/ batch=True para_name=scan_doping para_number=8
+		./python/run_batchjob.py det_name=SICAR-1  step=50000 total=200000 \
+							 instance=0 output=out/lgad3D/SICAR-1/ batch=True para_name=scan_voltage para_number=10
         ;;
 
-    2.1.3) echo "get time resolution for SiC-LGAD, multi points doping [1e5,7e5]"
+    2.1.3) echo "get time resolution for SiC-LGAD, multi points voltage [200,250]"
         hepjob
-        ./python/time_scan.py  out/SICAR-1 scan
+        ./python/time_scan.py  out/lgad3D/SICAR-1 scan
         ;;
 
     2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"
-		./python/time_scan.py  out/SICAR-1/time_resolution_scan.csv draw_doping 0
-        ./python/time_scan.py  out/SICAR-1/gain_efficiency_scan.csv gain_doping 0
+		./python/time_scan.py  out/lgad3D/SICAR-1/time_resolution_scan.csv draw_voltage 0
+        ./python/time_scan.py  out/lgad3D/SICAR-1/gain_efficiency_scan.csv gain_voltage 0
 		;;
     esac
 }
@@ -205,6 +227,21 @@ case $option in
         geant4 
         ./python/gsignal.py det_name=HPK-Si-LGAD parfile=setting.json
         ;;
+    2.2.2) echo "batch model with total number, split with step number"
+		hepjob
+		./python/run_batchjob.py det_name=HPK-Si-LGAD step=50000 total=200000 \
+							 instance=0 output=out/lgad3D/HPK-Si-LGAD/ batch=True para_name=scan_voltage para_number=6
+        ;;
+
+    2.2.3) echo "get time resolution for Si-LGAD, multi points voltage [200,250]"
+        hepjob
+        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD scan
+        ;;
+
+    2.2.4) echo "get time resolution and gain efficiency vs avalanche doping"
+		./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
+        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
+		;;
     esac
 }
 
@@ -215,6 +252,7 @@ case $option in
         geant4 
         ./python/TCTtest.py det_name=NJU-PIN parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
         ;;
+
     3.1.2) echo "SiC-LGAD top-TCT basic information ..."
         geant4 
         ./python/TCTtest.py det_name=SICAR-1 parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json
@@ -224,9 +262,14 @@ case $option in
 
 sub_3_2(){
 case $option in 
-    3.2.1) echo "SiC-PIN edge-TCT basic information ..."
+    3.2.1) echo "Si-PIN edge-TCT basic information ..."
         geant4 
-        ./python/TCTtest.py det_name=NJU-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
+        ;;
+
+    3.2.2) echo "Si-LGAD edge-TCT basic information ..."
+        geant4 
+        ./python/TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
         ;;
         esac
 }
