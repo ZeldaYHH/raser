@@ -149,11 +149,11 @@ case $option in
         ;;
 
     1.3.3) echo "Simulate 1D NJU-PIN I-V ..."
-        ./python/run_devsim_job.py ./python/solve_iv_pin.py
+        ./python/run_batchjob.py devsim ./python/solve_iv_pin.py
         ;;
 
     1.3.4) echo "Simulate 1D NJU-PIN C-V ..."
-        ./python/run_devsim_job.py ./python/solve_cv_pin.py
+        ./python/run_batchjob.py devsim ./python/solve_cv_pin.py
         ;;
 
     1.3.5) echo "Build 1D SICAR1 LGAD structure ..."
@@ -161,11 +161,11 @@ case $option in
         ;;
 
     1.3.6) echo "Simulate 1D SICAR1 LGAD I-V ..."
-        ./python/run_devsim_job.py ./python/solve_iv_lgad.py
+        ./python/run_batchjob.py devsim ./python/solve_iv_lgad.py
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-        ./python/run_devsim_job.py ./python/solve_cv_lgad.py
+        ./python/run_batchjob.py devsim ./python/solve_cv_lgad.py
         ;;
 
         esac

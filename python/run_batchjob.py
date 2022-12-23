@@ -12,6 +12,7 @@ import sys
 import time
 import json
 import subprocess
+import re
 
 class Input_parameters:
     def __init__(self,args):
@@ -28,11 +29,21 @@ class Input_parameters:
         return int(self.events_total/self.events_each_run)
 
 def main():
+
     args = sys.argv[1:]
-    input=Input_parameters(args)
-    job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.name)
-    if input.run_mode == "True":
-        run_job(job_name)
+
+    if args[0] == "devsim":
+        python_file = re.match(r"./python/(.*)",args[1]).group(1)
+        create_path("./devsim_output/jobs")
+        jobfile_name = "./devsim_output/jobs/"+python_file+".job"
+        gen_devsim_job(jobfile_name,run_code="raser ./python/"+python_file)
+        submit_devsim_job(jobfile_name)
+
+    else:
+        input=Input_parameters(args)
+        job_name=write_job(input,run_code="./python/gsignal.py det_name="+input.name)
+        if input.run_mode == "True":
+            run_job(job_name)
 
 def write_job(input,run_code):
     now = time.strftime("%Y_%m%d_%H%M")
@@ -155,6 +166,24 @@ def modify_json(input,name):
                         f.close()        
             else:
                 pass
+
+
+def gen_devsim_job(jobfile_name,run_code):
+    jobfile = open(jobfile_name,"w")
+    jobfile.write("source ./run raser \n")
+    jobfile.write(run_code)
+    jobfile.close()
+
+    print("Generate job file: ", jobfile_name)
+
+def submit_devsim_job(jobfile_name):
+    print("Submit job file: ", jobfile_name)
+    runcmd("chmod u+x {}".format(jobfile_name))
+    runcmd("hep_sub -o ./devsim_output/jobs -e ./devsim_output/jobs {} -g physics".format(jobfile_name))
+
+
+
+
 
 if __name__ == '__main__':
     main()
