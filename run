@@ -114,8 +114,9 @@ sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
         # need to ./run raser first 
-        geant4 
-        ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
+        apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif ./python/gsignal.py det_name=NJU-PIN parfile=setting.json 
+        # geant4 
+        # ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
