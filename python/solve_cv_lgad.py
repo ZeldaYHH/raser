@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import devsim 
 import os
 import sys
@@ -13,8 +16,8 @@ import matplotlib.pyplot
 import csv
 import math
 
-if not (os.path.exists("./output")):
-    os.mkdir("./output")
+if not (os.path.exists("./devsim_output")):
+    os.mkdir("./devsim_output")
 
 device="1D_SICAR1_LGAD"
 region="1D_SICAR1_LGAD"
@@ -26,9 +29,9 @@ area_factor = 4.0
 
 sicar1_lgad_mesh.CreateMesh(device=device, region=region)
 sicar1_lgad_mesh.SetDoping(device=device, region=region)
-sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./output/sicar1_lgad_doping.png")
+sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./devsim_output/sicar1_lgad_doping.png")
 
-devsim.open_db(filename="./SICARDB", permission="readonly")
+devsim.open_db(filename="./devsim_output/SICARDB", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -52,7 +55,7 @@ reverse_v=0.0
 ssac_voltage = []
 ssac_top_cap = []
 
-f = open("./output/sicar1_lgad_reverse_cv.csv", "w")
+f = open("./devsim_output/sicar1_lgad_reverse_cv.csv", "w")
 header = ["Voltage","Capacitance"]
 writer = csv.writer(f)
 writer.writerow(header)
@@ -80,5 +83,5 @@ matplotlib.pyplot.plot(ssac_voltage, ssac_top_cap)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Capacitance (pF)')
 #matplotlib.pyplot.axis([-200, 0, 0, 20])
-matplotlib.pyplot.savefig("./output/sicar1_lgad_reverse_cv.png")
+matplotlib.pyplot.savefig("./devsim_output/sicar1_lgad_reverse_cv.png")
 #write_devices(file="diode_1d.dat", type="tecplot")

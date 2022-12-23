@@ -34,9 +34,10 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-    draw_drift_path(my_d,my_f,my_current,path)
     if my_l != None:
         draw_nocarrier3D(path,my_l)
+    else: 
+        draw_drift_path(my_d,my_f,my_current,path)
      
 def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     """
@@ -159,6 +160,7 @@ def draw_ele_field_1D(my_d,my_f,path):
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
     c1.SetRightMargin(0.12)
+    '''
     c1.Divide(2,2)
     model = ["E","P","WP"]
     i=1
@@ -176,6 +178,9 @@ def draw_ele_field_1D(my_d,my_f,path):
     c1.GetPad(i).SetRightMargin(0.2)
     e_field3=fill_his_1D(model[i-1],my_d,my_f)
     e_field3.Draw("COLZ")
+    '''
+    e_field1=fill_his_1D('E',my_d,my_f)
+    e_field1.Draw("COLZ")
     c1.SaveAs(path+my_d.det_model+".pdf")
     c1.SaveAs(path+my_d.det_model+".root")
     del c1
@@ -232,11 +237,12 @@ def fill_his_1D(model,my_d,my_f):
             if model == "E":
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
-                                +math.pow(f_v[2],2))                           
+                                +math.pow(f_v[2],2))
+                e_v.GetYaxis().SetTitle(model+"[V/um]")                        
         except RuntimeError:
             f_v = 0.0
         e_v.SetBinContent(i+1,f_v)
-    e_v.GetXaxis().SetTitle("z") 
+    e_v.GetXaxis().SetTitle("z[um]") 
     return e_v
 
 def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
@@ -394,7 +400,7 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.SetLineWidth(2)
     c.Update()
 
-    if ele_current.GetMinimum() < 0:
+    """ if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
         rightmax = 1.1*ele_current.GetMaximum()
@@ -416,12 +422,16 @@ def draw_plot(my_d, ele_current, model, path):
                        min(0,rightmax), max(0,rightmax), 510, "+L")
     axis.SetLineColor(2)
     axis.SetTextColor(2)
-    axis.SetTextSize(0.035)
+    axis.SetTextSize(0.02)
+    axis.SetTextFont(40)
     axis.SetLabelColor(2)
-    axis.SetLabelSize(0.03)
+    axis.SetLabelSize(0.035)
+    axis.SetLabelFont(40)
     axis.SetTitle("Ampl [mV]")
+    axis.SetTitleFont(40)
+    axis.SetTitleOffset(1.2)
     #axis.CenterTitle()
-    axis.Draw("SAME HIST")
+    axis.Draw("SAME HIST") """
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
@@ -429,9 +439,9 @@ def draw_plot(my_d, ele_current, model, path):
     legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
     legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
     legend.AddEntry(my_d.sum_cu, "e+h", "l")
-    legend.AddEntry(ele_current, "electronics", "l")
+    #legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
-    legend.SetTextFont(43)
+    #legend.SetTextFont(43)
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
@@ -599,13 +609,13 @@ def draw_scat_angle(evnets_angle,angle,model):
     h2.Draw("HIST")    
     c1.SaveAs("scat_angle"+model+".pdf")
 
-def draw_nocarrier3D(path,my_l):
+def draw_nocarrier3D(path, my_l):
     ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
     h = ROOT.TH3D("h","Pairs of carrier generation",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min,my_l.x_max,\
-        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min,my_l.y_max,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min,my_l.z_max)
+        int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
+        int((my_l.y_right_most - my_l.y_left_most) / my_l.y_step), my_l.y_left_most, my_l.y_right_most,\
+        int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw()
@@ -618,26 +628,5 @@ def draw_nocarrier3D(path,my_l):
     c1.SaveAs(path+"nocarrier_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+"_"\
-        +str(my_l.min_carrier)+".pdf")  
+        +str(round(my_l.fz_rel,5))+".pdf")  
 
-def draw_nocarrier2D(path,my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    c1.SetLeftMargin(0.12)
-    c1.SetRightMargin(0.2)
-    c1.SetBottomMargin(0.14)
-    c1.SetRightMargin(0.12)
-    h = ROOT.TH2D("h","Light Intensity",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step),my_l.x_min,my_l.x_max,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step),my_l.z_min,my_l.z_max)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw("COLZ")
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
-    h.GetYaxis().SetTitle("Thick [um]")
-    c1.SaveAs(path+"nocarrier2D_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+"_"\
-        +str(my_l.min_carrier)+".pdf")  

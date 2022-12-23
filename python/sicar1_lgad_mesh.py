@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import devsim
 import os
 import sys
@@ -63,15 +66,15 @@ def Draw_Doping(device, region, path):
 
 
 def main():
-    if not (os.path.exists("./output")):
-        os.mkdir("./output")
+    if not (os.path.exists("./devsim_output")):
+        os.mkdir("./devsim_output")
 
     device="1D_SICAR1_LGAD"
     region="1D_SICAR1_LGAD"
 
     CreateMesh(device=device, region=region)
     SetDoping(device=device, region=region)
-    Draw_Doping(device=device, region=region, path="./output/sicar1_lgad_doping.png")
+    Draw_Doping(device=device, region=region, path="./devsim_output/sicar1_lgad_doping.png")
 
 
 if __name__ == '__main__':
