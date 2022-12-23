@@ -60,7 +60,7 @@ def time_scan(args):
 
 def draw_scan(input,index,model,eff):
     o_ls=input.split("/")[:]	
-    out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"
+    out_file=o_ls[0]+"/"+o_ls[1]+"/"+o_ls[2]+"/time_resolution_scan"
 
     xa_axis = array( 'f' )
     ya_axis = array( 'f' )
@@ -180,7 +180,7 @@ def draw_scan(input,index,model,eff):
 
 def draw_scan_gain(input,index,model,eff):
     o_ls=input.split("/")[:]	
-    out_file=o_ls[0]+"/"+o_ls[1]+"/gain_efficiency_scan"
+    out_file=o_ls[0]+"/"+o_ls[1]+"/"+o_ls[2]+"/gain_efficiency_scan"
 
     xa_axis = array( 'f' )
     ya_axis = array( 'f' )
@@ -263,16 +263,16 @@ def graph_set_time_resolution(gr,model,eff):
     gr.GetYaxis().SetNdivisions(510)
     if model == "draw_voltage":
         gr.GetXaxis().SetTitle("Voltage [V]")
-        if eff == "1":
-            pass
-        else:
-            gr.GetYaxis().SetRangeUser(30,60)
+        #if eff == "1":
+        #    pass
+        #else:
+        #    gr.GetYaxis().SetRangeUser(30,60)
     elif model == "draw_tmp":
         gr.GetXaxis().SetTitle("Temperature [K]")
-        if eff == "1":
-            pass
-        else:
-            gr.GetYaxis().SetRangeUser(30,60)
+        #if eff == "1":
+        #    pass
+        #else:
+        #    gr.GetYaxis().SetRangeUser(30,60)
     elif model == "draw_doping":
         gr.GetXaxis().SetTitle("Doping Concentration [1e12 cm^{-3}]")
     elif model == "draw_thick":
@@ -303,16 +303,16 @@ def graph_set_gain_efficiency(gr,model,eff):
     gr.GetYaxis().SetNdivisions(510)
     if model == "gain_voltage":
         gr.GetXaxis().SetTitle("Voltage [V]")
-        if eff == "1":
-            pass
-        else:
-            gr.GetYaxis().SetRangeUser(30,60)
+        #if eff == "1":
+        #    pass
+        #else:
+        #    gr.GetYaxis().SetRangeUser(30,60)
     elif model == "gain_tmp":
         gr.GetXaxis().SetTitle("Temperature [K]")
-        if eff == "1":
-            pass
-        else:
-            gr.GetYaxis().SetRangeUser(30,60)
+        #if eff == "1":
+        #    pass
+        #else:
+        #    gr.GetYaxis().SetRangeUser(30,60)
     elif model == "gain_doping":
         gr.GetXaxis().SetTitle("Doping Concentration [1e12 cm^{-3}]")
     elif model == "gain_thick":
