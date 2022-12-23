@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import devsim 
 import os
 import sys
@@ -29,7 +32,7 @@ nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
 nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
 nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./devsim_output/nju_pin_doping.png")
 
-devsim.open_db(filename="./SICARDB", permission="readonly")
+devsim.open_db(filename="./devsim_output/SICARDB", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)

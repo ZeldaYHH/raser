@@ -1,10 +1,17 @@
-from cProfile import label
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
+import os
 import devsim
 import math
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from array import array
+
+if not (os.path.exists("./devsim_output")):
+    os.mkdir("./devsim_output")
+
 
 def CreateDataBase(filename):
     devsim.create_db(filename=filename)
@@ -163,7 +170,7 @@ def CreateHatakeyamaImpact():
     plt.title("Hatakeyama Impact Model")
     plt.grid(True,ls = '--',which="both")
     fig.show()
-    fig.savefig("./HatakeyamaImpactModel.png")
+    fig.savefig("./devsim_output/HatakeyamaImpactModel.png")
 
 
 def SaveDataBase():
@@ -173,7 +180,7 @@ def SaveDataBase():
 
 
 def main():
-    CreateDataBase("SICARDB")
+    CreateDataBase("./devsim_output/SICARDB")
     CreateGlobalConstant()
     CreateSiliconCarbideConstant()
     CreateHatakeyamaImpact()

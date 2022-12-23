@@ -163,38 +163,31 @@ sub_1_3(){
 case $option in 
 
     1.3.1) echo "Initial DataBase of DEVSIM ..."
-        devsim
-        python ./raser/DataBase.py
+        raser "./python/gen_devsim_db.py"
         ;;
 
     1.3.2) echo "Build 1D NJU-PIN structure ..."
-        devsim
-        python ./python/nju_pin_5mm_5mm_mesh.py
+        raser "./python/nju_pin_5mm_5mm_mesh.py"
         ;;
 
     1.3.3) echo "Simulate 1D NJU-PIN I-V ..."
-        devsim
-        python ./python/solve_iv_pin.py
+        ./python/run_batchjob.py devsim ./python/solve_iv_pin.py
         ;;
 
     1.3.4) echo "Simulate 1D NJU-PIN C-V ..."
-        devsim
-        python ./python/solve_cv_pin.py
+        ./python/run_batchjob.py devsim ./python/solve_cv_pin.py
         ;;
 
     1.3.5) echo "Build 1D SICAR1 LGAD structure ..."
-        devsim
-        python ./python/sicar1_lgad_mesh.py
+        raser "./python/sicar1_lgad_mesh.py"
         ;;
 
     1.3.6) echo "Simulate 1D SICAR1 LGAD I-V ..."
-        devsim
-        python ./python/solve_iv_lgad.py
+        ./python/run_batchjob.py devsim ./python/solve_iv_lgad.py
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-        devsim
-        python ./python/solve_cv_lgad.py
+        ./python/run_batchjob.py devsim ./python/solve_cv_lgad.py
         ;;
 
         esac
@@ -283,7 +276,7 @@ case $option in
 
 case $option in 
     raser) echo "Loading RASER..."
-        raser
+        echo "Please setup the raser cmd by [source ./run raser]..."
         ;; 
 
     1.1) echo "RASER simulate NJU-SiC-PIN"
