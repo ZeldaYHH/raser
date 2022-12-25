@@ -19,8 +19,8 @@ import numpy as np
 
 import nju_pin_5mm_5mm_mesh
 
-if not (os.path.exists("./devsim_output")):
-    os.mkdir("./devsim_output")
+if not (os.path.exists("./output/devsim")):
+    os.mkdir("./output/devsim")
 
 device="1D_NJU_PIN"
 region="1D_NJU_PIN"
@@ -32,9 +32,9 @@ area_factor = 4.0
 
 nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
 nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
-nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./devsim_output/nju_pin_doping.png")
+nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
 
-devsim.open_db(filename="./devsim_output/SICARDB", permission="readonly")
+devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -58,7 +58,7 @@ reverse_bot_current = []
 reverse_voltage.append(0.)
 reverse_top_current.append(0.)
 
-f = open("./devsim_output/nju_pin_reverse_iv.csv", "w")
+f = open("./output/devsim/nju_pin_reverse_iv.csv", "w")
 header = ["Voltage","Current"]
 writer = csv.writer(f)
 writer.writerow(header)
@@ -97,7 +97,7 @@ matplotlib.pyplot.ylabel('E (V/cm)')
 matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 ax1.legend(loc='upper right')
 fig1.show()
-fig1.savefig("./devsim_output/nju_pin_reverse_electricfield.png")
+fig1.savefig("./output/devsim/nju_pin_reverse_electricfield.png")
 
 f.close()
 devsim.close_db()
@@ -111,4 +111,4 @@ matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Current (A)')
 #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-fig2.savefig("./devsim_output/nju_pin_reverse_iv.png")
+fig2.savefig("./output/devsim/nju_pin_reverse_iv.png")

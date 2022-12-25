@@ -17,8 +17,8 @@ import matplotlib.pyplot
 import csv
 import math
 
-if not (os.path.exists("./devsim_output")):
-    os.mkdir("./devsim_output")
+if not (os.path.exists("./output/devsim")):
+    os.mkdir("./output/devsim")
 
 device="1D_NJU_PIN"
 region="1D_NJU_PIN"
@@ -30,9 +30,9 @@ area_factor = 4.0
 
 nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
 nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
-nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./devsim_output/nju_pin_doping.png")
+nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
 
-devsim.open_db(filename="./devsim_output/SICARDB", permission="readonly")
+devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -53,7 +53,7 @@ reverse_v=0.0
 ssac_voltage = []
 ssac_top_cap = []
 
-f = open("./devsim_output/nju_pin_reverse_cv.csv", "w")
+f = open("./output/devsim/nju_pin_reverse_cv.csv", "w")
 header = ["Voltage","Capacitance"]
 writer = csv.writer(f)
 writer.writerow(header)
@@ -81,5 +81,5 @@ matplotlib.pyplot.plot(ssac_voltage, ssac_top_cap)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Capacitance (pF)')
 #matplotlib.pyplot.axis([-200, 0, 0, 20])
-matplotlib.pyplot.savefig("./devsim_output/nju_pin_reverse_cv.png")
+matplotlib.pyplot.savefig("./output/devsim/nju_pin_reverse_cv.png")
 #write_devices(file="diode_1d.dat", type="tecplot")

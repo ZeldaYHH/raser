@@ -9,8 +9,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from array import array
 
-if not (os.path.exists("./devsim_output")):
-    os.mkdir("./devsim_output")
+if not (os.path.exists("./output/devsim")):
+    os.mkdir("./output/devsim")
 
 
 def CreateDataBase(filename):
@@ -170,7 +170,7 @@ def CreateHatakeyamaImpact():
     plt.title("Hatakeyama Impact Model")
     plt.grid(True,ls = '--',which="both")
     fig.show()
-    fig.savefig("./devsim_output/HatakeyamaImpactModel.png")
+    fig.savefig("./output/devsim/HatakeyamaImpactModel.png")
 
 
 def SaveDataBase():
@@ -180,7 +180,7 @@ def SaveDataBase():
 
 
 def main():
-    CreateDataBase("./devsim_output/SICARDB")
+    CreateDataBase("./output/devsim/SICARDB")
     CreateGlobalConstant()
     CreateSiliconCarbideConstant()
     CreateHatakeyamaImpact()
