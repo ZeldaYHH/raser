@@ -38,7 +38,8 @@ def main():
         dset.scan_variation()
     if "parameter_alter=True" in args:
         # need to put the changed value at the end of the parameter list
-        key,_,value=args[-1].rpartition('=') 
+        key,_,value=args[-1].rpartition('=')
+        value=float(value)
         dset.paras.update({key:value})
     det_dic = dset.detector
     if "plugin3D" in det_dic['det_model']:
