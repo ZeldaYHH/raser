@@ -20,7 +20,7 @@ import numpy as np
 import nju_pin_5mm_5mm_mesh
 
 if not (os.path.exists("./output/devsim")):
-    os.mkdir("./output/devsim")
+    os.makedirs("./output/devsim")
 
 device="1D_NJU_PIN"
 region="1D_NJU_PIN"
