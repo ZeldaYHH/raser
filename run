@@ -107,7 +107,7 @@ case $option in
 
 	1.1.2) echo "batch model with total number, split with step number"
 		step=100000
-		for ((i=1;i<=20;i++))
+		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/NJU-PIN \
                 "gsignal.py det_name=NJU-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
@@ -124,7 +124,7 @@ case $option in
 
     1.1.5) echo "batch model with total number, split with step number"
 		step=10000
-		for ((i=1;i<=20;i++))
+		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/HPK-Si-PIN \
                 "gsignal.py det_name=HPK-Si-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
@@ -145,12 +145,12 @@ case $option in
 
     1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
         step=10000
-		for ((i=1;i<=2;i++))
+		for ((i=0;i<2;i++))
         do
-            for ((j=1;j<=10;j++))
+            for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py plugin3D/plugin3D \
-                "gsignal.py det_name=plugin3D parfile=setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=true voltage=$[-500+j*50]"
+                "gsignal.py det_name=plugin3D parfile=setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
                 # doping=$[10+j*10]
                 # temp=$[300+j*30]
                 # lz=$[150.0+j*30]
@@ -210,12 +210,12 @@ case $option in
 
 	2.1.2) echo "batch model with total number, split with step number"
         step=50000
-		for ((i=1;i<=4;i++))
+		for ((i=0;i<4;i++))
         do
-            for ((j=1;j<=10;j++))
+            for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py lgad3D/SICAR-1 \
-                "gsignal.py det_name=SICAR-1 parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=true voltage=$[-400-j*10]"
+                "gsignal.py det_name=SICAR-1 parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-400-j*10]"
             done
         done
         ;;
@@ -246,7 +246,7 @@ case $option in
             for ((j=1;j<=5;j++))
             do
                 ./python/run_batchjob.py lgad3D/HPK-Si-LGAD \
-                "gsignal.py det_name=HPK-Si-LGAD parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=true voltage=$[200+j*10]"
+                "gsignal.py det_name=HPK-Si-LGAD parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=True voltage=$[200+j*10]"
             done
         done
         ;;
