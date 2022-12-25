@@ -22,7 +22,7 @@ def main():
     command_name = command.replace(" ","_").replace("/","_")
     jobfile_name = "./output/{}/jobs/".format(destination_subfolder)+command_name+".job"
     gen_job(jobfile_name,run_code="raser \"./python/"+command+"\"")
-    # command: raser "./python/xxx.py parameters"
+    # run code: raser "./python/xxx.py parameters"
     submit_job(jobfile_name,destination_subfolder,group)
 
 def gen_job(jobfile_name,run_code):
