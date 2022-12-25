@@ -17,7 +17,7 @@ import csv
 import sicar1_lgad_mesh
 
 if not (os.path.exists("./output/devsim")):
-    os.mkdir("./output/devsim")
+    os.makedirs("./output/devsim")
 
 device="1D_SICAR1_LGAD"
 region="1D_SICAR1_LGAD"

@@ -17,7 +17,7 @@ import csv
 import math
 
 if not (os.path.exists("./output/devsim")):
-    os.mkdir("./output/devsim")
+    os.makedirs("./output/devsim")
 
 device="1D_SICAR1_LGAD"
 region="1D_SICAR1_LGAD"

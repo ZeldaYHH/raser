@@ -56,7 +56,7 @@ def Draw_Doping(device, region, path):
 
 def main():
     if not (os.path.exists("./output/devsim")):
-        os.mkdir("./output/devsim")
+        os.makedirs("./output/devsim")
 
     device="1D_NJU_PIN"
     region="1D_NJU_PIN"

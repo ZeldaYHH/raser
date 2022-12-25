@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from array import array
 
 if not (os.path.exists("./output/devsim")):
-    os.mkdir("./output/devsim")
+    os.makedirs("./output/devsim")
 
 
 def CreateDataBase(filename):

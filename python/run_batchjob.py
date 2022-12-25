@@ -10,13 +10,17 @@ Description:  Run batch model
 import os
 import sys
 import subprocess
+import grp
+import pwd
 
 def main():
     destination_subfolder = sys.argv[1]
-    if destination_subfolder == "devsim":
-        group = "physics"
-    else:
-        group = "atlas"
+    stat_info = os.stat("./")
+    uid = stat_info.st_uid
+    gid = stat_info.st_gid
+    user = pwd.getpwuid(uid)[0]
+    group = grp.getgrgid(gid)[0]
+ 
     command = sys.argv[2]
     create_path("./output/{}/jobs".format(destination_subfolder))
     command_name = command.replace(" ","_").replace("/","_")
