@@ -88,15 +88,11 @@ else
 fi
 
 imagename=raser-1.2.sif
+#active hep_sub
+export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
     apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
-}
-
-hepjob(){
-    # export HepcMyImage=raser-1.2.sif
-    export HepcMyImage=$imagename
-    export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
 sub_1_1(){

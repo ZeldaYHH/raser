@@ -31,7 +31,6 @@ def main():
 
 def gen_job(jobfile_name,run_code):
     jobfile = open(jobfile_name,"w")
-    jobfile.write("export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/ \n")
     jobfile.write("source ./run raser \n")
     jobfile.write(run_code)
     jobfile.close()
