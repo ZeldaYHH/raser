@@ -97,7 +97,7 @@ raser(){
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        raser "./python/gsignal.py det_name=NJU-PIN parfile=setting.json" 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
@@ -105,7 +105,7 @@ case $option in
 		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/NJU-PIN \
-                "gsignal.py det_name=NJU-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
+                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
         done
         ;;
 
@@ -114,7 +114,7 @@ case $option in
         ;;
 
     1.1.4) echo "Si-PIN basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=setting.json"
+        raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
 
     1.1.5) echo "batch model with total number, split with step number"
@@ -122,7 +122,7 @@ case $option in
 		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/HPK-Si-PIN \
-                "gsignal.py det_name=HPK-Si-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
+                "gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
         done
         ;;
 
@@ -135,7 +135,7 @@ case $option in
 sub_1_2(){
 case $option in 
     1.2.1) echo "3D-SiC basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=plugin3D parfile=setting.json"
+        raser "./python/gsignal.py det_name=plugin3D parfile=paras/setting.json"
 		;;
 
     1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
@@ -145,7 +145,7 @@ case $option in
             for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py plugin3D/plugin3D \
-                "gsignal.py det_name=plugin3D parfile=setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
+                "gsignal.py det_name=plugin3D parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
                 # doping=$[10+j*10]
                 # temp=$[300+j*30]
                 # lz=$[150.0+j*30]
@@ -200,7 +200,7 @@ case $option in
 sub_2_1(){
 case $option in 
     2.1.1) echo "SiC-LGAD basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=SICAR-1 parfile=setting.json" 
+        raser "./python/gsignal.py det_name=SICAR-1 parfile=paras/setting.json" 
         ;;
 
 	2.1.2) echo "batch model with total number, split with step number"
@@ -210,7 +210,7 @@ case $option in
             for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py lgad3D/SICAR-1 \
-                "gsignal.py det_name=SICAR-1 parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-400-j*10]"
+                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-400-j*10]"
             done
         done
         ;;
@@ -231,7 +231,7 @@ case $option in
 sub_2_2(){
 case $option in 
     2.2.1) echo "Si-LGAD basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=HPK-Si-LGAD parfile=setting.json"
+        raser "./python/gsignal.py det_name=HPK-Si-LGAD parfile=paras/setting.json"
         ;;
 
     2.2.2) echo "batch model with total number, split with step number"
@@ -241,7 +241,7 @@ case $option in
             for ((j=1;j<=5;j++))
             do
                 ./python/run_batchjob.py lgad3D/HPK-Si-LGAD \
-                "gsignal.py det_name=HPK-Si-LGAD parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=True voltage=$[200+j*10]"
+                "gsignal.py det_name=HPK-Si-LGAD parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=True voltage=$[200+j*10]"
             done
         done
         ;;
@@ -262,11 +262,11 @@ case $option in
 sub_3_1(){
 case $option in 
     3.1.1) echo "SiC-PIN top-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=NJU-PIN parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json"
+        raser "./python/TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
         ;;
 
     3.1.2) echo "SiC-LGAD top-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=SICAR-1 parfile=setting.json laser_model=top_TCT laser_parfile=laser_setting.json" 
+        raser "./python/TCTtest.py det_name=SICAR-1 parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json" 
         ;;
         esac
 }
@@ -274,11 +274,11 @@ case $option in
 sub_3_2(){
 case $option in 
     3.2.1) echo "Si-PIN edge-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json"
+        raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"
         ;;
 
     3.2.2) echo "Si-LGAD edge-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json"
+        raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"
         ;;
         esac
 }
