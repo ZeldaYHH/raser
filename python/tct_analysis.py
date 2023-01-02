@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """
-author: tanyuhang
+author: wanghaobo
 time: 2022.12.25
-Use: 1.Read the data of Raser TCT induced current
+Use: 1.Read the data of Raser eTCT induced current
      2.Add experimental noise on induced current
      3.Get the risertime,charge collection and velocity profile
 """
@@ -12,12 +12,12 @@ from array import array
 import contextlib
 import os
 import sys
-#import re
 import ROOT
 import math
 import numpy as np
 
 def main():
+   path=sys.argv[1:]
    Z= array("d")
    amplitude= array("d")
    risetime= array("d")
@@ -56,10 +56,10 @@ def main():
       rt=get_risetime(volt,time,J,mean)
       risetime.append(rt)  
       
-   draw_graphs(amplitude,Z,"Amplitude")
-   draw_graphs(charge,Z,"Charge")
-   draw_graphs(risetime,Z,"RiseTime")
-   draw_graphs(elefield,Z,"Elefield")
+   draw_graphs(amplitude,Z,"Amplitude",path)
+   draw_graphs(charge,Z,"Charge",path)
+   draw_graphs(risetime,Z,"RiseTime",path)
+   draw_graphs(elefield,Z,"Elefield",path)
    return
 
 def read_rootfile(rootfile):
@@ -159,7 +159,7 @@ def draw_graphs(array1,Z,name):
     legend.SetFillColor(0)
     legend.Draw()
 
-    g.SaveAs(name+".pdf")
+    g.SaveAs(path+name+".pdf")
   
     return
 if __name__ == "__main__":

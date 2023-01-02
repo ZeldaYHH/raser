@@ -1,6 +1,6 @@
 # Publish on pypi.org 
 check: 
-	python python/pypi.py sdist 
+	python cfg/pypi.py sdist 
 	twine check dist/* 
 	
 upload: 
@@ -18,10 +18,10 @@ build-login:
 	ssh -Y shixin@lxslc701
 
 build-raser: 
-	apptainer build --fakeroot raser.sif raser.def
+	apptainer build --fakeroot raser.sif cfg/raser.def
 
 build-raser-dev: 
-	apptainer build --force --fakeroot --sandbox /tmp/raser-dev raser.def
+	apptainer build --force --fakeroot --sandbox /tmp/raser-dev cfg/raser.def
 
 sign-raser: 
 	apptainer sign raser.sif 

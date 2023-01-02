@@ -29,4 +29,6 @@ drawsave.save(my_l,ele_current)
 # path = "fig/" + now + "/"
 # drawsave.create_path(path)
 # drawsave.draw_nocarrier3D(path,my_l)
+# drawsave.draw_nocarrier2D(path,my_l)
+
 print("total time used:%s"%(time.time()-start))

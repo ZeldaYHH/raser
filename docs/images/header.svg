@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="header.svg"
+   id="svg25"
+   version="1.1"
+   enable-background="new 270 -225 1440 883"
+   viewBox="270 -225 1440 883">
+  <metadata
+     id="metadata29">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     inkscape:current-layer="svg25"
+     inkscape:window-maximized="0"
+     inkscape:window-y="254"
+     inkscape:window-x="718"
+     inkscape:cy="441.5"
+     inkscape:cx="720"
+     inkscape:zoom="0.73125"
+     showgrid="false"
+     id="namedview27"
+     inkscape:window-height="612"
+     inkscape:window-width="979"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <style
+     id="style10"
+     type="text/css">.st0{fill:url(#SVGID_1_);} .st1{opacity:.08;fill:#FFFFFF;} .st2{opacity:0.15;fill:#C25847;} .st3{opacity:0.1;fill:#FFFFFF;}</style>
+  <defs
+     id="defs17">
+    <linearGradient
+       y2="656.269"
+       x2="990"
+       y1="-291.884"
+       x1="990"
+       gradientUnits="userSpaceOnUse"
+       id="SVGID_1_">
+      <stop
+         id="stop12"
+         stop-color="#e1563f"
+         offset="0" />
+      <stop
+         id="stop14"
+         stop-color="#E76D5A"
+         offset="1" />
+    </linearGradient>
+  </defs>
+  <path
+     style="fill:#000080;stroke-width:1"
+     id="path19"
+     d="M 270,-225 H 1710 V 658 H 270 Z"
+     class="st0" />
+  <path
+     d="M1706.7-225H270v65.1C422.1-90.1 663.3-45 935-45c348.9 0 647.7-74.4 771.7-180z"
+     class="st1"
+     id="top-left" />
+  <path
+     d="M586 300c-111.9 0-218.6 7.7-316 21.5V658h1125.1c15.6-22.1 23.9-45.2 23.9-69 0-159.6-372.9-289-833-289z"
+     class="st2"
+     id="bottom-left" />
+  <path
+     d="M776.3 658H1710V540c-75.4-7.8-155.3-12-238-12-290.7 0-546.7 51.7-695.7 130z"
+     class="st2"
+     id="bottom-right" />
+  <path
+     d="M1710-100.7V-225H745.6C892.1-142.2 1155.5-87 1456-87c88.6 0 173.9-4.8 254-13.7z"
+     class="st3"
+     id="top-right" />
+</svg>

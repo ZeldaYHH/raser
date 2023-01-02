@@ -18,11 +18,7 @@ setup(
     description="SiC Detector Simulation",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/dt-np/raser",
-    project_urls={
-        "Bug Tracker": "https://github.com/dt-np/raser/issues",
-        "Documentation": "http://xteam.ihep.ac.cn/research/rd50/raser/",
-    }, 
+    url="https://raser.team",
     packages=find_packages(),
     license='MIT',
     classifiers=[
@@ -31,4 +27,3 @@ setup(
 		"Operating System :: OS Independent",
     ]
 	)
-
