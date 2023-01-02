@@ -18,10 +18,8 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
 
     printf "\n\t%-9s  %-40s"    "3.1"       "top-TCT"
-
-    printf "\n\t%-9s  %-40s"    "5.1"       "edge-TCT-Si"
-
-    printf "\n\t%-9s  %-40s"    "7.1"       "edge-TCT-SiC"
+    printf "\n\t%-9s  %-40s"    "3.2"       "edge-TCT-Si"
+    printf "\n\t%-9s  %-40s"    "3.3"       "edge-TCT-SiC"
 
     printf "\n"
 }
@@ -75,18 +73,18 @@ usage_3_1() {
     printf "\n"
 }
 
-usage_5_1() {
-    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "Si-PIN edge-TCT basic information ..."
-    printf "\n\t%-5s  %-40s\n"  "5.1.2"    "Si-LGAD edge-TCT basic information ..."
-    printf "\n\t%-5s  %-40s\n"  "5.1.3"    "get volt-time for Si-PIN, multi points z [0,50]"
-    printf "\n\t%-5s  %-40s\n"  "5.1.4"    "get volt-time for Si-LGAD, multi points z [0,50]"
-    printf "\n\t%-5s  %-40s\n"  "5.1.4"    "analyse eTCT rootfiles "
+usage_3_2() {
+    printf "\n\t%-5s  %-40s\n"  "3.2.1"    "Si-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.2.2"    "Si-LGAD edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.2.3"    "get volt-time for Si-PIN, multi points z [0,50]"
+    printf "\n\t%-5s  %-40s\n"  "3.2.4"    "get volt-time for Si-LGAD, multi points z [0,50]"
+    printf "\n\t%-5s  %-40s\n"  "3.2.4"    "analyse eTCT rootfiles "
     printf "\n\n"
 }
 
-usage_7_1() {
-    printf "\n\t%-5s  %-40s\n"  "7.1.1"    "SiC-PIN edge-TCT basic information ..."
-    printf "\n\t%-5s  %-40s\n"  "7.1.2"    "get volt-time for Si-PIN, multi points z [0,100]"
+usage_3_3() {
+    printf "\n\t%-5s  %-40s\n"  "3.3.1"    "SiC-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.3.2"    "get volt-time for Si-PIN, multi points z [0,100]"
     printf "\n\n"
 }
 
@@ -285,21 +283,21 @@ case $option in
 }
 
 
-sub_5_1(){
+sub_3_2(){
 case $option in
-    5.1.1) echo "Si-PIN edge-TCT basic information ..."
+    3.2.1) echo "Si-PIN edge-TCT basic information ..."
         raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"        
         ;;
 
-    5.1.2) echo "Si-LGAD edge-TCT basic information ..."
+    3.2.2) echo "Si-LGAD edge-TCT basic information ..."
         raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"       
        ;;
 
-    5.1.3) echo "get volt-time for Si-PIN edge-TCT, multi points z [0,50]"
+    3.2.3) echo "get volt-time for Si-PIN edge-TCT, multi points z [0,50]"
         step=1
         k=0.02
 
-            for ((j=0;j<10;j++))
+            for ((j=0;j<51;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py pintct/HPK-Si-PIN \
@@ -307,30 +305,30 @@ case $option in
             done 
             ;;  
  
-    5.1.4) echo "get volt-time for Si-PIN edge-TCT, multi points Vbias [0,200]"
+    3.2.4) echo "get volt-time for Si-PIN edge-TCT, multi points Vbias [0,200]"
                 step=1
                 k=0.02
-            for ((j=0;j<10;j++))
+            for ((j=0;j<51;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py lgadtct/HPK-Si-LGAD \
                 "TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/lgadtct/HPK-Si-LGAD/ parameter_alter=True fz_rel=$z"
             done            
             ;;
-    5.1.5) echo " "analyse eTCT rootfiles""
+    3.2.5) echo " "analyse eTCT rootfiles""
             ./python/tct_analysis.py fig/eTCT/
         esac
 }
 
-sub_7_1(){
+sub_3_3(){
 case $option in
-    7.1.1) echo "SiC-PIN edge-TCT basic information ..."
+    3.3.1) echo "SiC-PIN edge-TCT basic information ..."
            raser "./python/TCTtest.py det_name=NJU-SiC-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json"        
         ;;
-    7.1.2) echo "get volt-time for SiC-PIN edge-TCT, multi points z [0,50]"
+    3.3.2) echo "get volt-time for SiC-PIN edge-TCT, multi points z [0,50]"
                 step=1
                 k=0.01
-            for ((j=0;j<10;j++))
+            for ((j=0;j<101;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py pintct/NJU-SiC-PIN \
@@ -402,24 +400,24 @@ case $option in
         sub_3_1 option
         ;;
 
-    5.1) echo "RASER simulate edge-TCT"
-        usage_5_1
+    3.2) echo "RASER simulate edge-TCT"
+        usage_3_2
         echo "Please enter your option: "
         read option
-        sub_5_1 option
+        sub_3_2 option
         ;;
-    5.1.*) echo "edge-TCT measurement"
-        sub_5_1 option
+    3.2.*) echo "edge-TCT measurement"
+        sub_3_2 option
         ;;
 
-    7.1) echo "RASER simulate edge-TCT"
-        usage_7_1
+    3.3) echo "RASER simulate edge-TCT"
+        usage_3_3
         echo "Please enter your option: "
         read option
-        sub_7_1 option
+        sub_3_3 option
         ;;
-    7.1.*) echo  "RASER simulate edge-TCT"
-        sub_7_1 option
+    3.3.*) echo  "RASER simulate edge-TCT"
+        sub_3_3 option
         ;;
 
 		esac
