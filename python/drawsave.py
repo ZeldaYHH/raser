@@ -63,7 +63,6 @@ def save(my_l,ele_current):
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
     t_out.Branch("z", z, "z/D")
-#ele_current = raser.Amplifier(my_d, dset.amplifier)
     for i in range(ele_current.BB_ele.GetNbinsX()):
           time[0]=i*ele_current.time_unit
           volt[0]=ele_current.BB_ele[i]

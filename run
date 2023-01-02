@@ -288,11 +288,11 @@ case $option in
 sub_5_1(){
 case $option in
     5.1.1) echo "Si-PIN edge-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json"        
+        raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"        
         ;;
 
     5.1.2) echo "Si-LGAD edge-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json"       
+        raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"       
        ;;
 
     5.1.3) echo "get volt-time for Si-PIN edge-TCT, multi points z [0,50]"
@@ -303,7 +303,7 @@ case $option in
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py pintct/HPK-Si-PIN \
-                "TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/HPK-Si-PIN/ parameter_alter=True fz_rel=$z"
+                "TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/HPK-Si-PIN/ parameter_alter=True fz_rel=$z"
             done 
             ;;  
  
@@ -314,7 +314,7 @@ case $option in
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py lgadtct/HPK-Si-LGAD \
-                "TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json scan=True total_e=$step instan=1 output=output/lgadtct/HPK-Si-LGAD/ parameter_alter=True fz_rel=$z"
+                "TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/lgadtct/HPK-Si-LGAD/ parameter_alter=True fz_rel=$z"
             done            
             ;;
     5.1.5) echo " "analyse eTCT rootfiles""
@@ -325,7 +325,7 @@ case $option in
 sub_7_1(){
 case $option in
     7.1.1) echo "SiC-PIN edge-TCT basic information ..."
-           raser "./python/TCTtest.py det_name=NJU-SiC-PIN parfile=setting.json laser_model=edge_TCT_SiC laser_parfile=laser_setting.json"        
+           raser "./python/TCTtest.py det_name=NJU-SiC-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json"        
         ;;
     7.1.2) echo "get volt-time for SiC-PIN edge-TCT, multi points z [0,50]"
                 step=1
