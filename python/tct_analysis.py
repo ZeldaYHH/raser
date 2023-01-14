@@ -15,9 +15,11 @@ import sys
 import ROOT
 import math
 import numpy as np
+import drawsave
 
 def main():
-   path=sys.argv[1:]
+   path=sys.argv[1]
+   drawsave.create_path(path)
    Z= array("d")
    amplitude= array("d")
    risetime= array("d")
