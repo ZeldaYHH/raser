@@ -1,0 +1,162 @@
+{
+  "main": {
+    "id": "7f7c19bfd868c61e",
+    "type": "split",
+    "children": [
+      {
+        "id": "4e3100167e46d7a9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7d369bb43504c4a9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "note/Training/RASER Week 2023/Day 7/A7 总结与讨论.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "a951aeae6df4ec78",
+    "type": "split",
+    "children": [
+      {
+        "id": "3971753f992a9e78",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bac3e651061270d6",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "1c3571709a37f782",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "05c309c5727dbcbe",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "95b21019bec63d6e",
+    "type": "split",
+    "children": [
+      {
+        "id": "ea41733d5ebb3f46",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "84929f5ecfb9550a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "note/Training/RASER Week 2023/Day 7/A7 总结与讨论.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "a5140b156c02280e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "note/Training/RASER Week 2023/Day 7/A7 总结与讨论.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "7c28390d5ea25be0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "0fc67b5464711a6d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "note/Training/RASER Week 2023/Day 7/A7 总结与讨论.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "7d369bb43504c4a9",
+  "lastOpenFiles": [
+    "note/Training/RASER Week 2023/Day 2/A2 半导体探测器及快时间测量原理.md",
+    "note/Training/RASER Week 2023/Day 7/A7 总结与讨论.md",
+    "note/Training/RASER Week 2023/Day 1/A1 粒子物理.md",
+    "note/Training/RASER Week 2023/Day 1/A0 团队介绍.md",
+    "Pasted image 20230114173040.jpg",
+    "note/Training/RASER Week 2023/Day 6/P6 撰写调研报告.md",
+    "note/Training/RASER Week 2023/Day 6/A6 实验数据分析.md",
+    "note/Training/RASER Week 2023/Day 5/A5 碳化硅快时间探测仿真原理.md",
+    "note/Training/RASER Week 2023/Day 4/A4 碳化硅探测器原理.md",
+    "note/Training/RASER Week 2023/Day 3/A3 硅探测器快时间探测数据采集原理.md"
+  ]
+}
