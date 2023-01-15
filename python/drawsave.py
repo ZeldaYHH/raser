@@ -53,12 +53,17 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(my_l,ele_current):
+def save(dset,my_d,my_l,ele_current):
+    if "planar3D" in my_d.det_model:
+        path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "lgad3D" in my_d.det_model:
+        path = "output/" + "lgadtct/" + dset.det_name + "/"
+    create_path(path) 
     L=round(my_l.fz_abs)
     volt = array('d', [999.])
     time = array('d', [999.])
     z = array('d', [999.])
-    fout = ROOT.TFile("sim-TCT"+str(L)+".root", "RECREATE")
+    fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
@@ -399,7 +404,7 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.SetLineWidth(2)
     c.Update()
 
-    """ if ele_current.GetMinimum() < 0:
+    if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
         rightmax = 1.1*ele_current.GetMaximum()
@@ -430,7 +435,7 @@ def draw_plot(my_d, ele_current, model, path):
     axis.SetTitleFont(40)
     axis.SetTitleOffset(1.2)
     #axis.CenterTitle()
-    axis.Draw("SAME HIST") """
+    axis.Draw("SAME HIST")
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")

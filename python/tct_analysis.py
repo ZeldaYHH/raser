@@ -32,7 +32,7 @@ def main():
       volt=array("d",[0.])
       time=array("d",[0.])
       Z.append(L)     
-      rootfile="sim-TCT"+str(L)+".root"
+      rootfile=path + "sim-TCT"+str(L)+".root"
       print(str(rootfile))
       volt,time=read_rootfile(rootfile)
       mean=0
