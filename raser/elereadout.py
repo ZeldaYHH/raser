@@ -198,6 +198,7 @@ class Amplifier:
         max_BB_height = min(self.BBGraph)
         time_t = self.BBGraph.index(max_BB_height)
         print("BB_time=%s"%(time_t*self.time_unit))
-          
+        self.max_BB_height = max_BB_height
+
     def __del__(self):
         pass

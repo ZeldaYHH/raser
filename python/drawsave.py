@@ -646,3 +646,18 @@ def draw_nocarrier2D(path, my_l):
         +str(round(my_l.fy_rel,5))+"_"\
         +str(round(my_l.fz_rel,5))+".pdf")  
 
+def get_beam_number(my_g4p,ele_current):
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/" + "beam_monitor/" + now + "/" 
+    create_path(path) 
+    number = array('d',[999.])
+    hittotal = array('d',[999.])
+    number[0] = int(-ele_current.max_BB_height/18.8)
+    hittotal[0]=my_g4p.hittotal
+    fout = ROOT.TFile(path + "beam_monitor.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "beam_number")
+    t_out.Branch("cal_number", number, "cal_number/D")
+    t_out.Branch("real_number", hittotal, "real_number/D")
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()
