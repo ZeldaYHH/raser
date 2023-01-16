@@ -48,7 +48,7 @@ def main():
       volt=array("d",[0.])
       time=array("d",[0.])
       sum_v=0
-      rootfile="sim-TCT"+str(L)+".root"
+      rootfile=path + "sim-TCT"+str(L)+".root"
       volt,time=read_rootfile(rootfile)
       J=len(volt)
       field=get_elefield(volt,k,l)

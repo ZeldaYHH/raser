@@ -321,7 +321,7 @@ case $option in
             done            
             ;;
     3.2.5) echo "analyse eTCT rootfiles"
-            ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD
+            ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
         esac
 }
 
