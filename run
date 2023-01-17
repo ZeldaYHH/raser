@@ -264,12 +264,12 @@ case $option in
 
     2.2.3) echo "get time resolution for Si-LGAD, multi points voltage [200,250]"
         hepjob
-        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD scan
+        ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD scan
         ;;
 
     2.2.4) echo "get time resolution and gain efficiency vs avalanche doping"
-		./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
-        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
+		./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
+        ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
 		;;
     esac
 }
