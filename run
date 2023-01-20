@@ -125,6 +125,22 @@ case $option in
         ./python/add_noise_raser.py output/pin3D/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
 
+    1.1.2S) echo "run 3D-SiC batch model with total number, split with step number ..."
+        step=10000
+		for ((i=0;i<2;i++))
+        do
+            for ((j=0;j<10;j++))
+            do
+                ./python/run_batchjob.py pin3D/NJU-PIN \
+                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/ parameter_alter=True voltage=$[-500-j*20]"
+            done
+        done
+        ;;
+
+	1.1.3S) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+        ./python/time_scan.py  output/pin3D/NJU-PIN/ scan
+		;;
+
     1.1.4) echo "Si-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
@@ -171,7 +187,6 @@ case $option in
         ;;
 
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        hepjob
         ./python/time_scan.py  output/plugin3D/plugin3D/ scan
 		;;
 
@@ -232,7 +247,6 @@ case $option in
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points voltage [200,250]"
-        hepjob
         ./python/time_scan.py  output/lgad3D/SICAR-1 scan
         ;;
 
@@ -263,7 +277,6 @@ case $option in
         ;;
 
     2.2.3) echo "get time resolution for Si-LGAD, multi points voltage [200,250]"
-        hepjob
         ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD scan
         ;;
 
