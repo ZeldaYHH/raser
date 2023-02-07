@@ -68,8 +68,7 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        #x_min = self.fx_abs - 1 * self.x_char
-        x_min = 0
+        x_min = self.fx_abs - 1 * self.x_char
         x_max = self.fx_abs + 1 * self.x_char
         y_min = self.fy_abs - 1 * self.y_char
         y_max = self.fy_abs + 1 * self.y_char

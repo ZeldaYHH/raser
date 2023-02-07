@@ -133,7 +133,7 @@ def draw_scan(input,index,model,eff):
         gr4 = ROOT.TGraphErrors(len(xa_axis), xa_axis, ya_axis)
         gr4 = graph_set_time_resolution(gr4,model,eff)     
         gr4.SetTitle(" ") 
-    c1 = ROOT.TCanvas("c1", "c1",200,10,1200,1600)
+    c1 = ROOT.TCanvas("c1", "c1",200,10,2000,1600)
     ROOT.gStyle.SetOptStat(0)
     c1.SetTopMargin(0.05)
     c1.SetRightMargin(0.12)
