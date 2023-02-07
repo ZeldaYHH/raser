@@ -12,7 +12,7 @@ import ROOT
 
 # CSA and BB amplifier simulation
 class Amplifier:
-    def __init__(self,my_d,ampl_par,mintstep="50e-12"):
+    def __init__(self,my_current,ampl_par,mintstep="50e-12"):
         """
         Description:
             Get current after CSA and BB amplifier
@@ -31,7 +31,7 @@ class Amplifier:
         CSA_par = ampl_par[0]
         BB_par = ampl_par[1]
         self.ampli_define(CSA_par,BB_par)
-        self.sampling_charge(my_d,mintstep)
+        self.sampling_charge(my_current,mintstep)
         self.ampl_sim() 
 
     def ampli_define(self,CSA_par,BB_par):
@@ -59,21 +59,21 @@ class Amplifier:
         self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
         self.tau_BBA =  math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))    #BB_out
 
-    def sampling_charge(self,my_d,mintstep):
+    def sampling_charge(self,my_current,mintstep):
         """ Transform current to charge 
         with changing bin width to oscilloscope bin width
         """
-        self.max_num = my_d.sum_cu.GetNbinsX()
-        self.max_hist_num = my_d.n_bin
-        self.undersampling = int(float(mintstep)/my_d.t_bin)
-        self.time_unit = my_d.t_bin*self.undersampling
+        self.max_num = my_current.sum_cu.GetNbinsX()
+        self.max_hist_num = my_current.n_bin
+        self.undersampling = int(float(mintstep)/my_current.t_bin)
+        self.time_unit = my_current.t_bin*self.undersampling
         self.CDet_j = 0     # CSA readout mode
         self.itot = [0.0]*self.max_num
         self.qtot = 0.0
         # get total charge
         i=0
         for j in range(0,self.max_hist_num,self.undersampling):
-            self.itot[i] = my_d.sum_cu.GetBinContent(j)
+            self.itot[i] = my_current.sum_cu.GetBinContent(j)
             self.qtot = self.qtot + self.itot[i]*self.time_unit
             i+=1
         max_hist_num = int(self.max_hist_num/self.undersampling)

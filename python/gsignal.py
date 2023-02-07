@@ -55,7 +55,7 @@ def main():
     if "beammonitor" in args:
         my_g4p = raser.Beammonitor(my_d, my_f, dset)
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_d, dset.amplifier)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.get_beam_number(my_g4p,ele_current)
         return
     my_g4p = raser.Particles(my_d, my_f, dset)
@@ -63,7 +63,7 @@ def main():
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #if "lgad" in dset.det_model:
         #   print("gain_efficiency="+str(my_current.gain_efficiency))
-        ele_current = raser.Amplifier(my_d, dset.amplifier)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
@@ -120,7 +120,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
             my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = raser.Amplifier(my_d, dset.amplifier)
+            ele_current = raser.Amplifier(my_current, dset.amplifier)
             drawsave.savedata(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
