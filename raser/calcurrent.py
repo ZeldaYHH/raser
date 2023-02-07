@@ -299,6 +299,7 @@ class CalCurrentGain(CalCurrent):
 
         self.drifting_loop(my_d, my_f)
 
+        self.current_define()
         self.sum_cu.Reset()
         self.positive_cu.Reset()
         self.negative_cu.Reset()
