@@ -31,8 +31,8 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
         draw_ele_field_1D(my_d,my_f,path)
-    draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
-    draw_plot(my_d,ele_current.BB_ele,"BB",path)
+    draw_plot(my_d, my_current,ele_current.CSA_ele,"CSA",path) # Draw current
+    draw_plot(my_d, my_current,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
@@ -350,7 +350,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, ele_current, model, path):
+def draw_plot(my_d, my_current, ele_current, model, path):
     """
     @description:
         Save current in root file
@@ -371,37 +371,37 @@ def draw_plot(my_d, ele_current, model, path):
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptStat(0)
 
-    #my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
-    #my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
-    my_d.sum_cu.GetXaxis().SetNdivisions(510)
-    #my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
-    #my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
-    my_d.sum_cu.GetYaxis().SetNdivisions(505)
-    #my_d.sum_cu.GetXaxis().CenterTitle()
-    #my_d.sum_cu.GetYaxis().CenterTitle() 
-    my_d.sum_cu.GetXaxis().SetTitle("Time [s]")
-    my_d.sum_cu.GetYaxis().SetTitle("Current [A]")
+    #my_current.sum_cu.GetXaxis().SetTitleOffset(1.2)
+    #my_current.sum_cu.GetXaxis().SetTitleSize(0.05)
+    #my_current.sum_cu.GetXaxis().SetLabelSize(0.04)
+    my_current.sum_cu.GetXaxis().SetNdivisions(510)
+    #my_current.sum_cu.GetYaxis().SetTitleOffset(1.1)
+    #my_current.sum_cu.GetYaxis().SetTitleSize(0.05)
+    #my_current.sum_cu.GetYaxis().SetLabelSize(0.04)
+    my_current.sum_cu.GetYaxis().SetNdivisions(505)
+    #my_current.sum_cu.GetXaxis().CenterTitle()
+    #my_current.sum_cu.GetYaxis().CenterTitle() 
+    my_current.sum_cu.GetXaxis().SetTitle("Time [s]")
+    my_current.sum_cu.GetYaxis().SetTitle("Current [A]")
 
-    my_d.sum_cu.Draw("HIST")
-    my_d.positive_cu.Draw("SAME HIST")
-    my_d.negative_cu.Draw("SAME HIST")
-    my_d.gain_positive_cu.Draw("SAME HIST")
-    my_d.gain_negative_cu.Draw("SAME HIST")
-    my_d.sum_cu.Draw("SAME HIST")
+    my_current.sum_cu.Draw("HIST")
+    my_current.positive_cu.Draw("SAME HIST")
+    my_current.negative_cu.Draw("SAME HIST")
+    my_current.gain_positive_cu.Draw("SAME HIST")
+    my_current.gain_negative_cu.Draw("SAME HIST")
+    my_current.sum_cu.Draw("SAME HIST")
 
-    my_d.positive_cu.SetLineColor(877)#kViolet-3
-    my_d.negative_cu.SetLineColor(600)#kBlue
-    my_d.gain_positive_cu.SetLineColor(617)#kMagneta+1
-    my_d.gain_negative_cu.SetLineColor(867)#kAzure+7
-    my_d.sum_cu.SetLineColor(418)#kGreen+2
+    my_current.positive_cu.SetLineColor(877)#kViolet-3
+    my_current.negative_cu.SetLineColor(600)#kBlue
+    my_current.gain_positive_cu.SetLineColor(617)#kMagneta+1
+    my_current.gain_negative_cu.SetLineColor(867)#kAzure+7
+    my_current.sum_cu.SetLineColor(418)#kGreen+2
 
-    my_d.positive_cu.SetLineWidth(2)
-    my_d.negative_cu.SetLineWidth(2)
-    my_d.gain_positive_cu.SetLineWidth(2)
-    my_d.gain_negative_cu.SetLineWidth(2)
-    my_d.sum_cu.SetLineWidth(2)
+    my_current.positive_cu.SetLineWidth(2)
+    my_current.negative_cu.SetLineWidth(2)
+    my_current.gain_positive_cu.SetLineWidth(2)
+    my_current.gain_negative_cu.SetLineWidth(2)
+    my_current.sum_cu.SetLineWidth(2)
     c.Update()
 
     if ele_current.GetMinimum() < 0:
@@ -438,11 +438,11 @@ def draw_plot(my_d, ele_current, model, path):
     axis.Draw("SAME HIST")
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
-    legend.AddEntry(my_d.negative_cu, "electron", "l")
-    legend.AddEntry(my_d.positive_cu, "hole", "l")
-    legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
-    legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
-    legend.AddEntry(my_d.sum_cu, "e+h", "l")
+    legend.AddEntry(my_current.negative_cu, "electron", "l")
+    legend.AddEntry(my_current.positive_cu, "hole", "l")
+    legend.AddEntry(my_current.gain_negative_cu, "gain electron", "l")
+    legend.AddEntry(my_current.gain_positive_cu, "gain hole", "l")
+    legend.AddEntry(my_current.sum_cu, "e+h", "l")
     #legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     #legend.SetTextFont(43)

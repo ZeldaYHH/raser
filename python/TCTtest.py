@@ -21,7 +21,7 @@ my_f = raser.FenicsCal(my_d, dset.fenics)
 my_l = raser.TCTTracks(my_d, dset.laser)
 
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
-ele_current = raser.Amplifier(my_d, dset.amplifier)
+ele_current = raser.Amplifier(my_current, dset.amplifier)
 if "scan=True" in args:
     drawsave.save(dset,my_d,my_l,ele_current)
 else:

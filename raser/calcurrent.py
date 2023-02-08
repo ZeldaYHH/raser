@@ -181,12 +181,17 @@ class CalCurrent:
                                       ionized_pairs[i]))
         
         self.drifting_loop(my_d, my_f)
-        my_d.sum_cu.Reset()
-        my_d.positive_cu.Reset()
-        my_d.negative_cu.Reset()
-        self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
+
+        self.current_define()
+        self.sum_cu.Reset()
+        self.positive_cu.Reset()
+        self.negative_cu.Reset()
+        self.get_current()
         if my_d.det_model == "lgad3D":
             self.gain_current = CalCurrentGain(my_d, my_f, self)
+            self.gain_positive_cu.Reset()
+            self.gain_negative_cu.Reset()
+            self.get_current_gain()
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -199,26 +204,61 @@ class CalCurrent:
                 hole.drift_single_step(my_d.steplength, my_d, my_f)
                 hole.drift_end(my_f)
             hole.get_signal(my_f)
+
+    def current_define(self):
+        """
+        @description: 
+            Parameter current setting     
+        @param:
+            positive_cu -- Current from holes move
+            negative_cu -- Current from electrons move
+            sum_cu -- Current from e-h move
+        @Returns:
+            None
+        @Modify:
+            2021/08/31
+        """
+        self.t_bin = 50e-12
+        self.t_end = 5.0e-9
+        self.t_start = 0
+        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
         
-    def get_current(self, my_d, positive_cu, negative_cu):
-        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        self.positive_cu = ROOT.TH1F("charge+", "Positive Current",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.negative_cu = ROOT.TH1F("charge-", "Negative Current",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.gain_positive_cu = ROOT.TH1F("gain_charge+","Current Contribution",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.gain_negative_cu = ROOT.TH1F("gain_charge-","Gain Negative Current",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.sum_cu = ROOT.TH1F("charge","Total Current",
+                                self.n_bin, self.t_start, self.t_end)
+        
+    def get_current(self):
+        test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
         for hole in self.holes:
             for i in range(len(hole.path)-1):
-                test_p.Fill(hole.path[i][3],hole.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
-            positive_cu.Add(test_p)
+                test_p.Fill(hole.path[i][3],hole.signal[i]/self.t_bin)# time,current=int(i*dt)/Δt
+            self.positive_cu.Add(test_p)
             test_p.Reset()
 
-        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
         test_n.Reset()
         for electron in self.electrons:             
             for i in range(len(electron.path)-1):
-                test_n.Fill(electron.path[i][3],electron.signal[i]/my_d.t_bin)# time,current=int(i*dt)/Δt
-            negative_cu.Add(test_n)
+                test_n.Fill(electron.path[i][3],electron.signal[i]/self.t_bin)# time,current=int(i*dt)/Δt
+            self.negative_cu.Add(test_n)
             test_n.Reset()
 
-        my_d.sum_cu.Add(positive_cu)
-        my_d.sum_cu.Add(negative_cu)
+        self.sum_cu.Add(self.positive_cu)
+        self.sum_cu.Add(self.negative_cu)
+
+    def get_current_gain(self):
+        self.gain_negative_cu = self.gain_current.negative_cu
+        self.gain_positive_cu = self.gain_current.positive_cu
+        self.sum_cu.Add(self.gain_positive_cu)
+        self.sum_cu.Add(self.gain_negative_cu)
 
 class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''
@@ -258,9 +298,12 @@ class CalCurrentGain(CalCurrent):
                                                   electron.charge*gain_rate/np.log(gain_rate)))
 
         self.drifting_loop(my_d, my_f)
-        my_d.gain_positive_cu.Reset()
-        my_d.gain_negative_cu.Reset()
-        self.get_current(my_d, my_d.gain_positive_cu, my_d.gain_negative_cu)
+
+        self.current_define()
+        self.sum_cu.Reset()
+        self.positive_cu.Reset()
+        self.negative_cu.Reset()
+        self.get_current()
 
     def gain_rate(self, my_d, my_f, my_ava):
 
@@ -315,6 +358,16 @@ class CalCurrentG4P(CalCurrent):
 
 class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):
+        delta_pulse_positive_cu = ROOT.TH1F("delta_pulse_charge+", "Delta Pulse Positive Current",
+                                     my_d.n_bin, my_d.t_start, my_d.t_end)
+        delta_pulse_negative_cu = ROOT.TH1F("delta_pulse_charge-", "Delta Pulse  Current",
+                                     my_d.n_bin, my_d.t_start, my_d.t_end)
+        delta_pulse_gain_positive_cu = ROOT.TH1F("delta_pulse_gain_charge+","Delta Pulse Gain Positive Current",
+                                     my_d.n_bin, my_d.t_start, my_d.t_end)
+        delta_pulse_gain_negative_cu = ROOT.TH1F("delta_pulse_gain_charge-","Delta Pulse Gain Negative Current",
+                                     my_d.n_bin, my_d.t_start, my_d.t_end)
+        delta_pulse_sum_cu = ROOT.TH1F("delta_pulse_charge","Delta Pulse Total Current",
+                                my_d.n_bin, my_d.t_start, my_d.t_end)
         super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
 
 class CarrierListFromG4P:
