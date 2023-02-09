@@ -189,6 +189,8 @@ class CalCurrent:
         self.get_current()
         if my_d.det_model == "lgad3D":
             self.gain_current = CalCurrentGain(my_d, my_f, self)
+            self.gain_positive_cu.Reset()
+            self.gain_negative_cu.Reset()
             self.get_current_gain()
 
     def drifting_loop(self, my_d, my_f):
