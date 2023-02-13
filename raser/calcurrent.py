@@ -169,16 +169,19 @@ class CalCurrent:
         self.electrons = []
         self.holes = []
         for i in range(len(track_position)):
-            self.electrons.append(Carrier(track_position[i][0],\
-                                          track_position[i][1],\
-                                          track_position[i][2],\
-                                          track_position[i][3],\
-                                          -1*ionized_pairs[i]))
-            self.holes.append(Carrier(track_position[i][0],\
-                                      track_position[i][1],\
-                                      track_position[i][2],\
-                                      track_position[i][3],\
-                                      ionized_pairs[i]))
+            electron = Carrier(track_position[i][0],\
+                               track_position[i][1],\
+                               track_position[i][2],\
+                               track_position[i][3],\
+                               -1*ionized_pairs[i])
+            hole = Carrier(track_position[i][0],\
+                           track_position[i][1],\
+                           track_position[i][2],
+                           track_position[i][3],\
+                           ionized_pairs[i])
+            if not electron.not_in_sensor(my_d):
+                self.electrons.append(electron)
+                self.holes.append(hole)
         
         self.drifting_loop(my_d, my_f)
 
