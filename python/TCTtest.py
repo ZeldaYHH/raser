@@ -24,6 +24,12 @@ my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
 if "scan=True" in args:
     drawsave.save(dset,my_d,my_l,ele_current)
+    if "planar3D" in my_d.det_model:
+        path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "lgad3D" in my_d.det_model:
+        path = "output/" + "lgadtct/" + dset.det_name + "/"
+    drawsave.create_path(path) 
+    drawsave.draw_plot(my_d,my_current,ele_current.BB_ele, "BB", path, "_"+args[-1])
 else:
     drawsave.drawplot(my_d,ele_current,my_f,None,my_current,my_l)
 

@@ -356,7 +356,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, my_current, ele_current, model, path):
+def draw_plot(my_d, my_current, ele_current, model, path, tag=""):
     """
     @description:
         Save current in root file
@@ -455,8 +455,8 @@ def draw_plot(my_d, my_current, ele_current, model, path):
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
+    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):

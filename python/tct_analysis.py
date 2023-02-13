@@ -166,10 +166,3 @@ def draw_graphs(array1,Z,name,path):
     return
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
