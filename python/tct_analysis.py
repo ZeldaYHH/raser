@@ -67,20 +67,18 @@ def main():
 def read_rootfile(rootfile):
     J=0
     v1=array("d")
-    v2=array("d",[0.])
     t1=array("d")
-    t2=array("d",[0.])
-    noise=np.array([0])
     myFile = ROOT.TFile(str(rootfile))
     myt = myFile.tree
-    mean=0
     for entry in myt:
        v1.append(entry.volt)
        t1.append(1000000000*entry.time)
        J=J+1
     return v1,t1    
 
-def add_noise(v1,t1):
+def add_noise(rootfile,J,v1,t1):
+    v2=array("d",[0.])
+    t2=array("d",[0.])
     noise=np.array([0])
     fout = ROOT.TFile("noise_"+str(rootfile), "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
