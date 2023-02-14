@@ -78,17 +78,20 @@ def read_rootfile(rootfile):
        v1.append(entry.volt)
        t1.append(1000000000*entry.time)
        J=J+1
-    fout = ROOT.TFile(str(rootfile), "RECREATE")
+    return v1,t1    
+
+def add_noise(v1,t1):
+    noise=np.array([0])
+    fout = ROOT.TFile("noise_"+str(rootfile), "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", v2, "volt/D")
     t_out.Branch("time", t2, "time/D")
     for i in range(J):
-          t2[0]=i*0.05
-          v2[0]=v1[i]
+          t2[0]=t1[i]
+          v2[0]=v1[i]+noise[i]
           t_out.Fill()
     t_out.Write()
     fout.Close()
-    return v1,t1    
 
 def get_average(volt,time,J,mean):
     Vmax=max(volt)
