@@ -328,8 +328,8 @@ case $option in
             ;;  
  
     3.2.4) echo "get volt-time for Si-PIN edge-TCT, multi points Vbias [0,200]"
-                step=1
-                k=0.02
+        step=1
+        k=0.02
             for ((j=0;j<51;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')

@@ -194,7 +194,7 @@
         "lz" : 50,
         "part" : 3,
         "doping1" : -1,
-        "doping2" : -1.9484e4,
+        "doping2" : -1.937e4,
         "doping3" : -1,
         "control_bond" : 1.0,
         "avalanche_bond" : 2.0,
