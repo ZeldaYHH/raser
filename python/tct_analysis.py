@@ -19,7 +19,30 @@ import drawsave
 
 def main():
     path=sys.argv[1]
-    drawsave.create_path(path)
+    output_path=path+"result/"
+    drawsave.create_path(output_path)
+    if 'LGAD' in path:
+        power_scale = 1.58
+    else:
+        power_scale = 1
+    # the power difference in experiment
+
+    if "experiment" in sys.argv:
+        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", power_scale*4e-7, 1e9)
+        amplitude_exp, charge_exp, risetime_exp, elefield_exp, Z_exp = collect_data(path, "exp-TCT", 1, 1)
+        draw_double_graphs(amplitude,amplitude_exp,Z,"Amplitude",output_path)
+        draw_double_graphs(charge,charge_exp,Z,"Charge",output_path)
+        draw_double_graphs(risetime,risetime_exp,Z,"RiseTime",output_path)
+        draw_double_graphs(elefield,elefield_exp,Z,"Elefield",output_path)
+
+    else:
+        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", power_scale*4e-7, 1e9)
+        draw_graphs(amplitude,Z,"Amplitude",output_path)
+        draw_graphs(charge,Z,"Charge",output_path)
+        draw_graphs(risetime,Z,"RiseTime",output_path)
+        draw_graphs(elefield,Z,"Elefield",output_path)
+
+def collect_data(path, model, volt_scale, time_scale):
     Z= array("d")
     amplitude= array("d")
     risetime= array("d")
@@ -32,9 +55,9 @@ def main():
         volt=array("d",[0.])
         time=array("d",[0.])
         Z.append(L)     
-        rootfile=path + "sim-TCT"+str(L)+".root"
+        rootfile=path+model+str(L)+".root"
         print(str(rootfile))
-        volt,time=read_rootfile(rootfile)
+        volt,time=read_rootfile(rootfile,volt_scale,time_scale)
         mean=0
         J=len(volt)
         amplitude.append(max(volt))
@@ -43,14 +66,13 @@ def main():
         sum_l+=l
     k=int(round(np.true_divide(sum_k,51)))
     l=int(round(np.true_divide(sum_l,51)))
-    print(k,l)
 
     for L in range(51):
         volt=array("d",[0.])
         time=array("d",[0.])
         sum_v=0
-        rootfile=path + "sim-TCT"+str(L)+".root"
-        volt,time=read_rootfile(rootfile)
+        rootfile=path+model+str(L)+".root"
+        volt,time=read_rootfile(rootfile,volt_scale, time_scale)
         J=len(volt)
         field=get_elefield(volt,k,l)
         elefield.append(field)
@@ -58,27 +80,18 @@ def main():
         charge.append(cha)
         rt=get_risetime(volt,time,J,mean)
         risetime.append(rt)  
-
-    print(amplitude)
-    print(charge)
-    print(elefield)
-    print(risetime)
       
-    draw_graphs(amplitude,Z,"Amplitude",path)
-    draw_graphs(charge,Z,"Charge",path)
-    draw_graphs(risetime,Z,"RiseTime",path)
-    draw_graphs(elefield,Z,"Elefield",path)
-    return
+    return amplitude, charge, risetime, elefield, Z
 
-def read_rootfile(rootfile):
+def read_rootfile(rootfile,volt_scale,time_scale):
     J=0
     v1=array("d")
     t1=array("d")
     myFile = ROOT.TFile(str(rootfile))
     myt = myFile.tree
     for entry in myt:
-       v1.append(entry.volt)
-       t1.append(1000000000*entry.time)
+       v1.append(volt_scale*entry.volt)
+       t1.append(time_scale*entry.time)
        J=J+1
     return v1,t1
 
@@ -172,5 +185,51 @@ def draw_graphs(array1,Z,name,path):
     g.SaveAs(path+name+".pdf")
   
     return
+
+def draw_double_graphs(array1,array2,Z,name,path):
+    c = ROOT.TCanvas('c', '', 800, 600)
+    c.SetFillColor(0)
+    c.SetFrameFillColor(0)
+    ROOT.gStyle.SetPadColor(0)
+    ROOT.gStyle.SetCanvasColor(0)
+    ROOT.gStyle.SetOptStat(0)
+    c.SetLeftMargin(0.15)
+    c.SetBottomMargin(0.15)
+
+    mg=ROOT.TMultiGraph("mg","")
+    n1=len(array1)
+    graph1 = ROOT.TGraph(n1,Z,array1)
+    n2=len(array2)
+    graph2 = ROOT.TGraph(n2,Z,array2)
+
+    graph1.SetLineColor(2)
+    graph2.SetLineColor(1)
+    graph1.SetMarkerColor(2)
+    graph2.SetMarkerColor(1)
+    graph1.SetMarkerStyle(26)
+    graph2.SetMarkerStyle(4)
+
+    mg.Add(graph1)
+    mg.Add(graph2)
+    mg.Draw('ap')
+    mg.GetYaxis().SetTitle(name)
+    mg.GetXaxis().SetTitle('z [um]')
+    mg.GetYaxis().SetLabelSize(0.05)
+    mg.GetYaxis().SetTitleSize(0.05)
+    mg.GetXaxis().SetLabelSize(0.05)
+    mg.GetXaxis().SetTitleSize(0.05)
+
+    legend = ROOT.TLegend(0.45,0.65, 0.81, 0.86)
+    legend.AddEntry(graph1, "RASER simulation", "p")
+    legend.AddEntry(graph2, "TCT measurement", "p")
+    legend.SetTextSize(27)
+    legend.SetTextFont(43)
+
+    legend.SetBorderSize(0)
+    legend.SetFillColor(0)
+    legend.Draw()
+
+    c.SaveAs(path+name+"_comparison.pdf")
+
 if __name__ == "__main__":
     main()

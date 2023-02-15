@@ -337,9 +337,21 @@ case $option in
                 "TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/lgadtct/HPK-Si-LGAD/ parameter_alter=True fz_rel=$z"
             done            
             ;;
+
+    3.2.X) echo "get volt-time from experiment"
+        ./python/readdata/extract_waveform.py
+        ;;
+
     3.2.5) echo "analyse eTCT rootfiles"
-            ./python/tct_analysis.py output/pintct/HPK-Si-PIN/
-            ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
+        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/
+        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
+        ;;
+
+    3.2.5S) echo "analyse eTCT rootfiles"
+        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/ "experiment"
+        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
+        ;;
+
         esac
 }
 
