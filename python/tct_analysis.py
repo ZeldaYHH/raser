@@ -212,7 +212,36 @@ def draw_double_graphs(array1,array2,Z,name,path):
     mg.Add(graph1)
     mg.Add(graph2)
     mg.Draw('ap')
-    mg.GetYaxis().SetTitle(name)
+
+    if name == 'Amplitude':
+        Y_title = 'Amplitude [V]'
+        if 'LGAD' in path:
+            mg.GetYaxis().SetRangeUser(0,1.13)
+        else:
+            mg.GetYaxis().SetRangeUser(0,0.045)
+
+    if name == 'Charge':
+        Y_title = 'Charge [a.u.]'
+        if 'LGAD' in path:
+            mg.GetYaxis().SetRangeUser(0,28)
+        else:
+            mg.GetYaxis().SetRangeUser(0,1.0)
+
+    if name == 'Elefield':
+        Y_title = 'Ve+Vh [a.u.]'
+        if 'LGAD' in path:
+            mg.GetYaxis().SetRangeUser(0,1.5)
+        else:
+            mg.GetYaxis().SetRangeUser(0,0.05)
+
+    if name == 'RiseTime':
+        Y_title = 'RiseTime [ns]'
+        if 'LGAD' in path:
+            mg.GetYaxis().SetRangeUser(0,1.5)
+        else:
+            mg.GetYaxis().SetRangeUser(0,1.5)
+    
+    mg.GetYaxis().SetTitle(Y_title)
     mg.GetXaxis().SetTitle('z [um]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
