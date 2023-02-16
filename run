@@ -240,18 +240,18 @@ case $option in
 
 	2.1.2) echo "batch model with total number, split with step number"
         step=50000
-		for ((i=0;i<4;i++))
+		for ((i=0;i<20;i++))
         do
-            for ((j=0;j<10;j++))
+            for ((j=0;j<4;j++))
             do
                 ./python/run_batchjob.py lgad3D/SICAR-1 \
-                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-400-j*10]"
+                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-500-j*100]"
             done
         done
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points voltage [200,250]"
-        ./python/time_scan.py  output/lgad3D/SICAR-1 scan
+        ./python/time_scan.py  output/lgad3D/SICAR-1/ scan
         ;;
 
     2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"

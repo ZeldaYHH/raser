@@ -611,7 +611,7 @@ def draw_2D_CFD_time(CFD_time,out_put,model):
             if CFD_time[i]< 9000:	
                 histo.Fill(CFD_time[i])
     else:
-        step = 0.025
+        step = 0.05
         x2_min = 4.8
         x2_max = 5.6
         n2_bin = int((x2_max-x2_min)/step)
