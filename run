@@ -239,7 +239,7 @@ case $option in
         ;;
 
 	2.1.2) echo "batch model with total number, split with step number"
-        step=5000
+        step=50000
 		for ((i=0;i<20;i++))
         do
             for ((j=0;j<4;j++))
