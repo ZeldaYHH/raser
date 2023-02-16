@@ -33,6 +33,7 @@ usage_1_1() {
     printf "\n\t%-5s  %-40s\n"  "1.1.4"    "HPK-Si-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.5"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution for HPK-Si-PIN" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.7"    "NJU-SiC-PIN beam monitor" 
     printf "\n"
 }
 usage_1_2() { 
@@ -134,11 +135,31 @@ case $option in
         ./python/add_noise_raser.py output/pin3D/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
 
-    1.1.4) echo "Si-PIN basic information for RASER simulation ..."
+    1.1.2S) echo "run 3D-SiC batch model with total number, split with step number ..."
+        step=10000
+		for ((i=0;i<2;i++))
+        do
+            for ((j=0;j<10;j++))
+            do
+                ./python/run_batchjob.py pin3D/NJU-PIN \
+                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/ parameter_alter=True voltage=$[-500-j*20]"
+            done
+        done
+        ;;
+
+	1.1.3S) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+        ./python/time_scan.py  output/pin3D/NJU-PIN/ scan
+		;;
+
+    1.1.4S) echo "get time resolution vs draw voltage"
+		./python/time_scan.py  output/pin3D/NJU-PIN/time_resolution_scan.csv draw_voltage 0
+		;;
+
+    1.1.1A) echo "Si-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
 
-    1.1.5) echo "batch model with total number, split with step number"
+    1.1.2A) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=0;i<20;i++))
         do
@@ -147,8 +168,12 @@ case $option in
         done
         ;;
 
-    1.1.6) echo "get time resolution for Si-PIN"
+    1.1.3A) echo "get time resolution for Si-PIN"
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
+        ;;
+
+    1.1.7) echo "SiC-PIN beam monitor" 
+        raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
         ;;
         esac
 }
@@ -176,7 +201,6 @@ case $option in
         ;;
 
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        hepjob
         ./python/time_scan.py  output/plugin3D/plugin3D/ scan
 		;;
 
@@ -226,19 +250,18 @@ case $option in
 
 	2.1.2) echo "batch model with total number, split with step number"
         step=50000
-		for ((i=0;i<4;i++))
+		for ((i=0;i<20;i++))
         do
-            for ((j=0;j<10;j++))
+            for ((j=0;j<4;j++))
             do
                 ./python/run_batchjob.py lgad3D/SICAR-1 \
-                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-400-j*10]"
+                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-500-j*100]"
             done
         done
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points voltage [200,250]"
-        hepjob
-        ./python/time_scan.py  output/lgad3D/SICAR-1 scan
+        ./python/time_scan.py  output/lgad3D/SICAR-1/ scan
         ;;
 
     2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"
@@ -268,13 +291,12 @@ case $option in
         ;;
 
     2.2.3) echo "get time resolution for Si-LGAD, multi points voltage [200,250]"
-        hepjob
-        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD scan
+        ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD scan
         ;;
 
     2.2.4) echo "get time resolution and gain efficiency vs avalanche doping"
-		./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
-        ./python/time_scan.py  out/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
+		./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
+        ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
 		;;
     esac
 }
@@ -316,8 +338,8 @@ case $option in
             ;;  
  
     3.2.4) echo "get volt-time for Si-PIN edge-TCT, multi points Vbias [0,200]"
-                step=1
-                k=0.02
+        step=1
+        k=0.02
             for ((j=0;j<51;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
@@ -325,8 +347,21 @@ case $option in
                 "TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/lgadtct/HPK-Si-LGAD/ parameter_alter=True fz_rel=$z"
             done            
             ;;
-    3.2.5) echo " "analyse eTCT rootfiles""
-            ./python/tct_analysis.py fig/eTCT/
+
+    3.2.X) echo "get volt-time from experiment"
+        ./python/readdata/extract_waveform.py
+        ;;
+
+    3.2.5) echo "analyse eTCT rootfiles"
+        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/
+        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
+        ;;
+
+    3.2.5S) echo "analyse eTCT rootfiles"
+        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/ "experiment"
+        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
+        ;;
+
         esac
 }
 

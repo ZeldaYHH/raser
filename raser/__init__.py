@@ -9,3 +9,4 @@ from raser.setting import Setting
 from raser.model import Material
 from raser.model import Avalanche
 from raser.source import TCTTracks
+from raser.g4beam_monitor import Beammonitor

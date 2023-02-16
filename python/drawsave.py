@@ -31,8 +31,8 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
         draw_ele_field_1D(my_d,my_f,path)
-    draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
-    draw_plot(my_d,ele_current.BB_ele,"BB",path)
+    draw_plot(my_d, my_current,ele_current.CSA_ele,"CSA",path) # Draw current
+    draw_plot(my_d, my_current,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
@@ -53,12 +53,17 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(my_l,ele_current):
+def save(dset,my_d,my_l,ele_current):
+    if "planar3D" in my_d.det_model:
+        path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "lgad3D" in my_d.det_model:
+        path = "output/" + "lgadtct/" + dset.det_name + "/"
+    create_path(path) 
     L=round(my_l.fz_abs)
     volt = array('d', [999.])
     time = array('d', [999.])
     z = array('d', [999.])
-    fout = ROOT.TFile("sim-TCT"+str(L)+".root", "RECREATE")
+    fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
@@ -155,7 +160,7 @@ def draw_ele_field_1D(my_d,my_f,path):
     c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptFit()
-    c1.SetLeftMargin(0.12)
+    c1.SetLeftMargin(0.18)
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
     c1.SetRightMargin(0.12)
@@ -180,6 +185,12 @@ def draw_ele_field_1D(my_d,my_f,path):
     '''
     e_field1=fill_his_1D('E',my_d,my_f)
     e_field1.Draw("COLZ")
+    e_field1.GetXaxis().SetTitleSize(0.05)
+    e_field1.GetXaxis().SetLabelSize(0.05)
+    e_field1.GetYaxis().SetTitleSize(0.05)
+    e_field1.GetYaxis().SetLabelSize(0.05)
+    e_field1.SetLineWidth(2)
+    e_field1.SetTitle("")
     c1.SaveAs(path+my_d.det_model+".pdf")
     c1.SaveAs(path+my_d.det_model+".root")
     del c1
@@ -345,7 +356,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, ele_current, model, path):
+def draw_plot(my_d, my_current, ele_current, model, path, tag=""):
     """
     @description:
         Save current in root file
@@ -366,40 +377,40 @@ def draw_plot(my_d, ele_current, model, path):
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptStat(0)
 
-    #my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
-    #my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
-    my_d.sum_cu.GetXaxis().SetNdivisions(510)
-    #my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
-    #my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
-    my_d.sum_cu.GetYaxis().SetNdivisions(505)
-    #my_d.sum_cu.GetXaxis().CenterTitle()
-    #my_d.sum_cu.GetYaxis().CenterTitle() 
-    my_d.sum_cu.GetXaxis().SetTitle("Time [s]")
-    my_d.sum_cu.GetYaxis().SetTitle("Current [A]")
+    #my_current.sum_cu.GetXaxis().SetTitleOffset(1.2)
+    #my_current.sum_cu.GetXaxis().SetTitleSize(0.05)
+    #my_current.sum_cu.GetXaxis().SetLabelSize(0.04)
+    my_current.sum_cu.GetXaxis().SetNdivisions(510)
+    #my_current.sum_cu.GetYaxis().SetTitleOffset(1.1)
+    #my_current.sum_cu.GetYaxis().SetTitleSize(0.05)
+    #my_current.sum_cu.GetYaxis().SetLabelSize(0.04)
+    my_current.sum_cu.GetYaxis().SetNdivisions(505)
+    #my_current.sum_cu.GetXaxis().CenterTitle()
+    #my_current.sum_cu.GetYaxis().CenterTitle() 
+    my_current.sum_cu.GetXaxis().SetTitle("Time [s]")
+    my_current.sum_cu.GetYaxis().SetTitle("Current [A]")
 
-    my_d.sum_cu.Draw("HIST")
-    my_d.positive_cu.Draw("SAME HIST")
-    my_d.negative_cu.Draw("SAME HIST")
-    my_d.gain_positive_cu.Draw("SAME HIST")
-    my_d.gain_negative_cu.Draw("SAME HIST")
-    my_d.sum_cu.Draw("SAME HIST")
+    my_current.sum_cu.Draw("HIST")
+    my_current.positive_cu.Draw("SAME HIST")
+    my_current.negative_cu.Draw("SAME HIST")
+    my_current.gain_positive_cu.Draw("SAME HIST")
+    my_current.gain_negative_cu.Draw("SAME HIST")
+    my_current.sum_cu.Draw("SAME HIST")
 
-    my_d.positive_cu.SetLineColor(877)#kViolet-3
-    my_d.negative_cu.SetLineColor(600)#kBlue
-    my_d.gain_positive_cu.SetLineColor(617)#kMagneta+1
-    my_d.gain_negative_cu.SetLineColor(867)#kAzure+7
-    my_d.sum_cu.SetLineColor(418)#kGreen+2
+    my_current.positive_cu.SetLineColor(877)#kViolet-3
+    my_current.negative_cu.SetLineColor(600)#kBlue
+    my_current.gain_positive_cu.SetLineColor(617)#kMagneta+1
+    my_current.gain_negative_cu.SetLineColor(867)#kAzure+7
+    my_current.sum_cu.SetLineColor(418)#kGreen+2
 
-    my_d.positive_cu.SetLineWidth(2)
-    my_d.negative_cu.SetLineWidth(2)
-    my_d.gain_positive_cu.SetLineWidth(2)
-    my_d.gain_negative_cu.SetLineWidth(2)
-    my_d.sum_cu.SetLineWidth(2)
+    my_current.positive_cu.SetLineWidth(2)
+    my_current.negative_cu.SetLineWidth(2)
+    my_current.gain_positive_cu.SetLineWidth(2)
+    my_current.gain_negative_cu.SetLineWidth(2)
+    my_current.sum_cu.SetLineWidth(2)
     c.Update()
 
-    """ if ele_current.GetMinimum() < 0:
+    if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
         rightmax = 1.1*ele_current.GetMaximum()
@@ -430,22 +441,22 @@ def draw_plot(my_d, ele_current, model, path):
     axis.SetTitleFont(40)
     axis.SetTitleOffset(1.2)
     #axis.CenterTitle()
-    axis.Draw("SAME HIST") """
+    axis.Draw("SAME HIST")
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
-    legend.AddEntry(my_d.negative_cu, "electron", "l")
-    legend.AddEntry(my_d.positive_cu, "hole", "l")
-    legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
-    legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
-    legend.AddEntry(my_d.sum_cu, "e+h", "l")
+    legend.AddEntry(my_current.negative_cu, "electron", "l")
+    legend.AddEntry(my_current.positive_cu, "hole", "l")
+    legend.AddEntry(my_current.gain_negative_cu, "gain electron", "l")
+    legend.AddEntry(my_current.gain_positive_cu, "gain hole", "l")
+    legend.AddEntry(my_current.sum_cu, "e+h", "l")
     #legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     #legend.SetTextFont(43)
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
+    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -611,7 +622,7 @@ def draw_scat_angle(evnets_angle,angle,model):
 def draw_nocarrier3D(path, my_l):
     ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","Pairs of carrier generation",\
+    h = ROOT.TH3D("h","",\
         int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
         int((my_l.y_right_most - my_l.y_left_most) / my_l.y_step), my_l.y_left_most, my_l.y_right_most,\
         int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
@@ -619,11 +630,18 @@ def draw_nocarrier3D(path, my_l):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw()
     h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
     h.GetYaxis().SetTitle("Width [um]")
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
     h.GetZaxis().SetTitle("Thick [um]")
+    h.GetZaxis().SetTitleSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
     h.GetXaxis().SetTitleOffset(1.8)
     h.GetYaxis().SetTitleOffset(2.2)
     h.GetZaxis().SetTitleOffset(1.4)
+    c1.SetLeftMargin(0.15)
     c1.SaveAs(path+"nocarrier_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
@@ -632,17 +650,38 @@ def draw_nocarrier3D(path, my_l):
 def draw_nocarrier2D(path, my_l):
     ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH2D("h","Pairs of carrier generation",\
+    h = ROOT.TH2D("h","",\
         int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
         int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw("COLZ")
     h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
     h.GetYaxis().SetTitle("Thick [um]")
-    c1.SetRightMargin(0.12)
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
+    c1.SetRightMargin(0.15)
+    c1.SetLeftMargin(0.12)
     c1.SaveAs(path+"nocarrier2D_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
         +str(round(my_l.fz_rel,5))+".pdf")  
 
+def get_beam_number(my_g4p,ele_current):
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/" + "beam_monitor/" + now + "/" 
+    create_path(path) 
+    number = array('d',[999.])
+    hittotal = array('d',[999.])
+    number[0] = int(-ele_current.max_BB_height/18.8)
+    hittotal[0]=my_g4p.hittotal
+    fout = ROOT.TFile(path + "beam_monitor.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "beam_number")
+    t_out.Branch("cal_number", number, "cal_number/D")
+    t_out.Branch("real_number", hittotal, "real_number/D")
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()

@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser):
+    def __init__(self, my_d, laser, pulse_time=1e-9, t_step=50e-12):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
@@ -54,8 +54,9 @@ class TCTTracks():
         #accuracy parameters
         self.r_step = laser["r_step"]#um
         self.h_step = laser["h_step"]#um
-        self.t_step = laser["t_step"]#s
-        
+        self.t_step = t_step#s
+
+        self.pulse_time = pulse_time        
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
@@ -68,15 +69,12 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        #x_min = self.fx_abs - 1 * self.x_char
-        x_min = 0
-        x_max = self.fx_abs + 1 * self.x_char
-        y_min = self.fy_abs - 1 * self.y_char
-        y_max = self.fy_abs + 1 * self.y_char
-        z_min = self.fz_abs - 1 * self.z_char
-        z_max = self.fz_abs + 1 * self.z_char
-        t_min = 1e-9 - 1 * self.tau
-        t_max = 1e-9 + 1 * self.tau
+        x_min = self.fx_abs - 3 * self.x_char
+        x_max = self.fx_abs + 3 * self.x_char
+        y_min = self.fy_abs - 3 * self.y_char
+        y_max = self.fy_abs + 3 * self.y_char
+        z_min = self.fz_abs - 3 * self.z_char
+        z_max = self.fz_abs + 3 * self.z_char
 
         #self.x_left_most, self.x_right_most = self.window(x_min, x_max, 0, my_d.l_x)
         self.x_left_most, self.x_right_most =  0, my_d.l_x
@@ -88,27 +86,24 @@ class TCTTracks():
         xArray = np.linspace(x_min, x_max, int((x_max - x_min) / self.x_step) + 1)
         yArray = np.linspace(y_min, y_max, int((y_max - y_min) / self.y_step) + 1)
         zArray = np.linspace(z_min, z_max, int((z_max - z_min) / self.z_step) + 1)
-        tArray = np.linspace(t_min, t_max, int((t_max - t_min) / self.t_step) + 1)
 
         xCenter = (xArray[:-1] + xArray[1:]) / 2
         yCenter = (yArray[:-1] + yArray[1:]) / 2
         zCenter = (zArray[:-1] + zArray[1:]) / 2
-        tCenter = (tArray[:-1] + tArray[1:]) / 2
 
-        xDiff = (xArray[:-1] - xArray[1:])
-        yDiff = (yArray[:-1] - yArray[1:])
-        zDiff = (zArray[:-1] - zArray[1:])
-        tDiff = (tArray[:-1] - tArray[1:])
+        xDiff = (xArray[1:] - xArray[:-1])
+        yDiff = (yArray[1:] - yArray[:-1])
+        zDiff = (zArray[1:] - zArray[:-1])
 
-        YC, XC, ZC, TC = np.meshgrid(yCenter, xCenter, zCenter, tCenter) #Feature of numpy.meshgrid
-        YD, XD, ZD, TD = np.meshgrid(yDiff, xDiff, zDiff, tDiff)
-        self.projGrid = self._getCarrierDensity(XC, YC, ZC, TC)\
-            * XD * YD * ZD * 1e-18 * TD
+        YC, XC, ZC = np.meshgrid(yCenter, xCenter, zCenter) #Feature of numpy.meshgrid
+        YD, XD, ZD = np.meshgrid(yDiff, xDiff, zDiff)
+        self.projGrid = self._getCarrierDensity(XC, YC, ZC)\
+            * XD * YD * ZD * 1e-18
         self.track_position = list(np.transpose(np.array([
             list(np.ravel(XC)),\
             list(np.ravel(YC)),\
             list(np.ravel(ZC)),\
-            list(np.ravel(TC))])))
+            [self.pulse_time for x in np.ravel(XC)]])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
         print(len(self.ionized_pairs))
 
@@ -122,13 +117,13 @@ class TCTTracks():
             self.x_char = self.y_char = self.r_char
             if self.direction == "top":
                 absorb_depth = self.lz * self.fz_rel
-                def _getCarrierDensity(x, y, z, t):
-                    return self.getCarrierDensity(z - self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2, t - 1e-9)
+                def _getCarrierDensity(x, y, z):
+                    return self.getCarrierDensity(z - self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2)
                 self._getCarrierDensity = _getCarrierDensity
             if self.direction == "bottom":
                 absorb_depth = self.lz * (1 - self.fz_rel)
-                def _getCarrierDensity(x, y, z, t):
-                    return self.getCarrierDensity(self.lz - z + self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2, t - 1e-9)
+                def _getCarrierDensity(x, y, z):
+                    return self.getCarrierDensity(self.lz - z + self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2)
                 self._getCarrierDensity = _getCarrierDensity
 
         elif self.direction == "edge":
@@ -138,8 +133,8 @@ class TCTTracks():
             self.y_char = self.z_char = self.r_char
 
             absorb_depth = self.lx * self.fx_rel
-            def _getCarrierDensity(x, y, z, t):
-                return self.getCarrierDensity(x - self.fx_abs, absorb_depth, (y - self.fy_abs) ** 2 + (z -self.fz_abs) ** 2, t - 1e-9)
+            def _getCarrierDensity(x, y, z):
+                return self.getCarrierDensity(x - self.fx_abs, absorb_depth, (y - self.fy_abs) ** 2 + (z -self.fz_abs) ** 2)
             self._getCarrierDensity = _getCarrierDensity
         else:
             raise NameError(self.direction)
@@ -156,20 +151,27 @@ class TCTTracks():
             elif inner_max > outer_max:
                 return outer_max - inner_length, outer_max
 
-    def getCarrierDensity(self, h, depth, r2, t):
-        #return the carrier density of a given point
+    def getCarrierDensity(self, h, depth, r2):
+        #return the carrier density of a given point in a given time period
         #referring to the vertical and horizontal distance from the focus 
         w_0 = self.widthBeamWaist / 2
         wSquared = (w_0 ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
         intensity = ((self.power) / self.tau)\
                     * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * wSquared * 1e-12))\
                     * np.exp((-2 * r2 / wSquared))\
-                    * np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)
+                    * self.t_step
 
         if self.tech == "SPA":
+            # I = I_0 * exp(-αz)
+            # dE_deposit = (αdz)dE_flux = (αdz)I*dSdt = (αI)*dVdt
+            # dN_ehpair = dE_deposit / Energy_for_each_ionized_ehpair
             e0 = 1.60217733e-19
             return self.alpha * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (3.6 * e0)
         elif self.tech == "TPA":
             h_Planck = 6.626*1e-34
             speedofLight = 2.998*1e8
             return self.beta_2 * self.wavelength * 1e-6 * intensity ** 2 / (2 * h_Planck * speedofLight)
+        
+    def timePulse(self, t):
+        # to reduce run time, convolute the time pulse function with the signal after the signal is calculated
+        return np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)

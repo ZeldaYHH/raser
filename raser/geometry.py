@@ -37,8 +37,6 @@ class R3dDetector:
         self.material = det_dic['material']
         self.det_model = det_dic['det_model']
 
-        self.current_define()
-
         if self.det_model == "lgad3D":
             self.avalanche_model = det_dic['avalanche_model']
 
@@ -65,35 +63,6 @@ class R3dDetector:
                 self.set_3D_electrode(det_dic['e_r'],det_dic['e_gap'])
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
-
-    def current_define(self):
-        """
-        @description: 
-            Parameter current setting     
-        @param:
-            positive_cu -- Current from holes move
-            negative_cu -- Current from electrons move
-            sum_cu -- Current from e-h move
-        @Returns:
-            None
-        @Modify:
-            2021/08/31
-        """
-        self.t_bin = 50e-12
-        self.t_end = 5.0e-9
-        self.t_start = 0
-        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
-        
-        self.positive_cu = ROOT.TH1F("charge+", "Positive Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.negative_cu = ROOT.TH1F("charge-", "Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_positive_cu = ROOT.TH1F("gain_charge+","Current Contribution",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_negative_cu = ROOT.TH1F("gain_charge-","Gain Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.sum_cu = ROOT.TH1F("charge","Total Current",
-                                self.n_bin, self.t_start, self.t_end)
 
     def set_3D_electrode(self,e_r,e_gap=0):
         """
