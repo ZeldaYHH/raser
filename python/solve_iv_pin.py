@@ -78,7 +78,7 @@ devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterat
 
 ### Drift diffusion simulation at equilibrium
 Initial.DriftDiffusionInitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
+devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-7, maximum_iterations=50)
 
 #### Ramp the bias to Reverse
 reverse_v = 0.0
@@ -104,7 +104,7 @@ while reverse_v < 800.0:
 
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     try:
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
+        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-7, maximum_iterations=50)
     except devsim.error as msg:
         if msg=="Convergence failure!":
             raise
