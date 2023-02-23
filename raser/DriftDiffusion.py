@@ -52,8 +52,16 @@ def CreateHoleCurrent(device, region, mu_p):
     # Make sure the bernoulli functions exist
     if not InEdgeModelList(device, region, "Bern01"):
         CreateBernoulli(device, region)
-
-    Jp ="-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
+    
+    #define electrons accumulated in the traps
+    #parameter of first trap Z1/2
+    Dn_t1="N_t1*r_n1*(r_n1*n_11+r_p1*Acceptors@n1)*Electrons@n1/(r_n1*(Donors@n1+n_11)+r_p1*(Acceptors@n1+p_11))^2"
+    #parameter of second trap EH6/7
+    Dn_t2="N_t2*r_n2*(r_n2*n_12+r_p2*Acceptors@n1)*Electrons@n1/(r_n2*(Donors@n1+n_12)+r_p2*(Acceptors@n1+p_12))^2"
+    CreateEdgeModel(device,region,"Dn_t1",Dn_t1)
+    CreateEdgeModel(device,region,"Dn_t2",Dn_t2)
+    
+    Jp ="-q*mu_p*ElectricField*(Dn_t1+Dn_t2)-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
     #Jp ="-q*HoleMobility*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)"
 
     CreateEdgeModel(device, region, "HoleCurrent", Jp)
