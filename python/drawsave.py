@@ -31,6 +31,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
         draw_ele_field_1D(my_d,my_f,path)
+        draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     draw_plot(my_d, my_current,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d, my_current,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
@@ -56,6 +57,8 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
 def save(dset,my_d,my_l,ele_current):
     if "planar3D" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "planarRing" in my_d.det_model:
+        path = "output/" + "pintct_ring/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     create_path(path) 
@@ -328,7 +331,7 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             l_yr = my_d.l_z
         else:
             print("the draw plane is not existing")
-    elif "planar3D" in sensor_model or "lgad3D" in sensor_model:
+    elif "planar3D" in sensor_model or "planarRing" in sensor_model or "lgad3D" in sensor_model:
         l_xl = 0
         l_yl = 0 
         if plane == "xy":
@@ -471,7 +474,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
         structure = ROOT.TH3D("","",n_bin[0],my_f.sx_l,my_f.sx_r,
                                     n_bin[1],my_f.sy_l,my_f.sy_r,
                                     n_bin[2],0,my_d.l_z)
-    elif "planar3D" or "lgad3D" in my_d.det_model:
+    elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing" in my_d.det_model:
         n_bin=[int(my_d.l_x/50),int(my_d.l_y/50),int(my_d.l_z)]
         structure = ROOT.TH3D("","",n_bin[0],0,my_d.l_x,
                                     n_bin[1],0,my_d.l_y,
@@ -484,7 +487,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
                     x_v = (i+1)*((my_f.sx_r-my_f.sx_l)/n_bin[0])+my_f.sx_l
                     y_v = (j+1)*((my_f.sx_r-my_f.sx_l)/n_bin[1])+my_f.sx_l
                     z_v = (k+1)*(my_d.l_z/n_bin[2])
-                elif "planar3D" or "lgad3D" in my_d.det_model:
+                elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing"in my_d.det_model:
                     x_v = (i+1)*(my_d.l_x/n_bin[0])
                     y_v = (j+1)*(my_d.l_y/n_bin[1])
                     z_v = (k+1)*(my_d.l_z/n_bin[2])

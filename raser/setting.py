@@ -111,6 +111,13 @@ class Setting:
                         'doping':p['doping'], 'steplength':p['steplength']
                         }
             
+        if "planarRing" in self.det_model:
+            detector = {'det_model':'planarRing', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
+                        'e_r_inner':p['e_r_inner'],'e_r_outer':p['e_r_outer'],
+                        'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
+                        'doping':p['doping'], 'steplength':p['steplength']
+                        }
+            
         if "plugin3D" in self.det_model:
             detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
                         'material':p['material'],'voltage':p['voltage'], 'temp':p['temp'], 
@@ -163,6 +170,9 @@ class Setting:
         p = self.paras
         if "planar3D" in self.det_model:
             fenics = {'det_model':'planar3D', 
+                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+        if "planarRing" in self.det_model:
+            fenics = {'det_model':'planarRing', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "lgad3D" in self.det_model:
             fenics = {'det_model':'lgad3D',

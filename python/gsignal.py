@@ -112,6 +112,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
         drawsave.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,dset.output)
     else:
         drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
+        drawsave.draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     start_n = dset.instance_number * dset.total_events
     end_n = (dset.instance_number + 1) * dset.total_events
     effective_number = 0

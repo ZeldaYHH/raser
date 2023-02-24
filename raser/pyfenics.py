@@ -19,6 +19,9 @@ class FenicsCal:
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z
         self.tol = 1e-14
+        if self.det_model == "planarRing":
+            self.e_r_inner = my_d.e_r_inner
+            self.e_r_outer = my_d.e_r_outer
 
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
@@ -48,7 +51,7 @@ class FenicsCal:
                 m_sensor = m_sensor - elec_n 
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
 
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "planarRing" in self.det_model:
             m_sensor = mshr.Box(fenics.Point(0, 0, 0), 
                                 fenics.Point(self.fl_x, self.fl_y, self.fl_z))
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
@@ -117,8 +120,10 @@ class FenicsCal:
         if  "plugin3D" in self.det_model:
             bc_l=[]
             bc_l = self.boundary_definition_3D(my_d,"Possion")          
-        elif "planar3D" or "lgad3D" in self.det_model:
+        elif "planar3D" in self.det_model or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Possion")
+        elif "planarRing" in self.det_model:
+            bc_l = self.boundary_definition_Ring(my_d,"Possion")
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
@@ -166,6 +171,9 @@ class FenicsCal:
             bc_l = self.boundary_definition_3D(my_d,"Laplace")
         elif "planar3D" or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Laplace")
+        elif "planarRing" in self.det_model:
+            bc_l = self.boundary_definition_Ring(my_d,"Laplace")
+
         # Define variational problem
         u_w = fenics.TrialFunction(self.V)
         v_w = fenics.TestFunction(self.V)
@@ -211,7 +219,7 @@ class FenicsCal:
     def boundary_definition_2D(self,my_d,model):
         """
         @description:
-            Get boundary definition of 2D detector with Possion and Laplace equations
+            Get boundary definition of planar detector with Possion and Laplace equations
         @Modify:
             2021/08/31
         """
@@ -221,6 +229,18 @@ class FenicsCal:
                                 p_1 = p_ele, p_2 = n_ele)
         def boundary(x, on_boundary):
             return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
+        bc_l = fenics.DirichletBC(self.V, u_D, boundary)
+        return bc_l
+    
+    def boundary_definition_Ring(self,my_d,model):
+        p_ele,n_ele=self.model_para(my_d,model)
+        u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = p_ele, p_2 = n_ele)
+        def boundary(x, on_boundary):
+            return (abs(x[2])<self.tol and 
+                    (((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) > self.e_r_inner**2 and ((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) < self.e_r_outer**2)
+                    or abs(x[2]-self.fl_z)<self.tol)
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
 
@@ -240,7 +260,6 @@ class FenicsCal:
         elif model == "Laplace":
             bc = fenics.DirichletBC(self.V, 1.0, elec_p)     
         return bc    
-
         
     def model_para(self,my_d,model):
         """
@@ -379,7 +398,7 @@ class FenicsCal:
                 out_range=True
             else:
                 out_range=False
-        elif "planar3D" or "lgad3D" in self.det_model:
+        elif "planar3D" or "lgad3D" or "planarRing" in self.det_model:
             out_range=False
         return out_range
     

@@ -64,6 +64,10 @@ class R3dDetector:
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
 
+        if self.det_model == "planarRing":
+            self.e_r_inner = det_dic['e_r_inner']
+            self.e_r_outer = det_dic['e_r_outer']
+
     def set_3D_electrode(self,e_r,e_gap=0):
         """
         @description: 

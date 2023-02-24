@@ -162,6 +162,10 @@ case $option in
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
 
+    1.1.1R) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
+        raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json"
+        ;;
+
     1.1.7) echo "SiC-PIN beam monitor" 
         raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
         ;;
@@ -301,7 +305,10 @@ case $option in
     3.1.2) echo "SiC-LGAD top-TCT basic information ..."
         raser "./python/TCTtest.py det_name=SICAR-1 parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json" 
         ;;
-        esac
+
+    3.1.1R) echo "ring electrode SiC-PIN top-TCT basic information ..."
+        raser "./python/TCTtest.py det_name=Ring-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
+    esac
 }
 
 

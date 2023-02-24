@@ -26,6 +26,8 @@ if "scan=True" in args:
     drawsave.save(dset,my_d,my_l,ele_current)
     if "planar3D" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "planarRing" in my_d.det_model:
+        path = "output/" + "pintct_ring/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     drawsave.create_path(path) 
