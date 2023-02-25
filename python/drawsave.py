@@ -60,7 +60,7 @@ def save(dset,my_d,my_l,ele_current,key):
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     create_path(path) 
-    L=eval("round({}.{})".format(my_l,key))
+    L=eval("round(my_l.{})".format(key))
     #L is defined by different keys
     volt = array('d', [999.])
     time = array('d', [999.])
