@@ -11,7 +11,7 @@ import mshr
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
-    def __init__(self,my_d,fen_dic):
+    def __init__(self,my_d,fen_dic,undepleted=False):
         self.p_electric = []
         self.w_p_electric = []
         self.det_model = fen_dic['det_model']
@@ -24,9 +24,12 @@ class FenicsCal:
             self.e_r_outer = my_d.e_r_outer
 
         self.generate_mesh(my_d,fen_dic['mesh'])
-        self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
-        self.fenics_p_electric(my_d)
-        self.fenics_p_w_electric(my_d)
+        if undepleted == False:
+            self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
+            self.fenics_p_electric(my_d)
+            self.fenics_p_w_electric(my_d)
+        else:
+            pass
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -299,9 +302,9 @@ class FenicsCal:
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
         if self.det_model=="lgad3D":
-            f_value = e0*input_doping*1e6/perm0/perm_mat
+            f_value = -e0*input_doping*1e6/perm0/perm_mat
         else:
-            f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
+            f_value = -e0*my_d.d_neff*1e6/perm0/perm_mat
         return f_value
         
     def get_e_field(self,px,py,pz):
