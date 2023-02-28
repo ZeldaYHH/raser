@@ -21,7 +21,7 @@ usage() {
     printf "\n\t%-9s  %-40s"    "3.2"       "edge-TCT-Si"
     printf "\n\t%-9s  %-40s"    "3.3"       "edge-TCT-SiC"
 
-    printf "\n\t%-9s  %-40s"    "9.1"       "Zhan"
+    printf "\n\t%-9s  %-40s"    "7.1"       "Si strip"
 
     printf "\n"
 }
@@ -91,11 +91,9 @@ usage_3_3() {
     printf "\n\n"
 }
 
-usage_9_1() { 
-	printf "\n\t%-5s  %-40s\n"  "9.1.0"    "Loading TRACK into Singularity..." 
-    printf "\n\t%-5s  %-40s\n"  "9.1.1"    "NJU-SiC-PIN basic information for RASER simulation ..." 
-    printf "\n\t%-5s  %-40s\n"  "9.1.2"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "9.1.3"    "get time resolution for NJU-SiC-PIN" 
+usage_7_1() { 
+	printf "\n\t%-5s  %-40s\n"  "7.1.1"    "Si sensor Energy deposition"  
+
     printf "\n"
 }
 
@@ -384,11 +382,11 @@ case $option in
         esac
 }
 
-sub_9_1(){
+sub_7_1(){
 case $option in 
 
-    9.1.1) echo "SiC-PIN basic information for RASER simulation ..."
-        raser "./raser/zhan_test.py"
+    7.1.1) echo "Si sensor energy deposition" 
+        raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad" 
         ;;
         esac
 }
@@ -474,14 +472,14 @@ case $option in
         sub_3_3 option
         ;;
 
-    9.1) echo "RASER simulate NJU-SiC-PIN"
-        usage_9_1
+    7.1) echo "RASER simulate ITk-Si-strip"
+        usage_7_1
         echo "Please enter your option: " 
         read option 
-        sub_9_1 option 
+        sub_7_1 option 
         ;;
-    9.1.*) echo "RASER simulate NJU-SiC-PIN"
-        sub_9_1 option
+    7.1.*) echo "RASER simulate ITk-Si-strip"
+        sub_7_1 option
         ;;
 
 		esac

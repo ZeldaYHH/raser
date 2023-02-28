@@ -258,5 +258,41 @@
         "BBGain" : 19500,
         "BB_imp" : 10,
         "OscBW" : 2
+    },
+
+    {
+        "steplength" : 0.1,
+        "total_events" : 1000,
+        "det_name" : "ITk-Si-strip",
+        "det_model" : "planar3D",
+
+        "lx" : 5000,
+        "ly" : 5000,
+        "lz" : 100,
+        "doping" : 10,  
+        "voltage" : 0,
+        "temp" : 300.0,
+        "material" : "Si",
+
+        "mesh" : 32,
+        "xyscale" : 10,
+
+        "maxstep" : 2,
+        "g4_vis" : 0,
+        "par_inx" : 2500,
+        "par_iny" : 2500,
+        "par_inz" : 17000,
+        "par_outx" : 2500,
+        "par_outy" : 2500,
+        "par_outz" : 0.0,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 19500,
+        "BB_imp" : 10,
+        "OscBW" : 2
     }
 ]

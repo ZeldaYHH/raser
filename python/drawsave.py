@@ -687,7 +687,7 @@ def get_beam_number(my_g4p,ele_current):
     fout.Close()
 
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    h1 = ROOT.TH1F("Edep_device", "Energy deposition in SiC", 100, 0., 0.1)
+    h1 = ROOT.TH1F("Edep_device", "Energy deposition in Si", 100, 0., 0.1)
     for i in range (len(my_g4p.edep_devices)):
         h1.Fill(my_g4p.edep_devices[i])
     h1.Draw()
