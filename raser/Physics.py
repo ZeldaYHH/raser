@@ -139,7 +139,7 @@ def CreateSRH1(device, region):
     '''
     Add defect Z 1 / 2
     '''
-    sigma_n=3e-16
+    sigma_n=3e-12
     sigma_p=2e-12
     N_t=1e13
     v_T=1e7
@@ -156,7 +156,7 @@ def CreateSRH2(device, region):
     '''
     Add defect EH 6 / 7
     '''
-    sigma_n_HS6=2e-12
+    sigma_n_HS6=2e-17
     sigma_p_HS6=3e-17
     N_t_HS6=1e13
     v_T=1e7
