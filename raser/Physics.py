@@ -139,14 +139,6 @@ def CreateSRH1(device, region):
     '''
     Add defect Z 1 / 2
     '''
-    sigma_n=3e-12
-    sigma_p=2e-12
-    N_t=1e13
-    v_T=1e7
-    devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
-    devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
-    devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
-    devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
     R_z="(sigma_n*sigma_p*v_T*N_t*(Electrons*Holes - n_i^2))/(sigma_n*(Electrons - n1*exp(1.6e-19/(k_T0))) + sigma_p*(Holes + p1*exp(1.6e-19/(k_T0))))"
     CreateNodeModel(device, region, "R_z", R_z)
     for i in ("Electrons", "Holes"):
