@@ -50,6 +50,7 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.5"    "Build 1D SICAR LGAD structure"
     printf "\n\t%-5s  %-40s\n"  "1.3.6"    "Simulate 1D SICAR LGAD I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.7"    "Simulate 1D SICAR LGAD C-V"
+    printf "\n\t%-5s  %-40s\n"  "1.3.8"    "Simulate 1D NJU-PIN I-V Defect"
 }
 
 usage_2_1() { 
@@ -228,6 +229,10 @@ case $option in
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
         ./python/run_batchjob.py devsim "solve_cv_lgad.py"
+        ;;
+            
+    1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
+        raser devsim "solve_iv_defect.py"
         ;;
         esac
 }
