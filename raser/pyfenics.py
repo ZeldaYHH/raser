@@ -11,7 +11,7 @@ import mshr
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
-    def __init__(self,my_d,fen_dic,undepleted=False):
+    def __init__(self,my_d,fen_dic,carrier_distribution=False):
         self.p_electric = []
         self.w_p_electric = []
         self.det_model = fen_dic['det_model']
@@ -19,12 +19,13 @@ class FenicsCal:
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z
         self.tol = 1e-14
+        self.bias_voltage = my_d.voltage
         if self.det_model == "planarRing":
             self.e_r_inner = my_d.e_r_inner
             self.e_r_outer = my_d.e_r_outer
 
         self.generate_mesh(my_d,fen_dic['mesh'])
-        if undepleted == False:
+        if carrier_distribution == False:
             self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
             self.fenics_p_electric(my_d)
             self.fenics_p_w_electric(my_d)
@@ -124,9 +125,9 @@ class FenicsCal:
             bc_l=[]
             bc_l = self.boundary_definition_3D(my_d,"Possion")          
         elif "planar3D" in self.det_model or "lgad3D" in self.det_model:
-            bc_l = self.boundary_definition_2D(my_d,"Possion")
+            bc_l = self.boundary_definition_planar(my_d,"Possion")
         elif "planarRing" in self.det_model:
-            bc_l = self.boundary_definition_Ring(my_d,"Possion")
+            bc_l = self.boundary_definition_ring(my_d,"Possion")
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
@@ -173,9 +174,9 @@ class FenicsCal:
             bc_l = []
             bc_l = self.boundary_definition_3D(my_d,"Laplace")
         elif "planar3D" or "lgad3D" in self.det_model:
-            bc_l = self.boundary_definition_2D(my_d,"Laplace")
+            bc_l = self.boundary_definition_planar(my_d,"Laplace")
         elif "planarRing" in self.det_model:
-            bc_l = self.boundary_definition_Ring(my_d,"Laplace")
+            bc_l = self.boundary_definition_ring(my_d,"Laplace")
 
         # Define variational problem
         u_w = fenics.TrialFunction(self.V)
@@ -219,7 +220,7 @@ class FenicsCal:
         bc_l.append(bc)
         return bc_l
 
-    def boundary_definition_2D(self,my_d,model):
+    def boundary_definition_planar(self,my_d,model):
         """
         @description:
             Get boundary definition of planar detector with Possion and Laplace equations
@@ -235,12 +236,13 @@ class FenicsCal:
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
     
-    def boundary_definition_Ring(self,my_d,model):
+    def boundary_definition_ring(self,my_d,model):
         p_ele,n_ele=self.model_para(my_d,model)
         u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
                                 p_1 = p_ele, p_2 = n_ele)
         def boundary(x, on_boundary):
+            #under construction
             return (abs(x[2])<self.tol and 
                     (((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) > self.e_r_inner**2 and ((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) < self.e_r_outer**2)
                     or abs(x[2]-self.fl_z)<self.tol)
@@ -272,10 +274,10 @@ class FenicsCal:
             2021/08/31
         """       
         bc_l=[]
-        if model == "Possion":
+        if model == "Possion": # solving the electric potential U
             p_ele = my_d.voltage
             n_ele = 0.0
-        elif model == "Laplace":
+        elif model == "Laplace": # solving the weighting potential U_w
             p_ele = 0.0
             n_ele = 1.0
         else:
@@ -327,12 +329,22 @@ class FenicsCal:
             scale_py=py%self.fl_y
             scale_pz=pz
             try:
-                x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
-                x_value = x_value* -1
-                y_value = y_value* -1
-                z_value = z_value* -1
+                f_p = self.u(scale_px,scale_py,scale_pz)
             except RuntimeError:
+                f_p = 0.0
+            
+            if f_p <= min(self.bias_voltage,0) or f_p >= max(self.bias_voltage,0):
+                # in undepleted area, carriers make space neutralized
                 x_value,y_value,z_value = 0,0,0
+            else:
+                try:
+                    x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
+                    x_value = x_value* -1
+                    y_value = y_value* -1
+                    z_value = z_value* -1
+                except RuntimeError:
+                    x_value,y_value,z_value = 0,0,0
+        
         return x_value,y_value,z_value
 
     def get_w_p(self,px,py,pz):
@@ -373,17 +385,21 @@ class FenicsCal:
             2021/08/31
         """
         out_range=self.judge_fenics_range(px,py,pz)
-        if out_range:   #
-            f_w_p = 0
+        if out_range:
+            f_p = 0
         else:
             scale_px=px%self.fl_x
             scale_py=py%self.fl_y
             scale_pz=pz   
             try:
-                f_w_p = self.u(scale_px,scale_py,scale_pz)
+                f_p = self.u(scale_px,scale_py,scale_pz)
             except RuntimeError:
-                f_w_p = 0.0
-        return f_w_p
+                f_p = 0.0
+        if f_p <= min(self.bias_voltage,0):
+            f_p = min(self.bias_voltage,0)
+        if f_p >= max(self.bias_voltage,0):
+            f_p = max(self.bias_voltage,0)
+        return f_p
 
     def judge_fenics_range(self,px,py,pz):
         """
