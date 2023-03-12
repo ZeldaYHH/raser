@@ -28,9 +28,23 @@ usage_1_1() {
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-SiC-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-SiC-PIN" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.4"    "HPK-Si-PIN basic information for RASER simulation ..." 
-    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution for HPK-Si-PIN" 
+    printf "\n"
+
+    printf "\n\t%-5s  %-40s\n"  "1.1.2Scan"    "batch model with total number, split with step number, multi points voltage [-50,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.3Scan"    "get time resolution 3D-SiC multi points voltage [-50,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.4Scan"    "get time resolution vs draw voltage" 
+    printf "\n"
+
+    printf "\n\t%-5s  %-40s\n"  "1.1.1Si"  "HPK-Si-PIN basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "1.1.2Si"  "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.3Si"  "get time resolution for HPK-Si-PIN"
+    printf "\n"
+
+    #printf "\n\t%-5s  %-40s\n"  "1.1.1Ring"    "ring electrode SiC-PIN basic information for RASER simulation ..." 
+    #printf "\n\t%-5s  %-40s\n"  "1.1.2Ring"    "batch model with total number, split with step number" 
+    #printf "\n\t%-5s  %-40s\n"  "1.1.3Ring"    "get time resolution for Ring-PIN" 
+    #printf "\n"
+
     printf "\n\t%-5s  %-40s\n"  "1.1.7"    "NJU-SiC-PIN beam monitor" 
     printf "\n"
 }
@@ -50,6 +64,7 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.5"    "Build 1D SICAR LGAD structure"
     printf "\n\t%-5s  %-40s\n"  "1.3.6"    "Simulate 1D SICAR LGAD I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.7"    "Simulate 1D SICAR LGAD C-V"
+    printf "\n"
 }
 
 usage_2_1() { 
@@ -62,9 +77,9 @@ usage_2_1() {
 
 usage_2_2() { 
     printf "\n\t%-5s  %-40s\n"  "2.2.1"    "Si-LGAD basic information for RASER simulation ..." 
-    printf "\n\t%-5s  %-40s\n"  "2.1.2"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "2.1.3"    "get time resolution for Si-LGAD, multi points voltage [200,250]"
-    printf "\n\t%-5s  %-40s\n"  "2.1.4"    "get time resolution vs voltage ..." 
+    printf "\n\t%-5s  %-40s\n"  "2.2.2"    "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "2.2.3"    "get time resolution for Si-LGAD, multi points voltage [200,250]"
+    printf "\n\t%-5s  %-40s\n"  "2.2.4"    "get time resolution vs voltage ..." 
     printf "\n"
 }
 
@@ -79,14 +94,16 @@ usage_3_2() {
     printf "\n\t%-5s  %-40s\n"  "3.2.2"    "Si-LGAD edge-TCT basic information ..."
     printf "\n\t%-5s  %-40s\n"  "3.2.3"    "get volt-time for Si-PIN, multi points z [0,50]"
     printf "\n\t%-5s  %-40s\n"  "3.2.4"    "get volt-time for Si-LGAD, multi points z [0,50]"
-    printf "\n\t%-5s  %-40s\n"  "3.2.4"    "analyse eTCT rootfiles "
-    printf "\n\n"
+    printf "\n\t%-5s  %-40s\n"  "3.2.5"    "analyse eTCT rootfiles"
+    printf "\n\t%-5s  %-40s\n"  "3.2.X"    "get volt-time from experiment"
+    printf "\n\t%-5s  %-40s\n"  "3.2.5S"   "analyse eTCT rootfiles with experiment data"
+    printf "\n"
 }
 
 usage_3_3() {
     printf "\n\t%-5s  %-40s\n"  "3.3.1"    "SiC-PIN edge-TCT basic information ..."
     printf "\n\t%-5s  %-40s\n"  "3.3.2"    "get volt-time for Si-PIN, multi points z [0,100]"
-    printf "\n\n"
+    printf "\n"
 }
 
 if [[ $# -eq 0 ]]; then
@@ -125,7 +142,7 @@ case $option in
         ./python/add_noise_raser.py output/pin3D/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
 
-    1.1.2S) echo "run 3D-SiC batch model with total number, split with step number ..."
+    1.1.2Scan) echo "run 3D-SiC batch model with total number, split with step number ..."
         step=10000
 		for ((i=0;i<2;i++))
         do
@@ -137,19 +154,19 @@ case $option in
         done
         ;;
 
-	1.1.3S) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+	1.1.3Scan) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
         ./python/time_scan.py  output/pin3D/NJU-PIN/ scan
 		;;
 
-    1.1.4S) echo "get time resolution vs draw voltage"
+    1.1.4Scan) echo "get time resolution vs draw voltage"
 		./python/time_scan.py  output/pin3D/NJU-PIN/time_resolution_scan.csv draw_voltage 0
 		;;
 
-    1.1.1A) echo "Si-PIN basic information for RASER simulation ..."
+    1.1.1Si) echo "Si-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
 
-    1.1.2A) echo "batch model with total number, split with step number"
+    1.1.2Si) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=0;i<20;i++))
         do
@@ -158,15 +175,15 @@ case $option in
         done
         ;;
 
-    1.1.3A) echo "get time resolution for Si-PIN"
+    1.1.3Si) echo "get time resolution for Si-PIN"
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
 
-    1.1.1R) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
+    1.1.1Ring) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json"
         ;;
 
-    1.1.2R) echo "batch model with total number, split with step number"
+    1.1.2Ring) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=0;i<20;i++))
         do
@@ -175,7 +192,7 @@ case $option in
         done
         ;;
 
-    1.1.3R) echo "get time resolution for SiC-PIN"
+    1.1.3Ring) echo "get time resolution for Ring-PIN"
         ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
 
@@ -392,7 +409,7 @@ case $option in
         ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
         ;;
 
-    3.2.5S) echo "analyse eTCT rootfiles"
+    3.2.5S) echo "analyse eTCT rootfiles with experiment data"
         ./python/tct_analysis.py output/pintct/HPK-Si-PIN/ "experiment"
         ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
         ;;
