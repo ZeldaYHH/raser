@@ -214,10 +214,12 @@ class Avalanche:
             # only consider the <0001> direction multiplication, no anisotropy now!
             a = a_0001
             b = b_0001
-
-            coefficient = _gamma*a*math.exp(-(_gamma*b/E))
-
-
+            
+            if(E>1.0e04):
+                coefficient = _gamma*a*math.exp(-(_gamma*b/E))
+            else:
+                coefficient = 0.
+                
         return coefficient
 
 class Vector:

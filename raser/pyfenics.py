@@ -329,21 +329,12 @@ class FenicsCal:
             scale_py=py%self.fl_y
             scale_pz=pz
             try:
-                f_p = self.u(scale_px,scale_py,scale_pz)
+                x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
+                x_value = x_value* -1
+                y_value = y_value* -1
+                z_value = z_value* -1
             except RuntimeError:
-                f_p = 0.0
-            
-            if f_p <= min(self.bias_voltage,0) or f_p >= max(self.bias_voltage,0):
-                # in undepleted area, carriers make space neutralized
                 x_value,y_value,z_value = 0,0,0
-            else:
-                try:
-                    x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
-                    x_value = x_value* -1
-                    y_value = y_value* -1
-                    z_value = z_value* -1
-                except RuntimeError:
-                    x_value,y_value,z_value = 0,0,0
         
         return x_value,y_value,z_value
 
@@ -395,10 +386,6 @@ class FenicsCal:
                 f_p = self.u(scale_px,scale_py,scale_pz)
             except RuntimeError:
                 f_p = 0.0
-        if f_p <= min(self.bias_voltage,0):
-            f_p = min(self.bias_voltage,0)
-        if f_p >= max(self.bias_voltage,0):
-            f_p = max(self.bias_voltage,0)
         return f_p
 
     def judge_fenics_range(self,px,py,pz):
