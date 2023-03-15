@@ -45,6 +45,9 @@ usage_1_1() {
     #printf "\n\t%-5s  %-40s\n"  "1.1.3Ring"    "get time resolution for Ring-PIN" 
     #printf "\n"
 
+    printf "\n\t%-5s  %-40s\n"  "1.1.1Alpha_gamma"    "alpha or gamma SiC-PIN basic information for RASER simulation ..." 
+    printf "\n"
+
     printf "\n\t%-5s  %-40s\n"  "1.1.7"    "NJU-SiC-PIN beam monitor" 
     printf "\n"
 }
@@ -194,6 +197,10 @@ case $option in
 
     1.1.3Ring) echo "get time resolution for Ring-PIN"
         ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
+        ;;
+
+    1.1.1Alpha_gamma) echo "alpha or gamma SiC-PIN basic information for RASER simulation ..."
+    raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor" 
         ;;
 
     1.1.7) echo "SiC-PIN beam monitor" 
