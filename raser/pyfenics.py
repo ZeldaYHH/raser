@@ -12,8 +12,6 @@ import mshr
 #Calculate the weighting potential and electric field
 class FenicsCal:
     def __init__(self,my_d,fen_dic,carrier_distribution=False):
-        self.p_electric = []
-        self.w_p_electric = []
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
@@ -25,12 +23,14 @@ class FenicsCal:
             self.e_r_outer = my_d.e_r_outer
 
         self.generate_mesh(my_d,fen_dic['mesh'])
+        self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
+        self.u_bc,self.u_w_bc = self.boundary_definition(my_d)
+
+        self.weighting_potential(my_d)
         if carrier_distribution == False:
-            self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
-            self.fenics_p_electric(my_d)
-            self.fenics_p_w_electric(my_d)
+            self.electric_field(my_d)
         else:
-            pass
+            self.electric_field_with_carrier(my_d)
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -67,7 +67,7 @@ class FenicsCal:
         
         else:
             raise(NameError)        
-        
+    
     def sensor_range_confirm(self,my_d):
         """
         @description:
@@ -85,17 +85,17 @@ class FenicsCal:
         xv_list=[]
         yv_list=[]
         rest_length=50 #um
-        length=0
+        length_flag = 0
         for i in range(len(my_d.e_tr)):
             e_t_i = my_d.e_tr[i]
             xv_list.append(e_t_i[0])
             yv_list.append(e_t_i[1])
             ele_radius= e_t_i[2]
-        while length == 0:
-            xv_max = max(xv_list)+ele_radius+rest_length 
-            xv_min = min(xv_list)-ele_radius-rest_length 
+        while length_flag == 0:
+            xv_max = max(xv_list)+ele_radius+rest_length
+            xv_min = min(xv_list)-ele_radius-rest_length
             yv_max = max(yv_list)+ele_radius+rest_length
-            yv_min = min(yv_list)-ele_radius-rest_length 
+            yv_min = min(yv_list)-ele_radius-rest_length
             if xv_max >= yv_max:
                 yv_max = xv_max
             else:
@@ -104,91 +104,39 @@ class FenicsCal:
                 yv_min = xv_min
             else:
                 xv_min = yv_min
-            if (xv_max > my_d.l_x or xv_min <0 
+            if (xv_max > my_d.l_x or xv_min < 0
                or yv_max > my_d.l_y or yv_min < 0):
                 rest_length -= 1
             else:
-                length=1
-        self.sx_l=xv_min 
-        self.sx_r=xv_max 
-        self.sy_l=yv_min 
-        self.sy_r=yv_max 
+                length_flag = 1
+        self.sx_l=xv_min
+        self.sx_r=xv_max
+        self.sy_l=yv_min
+        self.sy_r=yv_max
 
-    def fenics_p_electric(self,my_d):    
-        """
-        @description:
-            Solve Poisson equation to get potential and electric field
-        @Modify:
-            2021/08/31
-        """
-        if  "plugin3D" in self.det_model:
-            bc_l=[]
-            bc_l = self.boundary_definition_3D(my_d,"Possion")          
+    def boundary_definition(self,my_d):
+        if "plugin3D" in self.det_model:
+            u_bc_l = []
+            u_bc_l = self.boundary_definition_3D(my_d,my_d.voltage,0.0)
+            u_w_bc_l = []
+            u_w_bc_l = self.boundary_definition_3D(my_d,0.0,1.0)     
         elif "planar3D" in self.det_model or "lgad3D" in self.det_model:
-            bc_l = self.boundary_definition_planar(my_d,"Possion")
+            u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
+            u_w_bc_l = self.boundary_definition_planar(my_d,0.0,1.0)
         elif "planarRing" in self.det_model:
-            bc_l = self.boundary_definition_ring(my_d,"Possion")
-
-        u = fenics.TrialFunction(self.V)
-        v = fenics.TestFunction(self.V)
-        if "lgad3D" in self.det_model:
-            if my_d.part == 2:
-                f = fenics.Expression('x[2] < width + tol ? doping1 : doping2',\
-                                      degree = 0, width = my_d.avalanche_bond,\
-                                      doping1 = self.f_value(my_d, my_d.doping1),\
-                                      doping2 = self.f_value(my_d, my_d.doping2),\
-                                      tol = self.tol)
-            elif my_d.part == 3:
-                f = fenics.Expression('x[2] < bonda - tol ? dopinga : (x[2] > bondb + tol ? dopingc : dopingb)',\
-                                      degree = 0, bonda = my_d.control_bond, bondb = my_d.avalanche_bond,\
-                                      dopinga = self.f_value(my_d, my_d.doping1),\
-                                      dopingb = self.f_value(my_d, my_d.doping2),\
-                                      dopingc = self.f_value(my_d, my_d.doping3),\
-                                      tol = self.tol)
-            else:
-                raise ValueError
+            u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
+            u_w_bc_l = self.boundary_definition_ring(my_d,0.0,1.0)
+        elif "planarStrip" in self.det_model:
+            #under construction
+            #u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
+            #u_w_bc_l = self.boundary_definition_strip(my_d,0.0,1.0)
+            pass
         else:
-            f = fenics.Constant(self.f_value(my_d))
-        a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = f*v*fenics.dx
-        # Compute solution
-        self.u = fenics.Function(self.V)
-        fenics.solve(a == L, self.u, bc_l,
-                     solver_parameters=dict(linear_solver='gmres',
-                                            preconditioner='ilu'))
-        # Calculate electric field
-        W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
-        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
-                                                        self.u.dx(1),
-                                                        self.u.dx(2))),W)
+            raise NameError(self.det_model)
 
-    def fenics_p_w_electric(self,my_d):  
-        """
-        @description:
-            Solve Laplace equation to 
-            get weighting potential and weighting electric field
-        @Modify:
-            2021/08/31
-        """
-        if  "plugin3D" in self.det_model:
-            bc_l = []
-            bc_l = self.boundary_definition_3D(my_d,"Laplace")
-        elif "planar3D" or "lgad3D" in self.det_model:
-            bc_l = self.boundary_definition_planar(my_d,"Laplace")
-        elif "planarRing" in self.det_model:
-            bc_l = self.boundary_definition_ring(my_d,"Laplace")
+        return u_bc_l, u_w_bc_l
 
-        # Define variational problem
-        u_w = fenics.TrialFunction(self.V)
-        v_w = fenics.TestFunction(self.V)
-        f_w = fenics.Constant(0)
-        a_w = fenics.dot(fenics.grad(u_w), fenics.grad(v_w))*fenics.dx
-        L_w = f_w*v_w*fenics.dx
-        # Compute solution
-        self.u_w = fenics.Function(self.V)
-        fenics.solve(a_w == L_w, self.u_w, bc_l)
-
-    def boundary_definition_3D(self,my_d,model):
+    def boundary_definition_3D(self,my_d,p_ele,n_ele):
         """
         @description:
             Get boundary definition of 3D detector with Possion and Laplace equations
@@ -196,14 +144,8 @@ class FenicsCal:
             2021/08/31
         """
         bc_l = []
-        p_ele,n_ele=self.model_para(my_d,model)
-        x_list = []
-        y_list = []
-        radius = my_d.e_tr[0][2]
         for i in range (len(my_d.e_tr)):
             e_i = my_d.e_tr[i]
-            x_list.append(e_i[0])
-            y_list.append(e_i[1])
             str_e = "x[0]>={e_0}-{e_2} && x[0]<={e_0}+"\
                     +"{e_2} && x[1]>={e_1}-{e_2} && "\
                     +"x[1]<={e_1}+{e_2} && x[2]>={e_3} \
@@ -216,18 +158,23 @@ class FenicsCal:
             else:
                 bc = fenics.DirichletBC(self.V, n_ele, elec_p)
             bc_l.append(bc)
-        bc = self.out_column(x_list,y_list,radius,model,my_d)
-        bc_l.append(bc)
+
+        x_center = my_d.e_tr[0][0]
+        y_center = my_d.e_tr[0][1]
+        str_e = "(x[0]-{e_0})*(x[0]-{e_0}) +(x[1]-{e_1})*(x[1]-{e_1}) >= {e_2}*{e_2}"  
+        elec_p = str_e.format(e_0=x_center, e_1=y_center,
+                              e_2=my_d.e_gap)        
+        out_colomn = fenics.DirichletBC(self.V, n_ele, elec_p)
+        bc_l.append(out_colomn)
         return bc_l
 
-    def boundary_definition_planar(self,my_d,model):
+    def boundary_definition_planar(self,my_d,p_ele,n_ele):
         """
         @description:
             Get boundary definition of planar detector with Possion and Laplace equations
         @Modify:
             2021/08/31
         """
-        p_ele,n_ele=self.model_para(my_d,model)
         u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
                                 p_1 = p_ele, p_2 = n_ele)
@@ -236,55 +183,75 @@ class FenicsCal:
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
     
-    def boundary_definition_ring(self,my_d,model):
-        p_ele,n_ele=self.model_para(my_d,model)
+    def boundary_definition_ring(self,my_d,p_ele,n_ele):
         u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
                                 p_1 = p_ele, p_2 = n_ele)
         def boundary(x, on_boundary):
             #under construction
-            return (abs(x[2])<self.tol and 
-                    (((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) > self.e_r_inner**2 and ((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) < self.e_r_outer**2)
+            return (abs(x[2])<self.tol
+                    and (((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) > self.e_r_inner**2
+                    and ((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) < self.e_r_outer**2)
                     or abs(x[2]-self.fl_z)<self.tol)
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
-        return bc_l
+        return bc_l 
 
-    def out_column(self,x_list,y_list,radius,model,my_d):
-        x_min = min(x_list)-radius
-        x_max = max(x_list)+radius
-        y_min = min(y_list)-radius
-        y_max = max(y_list)+radius
-        
-        x_center = my_d.e_tr[0][0]
-        y_center = my_d.e_tr[0][1]
-        str_e = "(x[0]-{e_0})*(x[0]-{e_0}) +(x[1]-{e_1})*(x[1]-{e_1}) >= {e_2}*{e_2}"  
-        elec_p = str_e.format(e_0=x_center, e_1=y_center,
-                              e_2=my_d.e_gap)        
-        if model == "Possion":
-            bc = fenics.DirichletBC(self.V, 0.0, elec_p) 
-        elif model == "Laplace":
-            bc = fenics.DirichletBC(self.V, 1.0, elec_p)     
-        return bc    
-        
-    def model_para(self,my_d,model):
+    def weighting_potential(self,my_d):  
         """
         @description:
-            Choose Possion and Laplace parameters
+            Solve Laplace equation to 
+            get weighting potential and weighting electric field
         @Modify:
             2021/08/31
-        """       
-        bc_l=[]
-        if model == "Possion": # solving the electric potential U
-            p_ele = my_d.voltage
-            n_ele = 0.0
-        elif model == "Laplace": # solving the weighting potential U_w
-            p_ele = 0.0
-            n_ele = 1.0
-        else:
-            print("The input fenics solver model is wrong")
-        return p_ele,n_ele
+        """
+        # Define variational problem
+        # original problem: -Δu = 0
+        u_w = fenics.TrialFunction(self.V)
+        v_w = fenics.TestFunction(self.V)
+        f_w = fenics.Constant(0)
+        a_w = fenics.dot(fenics.grad(u_w), fenics.grad(v_w))*fenics.dx
+        L_w = f_w*v_w*fenics.dx
+        # Compute solution
+        self.u_w = fenics.Function(self.V)
+        fenics.solve(a_w == L_w, self.u_w, self.u_w_bc)
 
-    def f_value(self,my_d,input_doping=None):
+    def electric_field(self,my_d):    
+        """
+        @description:
+            Solve Poisson equation to get potential and electric field
+        @Modify:
+            2021/08/31
+        """
+        # Define variational problem
+        # original problem: -Δu = f
+        u = fenics.TrialFunction(self.V)
+        v = fenics.TestFunction(self.V)
+        f = self.f_expression(my_d)
+        a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
+        L = f*v*fenics.dx
+        # Compute solution
+        self.u = fenics.Function(self.V)
+        fenics.solve(a == L, self.u, self.u_bc,
+                     solver_parameters=dict(linear_solver='gmres',
+                     preconditioner='ilu'))
+        # Calculate electric field
+        W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
+        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
+                                                       self.u.dx(1),
+                                                       self.u.dx(2))),W)
+
+    def electric_field_with_carrier(self,my_d):    
+        """
+        @description:
+            Solve Poisson equation with carrier density 
+            to get potential and electric field of undepleted device
+        @Modify:
+            2023/03/13
+        """
+        # Define variational problem
+        # original problem: -Δu = f(1-exp(±u/u_T)), + for n-doped bulk and - for p
+
+    def f_expression(self,my_d):
         """
         @description: 
             Cal f_value of Poisson equation
@@ -300,43 +267,29 @@ class FenicsCal:
         elif my_d.material == 'SiC':
             perm_mat = 9.76  
         else:
-            print("material is wrong")            
+            raise NameError(my_d.material)
+             
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
-        if self.det_model=="lgad3D":
-            f_value = -e0*input_doping*1e6/perm0/perm_mat
+        if "lgad3D" in self.det_model:
+            if my_d.part == 2:
+                f = fenics.Expression('x[2] < width + tol ? charge1 : charge2',\
+                                      degree = 0, width = my_d.avalanche_bond,\
+                                      charge1 = e0*my_d.doping1*1e6/perm0/perm_mat,\
+                                      charge2 = e0*my_d.doping2*1e6/perm0/perm_mat,\
+                                      tol = self.tol)
+            elif my_d.part == 3:
+                f = fenics.Expression('x[2] < width1 - tol ? charge1 : (x[2] > width2 + tol ? charge3 : charge2)',\
+                                      degree = 0, width1 = my_d.control_bond, width2 = my_d.avalanche_bond,\
+                                      charge1 = e0*my_d.doping1*1e6/perm0/perm_mat,\
+                                      charge2 = e0*my_d.doping2*1e6/perm0/perm_mat,\
+                                      charge3 = e0*my_d.doping3*1e6/perm0/perm_mat,\
+                                      tol = self.tol)
+            else:
+                raise ValueError
         else:
-            f_value = -e0*my_d.d_neff*1e6/perm0/perm_mat
-        return f_value
-        
-    def get_e_field(self,px,py,pz):
-        """
-        @description: 
-            Get eletric field at the px,py,pz position in V/um
-        @param:
-            out_range -- out_range = False
-                      -- Position (x,y,z) don't exit in sensor fenics range
-        @reture:
-            Eletric field along x,y,z direction
-        @Modify:
-            2021/08/31
-        """
-        out_range=self.judge_fenics_range(px,py,pz)
-        if out_range:   
-            x_value,y_value,z_value = 0,0,0
-        else:
-            scale_px=px%self.fl_x
-            scale_py=py%self.fl_y
-            scale_pz=pz
-            try:
-                x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
-                x_value = x_value* -1
-                y_value = y_value* -1
-                z_value = z_value* -1
-            except RuntimeError:
-                x_value,y_value,z_value = 0,0,0
-        
-        return x_value,y_value,z_value
+            f = fenics.Constant(e0*my_d.d_neff*1e6/perm0/perm_mat)
+        return f
 
     def get_w_p(self,px,py,pz):
         """
@@ -387,6 +340,35 @@ class FenicsCal:
             except RuntimeError:
                 f_p = 0.0
         return f_p
+            
+    def get_e_field(self,px,py,pz):
+        """
+        @description: 
+            Get eletric field at the px,py,pz position in V/um
+        @param:
+            out_range -- out_range = False
+                      -- Position (x,y,z) don't exit in sensor fenics range
+        @reture:
+            Eletric field along x,y,z direction
+        @Modify:
+            2021/08/31
+        """
+        out_range=self.judge_fenics_range(px,py,pz)
+        if out_range:   
+            x_value,y_value,z_value = 0,0,0
+        else:
+            scale_px=px%self.fl_x
+            scale_py=py%self.fl_y
+            scale_pz=pz
+            try:
+                x_value,y_value,z_value = self.grad_u(scale_px,scale_py,scale_pz)
+                x_value = x_value* -1
+                y_value = y_value* -1
+                z_value = z_value* -1
+            except RuntimeError:
+                x_value,y_value,z_value = 0,0,0
+        
+        return x_value,y_value,z_value
 
     def judge_fenics_range(self,px,py,pz):
         """
@@ -409,4 +391,5 @@ class FenicsCal:
         return out_range
     
     def __del__(self):
+        #for reuse of batch job?
         pass

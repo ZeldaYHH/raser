@@ -7,6 +7,7 @@ Description: Raser parameter settings
 @version    : 1.0
 '''
 import json
+import random
 
 # Define all input parameters used in raser main process
 class Setting:
@@ -38,7 +39,8 @@ class Setting:
         
         p = self.paras
         self.total_events = int(p['total_events'])
-        self.g4seed = 0 
+        #self.g4seed = 0 
+        self.g4seed = random.randint(0,1e7)
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
