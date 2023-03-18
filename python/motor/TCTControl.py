@@ -17,7 +17,17 @@ if tctEnable:
     import VitualDevice as vitual_dev
 
 testpass = False
-
+"""
+扫描时默认每一个扫描点采集一次数据
+如需在每个点采集多次数据，请在运行程序时加上加上每个采集点需要采集数据的次数
+例：
+每个采集点只需要采集1次数据：python TCTControl.py
+每个采集点需要采集50次数据：python TCTControl.py 50
+"""
+if len(sys.argv)==2:
+    count_2=int(sys.argv[1])
+else:
+    count_2=1
 
 
 class MainWidget(QtWidgets.QWidget):
@@ -166,6 +176,7 @@ class MainWidget(QtWidgets.QWidget):
         self.scan_thread.dp = [self.ui.dx.value(),self.ui.dy.value(),self.ui.dz.value()]
         self.scan_thread.Np = [self.ui.Nx.value(),self.ui.Ny.value(),self.ui.Nz.value()]
         self.scan_thread.start()
+        print(111)
 
     def ScanContinue(self):
         self.scan_thread.continue_flag = True
@@ -175,6 +186,7 @@ class MainWidget(QtWidgets.QWidget):
         self.setdevice[0] = self.device[self.ui.X_Motor_Num.value()-1]
         self.setdevice[1] = self.device[self.ui.Y_Motor_Num.value()-1]
         self.setdevice[2] = self.device[self.ui.Z_Motor_Num.value()-1]
+        print(self.setdevice)
 
     def SetSpeed(self,default):
         self.steps = numpy.empty(3,dtype=int)
@@ -242,7 +254,7 @@ class MainWidget(QtWidgets.QWidget):
                 if 'Axis 1' in repr(self.friend_name[self.dev_ind]): self.device[0] =pymotor.Motor(self.device_name[self.dev_ind])
                 if 'Axis 2' in repr(self.friend_name[self.dev_ind]): self.device[1] =pymotor.Motor(self.device_name[self.dev_ind])
                 if 'Axis 3' in repr(self.friend_name[self.dev_ind]): self.device[2] =pymotor.Motor(self.device_name[self.dev_ind])
-        
+        print(self.device) 
             
         
     
@@ -286,23 +298,26 @@ class MainWidget(QtWidgets.QWidget):
         self.SignalCapture.emit()
 
     def CaptureMode(self,mode):
-        self.capture_thread = thread.DataCapture()
-        self.capture_thread.flag = True
-        self.capture_thread.stepmode_flag = mode
-        self.capture_thread.resource = self.ui.Interface.currentText()
-        self.capture_thread.folder = self.ui.FolderText.text()
-        self.capture_thread.device = self.setdevice
-        self.capture_thread.frequency = self.ui.Frequency.value()
-        self.capture_thread.point_num = self.ui.Points.value()
-        self.capture_thread.ymult = float(self.ui.ymult.text())
-        self.capture_thread.yzero = float(self.ui.yzero.text())
-        self.capture_thread.yoff = float(self.ui.yoff.text())
-        self.capture_thread.xincr = float(self.ui.xincr.text())
-        self.capture_thread.xzero = float(self.ui.xzero.text())
-        self.capture_thread.scope = self.scope
-        self.capture_thread.info = self.oscilloscope_info
-        self.capture_thread.start()
-        self.capture_thread.scan_signal.connect(self.SignalScanContinue.emit)
+        for i in range(0,count_2):
+            self.capture_thread = thread.DataCapture()
+            self.capture_thread.flag = True
+            self.capture_thread.stepmode_flag = mode
+            self.capture_thread.resource = self.ui.Interface.currentText()
+            self.capture_thread.folder = self.ui.FolderText.text()
+            self.capture_thread.device = self.setdevice
+            self.capture_thread.frequency = self.ui.Frequency.value()
+            self.capture_thread.point_num = self.ui.Points.value()
+            self.capture_thread.ymult = float(self.ui.ymult.text())
+            self.capture_thread.yzero = float(self.ui.yzero.text())
+            self.capture_thread.yoff = float(self.ui.yoff.text())
+            self.capture_thread.xincr = float(self.ui.xincr.text())
+            self.capture_thread.xzero = float(self.ui.xzero.text())
+            self.capture_thread.scope = self.scope
+            self.capture_thread.info = self.oscilloscope_info
+            self.capture_thread.start()
+            self.capture_thread.scan_signal.connect(self.SignalScanContinue.emit)
+            print(i)
+            time.sleep(0.2)
         #self.capture_thread.wait()
 
     def CapturePause(self):
