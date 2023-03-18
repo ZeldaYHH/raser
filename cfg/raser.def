@@ -2,7 +2,7 @@
 #From: library/debian:11.5   
 
 Bootstrap: localimage
-From: raser-dev.sif  
+From: raser-1.2.sif  
 
 %post
     ## Use huaweicloud  
@@ -38,5 +38,6 @@ From: raser-dev.sif
     ## DevSim    
     #pip install mkl devsim 
 
-
+    ## NGSpice 
+    #apt -y install ngspice
 
