@@ -11,15 +11,20 @@ usage() {
     printf "\nOPTIONS\n"    
 
     printf "\n\t%-9s  %-40s"    "1.1"       "SiC-PIN"
-    printf "\n\t%-9s  %-40s\n"  "1.2"       "SiC-3D"
-    printf "\n\t%-9s  %-40s\n"  "1.3"       "DEVSIM"
+    printf "\n\t%-9s  %-40s"    "1.2"       "Si-PIN"
+    printf "\n\t%-9s  %-40s"    "1.3"       "DEVSIM"
+    printf "\n\t%-9s  %-40s"    "1.4"       "beam monitor"
+    printf "\n\t%-9s  %-40s"    "1.5"       "TOKAMAK"
+    printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
 
     printf "\n\t%-9s  %-40s"    "3.1"       "top-TCT"
     printf "\n\t%-9s  %-40s"    "3.2"       "edge-TCT-Si"
-    printf "\n\t%-9s  %-40s"    "3.3"       "edge-TCT-SiC"
+    printf "\n\t%-9s  %-40s\n"  "3.3"       "edge-TCT-SiC"
+
+    printf "\n\t%-9s  %-40s\n"  "4.1"       "SiC-3D"
 
     printf "\n"
 }
@@ -27,35 +32,17 @@ usage() {
 usage_1_1() { 
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-SiC-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-SiC-PIN" 
-    printf "\n"
-
-    printf "\n\t%-5s  %-40s\n"  "1.1.2Scan"    "batch model with total number, split with step number, multi points voltage [-50,-500]" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.3Scan"    "get time resolution 3D-SiC multi points voltage [-50,-500]" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.4Scan"    "get time resolution vs draw voltage" 
-    printf "\n"
-
-    printf "\n\t%-5s  %-40s\n"  "1.1.1Si"  "HPK-Si-PIN basic information for RASER simulation ..." 
-    printf "\n\t%-5s  %-40s\n"  "1.1.2Si"  "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.3Si"  "get time resolution for HPK-Si-PIN"
-    printf "\n"
-
-    #printf "\n\t%-5s  %-40s\n"  "1.1.1Ring"    "ring electrode SiC-PIN basic information for RASER simulation ..." 
-    #printf "\n\t%-5s  %-40s\n"  "1.1.2Ring"    "batch model with total number, split with step number" 
-    #printf "\n\t%-5s  %-40s\n"  "1.1.3Ring"    "get time resolution for Ring-PIN" 
-    #printf "\n"
-
-    printf "\n\t%-5s  %-40s\n"  "1.1.1Alpha_gamma"    "alpha or gamma SiC-PIN basic information for RASER simulation ..." 
-    printf "\n"
-
-    printf "\n\t%-5s  %-40s\n"  "1.1.7"    "NJU-SiC-PIN beam monitor" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for HPK-Si-PIN"
+    printf "\n\t%-5s  %-40s\n"  "1.1.4"    "batch model with total number, split with step number, multi points voltage [-50,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "get time resolution 3D-SiC multi points voltage [-300,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution vs draw voltage" 
     printf "\n"
 }
+
 usage_1_2() { 
-	printf "\n\t%-5s  %-40s\n"  "1.2.1"    "3D-SiC basic information for RASER simulation ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "3D-SiC batch model with total number, split with step number ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.3"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.4"    "get time resolution vs draw voltage ..." 
+    printf "\n\t%-5s  %-40s\n"  "1.2.1"  "HPK-Si-PIN basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "1.2.2"  "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "1.2.3"  "get time resolution for HPK-Si-PIN"
     printf "\n"
 }
 
@@ -68,6 +55,23 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.6"    "Simulate 1D SICAR LGAD I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.7"    "Simulate 1D SICAR LGAD C-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.8"    "Simulate 1D NJU-PIN I-V Defect"
+}
+
+usage_1_4() { 
+    printf "\n\t%-5s  %-40s\n"  "1.4.1"    "NJU-SiC-PIN beam monitor" 
+    printf "\n"
+}
+
+usage_1_5() { 
+    printf "\n\t%-5s  %-40s\n"  "1.5.1"    "alpha or gamma SiC-PIN basic information for RASER simulation ..." 
+    printf "\n"
+}
+
+usage_1_6() { 
+    printf "\n\t%-5s  %-40s\n"  "1.6.1"    "ring electrode SiC-PIN basic information for RASER simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "1.6.2"    "batch model with total number, split with step number" 
+    printf "\n\t%-5s  %-40s\n"  "1.6.3"    "get time resolution for Ring-PIN" 
+    printf "\n"
 }
 
 usage_2_1() { 
@@ -98,8 +102,8 @@ usage_3_2() {
     printf "\n\t%-5s  %-40s\n"  "3.2.3"    "get volt-time for Si-PIN, multi points z [0,50]"
     printf "\n\t%-5s  %-40s\n"  "3.2.4"    "get volt-time for Si-LGAD, multi points z [0,50]"
     printf "\n\t%-5s  %-40s\n"  "3.2.5"    "analyse eTCT rootfiles"
-    printf "\n\t%-5s  %-40s\n"  "3.2.X"    "get volt-time from experiment"
-    printf "\n\t%-5s  %-40s\n"  "3.2.5S"   "analyse eTCT rootfiles with experiment data"
+    printf "\n\t%-5s  %-40s\n"  "3.2.6"    "get volt-time from experiment"
+    printf "\n\t%-5s  %-40s\n"  "3.2.7"   "analyse eTCT rootfiles with experiment data"
     printf "\n"
 }
 
@@ -108,6 +112,15 @@ usage_3_3() {
     printf "\n\t%-5s  %-40s\n"  "3.3.2"    "get volt-time for Si-PIN, multi points z [0,100]"
     printf "\n"
 }
+
+usage_4_1() { 
+	printf "\n\t%-5s  %-40s\n"  "4.1.1"    "3D-SiC basic information for RASER simulation ..." 
+	printf "\n\t%-5s  %-40s\n"  "4.1.2"    "3D-SiC batch model with total number, split with step number ..." 
+	printf "\n\t%-5s  %-40s\n"  "4.1.3"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
+	printf "\n\t%-5s  %-40s\n"  "4.1.4"    "get time resolution vs draw voltage ..." 
+    printf "\n"
+}
+
 
 if [[ $# -eq 0 ]]; then
     usage
@@ -145,7 +158,7 @@ case $option in
         ./python/add_noise_raser.py output/pin3D/NJU-PIN/_d=10.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
 
-    1.1.2Scan) echo "run 3D-SiC batch model with total number, split with step number ..."
+    1.1.4) echo "run 3D-SiC batch model with total number, split with step number ..."
         step=10000
 		for ((i=0;i<2;i++))
         do
@@ -157,19 +170,23 @@ case $option in
         done
         ;;
 
-	1.1.3Scan) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+	1.1.5) echo "get time resolution 3D-SiC multi points voltage [-300,-500]"
         ./python/time_scan.py  output/pin3D/NJU-PIN/ scan
 		;;
 
-    1.1.4Scan) echo "get time resolution vs draw voltage"
+    1.1.6) echo "get time resolution vs draw voltage"
 		./python/time_scan.py  output/pin3D/NJU-PIN/time_resolution_scan.csv draw_voltage 0
 		;;
+        esac
+}
 
-    1.1.1Si) echo "Si-PIN basic information for RASER simulation ..."
+sub_1_2(){
+case $option in 
+    1.2.1) echo "Si-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
 
-    1.1.2Si) echo "batch model with total number, split with step number"
+    1.2.2) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=0;i<20;i++))
         do
@@ -178,66 +195,9 @@ case $option in
         done
         ;;
 
-    1.1.3Si) echo "get time resolution for Si-PIN"
+    1.2.3) echo "get time resolution for Si-PIN"
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
-
-    1.1.1Ring) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json"
-        ;;
-
-    1.1.2Ring) echo "batch model with total number, split with step number"
-		step=10000
-		for ((i=0;i<20;i++))
-        do
-            ./python/run_batchjob.py pin3D/Ring-PIN \
-                "gsignal.py det_name=Ring-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/Ring-PIN/"
-        done
-        ;;
-
-    1.1.3Ring) echo "get time resolution for Ring-PIN"
-        ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
-        ;;
-
-    1.1.1Alpha_gamma) echo "alpha or gamma SiC-PIN basic information for RASER simulation ..."
-    raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor" 
-        ;;
-
-    1.1.7) echo "SiC-PIN beam monitor" 
-        raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
-        ;;
-        esac
-}
-
-sub_1_2(){
-case $option in 
-    1.2.1) echo "3D-SiC basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=plugin3D parfile=paras/setting.json"
-		;;
-
-    1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
-        step=10000
-		for ((i=0;i<2;i++))
-        do
-            for ((j=0;j<10;j++))
-            do
-                ./python/run_batchjob.py plugin3D/plugin3D \
-                "gsignal.py det_name=plugin3D parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
-                # doping=$[10+j*10]
-                # temp=$[300+j*30]
-                # lz=$[150.0+j*30]
-                # e_gap=$[140.0+j*20]
-            done
-        done
-        ;;
-
-	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        ./python/time_scan.py  output/plugin3D/plugin3D/ scan
-		;;
-
-	1.2.4) echo "get time resolution vs draw voltage"
-		./python/time_scan.py  output/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
-		;;
         esac
 }
 
@@ -273,6 +233,43 @@ case $option in
             
     1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
         raser devsim "solve_iv_nju_defect.py"
+        ;;
+        esac
+}
+
+sub_1_4(){
+case $option in 
+    1.4.1) echo "SiC-PIN beam monitor" 
+        raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
+        ;;
+        esac
+}
+
+sub_1_5(){
+case $option in 
+    1.5.1) echo "alpha or gamma SiC-PIN basic information for RASER simulation ..."
+        raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor" 
+        ;;
+        esac
+}
+
+sub_1_6(){
+case $option in 
+    1.6.1) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
+        raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json"
+        ;;
+
+    1.6.2) echo "batch model with total number, split with step number"
+		step=10000
+		for ((i=0;i<20;i++))
+        do
+            ./python/run_batchjob.py pin3D/Ring-PIN \
+                "gsignal.py det_name=Ring-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/Ring-PIN/"
+        done
+        ;;
+
+    1.6.3) echo "get time resolution for Ring-PIN"
+        ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
         esac
 }
@@ -347,14 +344,9 @@ case $option in
         raser "./python/TCTtest.py det_name=SICAR-1 parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json" 
         ;;
 
-    3.1.1R) echo "ring electrode SiC-PIN top-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=Ring-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
-        ;;
-
     3.1.3) echo "get volt-time for SiC-PIN top-TCT, multi points x [0,500]"
         step=1
         k=0.02
-
             for ((j=0;j<51;j++))
             do
                 x=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
@@ -362,19 +354,7 @@ case $option in
                 "TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-PIN/ parameter_alter=True fx_rel=$x"
             done 
         ;;  
-    
-    3.1.3R) echo "get volt-time for ring electrode SiC-PIN top-TCT, multi points x [0,500]"
-        step=1
-        k=0.02
-
-            for ((j=0;j<51;j++))
-            do
-                x=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
-                ./python/run_batchjob.py pintct/Ring-PIN \
-                "TCTtest.py det_name=Ring-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/Ring-PIN/ parameter_alter=True fx_rel=$x"
-            done 
-        ;;  
-    esac
+        esac
 }
 
 
@@ -411,16 +391,16 @@ case $option in
             done            
             ;;
 
-    3.2.X) echo "get volt-time from experiment"
-        ./python/readdata/extract_waveform.py
-        ;;
-
     3.2.5) echo "analyse eTCT rootfiles"
         ./python/tct_analysis.py output/pintct/HPK-Si-PIN/
         ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
         ;;
 
-    3.2.5S) echo "analyse eTCT rootfiles with experiment data"
+    3.2.6) echo "get volt-time from experiment"
+        ./python/readdata/extract_waveform.py
+        ;;
+
+    3.2.7) echo "analyse eTCT rootfiles with experiment data"
         ./python/tct_analysis.py output/pintct/HPK-Si-PIN/ "experiment"
         ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
         ;;
@@ -443,9 +423,41 @@ case $option in
                 "TCTtest.py det_name=NJU-SiC-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-SiC-PIN/ parameter_alter=True fz_rel=$z"
             done
         ;;
-
         esac
 }
+
+sub_4_1(){
+case $option in 
+    4.1.1) echo "3D-SiC basic information for RASER simulation ..."
+        raser "./python/gsignal.py det_name=plugin3D parfile=paras/setting.json"
+		;;
+
+    4.1.2) echo "run 3D-SiC batch model with total number, split with step number ..."
+        step=10000
+		for ((i=0;i<2;i++))
+        do
+            for ((j=0;j<10;j++))
+            do
+                ./python/run_batchjob.py plugin3D/plugin3D \
+                "gsignal.py det_name=plugin3D parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
+                # doping=$[10+j*10]
+                # temp=$[300+j*30]
+                # lz=$[150.0+j*30]
+                # e_gap=$[140.0+j*20]
+            done
+        done
+        ;;
+
+	4.1.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
+        ./python/time_scan.py  output/plugin3D/plugin3D/ scan
+		;;
+
+	4.1.4) echo "get time resolution vs draw voltage"
+		./python/time_scan.py  output/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
+		;;
+        esac
+}
+
 
 case $option in 
     1.1) echo "RASER simulate NJU-SiC-PIN"
@@ -458,13 +470,13 @@ case $option in
         sub_1_1 option
         ;;
 
-    1.2) echo "RASER simulate 3D-SiC"
+    1.2) echo "RASER simulate HPK-Si-PIN"
         usage_1_2
         echo "Please enter your option: " 
         read option 
         sub_1_2 option 
         ;;
-    1.2.*) echo "RASER simulate 3D-SiC"
+    1.2.*) echo "RASER simulate HPK-Si-PIN"
         sub_1_2 option
         ;;
 
@@ -476,6 +488,36 @@ case $option in
         ;;
     1.3.*) echo "DEVSIM"
         sub_1_3 option
+        ;;
+
+    1.4) echo "RASER simulate beam monitor"
+        usage_1_4
+        echo "Please enter your option: " 
+        read option 
+        sub_1_4 option 
+        ;;
+    1.4.*) echo "RASER simulate beam monitor"
+        sub_1_4 option
+        ;;
+
+    1.5) echo "RASER simulate TOKAMAK neutron counter"
+        usage_1_5
+        echo "Please enter your option: " 
+        read option 
+        sub_1_5 option 
+        ;;
+    1.5.*) echo "RASER simulate TOKAMAK neutron counter"
+        sub_1_5 option
+        ;;
+
+    1.6) echo "RASER simulate Ring-PIN"
+        usage_1_6
+        echo "Please enter your option: " 
+        read option 
+        sub_1_6 option 
+        ;;
+    1.6.*) echo "RASER simulate Ring-PIN"
+        sub_1_6 option
         ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
@@ -526,6 +568,16 @@ case $option in
         ;;
     3.3.*) echo  "RASER simulate edge-TCT"
         sub_3_3 option
+        ;;
+
+    4.1) echo "RASER simulate 3D-SiC"
+        usage_4_1
+        echo "Please enter your option: " 
+        read option 
+        sub_4_1 option 
+        ;;
+    4.1.*) echo "RASER simulate 3D-SiC"
+        sub_4_1 option
         ;;
 
 		esac
