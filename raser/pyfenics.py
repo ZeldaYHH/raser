@@ -11,26 +11,27 @@ import mshr
 
 #Calculate the weighting potential and electric field
 class FenicsCal:
-    def __init__(self,my_d,fen_dic,carrier_distribution=False):
+    def __init__(self,my_d,fen_dic):
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
-        self.fl_z=my_d.l_z
+        if self.det_model != "plugin3D":
+            self.fl_z=my_d.depletion_depth
+        else:
+            self.fl_z=my_d.l_z
+
         self.tol = 1e-14
         self.bias_voltage = my_d.voltage
         if self.det_model == "planarRing":
+            # under construction
             self.e_r_inner = my_d.e_r_inner
             self.e_r_outer = my_d.e_r_outer
 
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.u_bc,self.u_w_bc = self.boundary_definition(my_d)
-
         self.weighting_potential(my_d)
-        if carrier_distribution == False:
-            self.electric_field(my_d)
-        else:
-            self.electric_field_with_carrier(my_d)
+        self.electric_field(my_d)
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -178,6 +179,7 @@ class FenicsCal:
         u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
                                 p_1 = p_ele, p_2 = n_ele)
+
         def boundary(x, on_boundary):
             return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
@@ -205,7 +207,7 @@ class FenicsCal:
             2021/08/31
         """
         # Define variational problem
-        # original problem: -Δu = 0
+        # original problem: -Δu_w = 0
         u_w = fenics.TrialFunction(self.V)
         v_w = fenics.TestFunction(self.V)
         f_w = fenics.Constant(0)
@@ -250,7 +252,35 @@ class FenicsCal:
         """
         # Define variational problem
         # original problem: -Δu = f(1-exp(±u/u_T)), + for n-doped bulk and - for p
+        # u_var = exp(±u/u_T)
 
+        # under construction
+        
+        kboltz=8.617385e-5 #eV/K
+        u_T = kboltz * my_d.temperature/1 # u_T = kT/q
+
+        def q(u):
+            "Return nonlinear coefficient"
+            if my_d.voltage <0:
+                return 1 - fenics.exp(u/u_T)**2
+            else:
+                return 1 - fenics.exp(-u/u_T)**2
+
+        u = fenics.TrialFunction(self.V)
+        v = fenics.TestFunction(self.V)
+        f = self.f_expression(my_d)
+        F = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx - f*v*(q(u))*fenics.dx
+        # Compute solution
+        self.u = fenics.Function(self.V)
+        fenics.solve(F == 0, self.u, self.u_bc,
+                     solver_parameters=dict(linear_solver='gmres',
+                     preconditioner='ilu'))
+        # Calculate electric field
+        W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
+        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
+                                                       self.u.dx(1),
+                                                       self.u.dx(2))),W)
+        
     def f_expression(self,my_d):
         """
         @description: 
@@ -296,15 +326,15 @@ class FenicsCal:
         @description: 
             Get weighting potential at the (x,y,z) position
         @param:
-            out_range -- out_range = False
+            threeD_out_column -- threeD_out_column = False
                       -- Position (x,y,z) don't exit in sensor fenics range
         @reture:
             Get weighting potential at (x,y,z) position
         @Modify:
             2021/08/31
         """
-        out_range=self.judge_fenics_range(px,py,pz)
-        if out_range:   
+        threeD_out_column=self.threeD_out_column(px,py,pz)
+        if threeD_out_column:   
             f_w_p = 1.0
         else:
             scale_px=px%self.fl_x
@@ -321,15 +351,15 @@ class FenicsCal:
         @description: 
             Get potential at the (x,y,z) position
         @param:
-            out_range -- out_range = False
+            threeD_out_column -- threeD_out_column = False
                       -- Position (x,y,z) don't exit in sensor fenics range
         @reture:
             Get potential at (x,y,z) position
         @Modify:
             2021/08/31
         """
-        out_range=self.judge_fenics_range(px,py,pz)
-        if out_range:
+        threeD_out_column=self.threeD_out_column(px,py,pz)
+        if threeD_out_column:
             f_p = 0
         else:
             scale_px=px%self.fl_x
@@ -346,15 +376,15 @@ class FenicsCal:
         @description: 
             Get eletric field at the px,py,pz position in V/um
         @param:
-            out_range -- out_range = False
+            threeD_out_column -- threeD_out_column = False
                       -- Position (x,y,z) don't exit in sensor fenics range
         @reture:
             Eletric field along x,y,z direction
         @Modify:
             2021/08/31
         """
-        out_range=self.judge_fenics_range(px,py,pz)
-        if out_range:   
+        threeD_out_column=self.threeD_out_column(px,py,pz)
+        if threeD_out_column:   
             x_value,y_value,z_value = 0,0,0
         else:
             scale_px=px%self.fl_x
@@ -370,7 +400,7 @@ class FenicsCal:
         
         return x_value,y_value,z_value
 
-    def judge_fenics_range(self,px,py,pz):
+    def threeD_out_column(self,px,py,pz):
         """
         @description: 
            Judge whether (x,y,z) position is in sensor fenics range
@@ -381,14 +411,14 @@ class FenicsCal:
             2021/08/31
         """
         if "plugin3D" in self.det_model:
-            if (px < self.sx_l or px > self.sx_r 
-                   or py < self.sy_l or py > self.sy_r):
-                out_range=True
+            if (px < self.sx_l or px > self.sx_r
+                or py < self.sy_l or py > self.sy_r):
+                threeD_out_column=True
             else:
-                out_range=False
+                threeD_out_column=False
         elif "planar3D" or "lgad3D" or "planarRing" in self.det_model:
-            out_range=False
-        return out_range
+            threeD_out_column=False
+        return threeD_out_column
     
     def __del__(self):
         #for reuse of batch job?

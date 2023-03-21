@@ -70,30 +70,29 @@ class Carrier:
                 delta_y=-step*e_field[1]/intensity
                 delta_z=-step*e_field[2]/intensity
         else:
-            delta_x=0.0
-            delta_y=0.0
-            delta_z=0.0
+            self.end_condition = "zero velocity"
+            return
 
         # get velocity from electric field
         e_field_prime = my_f.get_e_field(self.d_x+delta_x,self.d_y+delta_y,self.d_z+delta_z)
         intensity_prime = Vector(e_field_prime[0],e_field_prime[1],e_field_prime[2]).get_length()
+        if(intensity_prime==0):
+            self.end_condition = "zero velocity"
+            return
+        
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
         mobility = Mobility(my_d.material)
         mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
         velocity = mu*average_intensity
 
         # get diffution from mobility and temperature
-        if(velocity==0):
-            self.end_condition = "zero velocity"
-            return
-
-        else:
-            delta_t = step*1e-4/velocity
-            kboltz=8.617385e-5 #eV/K
-            diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
-            dif_x=random.gauss(0.0,diffusion)*1e4
-            dif_y=random.gauss(0.0,diffusion)*1e4
-            dif_z=random.gauss(0.0,diffusion)*1e4
+        delta_t = step*1e-4/velocity
+        kboltz=8.617385e-5 #eV/K
+        # diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
+        diffusion = 0.0
+        dif_x=random.gauss(0.0,diffusion)*1e4
+        dif_y=random.gauss(0.0,diffusion)*1e4
+        dif_z=random.gauss(0.0,diffusion)*1e4
 
         # sum up
         # x axis   

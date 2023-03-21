@@ -63,10 +63,96 @@ class R3dDetector:
                 self.set_3D_electrode(det_dic['e_r'],det_dic['e_gap'])
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
+        else:
+            self.v_FD, self.depletion_depth = self.full_depletion_voltage()
+            print (self.v_FD,self.depletion_depth)
 
         if self.det_model == "planarRing":
             self.e_r_inner = det_dic['e_r_inner']
             self.e_r_outer = det_dic['e_r_outer']
+
+    def full_depletion_voltage(self):
+        if self.material == 'Si':
+            perm_mat = 11.7  
+        elif self.material == 'SiC':
+            perm_mat = 9.76  
+        else:
+            raise NameError(self.material)
+             
+        e0 = 1.60217733e-19
+        perm0 = 8.854187817e-12   #F/m
+
+        if self.det_model != "lgad3D":
+            z1 = self.l_z
+            c1 = -e0*self.d_neff*1e6/perm0/perm_mat
+            v_FD = c1 * (z1**2 / 2)
+        else:
+            if self.part == 2:
+                z1 = self.avalanche_bond
+                z2 = self.l_z - self.avalanche_bond
+                c1 = -e0*self.doping1*1e6/perm0/perm_mat
+                c2 = -e0*self.doping2*1e6/perm0/perm_mat
+                v_FD = c1 * (z1**2 / 2)\
+                     + c2 * z2 * z1 \
+                     + c2 * (z2**2 / 2)
+
+            elif self.part == 3:
+                z1 = self.control_bond
+                z2 = self.avalanche_bond - self.control_bond
+                z3 = self.l_z - self.avalanche_bond
+                c1 = -e0*self.doping1*1e6/perm0/perm_mat
+                c2 = -e0*self.doping2*1e6/perm0/perm_mat
+                c3 = -e0*self.doping3*1e6/perm0/perm_mat
+                v_FD = c1 * (z1**2 / 2)\
+                     + c2 * z2 * z1 \
+                     + c2 * (z2**2 / 2)\
+                     + c3 * z3 * z1\
+                     + c3 * z3 * z2\
+                     + c3 * (z3**2 / 2)
+        
+        if abs(v_FD) < abs(self.voltage):
+            depletion_depth = self.l_z
+        else:
+            if self.det_model != "lgad3D":
+                depletion_depth = (2*abs(self.voltage/c1))**0.5 - 1
+            else:
+                if self.part == 2:
+                    c = abs(self.voltage) - abs(c1 * (z1**2 / 2))
+                    if c < 0:
+                        raise ValueError(self.voltage)
+                    
+                    for i in range(101):
+                        z = self.l_z
+                        a = self.avalanche_bond
+                        d = a + i*(z-a)/100
+                        if abs(c1 * (z1**2 / 2)\
+                         + c2 * d * z1 \
+                         + c2 * (d**2 / 2)) > abs(v_FD):
+                            depletion_depth = d-1.5
+                        break
+
+                elif self.part == 3:
+                    c = abs(self.voltage)\
+                        - abs(c1 * (z1**2 / 2)\
+                        + c2 * z2 * z1 \
+                        + c2 * (z2**2 / 2))
+                    if c < 0:
+                        raise ValueError(self.voltage)
+                    
+                    for i in range(101):
+                        z = self.l_z
+                        a = self.avalanche_bond
+                        d = a + i*(z-a)/100
+                        if abs(c1 * (z1**2 / 2)\
+                         + c2 * z2 * z1 \
+                         + c2 * (z2**2 / 2)\
+                         + c3 * d * z1\
+                         + c3 * d * z2\
+                         + c3 * (d**2 / 2)) > abs(v_FD):
+                            depletion_depth = d-1.5
+                        break
+
+        return v_FD, depletion_depth
 
     def set_3D_electrode(self,e_r,e_gap=0):
         """
