@@ -1,12 +1,15 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import devsim 
 import os
 import math
 import sys
 sys.path.append("..")
 
-from sicar import Physics
-from sicar import Node
-from sicar import Initial
+from raser import Physics
+from raser import Node
+from raser import Initial
 
 import matplotlib
 import matplotlib.pyplot
@@ -27,11 +30,11 @@ region="1D_NJU_PIN"
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-nju_pin_5mm_5mm_mesh.CreateMesh(device=device, region=region)
+nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
 nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
-nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/nju_pin_doping.png")
+nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
 
-devsim.open_db(filename="../sicar/SICARDB", permission="readonly")
+devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -76,7 +79,7 @@ while para_N < 6.0:
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
 
-    f = open("./output/nju_pin_reverse_iv%d.csv"%para_N, "w" )
+    f = open("./output/devsim/nju_pin_reverse_iv%d.csv"%para_N, "w" )
     header = ["Voltage","Current"]
     writer = csv.writer(f)
     writer.writerow(header)
@@ -110,7 +113,7 @@ devsim.close_db()
 #matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 #ax1.legend(loc='upper right')
 #fig1.show()
-#fig1.savefig("./output/nju_pin_reverse_electricfield%d.png"%para_N)
+#fig1.savefig("./output/devsim/nju_pin_reverse_electricfield%d.png"%para_N)
 #print(reverse_voltage)
 #print(reverse_top_current)
 
@@ -120,5 +123,5 @@ devsim.close_db()
 #matplotlib.pyplot.xlabel('Voltage (V)')
 #matplotlib.pyplot.ylabel('Current (A)')
 #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-#fig2.savefig("./output/nju_pin_reverse_iv%d.png"%para_N)
+#fig2.savefig("./output/devsim/nju_pin_reverse_iv%d.png"%para_N)
  
