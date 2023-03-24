@@ -1,7 +1,7 @@
 T1 circuit 
 * name of the circuit
 
-*definition of BFR840L3RHESD, as a subcircuit
+* definition of BFR840L3RHESD, as a subcircuit
 .subckt BFR840L3RHESD 1 2 3
 *
 Rcx 15 1 1.57895
@@ -140,7 +140,7 @@ L2 8 7 2.2u
 .control
 tran 0.1p 20n
 * <step> <stopping time>
-plot v(out)
+hardcopy fig/T1.ps v(out)
 .endc
 
 .end
