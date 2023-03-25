@@ -66,4 +66,7 @@ def main():
 
     Create1DMesh(device=device, region=region)
     SetDoping(device=device, region=region)
-    Draw_Doping(device=device, region=region, path="./output/devsim/1d_nju_pin_doping.png")
+    Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
+
+if __name__ == '__main__':
+    main()

@@ -70,9 +70,6 @@ devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 
-# For converge
-devsim.set_parameter(name = "n_i", value=1e10)
-
 # Initial DC solution
 Initial.InitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=30)
