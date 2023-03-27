@@ -133,7 +133,7 @@ header = ["Voltage","Current"]
 writer = csv.writer(f)
 writer.writerow(header)
 
-while reverse_v < 500.0:
+while reverse_v < 800.0:
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
     Physics.PrintCurrents(device, "top")
