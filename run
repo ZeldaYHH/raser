@@ -124,8 +124,8 @@ usage_4_1() {
 }
 
 usage_5_1() {
-    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation, get raw data..." 
-    printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result picture ..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result figure ..." 
     printf "\n"
 }
 
