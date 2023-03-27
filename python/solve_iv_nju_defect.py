@@ -108,7 +108,7 @@ elif (i>=9&i<=13):
     devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
     devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
-else
+else :
     N_t_HS6=sys.argv[3]
     sigma_n_HS6=list_Nt[i-14]
     sigma_p_HS6=sys.argv[2]
