@@ -38,6 +38,6 @@ From: raser-1.2.sif
     ## DevSim    
     #pip install mkl devsim 
 
-    ## NGSpice 
-    #apt -y install ngspice
-
+    ## NGSpice & KiCAD
+    #apt -y install ngspice 
+    #apt -y install kicad 

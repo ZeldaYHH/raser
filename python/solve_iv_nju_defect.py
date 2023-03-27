@@ -19,8 +19,8 @@ import numpy as np
 
 import nju_pin_5mm_5mm_mesh
 
-if not (os.path.exists("./output")):
-    os.mkdir("./output")
+if not (os.path.exists("./output/devsim")):
+    os.makedir("./output/devsim")
 
 device="1D_NJU_PIN"
 region="1D_NJU_PIN"
@@ -36,6 +36,37 @@ nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/de
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
+
+#add defect parameters
+N_c=3.25e15 #effective density of states in conduction band
+N_v=4.8e15 #effective density of states in valence band
+k=1.3806503e-23 
+T0=300
+#Z1/2
+E_t11=-0.67*1.6e-19 #J
+E_t12=-2.56*1.6e-19
+n_11=N_c*math.exp(E_t11/(k*T0))
+p_11=N_v*math.exp(E_t12/(k*T0))
+devsim.set_parameter(device=device,region=region,name="N_t1",value=0)#density of Z1/2,4.1e13 from paper
+devsim.set_parameter(device=device,region=region,name="r_n1",value=2e-7)#electron capture constant of Z1/2
+devsim.set_parameter(device=device,region=region,name="r_p1",value=3e-7)#hole capture constant of Z1/2
+devsim.set_parameter(device=device,region=region,name="E_t11",value=E_t11)#Z1/2 Et-Ec
+devsim.set_parameter(device=device,region=region,name="E_t12",value=E_t12)#Z1/2 -(Et-Ev)
+devsim.set_parameter(device=device,region=region,name="n_11",value=n_11)#n1 of Z1/2
+devsim.set_parameter(device=device,region=region,name="p_11",value=p_11)#p1 of Z1/2
+#EH6/7
+E_t21=-1.65*1.6e-19 #J
+E_t22=-1.58*1.6e-19
+n_12=N_c*math.exp(E_t21/(k*T0))
+p_12=N_v*math.exp(E_t22/(k*T0))
+devsim.set_parameter(device=device,region=region,name="N_t2",value=0)#density of EH6/7,3.9e13 from paper
+devsim.set_parameter(device=device,region=region,name="r_n2",value=2.4e-7)#electron capture constant of EH6/7
+devsim.set_parameter(device=device,region=region,name="r_p2",value=5e-11)#hole capture constant of EH6/7
+devsim.set_parameter(device=device,region=region,name="E_t21",value=E_t21)#EH6/7 Et-Ec
+devsim.set_parameter(device=device,region=region,name="E_t22",value=E_t22)#EH6/7 -(Et-Ev)
+devsim.set_parameter(device=device,region=region,name="n_12",value=n_12)#n1 of EH6/7
+devsim.set_parameter(device=device,region=region,name="p_12",value=p_12)#p1 of EH6/7
+
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
@@ -43,85 +74,80 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 # Initial DC solution
 Initial.InitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=30)
+devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-5, maximum_iterations=50)
 
 ### Drift diffusion simulation at equilibrium
 Initial.DriftDiffusionInitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-7, maximum_iterations=30)
+devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
 
 #set paramater of Z1/2
 list_Nt = [1e12, 1e13, 1e14, 1e15, 1e16, 1e17]
-#list_sigman = [3e-12, 3e-13, 3e-14, 3e-15, 3e-16, 3e-17]
-#list_sigmap = [2e-12, 2e-13, 2e-14, 2e-15, 2e-16, 2e-17]
-#para_n=0
-#para_p=0
-para_N = 0.0
-#sigma_n=list_sigman[para_n]
-#sigma_p=list_sigman[para_p]
-#sigma_n=3e-12
-#sigma_p=2e-12
-#N_t=list_Nt[para_N]
-#devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
-#devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
-#devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
+list_sigman = [3e-12, 3e-13, 3e-14, 3e-15, 3e-16, 3e-17]
+list_sigmap = [2e-12, 2e-13, 2e-14, 2e-15, 2e-16, 2e-17]
 
-while para_N < 6.0:
-    #### Ramp the bias to Reverse
-    para_N += 1
-    reverse_v = 0.0
-    reverse_voltage = []
-    reverse_top_current = []    
-    reverse_bot_current = []
+i = int(sys.argv[1])
+#### Ramp the bias to Reverse
+N_t=list_Nt[i]
+sigma_n=list_sigman[i]
+sigma_p=list_sigman[i]
+devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
+devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
+devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
 
-    reverse_voltage.append(0.)
-    reverse_top_current.append(0.)
+reverse_v = 0.0
+reverse_voltage = []
+reverse_top_current = []    
+reverse_bot_current = []
 
-    #devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
-    #devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
+reverse_voltage.append(0.)
+reverse_top_current.append(0.)
 
-    f = open("./output/devsim/nju_pin_reverse_iv%d.csv"%para_N, "w" )
-    header = ["Voltage","Current"]
-    writer = csv.writer(f)
-    writer.writerow(header)
-    
-    while reverse_v < 20.0:
-        devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
-        Physics.PrintCurrents(device, "top")
-        Physics.PrintCurrents(device, "bot")
-        reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
-        reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
-        reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       
-        reverse_voltage.append(0-reverse_v)
-        reverse_top_current.append(abs(reverse_top_total_current))
-        writer.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
-    
-        if(reverse_v%100.0==0):
-            devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
-            x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values
-            y = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
-            matplotlib.pyplot.plot(x,y,label="%s"%(str(reverse_v)))
+#devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
+#devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
 
-         #break
-        reverse_v += 1
-    f.close()
+f = open("./output/devsim/nju_pin_reverse_iv%d.csv"%i, "w" )
+header = ["Voltage","Current"]
+writer = csv.writer(f)
+writer.writerow(header)
+
+while reverse_v < 500.0:
+    devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
+    Physics.PrintCurrents(device, "top")
+    Physics.PrintCurrents(device, "bot")
+    reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
+    reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
+    reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       
+    reverse_voltage.append(0-reverse_v)
+    reverse_top_current.append(abs(reverse_top_total_current))
+    writer.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
+
+    if(reverse_v%100.0==0):
+        devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
+        x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values
+        y = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
+        matplotlib.pyplot.plot(x,y,label="%s"%(str(reverse_v)))
+        #break
+    reverse_v += 1
+f.close()
+
+fig1=matplotlib.pyplot.figure()
+ax1 = fig1.add_subplot(111)
+matplotlib.pyplot.xlabel('Depth [cm]')
+matplotlib.pyplot.ylabel('E (V/cm)')
+matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+ax1.legend(loc='upper right')
+fig1.show()
+fig1.savefig("./output/devsim/nju_pin_reverse_electricfield%d.png"%i)
+
+print(reverse_voltage)
+print(reverse_top_current)
+fig2=matplotlib.pyplot.figure()
+ax2 = fig2.add_subplot(111)
+matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
+matplotlib.pyplot.xlabel('Voltage (V)')
+matplotlib.pyplot.ylabel('Current (A)')
+matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
+fig2.savefig("./output/devsim/nju_pin_reverse_iv%d.png"%i)
+
 devsim.close_db() 
-#fig1=matplotlib.pyplot.figure()
-#ax1 = fig1.add_subplot(111)
-#matplotlib.pyplot.xlabel('Depth [cm]')
-#matplotlib.pyplot.ylabel('E (V/cm)')
-#matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-#ax1.legend(loc='upper right')
-#fig1.show()
-#fig1.savefig("./output/devsim/nju_pin_reverse_electricfield%d.png"%para_N)
-#print(reverse_voltage)
-#print(reverse_top_current)
-
-#fig2=matplotlib.pyplot.figure()
-#ax2 = fig2.add_subplot(111)
-#matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
-#matplotlib.pyplot.xlabel('Voltage (V)')
-#matplotlib.pyplot.ylabel('Current (A)')
-#matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-#fig2.savefig("./output/devsim/nju_pin_reverse_iv%d.png"%para_N)
- 
