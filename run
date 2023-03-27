@@ -255,6 +255,10 @@ case $option in
                 raser "./python/solve_iv_nju_defect.py $i" 
             fi
         done
+        raser "./python/plot-Z12-sigma.py"
+        raser "./python/plot-Z12-sigma.py"
+        raser "./python/plot-EH67-sigma.py"
+        raser "./python/plot-EH67-sigma.py"
         ;;
         esac
 }
