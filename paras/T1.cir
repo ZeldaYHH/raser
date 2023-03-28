@@ -140,7 +140,8 @@ L2 8 7 2.2u
 .control
 tran 0.1p 20n
 * <step> <stopping time>
-hardcopy fig/T1.ps v(out)
+wrdata fig/t1.raw v(out)
+* save raw data
 .endc
 
 .end

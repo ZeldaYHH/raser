@@ -124,7 +124,8 @@ usage_4_1() {
 }
 
 usage_5_1() {
-    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation ..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result figure ..." 
     printf "\n"
 }
 
@@ -239,10 +240,26 @@ case $option in
         ;;
             
     1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
-        for ((i=0;i<6;i++))
+        for ((i=0;i<19;i++))
         do
-            ./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+            if [[ $i<=3 ]] ; then
+                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                raser "./python/solve_iv_nju_defect.py $i" 
+            elif [[ $i>=4 && $i<=8 ]] ; then
+                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                raser "./python/solve_iv_nju_defect.py $i" 
+            elif [[ $i>=9 && $i<=13 ]] ;then
+                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                raser "./python/solve_iv_nju_defect.py $i" 
+            else
+                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                raser "./python/solve_iv_nju_defect.py $i" 
+            fi
         done
+        raser "./python/plot-Z12-sigma.py"
+        raser "./python/plot-Z12-sigma.py"
+        raser "./python/plot-EH67-sigma.py"
+        raser "./python/plot-EH67-sigma.py"
         ;;
         esac
 }
@@ -470,9 +487,14 @@ case $option in
 
 sub_5_1(){
 case $option in 
-    5.1.1) echo "T1 circuit simulation ..."
-    apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b paras/T1.cir
-    ;;
+    5.1.1) echo "T1 circuit simulation and get raw data ..."
+        apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw paras/T1.cir
+        echo "raw data file t1.raw has been saved in fig/t1.raw"
+        ;;
+
+    5.1.2) echo "get T1 circuit simulation result figure ..."
+        ./python/NGspice_get_fig.py t1.raw
+        ;;
         esac
 }
 
