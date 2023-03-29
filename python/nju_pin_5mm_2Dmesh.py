@@ -18,7 +18,7 @@ def main():
     #Draw_Doping(device=device, region=region, path="./output/1d_nju_pin_doping.png")
     devsim.write_devices(file="nju_pin_5mm_2D",device=device,type="vtk")
 
-def Create2DMesh(device,region)
+def Create2DMesh(device,region):
     #meshing
     devsim.create_2d_mesh(mesh="pin")
     devsim.add_2d_mesh_line(mesh="pin",dir="x",pos=0,ps=1e-6)
@@ -32,7 +32,7 @@ def Create2DMesh(device,region)
     devsim.finalize_mesh(mesh="pin")
     devsim.creat_device(mesh="pin",device=device)
 
-def SetDoping(device,region)
+def SetDoping(device,region):
     #Doping
     CreateNodeModel(device,region,"Acceptors","1.0e19*step(1e-4-x)")
     CreateNodeModel(device,region,"Donors","5.2e13*step(x-1e-4)")
