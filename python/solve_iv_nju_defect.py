@@ -103,7 +103,7 @@ elif (3<i<9):
     devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
 elif (8<i<14):
     N_t_HS6=list_Nt[i-8]
-    sigma_n_HS6=3e-17
+    sigma_n_HS6=2e-17
     sigma_p_HS6=3e-17
     devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
     devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
