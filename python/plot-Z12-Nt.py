@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import ROOT
 import math
 from array import array
@@ -46,7 +49,7 @@ mg.Add(g_3)
 mg.Add(g_4)
 mg.Add(g_5)
 
-mg.GetXaxis().SetRangeUser(-5,805)
+mg.GetXaxis().SetRangeUser(-805,5)
 mg.GetXaxis().SetTitle("Reverse Voltage [V]")
 mg.GetXaxis().CenterTitle()
 mg.GetXaxis().SetTitleOffset(1.4)
@@ -79,4 +82,4 @@ c.SetLogy()
 mg.Draw("ALP")
 legend.Draw("SAME")
 
-c.SaveAs("./Z12-Nt.pdf")
+c.SaveAs("./output/devsim/Z12-Nt.pdf")
