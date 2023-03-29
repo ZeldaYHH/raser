@@ -153,7 +153,7 @@ while reverse_v < 800.0:
         #break
     reverse_v += 1
 f.close()
-
+'''
 fig1=matplotlib.pyplot.figure()
 ax1 = fig1.add_subplot(111)
 matplotlib.pyplot.xlabel('Depth [cm]')
@@ -162,9 +162,10 @@ matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 ax1.legend(loc='upper right')
 fig1.show()
 fig1.savefig("./output/devsim/nju_pin_reverse_electricfield%d.png"%i)
-
+'''
 print(reverse_voltage)
 print(reverse_top_current)
+'''
 fig2=matplotlib.pyplot.figure()
 ax2 = fig2.add_subplot(111)
 matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
@@ -172,5 +173,5 @@ matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Current (A)')
 matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
 fig2.savefig("./output/devsim/nju_pin_reverse_iv%d.png"%i)
-
+'''
 devsim.close_db() 
