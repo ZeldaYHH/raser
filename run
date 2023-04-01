@@ -245,23 +245,29 @@ case $option in
         for ((i=0;i<19;i++))
         do
             if [[ $i<=3 ]] ; then
-                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
-                raser "./python/solve_iv_nju_defect.py $i" 
+                ./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                #raser "./python/solve_iv_nju_defect.py $i" 
             elif [[ $i>=4 && $i<=8 ]] ; then
-                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
-                raser "./python/solve_iv_nju_defect.py $i" 
+                ./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                #raser "./python/solve_iv_nju_defect.py $i" 
             elif [[ $i>=9 && $i<=13 ]] ;then
-                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
-                raser "./python/solve_iv_nju_defect.py $i" 
+                ./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                #raser "./python/solve_iv_nju_defect.py $i" 
             else
-                #后台./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
-                raser "./python/solve_iv_nju_defect.py $i" 
+                ./python/run_batchjob.py devsim "solve_iv_nju_defect.py $i"
+                #raser "./python/solve_iv_nju_defect.py $i" 
             fi
         done
+        ;;
+    1.3.9) echo "Plot 1D NJU-PIN I-V with Respect to Defect ..."
+        raser "./python/plot-Z12-Nt.py"
         raser "./python/plot-Z12-sigma.py"
-        raser "./python/plot-Z12-sigma.py"
+        raser "./python/plot-EH67-Nt.py"
         raser "./python/plot-EH67-sigma.py"
-        raser "./python/plot-EH67-sigma.py"
+        ;;
+    1.3.10) echo "Irradiated pin ..."
+        ./python/run_batchjob.py devsim "solve_iv_irr.py"
+        ./python/run_batchjob.py devsim "solve_cv_irr.py"
         ;;
         esac
 }
