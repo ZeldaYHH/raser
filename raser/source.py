@@ -69,19 +69,16 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        x_min = self.fx_abs - 3 * self.x_char
-        x_max = self.fx_abs + 3 * self.x_char
-        y_min = self.fy_abs - 3 * self.y_char
-        y_max = self.fy_abs + 3 * self.y_char
-        z_min = self.fz_abs - 3 * self.z_char
-        z_max = self.fz_abs + 3 * self.z_char
+        x_min = max(0,self.fx_abs - 3 * self.x_char)
+        x_max = min(my_d.l_x,self.fx_abs + 3 * self.x_char)
+        y_min = max(0,self.fy_abs - 3 * self.y_char)
+        y_max = min(my_d.l_y,self.fy_abs + 3 * self.y_char)
+        z_min = max(0,self.fz_abs - 3 * self.z_char)
+        z_max = min(my_d.l_z,self.fz_abs + 3 * self.z_char)
 
-        #self.x_left_most, self.x_right_most = self.window(x_min, x_max, 0, my_d.l_x)
-        self.x_left_most, self.x_right_most =  0, my_d.l_x
-        #self.y_left_most, self.y_right_most = self.window(y_min, y_max, 0, my_d.l_y)
-        self.y_left_most, self.y_right_most = 625, 675
-        #self.z_left_most, self.z_right_most = self.window(z_min, z_max, 0, my_d.l_z)
-        self.z_left_most, self.z_right_most = 0, my_d.l_z
+        self.x_left_most, self.x_right_most = self.window(x_min, x_max, 0, my_d.l_x)
+        self.y_left_most, self.y_right_most = self.window(y_min, y_max, 0, my_d.l_y)
+        self.z_left_most, self.z_right_most = self.window(z_min, z_max, 0, my_d.l_z)
         
         xArray = np.linspace(x_min, x_max, int((x_max - x_min) / self.x_step) + 1)
         yArray = np.linspace(y_min, y_max, int((y_max - y_min) / self.y_step) + 1)
@@ -141,14 +138,14 @@ class TCTTracks():
 
     def window(self,inner_min,inner_max,outer_min,outer_max):
         inner_length = inner_max - inner_min
-        if outer_max - outer_min < inner_length:
+        if outer_max - outer_min <= inner_length:
             return outer_min, outer_max # range shrunk
         else:
-            if inner_min > outer_min and inner_max < outer_max:
+            if inner_min >= outer_min and inner_max <= outer_max:
                 return inner_min, inner_max
-            elif inner_min < outer_min:
+            elif inner_min <= outer_min:
                 return outer_min, outer_min + inner_length
-            elif inner_max > outer_max:
+            elif inner_max >= outer_max:
                 return outer_max - inner_length, outer_max
 
     def getCarrierDensity(self, h, depth, r2):

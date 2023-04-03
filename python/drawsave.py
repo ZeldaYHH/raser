@@ -31,6 +31,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
         draw_ele_field_1D(my_d,my_f,path)
+        draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     draw_plot(my_d, my_current,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d, my_current,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
@@ -53,25 +54,26 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(dset,my_d,my_l,ele_current):
-    if "planar3D" in my_d.det_model:
+def save(dset,my_d,my_l,ele_current,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     create_path(path) 
-    L=round(my_l.fz_abs)
+    L=eval("round(my_l.{})".format(key))
+    #L is defined by different keys
     volt = array('d', [999.])
     time = array('d', [999.])
-    z = array('d', [999.])
+    variation = array('d', [999.])
     fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
-    t_out.Branch("z", z, "z/D")
+    t_out.Branch(key, variation, "{}/D".format(key))
     for i in range(ele_current.BB_ele.GetNbinsX()):
           time[0]=i*ele_current.time_unit
           volt[0]=ele_current.BB_ele[i]
-          z[0]=L
+          variation[0]=L
           t_out.Fill()
     t_out.Write()
     fout.Close()
@@ -328,7 +330,7 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             l_yr = my_d.l_z
         else:
             print("the draw plane is not existing")
-    elif "planar3D" in sensor_model or "lgad3D" in sensor_model:
+    elif "planar3D" in sensor_model or "planarRing" in sensor_model or "lgad3D" in sensor_model:
         l_xl = 0
         l_yl = 0 
         if plane == "xy":
@@ -471,7 +473,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
         structure = ROOT.TH3D("","",n_bin[0],my_f.sx_l,my_f.sx_r,
                                     n_bin[1],my_f.sy_l,my_f.sy_r,
                                     n_bin[2],0,my_d.l_z)
-    elif "planar3D" or "lgad3D" in my_d.det_model:
+    elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing" in my_d.det_model:
         n_bin=[int(my_d.l_x/50),int(my_d.l_y/50),int(my_d.l_z)]
         structure = ROOT.TH3D("","",n_bin[0],0,my_d.l_x,
                                     n_bin[1],0,my_d.l_y,
@@ -484,7 +486,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
                     x_v = (i+1)*((my_f.sx_r-my_f.sx_l)/n_bin[0])+my_f.sx_l
                     y_v = (j+1)*((my_f.sx_r-my_f.sx_l)/n_bin[1])+my_f.sx_l
                     z_v = (k+1)*(my_d.l_z/n_bin[2])
-                elif "planar3D" or "lgad3D" in my_d.det_model:
+                elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing"in my_d.det_model:
                     x_v = (i+1)*(my_d.l_x/n_bin[0])
                     y_v = (j+1)*(my_d.l_y/n_bin[1])
                     z_v = (k+1)*(my_d.l_z/n_bin[2])
@@ -687,7 +689,7 @@ def get_beam_number(my_g4p,ele_current):
     fout.Close()
 
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    h1 = ROOT.TH1F("Edep_device", "Energy deposition in Si", 100, 0., 0.1)
+    h1 = ROOT.TH1F("Edep_device", "Energy deposition in SiC", 100, 0., 0.1)
     for i in range (len(my_g4p.edep_devices)):
         h1.Fill(my_g4p.edep_devices[i])
     h1.Draw()
@@ -695,3 +697,31 @@ def get_beam_number(my_g4p,ele_current):
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
+
+
+def get1_beam_number(my_g4p,ele_current):
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/" + "beam_monitor/" + now + "/" 
+    create_path(path) 
+    number = array('d',[999.])
+    hittotal = array('d',[999.])
+    number[0] = int(-ele_current.max_BB_height/18.8)
+    hittotal[0]=my_g4p.hittotal
+    fout = ROOT.TFile(path + "beam_monitor.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "beam_number")
+    t_out.Branch("cal_number", number, "cal_number/D")
+    t_out.Branch("real_number", hittotal, "real_number/D")
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()
+
+    c1=ROOT.TCanvas("c1","canvas1",1000,1000)
+    h1 = ROOT.TH1F("Edep_device", "Energy deposition in Si", 100, 0., 1)
+    for i in range (len(my_g4p.edep_devices)):
+        h1.Fill(my_g4p.edep_devices[i])
+    h1.Draw()
+    h1.GetXaxis().SetTitle("energy[MeV]")
+    h1.GetYaxis().SetTitle("number")
+    c1.SaveAs(path+"_energy.pdf")
+    c1.SaveAs(path+"_energy.root")
+ 
