@@ -12,6 +12,7 @@
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
+        "trapping_time":7.89e-9,
 
         "mesh" : 32,
         "xyscale" : 10,
@@ -48,6 +49,7 @@
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
+        "trapping_time":7.89e-9,
 
         "mesh" : 32,
         "xyscale" : 10,

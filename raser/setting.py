@@ -111,8 +111,8 @@ class Setting:
             detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                         'doping':p['doping'], 'steplength':p['steplength']
-                        }
-            
+                       }
+        
         if "planarRing" in self.det_model:
             detector = {'det_model':'planarRing', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'e_r_inner':p['e_r_inner'],'e_r_outer':p['e_r_outer'],
@@ -141,6 +141,8 @@ class Setting:
                             'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
                             'steplength':p['steplength'], 'avalanche_model':p['avalanche_model']
                             }
+        if "trapping_time" in p:
+            detector['trapping_time']=p['trapping_time']
         return detector
 
     def electron_custom(self,electrodes):

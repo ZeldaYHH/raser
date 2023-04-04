@@ -120,9 +120,9 @@ class Carrier:
         self.t = self.t+delta_t
 
         #record
-        self.path.append([self.d_x,self.d_y,self.d_z,self.t])
+        self.path.append([self.d_x,self.d_y,self.d_z,self.t]) 
 
-    def get_signal(self,my_f):
+    def get_signal(self,my_f,my_d):
         """Calculate signal from carrier path"""
         # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
         # signal = i*dt = q*dU_w(x)
@@ -130,6 +130,10 @@ class Carrier:
             U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2]) # x,y,z
             U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2])
             e0 = 1.60217733e-19
+            if i>0:
+               d_t=self.path[i][3]-self.path[i-1][3]
+              self.trapping_time=my_d.trapping_time
+               self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
             q = self.charge * e0
             dU_w = U_w_2 - U_w_1
             self.signal.append(q*dU_w)
@@ -200,12 +204,12 @@ class CalCurrent:
             while not electron.not_in_sensor(my_d):
                 electron.drift_single_step(my_d.steplength, my_d, my_f)
                 electron.drift_end(my_f)
-            electron.get_signal(my_f)
+            electron.get_signal(my_f,my_d)
         for hole in self.holes:
             while not hole.not_in_sensor(my_d):
                 hole.drift_single_step(my_d.steplength, my_d, my_f)
                 hole.drift_end(my_f)
-            hole.get_signal(my_f)
+            hole.get_signal(my_f,my_d)
 
     def current_define(self):
         """
@@ -261,7 +265,7 @@ class CalCurrent:
         self.gain_positive_cu = self.gain_current.positive_cu
         self.sum_cu.Add(self.gain_positive_cu)
         self.sum_cu.Add(self.gain_negative_cu)
-
+    
 class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''
     def __init__(self, my_d, my_f, my_current):
