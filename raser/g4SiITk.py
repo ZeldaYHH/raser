@@ -29,7 +29,6 @@ class SiITk:
         gRunManager.SetUserInitialization(MyActionInitialization(
                                           g4_dic['par_in'],
                                           g4_dic['par_out']))
-        print(s_p_steps)
         if g4_dic['g4_vis']:    
             visManager = g4b.G4VisExecutive()
             visManager.Initialize()
@@ -40,14 +39,12 @@ class SiITk:
             UImanager.ApplyCommand('/run/initialize')
             
         gRunManager.BeamOn(int(dset.total_events))     #s_p_steps problems is in this line
-        
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
         self.init_tz_device = my_g4d.init_tz_device
         self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
             for single_step in p_step] for p_step in self.p_steps]
-
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
 
@@ -58,29 +55,24 @@ class SiITk:
         self.hittotal=hittotal      #count the number of hit particles
 
         number=0
+        total_steps=0
         for step in s_p_steps:
-            if(len(step)>50):
+            total_steps=len(step)+total_steps
+        average_steps=total_steps/len(s_p_steps)
+        for step in s_p_steps:
+            if(len(step)>average_steps):
                 break
             number=number+1
-        try:
-            newtype_step=s_p_steps[number]      #new particle's step
-        except IndexError:
-            print(number)
+        newtype_step=s_p_steps[number]      #new particle's step
         self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
             for single_step in newtype_step]]
-        '''
-        p1,p2,c1,c2=0.3487,0.4488,0.1322,1.8162    #Irradiation damage
-        total_irradiation=0
-        c=total_irradiation/1e16
-        I=1-p1*(1-math.exp(-c/c1))-p2*(1-math.exp(-c/c2))
-        '''
+
         newtype_energy=[0 for i in range(len(newtype_step))]
         for energy in s_energy_steps:
             for i in range(len(newtype_step)):
                 if(len(energy)>i):
                     newtype_energy[i]+=energy[i]
         self.energy_steps=[newtype_energy]      #new particle's every step' energy
-        'self.energy_steps=[newtype_energy*I]'
 
         del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         
@@ -101,13 +93,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         #2D source order: beta->Si->SiC
         tx_all = my_d.l_x/2.0*g4b.um
         ty_all = my_d.l_y/2.0*g4b.um
-        if "plugin3D" in sensor_model:
-            tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
-            self.init_tz_device = 10000
-            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um 
-            device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
-            device_z = my_d.l_z*g4b.um
-        elif "planar3D" or "lgad3D" in sensor_model:
+        if "planar3D" or "lgad3D" in sensor_model:
             tz_device = my_d.l_z/2.0*g4b.um
             self.init_tz_device = 0
             device_x = my_d.l_x*g4b.um 
@@ -122,6 +108,26 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                             material_si = "G4_Si",
                             colour = [1,0,0],
                             mother = 'world')
+        
+        self.create_si_box(
+                            name = "Device2",
+                            sidex = device_x,
+                            sidey = device_y,
+                            sidez = device_z,
+                            translation = [tx_all,ty_all,tz_device-device_z],
+                            material_si = "G4_Si",
+                            colour = [1,0,0],
+                            mother = 'world')
+
+        # self.create_Al_box(
+        #                     name = "Foil",
+        #                     sidex = 5000*g4b.um,
+        #                     sidey = 5000*g4b.um,
+        #                     sidez = 10*g4b.um,
+        #                     translation = [tx_all,ty_all,tz_device-0.5*device_z],
+        #                     colour = [2,0,0],
+        #                     mother = 'world')
+
         self.maxStep = maxStep*g4b.um
         self.fStepLimit = g4b.G4UserLimits(self.maxStep)
         self.logical["Device"].SetUserLimits(self.fStepLimit)
@@ -133,7 +139,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
-                                        25000*g4b.um)
+                                        50000*g4b.um)
         self.logical['world'] = g4b.G4LogicalVolume(self.solid['world'], 
                                                     material, 
                                                     "world")
@@ -146,18 +152,15 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         visual.SetVisibility(False)
         self.logical['world'].SetVisAttributes(visual)
 
-
     def create_Al_box(self, **kwargs):
         name = kwargs['name']
         material_Al = self.nist.FindOrBuildMaterial("G4_Al")
-
         translation = g4b.G4ThreeVector(*kwargs['translation'])
         visual = g4b.G4VisAttributes(g4b.G4Color(*kwargs['colour']))
         mother = self.physical[kwargs['mother']]
         sidex = kwargs['sidex']
         sidey = kwargs['sidey']
         sidez = kwargs['sidez']
-
 
         self.solid[name] = g4b.G4Box(name, sidex/2., sidey/2., sidez/2.)
         
@@ -208,9 +211,8 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         particle_table = g4b.G4ParticleTable.GetParticleTable()
         electron = particle_table.FindParticle("proton") # define the proton
         beam = g4b.G4ParticleGun(1)
-        #beam.SetParticleEnergy(941.4053*g4b.MeV) #sqrt(938^2+80^2)=
         beam.SetParticleEnergy(80*g4b.MeV)
-        #beam.SetParticleEnergy(1600*g4b.MeV)
+        # beam.SetParticleEnergy(1600*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
                                                             par_direction[2]))
