@@ -35,8 +35,9 @@ def CreateElectronCurrent(device, region, mu_n):
     # Make sure the bernoulli functions exist
     if not InEdgeModelList(device, region, "Bern01"):
         CreateBernoulli(device, region)
-
-    Jn = "q*{0}*EdgeInverseLength*V_T0*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)-q*{0}*ElectricField*step(-Dn_t)*(-Dn_t)".format(mu_n)
+    
+    Jn = "q*{0}*EdgeInverseLength*V_T0*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)".format(mu_n)
+    #Jn = "q*{0}*EdgeInverseLength*V_T0*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)-q*{0}*ElectricField*step(-Dn_t)*(-Dn_t)".format(mu_n)
     #-1e-9*ElectricField
     #Jn = "q*ElectronMobility*EdgeInverseLength*V_T0*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)"
 
@@ -62,8 +63,8 @@ def CreateHoleCurrent(device, region, mu_p):
     Dn_t2="N_t2*r_n2*(r_n2*n_12+r_p2*Acceptors@n1)*Electrons@n1/(r_n2*(Donors@n1+n_12)+r_p2*(Acceptors@n1+p_12))^2"
     CreateEdgeModel(device,region,"Dn_t1",Dn_t1)
     CreateEdgeModel(device,region,"Dn_t2",Dn_t2)'''
-    
-    Jp ="-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)+q*{0}*ElectricField*step(Dn_t)*Dn_t".format(mu_p)
+    Jp ="-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
+    #Jp ="-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)+q*{0}*ElectricField*step(Dn_t)*Dn_t".format(mu_p)
     #Jp ="-q*mu_p*ElectricField*(Dn_t1+Dn_t2)-q*{0}*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
     #Jp ="-q*HoleMobility*EdgeInverseLength*V_T0*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)"
 
