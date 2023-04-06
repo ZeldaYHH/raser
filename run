@@ -265,9 +265,10 @@ case $option in
         raser "./python/plot-EH67-Nt.py"
         raser "./python/plot-EH67-sigma.py"
         ;;
-    1.3.10) echo "Irradiated pin ..."
-        ./python/run_batchjob.py devsim "solve_iv_irr.py"
-        ./python/run_batchjob.py devsim "solve_cv_irr.py"
+        
+
+    1.3.10) echo "Simulate 3D NJU-PIN I-V"
+        raser "./python/pin_3d_iv.py"
         ;;
         esac
 }

@@ -132,7 +132,7 @@ class Carrier:
             e0 = 1.60217733e-19
             if i>0:
                d_t=self.path[i][3]-self.path[i-1][3]
-              self.trapping_time=my_d.trapping_time
+               self.trapping_time=my_d.trapping_time
                self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
             q = self.charge * e0
             dU_w = U_w_2 - U_w_1
