@@ -378,7 +378,7 @@ def CreateMobility(device, region):
 
 
 
-def CreateECE(device, region, mu_n):
+def CreateECE_improved(device, region, mu_n):
     CreateElectronCurrent(device, region, mu_n)
 
     NCharge = "-q * Electrons"
@@ -386,7 +386,7 @@ def CreateECE(device, region, mu_n):
     CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
 
     #CreateImpactGeneration(device, region)
-    CreateAnisoImpactGeneration(device, region)
+    CreateTunnelingAndAvalanche(device, region)
     devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", 
@@ -394,6 +394,29 @@ def CreateECE(device, region, mu_n):
              edge_volume_model="ImpactGen_n"
              )
 
+####
+    #### drift diffusion solution variables
+    ####
+    CreateSolution(device, region, "Electrons")
+    CreateSolution(device, region, "Holes")
+
+    ####
+    #### create initial guess from dc only solution
+    ####
+    devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
+    devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
+    #devsim.set_node_values(device=device, region=region, name="Electrons", init_from="InitialElectron")
+    #devsim.set_node_values(device=device, region=region, name="Holes",     init_from="InitialHole")
+
+    ###
+    ### Set up equations
+    ###
+    CreateSiliconDriftDiffusion(device, region)
+    for i in devsim.get_contact_list(device=device):
+        if circuit_contacts and i in circuit_contacts:
+            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+        else:
+            CreateSiliconDriftDiffusionAtContact(device, region, i)
 
 
 def CreateHCE(device, region, mu_p):
@@ -456,7 +479,13 @@ def CreateSiliconDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
 
-
+def CreateImprovedDriftDiffusion(device,region,mu_n="mu_n",mu_p="mu_p"):
+    CreatePE(device,region)
+    CreateBernoulli(device,region)
+    CreateSRH(device,region)
+    CreateInitialNetGeneration(device,region)
+    CreateECE_improved(device,region,mu_n)
+    CreateHCE_improved(device,region,mu_p)
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
     '''
