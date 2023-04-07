@@ -291,7 +291,7 @@ def CreateAnisoImpactGeneration(device, region):
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
 
-def CreateTunnelingAndAvalanche(device,region)
+def CreateTunnelingAndAvalanche(device,region):
     cutoff_angle = 4 #degree
     sin_cutoff_angle = math.sin(math.radians(cutoff_angle))
     cos_cutoff_angle = math.cos(math.radians(cutoff_angle))
@@ -324,7 +324,7 @@ def CreateTunnelingAndAvalanche(device,region)
     CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
     CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
     
-    R_BTBT="1e2*abs(ElectricField)^2.5"*exp(abs(ElectricField)/1e10)
+    R_BTBT="3.11*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e4)"
     CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
     CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
     ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)

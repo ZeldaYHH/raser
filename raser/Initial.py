@@ -84,7 +84,7 @@ def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=Non
         else:
             CreateSiliconDriftDiffusionAtContact(device, region, i)
 
-def ImprovedDriftDiffusionInitialSolution(device, region, circuit_contacts=None)
+def ImprovedDriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
