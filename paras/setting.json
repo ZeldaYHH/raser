@@ -334,5 +334,45 @@
         "BBGain" : 19500,
         "BB_imp" : 10,
         "OscBW" : 2
+    },
+
+    {
+        "steplength" : 0.1,
+        "total_events" : 1000,
+        "det_name" : "Si_Strip",
+        "det_model" : "planar3D",
+
+        "lx" : 550,
+        "ly" : 5000,
+        "lz" : 100,
+        "doping" : -1,
+        "voltage" : 200,
+        "temp" : 300.0,
+        "material" : "Si",
+
+        "mesh" : 300,
+        "xyscale" : 10,
+
+        "maxstep" : 2,
+        "g4_vis" : 0,
+        "par_inx" : 305,
+        "par_iny" : 2500,
+        "par_inz" : 105,
+        "par_outx" : 305,
+        "par_outy" : 2500,
+        "par_outz" : 0.0,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 19500,
+        "BB_imp" : 10,
+        "OscBW" : 2,
+
+        "striplenth" : 110,
+        "elelenth" : 60,
+        "tol_elenumber" : 5
     }
 ]

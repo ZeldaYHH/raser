@@ -32,8 +32,9 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     else:
         draw_ele_field_1D(my_d,my_f,path)
         draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
-    draw_plot(my_d, my_current,ele_current.CSA_ele,"CSA",path) # Draw current
-    draw_plot(my_d, my_current,ele_current.BB_ele,"BB",path)
+    for i in range(my_f.tol_elenumber):
+        draw_plot(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
+        draw_plot(my_d, my_current,ele_current.BB_ele,i,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
@@ -130,30 +131,32 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     @Modify:
         2021/08/31
     """
-    c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
+    c1 = ROOT.TCanvas("c", "canvas",2000, 2000)
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptFit()
     c1.SetLeftMargin(0.12)
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
     c1.SetRightMargin(0.12)
-    c1.Divide(2,2)
+    q = int(math.sqrt(my_f.tol_elenumber+2))+1
+    c1.Divide(q,q)
     model = ["E","P","WP"]
+    e_field=[]
     i=1
     c1.cd(i)
     c1.GetPad(i).SetRightMargin(0.2)
-    e_field1=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field1.Draw("COLZ")
+    e_field.append(fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model,i))
+    e_field[i-1].Draw("COLZ")
     i=2
     c1.cd(i)
     c1.GetPad(i).SetRightMargin(0.2)
-    e_field2=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field2.Draw("COLZ")
-    i=3
-    c1.cd(i)
-    c1.GetPad(i).SetRightMargin(0.2)
-    e_field3=fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model)
-    e_field3.Draw("COLZ")
+    e_field.append(fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model,i))
+    e_field[i-1].Draw("COLZ")
+    for i in range(3,my_f.tol_elenumber+3):
+        c1.cd(i)
+        c1.GetPad(i).SetRightMargin(0.2)
+        e_field.append(fill_his(model[2],depth,my_d,my_f,plane,sensor_model,i))
+        e_field[i-1].Draw("COLZ")
     c1.SaveAs(path+my_d.det_model+plane+str(depth)+".pdf")
     c1.SaveAs(path+my_d.det_model+plane+str(depth)+".root")
     del c1
@@ -197,7 +200,7 @@ def draw_ele_field_1D(my_d,my_f,path):
     c1.SaveAs(path+my_d.det_model+".root")
     del c1
 
-def fill_his(model,depth,my_d,my_f,plane,sensor_model):
+def fill_his(model,depth,my_d,my_f,plane,sensor_model,k):
     """
     @description:
         Draw eletric field - Fill histrogram
@@ -211,14 +214,14 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     nx_e=100
     ny_e=100
     d_r=confirm_range(my_d,my_f,plane,sensor_model,depth)
-    e_v = ROOT.TH2F("","",nx_e,d_r[0],d_r[1],ny_e,d_r[2],d_r[3])
+    e_v = ROOT.TH2F("",""+str(k),nx_e,d_r[0],d_r[1],ny_e,d_r[2],d_r[3])
     for j in range (ny_e):
         for i in range(nx_e):
             x_v = (i+1)*((d_r[1]-d_r[0])/nx_e)+d_r[0]
             y_v = (j+1)*((d_r[3]-d_r[2])/ny_e)+d_r[2]
             f_v=0.0
             try:
-                f_v,e_v = get_f_v(x_v,y_v,depth,model,my_f,plane,e_v,d_r)
+                f_v,e_v = get_f_v(x_v,y_v,depth,model,my_f,plane,e_v,d_r,k)
                 if model == "E":
                     f_v = math.sqrt(math.pow(f_v[0],2)
                                     +math.pow(f_v[1],2)
@@ -257,7 +260,7 @@ def fill_his_1D(model,my_d,my_f):
     e_v.GetXaxis().SetTitle("z[um]") 
     return e_v
 
-def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
+def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r,k):
     """
     @description:
         Draw eletric field - Get parameters
@@ -289,8 +292,8 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
         e_v.SetTitle("potential "+d_r[4])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weighting potential "+d_r[4]) 
-        f_v=my_f.get_w_p(input_x,input_y,input_z)
+        e_v.SetTitle("weighting potential "+d_r[4]+" No."+str(k-2)+"electron") 
+        f_v=my_f.get_w_p(input_x,input_y,input_z,k-3)
     return f_v,e_v
 
 def get_f_v_1D(i_x,i_y,i_z,model,my_f,e_v,d_r):
@@ -358,7 +361,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, my_current, ele_current, model, path, tag=""):
+def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag=""):
     """
     @description:
         Save current in root file
@@ -382,51 +385,51 @@ def draw_plot(my_d, my_current, ele_current, model, path, tag=""):
     #my_current.sum_cu.GetXaxis().SetTitleOffset(1.2)
     #my_current.sum_cu.GetXaxis().SetTitleSize(0.05)
     #my_current.sum_cu.GetXaxis().SetLabelSize(0.04)
-    my_current.sum_cu.GetXaxis().SetNdivisions(510)
+    my_current.sum_cu[tol_elenumber].GetXaxis().SetNdivisions(510)
     #my_current.sum_cu.GetYaxis().SetTitleOffset(1.1)
     #my_current.sum_cu.GetYaxis().SetTitleSize(0.05)
     #my_current.sum_cu.GetYaxis().SetLabelSize(0.04)
-    my_current.sum_cu.GetYaxis().SetNdivisions(505)
+    my_current.sum_cu[tol_elenumber].GetYaxis().SetNdivisions(505)
     #my_current.sum_cu.GetXaxis().CenterTitle()
     #my_current.sum_cu.GetYaxis().CenterTitle() 
-    my_current.sum_cu.GetXaxis().SetTitle("Time [s]")
-    my_current.sum_cu.GetYaxis().SetTitle("Current [A]")
+    my_current.sum_cu[tol_elenumber].GetXaxis().SetTitle("Time [s]")
+    my_current.sum_cu[tol_elenumber].GetYaxis().SetTitle("Current [A]")
 
-    my_current.sum_cu.Draw("HIST")
-    my_current.positive_cu.Draw("SAME HIST")
-    my_current.negative_cu.Draw("SAME HIST")
-    my_current.gain_positive_cu.Draw("SAME HIST")
-    my_current.gain_negative_cu.Draw("SAME HIST")
-    my_current.sum_cu.Draw("SAME HIST")
+    my_current.sum_cu[tol_elenumber].Draw("HIST")
+    my_current.positive_cu[tol_elenumber].Draw("SAME HIST")
+    my_current.negative_cu[tol_elenumber].Draw("SAME HIST")
+    my_current.gain_positive_cu[tol_elenumber].Draw("SAME HIST")
+    my_current.gain_negative_cu[tol_elenumber].Draw("SAME HIST")
+    my_current.sum_cu[tol_elenumber].Draw("SAME HIST")
 
-    my_current.positive_cu.SetLineColor(877)#kViolet-3
-    my_current.negative_cu.SetLineColor(600)#kBlue
-    my_current.gain_positive_cu.SetLineColor(617)#kMagneta+1
-    my_current.gain_negative_cu.SetLineColor(867)#kAzure+7
-    my_current.sum_cu.SetLineColor(418)#kGreen+2
+    my_current.positive_cu[tol_elenumber].SetLineColor(877)#kViolet-3
+    my_current.negative_cu[tol_elenumber].SetLineColor(600)#kBlue
+    my_current.gain_positive_cu[tol_elenumber].SetLineColor(617)#kMagneta+1
+    my_current.gain_negative_cu[tol_elenumber].SetLineColor(867)#kAzure+7
+    my_current.sum_cu[tol_elenumber].SetLineColor(418)#kGreen+2
 
-    my_current.positive_cu.SetLineWidth(2)
-    my_current.negative_cu.SetLineWidth(2)
-    my_current.gain_positive_cu.SetLineWidth(2)
-    my_current.gain_negative_cu.SetLineWidth(2)
-    my_current.sum_cu.SetLineWidth(2)
+    my_current.positive_cu[tol_elenumber].SetLineWidth(2)
+    my_current.negative_cu[tol_elenumber].SetLineWidth(2)
+    my_current.gain_positive_cu[tol_elenumber].SetLineWidth(2)
+    my_current.gain_negative_cu[tol_elenumber].SetLineWidth(2)
+    my_current.sum_cu[tol_elenumber].SetLineWidth(2)
     c.Update()
 
-    if ele_current.GetMinimum() < 0:
-        rightmax = 1.1*ele_current.GetMinimum()
+    if ele_current[tol_elenumber].GetMinimum() < 0:
+        rightmax = 1.1*ele_current[tol_elenumber].GetMinimum()
     else:
-        rightmax = 1.1*ele_current.GetMaximum()
+        rightmax = 1.1*ele_current[tol_elenumber].GetMaximum()
     if rightmax == 0:
         n_scale=0
-    elif ele_current.GetMinimum() <0:
+    elif ele_current[tol_elenumber].GetMinimum() <0:
         n_scale = ROOT.gPad.GetUymin() / rightmax
     else:
         n_scale = ROOT.gPad.GetUymax() / rightmax
-    ele_current.Scale(n_scale)
-    ele_current.Draw("SAME HIST")
-    ele_current.SetLineWidth(2)   
-    ele_current.SetLineColor(8)
-    ele_current.SetLineColor(2)
+    ele_current[tol_elenumber].Scale(n_scale)
+    ele_current[tol_elenumber].Draw("SAME HIST")
+    ele_current[tol_elenumber].SetLineWidth(2)   
+    ele_current[tol_elenumber].SetLineColor(8)
+    ele_current[tol_elenumber].SetLineColor(2)
     c.Update()
 
     axis = ROOT.TGaxis(ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymin(), 
@@ -446,19 +449,19 @@ def draw_plot(my_d, my_current, ele_current, model, path, tag=""):
     axis.Draw("SAME HIST")
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
-    legend.AddEntry(my_current.negative_cu, "electron", "l")
-    legend.AddEntry(my_current.positive_cu, "hole", "l")
-    legend.AddEntry(my_current.gain_negative_cu, "gain electron", "l")
-    legend.AddEntry(my_current.gain_positive_cu, "gain hole", "l")
-    legend.AddEntry(my_current.sum_cu, "e+h", "l")
+    legend.AddEntry(my_current.negative_cu[tol_elenumber], "electron", "l")
+    legend.AddEntry(my_current.positive_cu[tol_elenumber], "hole", "l")
+    legend.AddEntry(my_current.gain_negative_cu[tol_elenumber], "gain electron", "l")
+    legend.AddEntry(my_current.gain_positive_cu[tol_elenumber], "gain hole", "l")
+    legend.AddEntry(my_current.sum_cu[tol_elenumber], "e+h", "l")
     #legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     #legend.SetTextFont(43)
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+tag+"_basic_infor.root")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
