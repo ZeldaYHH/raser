@@ -68,7 +68,7 @@ writer.writerow(header)
 fig1=matplotlib.pyplot.figure()
 ax1 = fig1.add_subplot(111)
 
-while reverse_v < 1500.0:
+while reverse_v < 4000.0:
 
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
@@ -91,7 +91,7 @@ while reverse_v < 1500.0:
     reverse_v += 1
 
     # breakdown
-    if( abs(reverse_top_total_current/area_factor) > 1e3): break
+    if( abs(reverse_top_total_current/area_factor) > 1e6): break
 
 matplotlib.pyplot.xlabel('Depth [cm]')
 matplotlib.pyplot.ylabel('E (V/cm)')
