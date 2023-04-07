@@ -35,14 +35,14 @@ class Carrier:
     Modify:
         2022/10/28
     """
-    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge):
+    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge,tol_elenumber):
         self.d_x = d_x_init
         self.d_y = d_y_init
         self.d_z = d_z_init
         self.t = t_init
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
         self.charge = charge
-        self.signal = []
+        self.signal = [[] for j in range(tol_elenumber)]
         
         if self.charge == 0:
             self.end_condition = "zero charge"
@@ -126,29 +126,31 @@ class Carrier:
         """Calculate signal from carrier path"""
         # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
         # signal = i*dt = q*dU_w(x)
-        for i in range(len(self.path)-1): # differentiate of weighting potential
-            U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2]) # x,y,z
-            U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2])
-            e0 = 1.60217733e-19
-            if i>0:
-               d_t=self.path[i][3]-self.path[i-1][3]
-               self.trapping_time=my_d.trapping_time
-               self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
-            q = self.charge * e0
-            dU_w = U_w_2 - U_w_1
-            self.signal.append(q*dU_w)
+        for j in range(my_f.tol_elenumber):
+            for i in range(len(self.path)-1): # differentiate of weighting potential
+                U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
+                U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
+                e0 = 1.60217733e-19
+                if i>0:
+                    d_t=self.path[i][3]-self.path[i-1][3]
+                    self.trapping_time=my_d.trapping_time
+                    self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
+                q = self.charge * e0
+                dU_w = U_w_2 - U_w_1
+                self.signal[j].append(q*dU_w)
+        
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
+        '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
         if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
             self.end_condition = "zero velocity"
-        elif wpot>(1-1e-5):
+        '''elif wpot>(1-1e-5):
             self.end_condition = "reached cathode"
         elif wpot<1e-5:
             self.end_condition = "reached anode"
         elif(len(self.path)>10000):
-            self.end_condition = "reciprocate"
+            self.end_condition = "reciprocate"'''
         return self.end_condition
 
 class CalCurrent:
@@ -176,23 +178,26 @@ class CalCurrent:
                                track_position[i][1],\
                                track_position[i][2],\
                                track_position[i][3],\
-                               -1*ionized_pairs[i])
+                               -1*ionized_pairs[i],\
+                                my_f.tol_elenumber)
             hole = Carrier(track_position[i][0],\
                            track_position[i][1],\
                            track_position[i][2],
                            track_position[i][3],\
-                           ionized_pairs[i])
+                           ionized_pairs[i],\
+                            my_f.tol_elenumber)
             if not electron.not_in_sensor(my_d):
                 self.electrons.append(electron)
                 self.holes.append(hole)
         
         self.drifting_loop(my_d, my_f)
 
-        self.current_define()
-        self.sum_cu.Reset()
-        self.positive_cu.Reset()
-        self.negative_cu.Reset()
-        self.get_current()
+        self.current_define(my_f.tol_elenumber)
+        for i in range(my_f.tol_elenumber):
+            self.sum_cu[i].Reset()
+            self.positive_cu[i].Reset()
+            self.negative_cu[i].Reset()
+        self.get_current(my_f.tol_elenumber)
         if my_d.det_model == "lgad3D":
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             self.gain_positive_cu.Reset()
@@ -211,7 +216,7 @@ class CalCurrent:
                 hole.drift_end(my_f)
             hole.get_signal(my_f,my_d)
 
-    def current_define(self):
+    def current_define(self,tol_elenumber):
         """
         @description: 
             Parameter current setting     
@@ -228,37 +233,63 @@ class CalCurrent:
         self.t_end = 5.0e-9
         self.t_start = 0
         self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
+
+        self.positive_cu=[]
+        self.negative_cu=[]
+        self.gain_positive_cu=[]
+        self.gain_negative_cu=[]
+        self.sum_cu=[]
+
+        for i in range(tol_elenumber):
+            self.positive_cu.append(ROOT.TH1F("charge+"+str(i), "Positive Current",
+                                        self.n_bin, self.t_start, self.t_end))
+            self.negative_cu.append(ROOT.TH1F("charge-"+str(i), "Negative Current",
+                                        self.n_bin, self.t_start, self.t_end))
+            self.gain_positive_cu.append(ROOT.TH1F("gain_charge+"+str(i),"Gain Positive Current",
+                                        self.n_bin, self.t_start, self.t_end))
+            self.gain_negative_cu.append(ROOT.TH1F("gain_charge-"+str(i),"Gain Negative Current",
+                                        self.n_bin, self.t_start, self.t_end))
+            self.sum_cu.append(ROOT.TH1F("charge"+str(i),"Total Current"+" No."+str(i+1)+"electron",
+                                    self.n_bin, self.t_start, self.t_end))
+            
         
-        self.positive_cu = ROOT.TH1F("charge+", "Positive Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.negative_cu = ROOT.TH1F("charge-", "Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_positive_cu = ROOT.TH1F("gain_charge+","Gain Positive Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.gain_negative_cu = ROOT.TH1F("gain_charge-","Gain Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        self.sum_cu = ROOT.TH1F("charge","Total Current",
-                                self.n_bin, self.t_start, self.t_end)
-        
-    def get_current(self):
+    def get_current(self,tol_elenumber):
         test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
-        for hole in self.holes:
-            for i in range(len(hole.path)-1):
-                test_p.Fill(hole.path[i][3],hole.signal[i]/self.t_bin)# time,current=int(i*dt)/Δt
-            self.positive_cu.Add(test_p)
-            test_p.Reset()
+        for j in range(tol_elenumber):
+            sum_max_hole=0
+            sum_min_hole=0
+            for hole in self.holes:
+                if (len(hole.signal[j])!=0):
+                    sum_max_hole=sum_max_hole+max(hole.signal[j])/self.t_bin
+                    sum_min_hole=sum_min_hole+min(hole.signal[j])/self.t_bin
+            if(sum_max_hole>1e-11 or abs(sum_min_hole)>1e-11):
+                for hole in self.holes:
+                    for i in range(len(hole.path)-1):
+                        test_p.Fill(hole.path[i][3],hole.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
+                    self.positive_cu[j].Add(test_p)
+                    test_p.Reset()
+
 
         test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
         test_n.Reset()
-        for electron in self.electrons:             
-            for i in range(len(electron.path)-1):
-                test_n.Fill(electron.path[i][3],electron.signal[i]/self.t_bin)# time,current=int(i*dt)/Δt
-            self.negative_cu.Add(test_n)
-            test_n.Reset()
-
-        self.sum_cu.Add(self.positive_cu)
-        self.sum_cu.Add(self.negative_cu)
+        for j in range(tol_elenumber):
+            sum_max_electron=0
+            sum_min_electron=0
+            for electron in self.electrons:
+                if (len(electron.signal[j])!=0):
+                    sum_max_electron=sum_max_electron+max(electron.signal[j])/self.t_bin
+                    sum_min_electron=sum_min_electron+min(electron.signal[j])/self.t_bin
+            if(sum_max_hole>1e-11 or abs(sum_min_hole)>1e-11):
+                for electron in self.electrons:             
+                    for i in range(len(electron.path)-1):
+                        test_n.Fill(electron.path[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
+                    self.negative_cu[j].Add(test_n)
+                    test_n.Reset()
+    
+        for i in range(tol_elenumber):
+            self.sum_cu[i].Add(self.positive_cu[i])
+            self.sum_cu[i].Add(self.negative_cu[i])
 
     def get_current_gain(self):
         self.gain_negative_cu = self.gain_current.negative_cu
@@ -399,11 +430,13 @@ class CalCurrentGain(CalCurrent):
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
         G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
+        self.tol_elenumber = my_f.tol_elenumber
         super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
 
 class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):
         super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
+        self.tol_elenumber = my_f.tol_elenumber
         # convolute the signal with the laser pulse shape in time
         convolved_positive_cu = ROOT.TH1F("convolved_charge+", "Positive Current",
                                      self.n_bin, self.t_start, self.t_end)
@@ -428,11 +461,17 @@ class CalCurrentLaser(CalCurrent):
         self.signalConvolution(self.gain_negative_cu,my_l.timePulse,convolved_gain_negative_cu)
         self.signalConvolution(self.sum_cu,my_l.timePulse,convolved_sum_cu)
 
-        self.positive_cu = convolved_positive_cu
-        self.negative_cu = convolved_negative_cu
-        self.gain_positive_cu = convolved_gain_positive_cu
-        self.gain_negative_cu = convolved_gain_negative_cu
-        self.sum_cu = convolved_sum_cu
+        self.positive_cu = []
+        self.negative_cu = []
+        self.gain_positive_cu = []
+        self.gain_negative_cu = []
+        self.sum_cu = []
+        for i in range(self.tol_elenumber):
+            self.positive_cu[i] = convolved_positive_cu
+            self.negative_cu[i] = convolved_negative_cu
+            self.gain_positive_cu[i] = convolved_gain_positive_cu
+            self.gain_negative_cu[i] = convolved_gain_negative_cu
+            self.sum_cu[i] = convolved_sum_cu
 
     def signalConvolution(self,cu,timePulse,convolved_cu):
         for i in range(self.n_bin):
@@ -489,6 +528,4 @@ class CarrierListFromG4P:
         self.track_position = [[single_step[0],single_step[1],single_step[2],1e-9] for single_step in my_g4p.p_steps_current[j]]
         self.tracks_step = my_g4p.energy_steps[j]
         self.tracks_t_energy_deposition = my_g4p.edep_devices[j] #为什么不使用？
-        print(self.track_position)
-        print(len(self.track_position))
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]

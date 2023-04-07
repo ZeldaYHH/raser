@@ -173,17 +173,26 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            fenics = {'det_model':'planar3D', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+            if "Si_Strip" in self.det_name:
+                fenics = {'det_model':'planar3D', 
+                        'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                        "striplenth":p['striplenth'], "elelenth":p['elelenth'], "tol_elenumber":p['tol_elenumber']}
+            else:
+                fenics = {'det_model':'planar3D', 
+                        'mesh':p['mesh'], "xyscale":p['xyscale'],
+                        "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "planarRing" in self.det_model:
             fenics = {'det_model':'planarRing', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "lgad3D" in self.det_model:
             fenics = {'det_model':'lgad3D',
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "plugin3D" in self.det_model:
             fenics = {'det_model':'plugin3D', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         return fenics
 
     @property
