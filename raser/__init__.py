@@ -11,3 +11,5 @@ from raser.model import Avalanche
 from raser.source import TCTTracks
 from raser.g4beam_monitor import Beammonitor
 from raser.g4reactor import reactor
+from raser.pyfenics2D import FenicsCal2D
+from raser.g4Si_Strip import SiStrip

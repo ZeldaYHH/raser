@@ -28,6 +28,10 @@ class Amplifier:
         ---------
             2021/09/09
         """
+        self.CSA_ele=[]
+        self.BB_ele = []
+
+        self.tol_elenumber = my_current.tol_elenumber
         CSA_par = ampl_par[0]
         BB_par = ampl_par[1]
         self.ampli_define(CSA_par,BB_par)
@@ -63,19 +67,25 @@ class Amplifier:
         """ Transform current to charge 
         with changing bin width to oscilloscope bin width
         """
-        self.max_num = my_current.sum_cu.GetNbinsX()
+        self.max_num=[]
+        self.itot=[]
+        for i in range(self.tol_elenumber):
+            self.max_num.append(my_current.sum_cu[i].GetNbinsX())
+            self.itot.append([0.0]*self.max_num[i])
+
         self.max_hist_num = my_current.n_bin
         self.undersampling = int(float(mintstep)/my_current.t_bin)
         self.time_unit = my_current.t_bin*self.undersampling
         self.CDet_j = 0     # CSA readout mode
-        self.itot = [0.0]*self.max_num
-        self.qtot = 0.0
+        
+        self.qtot = [0.0]*self.tol_elenumber
         # get total charge
-        i=0
-        for j in range(0,self.max_hist_num,self.undersampling):
-            self.itot[i] = my_current.sum_cu.GetBinContent(j)
-            self.qtot = self.qtot + self.itot[i]*self.time_unit
-            i+=1
+        for k in range(self.tol_elenumber):
+            i=0
+            for j in range(0,self.max_hist_num,self.undersampling):
+                self.itot[k][i] = my_current.sum_cu[k].GetBinContent(j)
+                self.qtot[k] = self.qtot[k] + self.itot[k][i]*self.time_unit
+                i+=1
         max_hist_num = int(self.max_hist_num/self.undersampling)
         IintTime = max(2.0*(self.t_rise+self.t_fall)*1e-9/self.time_unit,
                        3.0*self.tau_BBA/self.time_unit)
@@ -94,29 +104,34 @@ class Amplifier:
             2021/09/09
         """
         IMaxSh = self.IMaxSh
-        preamp_Q = [0.0]*IMaxSh
-        self.CSA_p_init()
-        self.BB_p_init()
+        preamp_Q = [] 
+        for i in range(self.tol_elenumber):
+            preamp_Q.append([0.0]*IMaxSh)
         step=1
-        for i in range(IMaxSh-step):
-            if(i>0 and i <self.max_hist_num-step):
-                preamp_Q[i] = 0.0
-                for il in range(i,i+step):
-                    preamp_Q[i] += self.itot[il]*self.time_unit
-            elif (i != 0):
-                preamp_Q[i]=0.0
 
-        for i in range(IMaxSh-step):
-            if i >= step:
-                dif_shaper_Q = preamp_Q[i]
-            else:
-                dif_shaper_Q = 0
-            for j in range(IMaxSh-i):
-                self.fill_CSA_out(i,j,dif_shaper_Q)
-                self.fill_BB_out(i,j,dif_shaper_Q)
-            self.max_CSA(i)
-        self.fill_CSA_th1f()
-        self.fill_BB_th1f()
+        for k in range(self.tol_elenumber):
+            for i in range(IMaxSh-step):
+                if(i>0 and i <self.max_hist_num-step):
+                    preamp_Q[k][i] = 0.0
+                    for il in range(i,i+step):
+                        preamp_Q[k][i] += self.itot[k][il]*self.time_unit
+                elif (i != 0):
+                    preamp_Q[k][i]=0.0
+
+        for k in range(self.tol_elenumber):
+            self.CSA_p_init()
+            self.BB_p_init()
+            for i in range(IMaxSh-step):
+                if i >= step:
+                    dif_shaper_Q = preamp_Q[k][i]
+                else:
+                    dif_shaper_Q = 0
+                for j in range(IMaxSh-i):
+                    self.fill_CSA_out(i,j,dif_shaper_Q)
+                    self.fill_BB_out(i,j,dif_shaper_Q)
+                self.max_CSA(i)
+            self.fill_CSA_th1f(k)
+            self.fill_BB_th1f(k)
 
     def CSA_p_init(self):
         """ CSA parameter initialization"""
@@ -160,40 +175,43 @@ class Amplifier:
         if (abs(self.shaper_out_Q[i]) > abs(self.sh_max)):
             self.sh_max = self.shaper_out_Q[i]
 
-    def fill_CSA_th1f(self):
+    def fill_CSA_th1f(self,k):
         """ Change charge to amplitude [mV]
             and save in the th1f
         """
         Ci = 3.5e-11  #fF
         Qfrac = 1.0/(1.0+self.CDet*1e-12/Ci)
-        self.CSA_ele = ROOT.TH1F("electronics", "electronics",
-                                 self.IMaxSh, 0, self.IMaxSh*self.time_unit)
+        
+        self.CSA_ele.append(ROOT.TH1F("electronics"+str(k), "electronics",
+                                self.IMaxSh, 0, self.IMaxSh*self.time_unit))
         for i in range(self.IMaxSh):
             if self.sh_max == 0.0:
                 self.shaper_out_V[i] = 0.0
             elif self.CDet_j == 0:
+
                 self.shaper_out_V[i] = self.shaper_out_Q[i]*self.trans_imp\
-                                       * 1e15*self.qtot*Qfrac/self.sh_max            
+                                       * 1e15*self.qtot[k]*Qfrac/self.sh_max            
             elif self.CDet_j ==1:
                 self.shaper_out_V[i] = self.shaper_out_Q[i]*self.trans_imp\
-                                       * 1e15*self.qtot/self.sh_max
-            self.CSA_ele.SetBinContent(i,self.shaper_out_V[i])
+                                       * 1e15*self.qtot[k]/self.sh_max
+            self.CSA_ele[k].SetBinContent(i,self.shaper_out_V[i])
         #Print the max current time of CSA
         max_CSA_height = min(self.shaper_out_V)
         time_t = self.shaper_out_V.index(max_CSA_height)
         print("CSA_time=%s" %(time_t*self.time_unit))
 
-    def fill_BB_th1f(self):
+    def fill_BB_th1f(self,k):
         """ Change charge to amplitude [mV]
             and save in the th1f
         """
-        self.BB_ele = ROOT.TH1F("electronics BB","electronics BB",
-                                self.IMaxSh,0,self.IMaxSh*self.time_unit)
+        
+        self.BB_ele.append(ROOT.TH1F("electronics BB"+str(k),"electronics BB",
+                                self.IMaxSh,0,self.IMaxSh*self.time_unit))
         for i in range(len(self.BBGraph)+1):
             if i == 0:
-                self.BB_ele.SetBinContent(i,0)
+                self.BB_ele[k].SetBinContent(i,0)
             else:
-                self.BB_ele.SetBinContent(i,self.BBGraph[i-1])
+                self.BB_ele[k].SetBinContent(i,self.BBGraph[i-1])
         # Print the max current time of BB
         max_BB_height = min(self.BBGraph)
         time_t = self.BBGraph.index(max_BB_height)

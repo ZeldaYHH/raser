@@ -51,9 +51,10 @@ def main():
         else:
             print("The electrode model is wrong.")
     my_d = raser.R3dDetector(dset)
-    my_f = raser.FenicsCal(my_d,dset.fenics)
+    
 
     if "beammonitor" in args:
+        my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.Beammonitor(my_d, my_f, dset)
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
@@ -61,12 +62,22 @@ def main():
         return
     
     if "reactor" in args:
+        my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.reactor(my_d, my_f, dset)
-        '''my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)'''
+        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
+    if "Si_Strip" in args:
+        my_f = raser.FenicsCal2D(my_d,dset.fenics)
+        my_g4p = raser.SiStrip(my_d, my_f, dset)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
+        return
+    
+    my_f = raser.FenicsCal(my_d,dset.fenics)
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)

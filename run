@@ -16,6 +16,7 @@ usage() {
     printf "\n\t%-9s  %-40s"    "1.4"       "beam monitor"
     printf "\n\t%-9s  %-40s"    "1.5"       "TOKAMAK"
     printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
+    printf "\n\t%-9s  %-40s\n"  "1.7"       "Si_Strip"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
@@ -75,6 +76,11 @@ usage_1_6() {
     printf "\n\t%-5s  %-40s\n"  "1.6.1"    "ring electrode SiC-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.6.2"    "batch model with total number, split with step number" 
     printf "\n\t%-5s  %-40s\n"  "1.6.3"    "get time resolution for Ring-PIN" 
+    printf "\n"
+}
+
+usage_1_7() { 
+    printf "\n\t%-5s  %-40s\n"  "1.7.1"    "Si strip for RASER simulation ..." 
     printf "\n"
 }
 
@@ -305,6 +311,14 @@ case $option in
 
     1.6.3) echo "get time resolution for Ring-PIN"
         ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
+        ;;
+        esac
+}
+
+sub_1_7(){
+case $option in 
+    1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
+        raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip"
         ;;
         esac
 }
@@ -566,6 +580,16 @@ case $option in
         ;;
     1.6.*) echo "RASER simulate Ring-PIN"
         sub_1_6 option
+        ;;
+
+    1.7) echo "RASER simulate Si_Strip"
+        usage_1_7
+        echo "Please enter your option: " 
+        read option 
+        sub_1_7 option 
+        ;;
+    1.7.*) echo "RASER simulate Si_Strip"
+        sub_1_7 option
         ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
