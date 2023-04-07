@@ -126,7 +126,6 @@ class Carrier:
         """Calculate signal from carrier path"""
         # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
         # signal = i*dt = q*dU_w(x)
-<<<<<<< Updated upstream
         for j in range(my_f.tol_elenumber):
             for i in range(len(self.path)-1): # differentiate of weighting potential
                 U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
@@ -140,20 +139,6 @@ class Carrier:
                 dU_w = U_w_2 - U_w_1
                 self.signal[j].append(q*dU_w)
         
-=======
-        for i in range(len(self.path)-1): # differentiate of weighting potential
-            U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2]) # x,y,z
-            U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2])
-            e0 = 1.60217733e-19
-            if i>0:
-               d_t=self.path[i][3]-self.path[i-1][3]
-               self.trapping_time=my_d.trapping_time
-               self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
-            q = self.charge * e0
-            dU_w = U_w_2 - U_w_1
-            self.signal.append(q*dU_w)
->>>>>>> Stashed changes
-
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
