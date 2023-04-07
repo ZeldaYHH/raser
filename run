@@ -261,7 +261,7 @@ case $option in
         ;;
 
     1.3.7T) echo "Simulate 1D SICAR1 LGAD C-V..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD CV=True v_max=800"
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD CV=True v_max=400"
         ;;
 
     1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
