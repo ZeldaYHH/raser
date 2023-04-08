@@ -54,6 +54,23 @@ def CreateSiliconCarbideConstant():
     devsim.add_db_entry(material="SiliconCarbide",   parameter="tau_p",  value=0.5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
 
 
+# def CreateSiliconConstant():
+#     # define SiliconCarbide parameters
+#     # material
+#     #n_i    = 3.89e-9 # #/cm^3
+#     #n_i    = 6.7e10 # #/cm^3
+#     devsim.add_db_entry(material="Silicon",   parameter="eps",    value=,      unit="1",         description="Dielectric Constant")
+#     devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=,   unit="/cm^3",     description="Intrinsic Electron Concentration")
+#     # mobility
+#     devsim.add_db_entry(material="Silicon",   parameter="mu_n",   value=,      unit="cm^2/Vs",   description="Constant Mobility of Electron")
+#     devsim.add_db_entry(material="Silicon",   parameter="mu_p",   value=,       unit="cm^2/Vs",   description="Constant Mobility of Hole")
+#     # SRH
+#     devsim.add_db_entry(material="Silicon",   parameter="n1",     value=,   unit="/cm^3",     description="n1")
+#     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=,   unit="/cm^3",     description="p1")
+#     devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=,    unit="s",         description="Constant SRH Lifetime of Electron")
+#     devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=,    unit="s",         description="Constant SRH Lifetime of Hole")
+
+
 '''
 Doping & ElectricFiled Dependence Mobility of SiliconCarbide
 Ref DOI: 

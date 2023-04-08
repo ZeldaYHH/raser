@@ -291,7 +291,7 @@ def CreateAnisoImpactGeneration(device, region):
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
 
-def CreateTunnelingAndAvalanche(device,region)
+def CreateTunnelingAndAvalanche(device,region):
     R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
     CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
     CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")

@@ -28,7 +28,7 @@ region="1D_SICAR1_LGAD"
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-sicar1_lgad_mesh.CreateMesh(device=device, region=region)
+sicar1_lgad_mesh.Create1DMesh(device=device, region=region)
 sicar1_lgad_mesh.SetDoping(device=device, region=region)
 sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/sicar1_lgad_doping.png")
 
