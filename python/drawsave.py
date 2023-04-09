@@ -700,3 +700,24 @@ def get_beam_number(my_g4p,ele_current):
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
+    
+def save_current(dset,my_d,my_l,my_current,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = "output/" + "pintct/" + dset.det_name + "/"
+    elif "lgad3D" in my_d.det_model:
+        path = "output/" + "lgadtct/" + dset.det_name + "/"
+    create_path(path) 
+    L=eval("round(my_l.{})".format(key))
+    #L is defined by different keys
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(path+"sim-TCT-current"+str(L)+".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    t_out.Branch("current", current, "current/D")
+    for j in range(my_current.n_bin):
+        current[0]=my_current.sum_cu.GetBinContent(j)
+        time[0]=j*my_current.t_bin
+        t_out.Fill()
+    t_out.Write()
+    fout.Close()

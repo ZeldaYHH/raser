@@ -8,12 +8,12 @@
         "refractionIndex" : 3.124,
     
         "wavelength" : 355,
-        "tau" : 350e-12,
+        "tau" : 10e-9,
         "power" : 1e-11,
-        "widthBeamWaist" : 5,
+        "widthBeamWaist" : 20,
     
-        "r_step" : 1,
-        "h_step" : 1,
+        "r_step" : 5,
+        "h_step" : 15,
 
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,

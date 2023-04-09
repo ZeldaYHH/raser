@@ -5,11 +5,11 @@
         "det_name" : "NJU-PIN",
         "det_model" : "planar3D",
 
-        "lx" : 1000,
-        "ly" : 1000,
+        "lx" : 5000,
+        "ly" : 5000,
         "lz" : 100,
-        "doping" : 10,  
-        "voltage" : -500,
+        "doping" : 52,  
+        "voltage" : -1000,
         "temp" : 300.0,
         "material" : "SiC",
         "trapping_time":7.89e-9,
@@ -31,8 +31,8 @@
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
+        "BBGain" : 2.52,
+        "BB_imp" : 80,
         "OscBW" : 2
     },
 
