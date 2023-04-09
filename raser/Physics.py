@@ -170,8 +170,10 @@ def CreateSRH2(device, region):
         CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
           
 
-def CreateImpactGeneration(device, region):
-    
+def CreateImpactGenerationSilicon(device, region):
+    """
+    van Ovenstraeten Model
+    """
     # if not InEdgeModelList(device, region, "ElectricField"):
     #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
     #     CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
@@ -180,8 +182,8 @@ def CreateImpactGeneration(device, region):
     #Ion_coeff_n  = "gamma * n_a * exp( - gamma * n_b / (ElectricField))"
     #Ion_coeff_p  = "gamma * p_a * exp( - gamma * p_b / (ElectricField))"
 
-    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, gamma * n_a * exp( - gamma * n_b / (abs(ElectricField)+1)), 1)"
-    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, gamma * p_a * exp( - gamma * p_b / (abs(ElectricField)+1)), 1)"
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1.75e4, (ifelse(abs(ElectricField)>4e5, gamma * n_a_high * exp( - gamma * n_b_high / (abs(ElectricField)+1)),  gamma * n_a_low * exp( - gamma * n_b_low / (abs(ElectricField)+1)))), 1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1.75e4, (ifelse(abs(ElectricField)>4e5, gamma * p_a_high * exp( - gamma * p_b_high / (abs(ElectricField)+1)),  gamma * p_a_low * exp( - gamma * p_b_low / (abs(ElectricField)+1)))), 1)"
 
     Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
 
@@ -212,7 +214,10 @@ def CreateImpactGeneration(device, region):
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
 
-def CreateAnisoImpactGeneration(device, region):
+def CreateImpactGenerationSiliconCarbide(device, region):
+    """
+    Hatakeyama Model for cutoff angle of 4°
+    """
 
     #hbarOmega = 0.19 # eV
     #k_T0_ev = 0.0257 # eV
@@ -290,6 +295,11 @@ def CreateAnisoImpactGeneration(device, region):
     CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
+def CreateImpactGeneration(device, region):
+    if devsim.get_material(device=device, region=region) == "Silicon":
+        CreateImpactGenerationSilicon(device, region)
+    elif devsim.get_material(device=device, region=region) == "SiliconCarbide":
+        CreateImpactGenerationSiliconCarbide(device, region)
 
 def CreateTunnelingAndAvalanche(device,region):
     R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
@@ -404,8 +414,7 @@ def CreateECE(device, region, mu_n):
     CreateNodeModel(device, region, "NCharge", NCharge)
     CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
 
-    #CreateImpactGeneration(device, region)
-    CreateAnisoImpactGeneration(device, region)
+    CreateImpactGeneration(device, region)
     devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", 
@@ -421,8 +430,7 @@ def CreateHCE(device, region, mu_p):
     CreateNodeModel(device, region, "PCharge", PCharge)
     CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
     
-    #CreateImpactGeneration(device, region)
-    CreateAnisoImpactGeneration(device, region)
+    CreateImpactGeneration(device, region)
     devsim.equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", 
@@ -452,7 +460,7 @@ def CreatePEIrradiated(device, region):
              node_model="PotentialNodeCharge", edge_model="PotentialEdgeFlux",
              time_node_model="", variable_update="log_damp") 
 
-def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+def CreateDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
@@ -463,7 +471,7 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
 
-def CreateSiliconDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
+def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateIrradiatedCharge(device, region)
     CreatePEIrradiated(device, region)
     CreateBernoulli(device, region)
@@ -477,7 +485,7 @@ def CreateSiliconDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_
 
 
 
-def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
+def CreateDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
     '''
       Restrict electrons and holes to their equilibrium values
       Integrates current into circuit

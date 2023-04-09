@@ -10,6 +10,7 @@ from raser import Node
 from raser import Initial
 
 import nju_pin_5mm_5mm_mesh
+import hpk_pin_5mm_5mm_mesh
 import sicar1_lgad_mesh
 
 import matplotlib
@@ -68,6 +69,8 @@ def set_mesh(device,region):
         device_mesh = nju_pin_5mm_5mm_mesh
     elif device == "1D_SICAR1_LGAD":
         device_mesh = sicar1_lgad_mesh
+    elif device == "1D_HPK_PIN":
+        device_mesh = hpk_pin_5mm_5mm_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))

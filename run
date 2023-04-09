@@ -236,6 +236,18 @@ case $option in
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN CV=True v_max=400"
         ;;
 
+    1.3.2Si) echo "Build 1D HPK-PIN structure ..."
+        raser "./python/hpk_pin_5mm_5mm_mesh.py"
+        ;;
+
+    1.3.3Si) echo "Simulate 1D HPK-PIN I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN IV=True v_max=800"
+        ;;
+
+    1.3.4Si) echo "Simulate 1D HPK-PIN C-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN CV=True v_max=400"
+        ;;
+
     1.3.5) echo "Build 1D SICAR1 LGAD structure ..."
         raser "./python/sicar1_lgad_mesh.py"
         ;;
