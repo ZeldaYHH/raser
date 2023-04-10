@@ -149,11 +149,11 @@ else
 fi
 
 
-imagename=raser-1.2.sif
+imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
-    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
+    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs $imagefile $1 
 }
 
 sub_1_1(){
@@ -194,7 +194,7 @@ case $option in
     1.1.6) echo "get time resolution vs draw voltage"
 		./python/time_scan.py  output/pin3D/NJU-PIN/time_resolution_scan.csv draw_voltage 0
 		;;
-        esac
+esac
 }
 
 sub_1_2(){
@@ -215,7 +215,7 @@ case $option in
     1.2.3) echo "get time resolution for Si-PIN"
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
-        esac
+esac
 }
 
 sub_1_3(){
@@ -229,19 +229,23 @@ case $option in
         ;;
 
     1.3.3) echo "Simulate 1D NJU-PIN I-V ..."
-        ./python/run_batchjob.py devsim "solve_iv_pin.py"
-        ;;
-
-    1.3.3T) echo "Simulate 1D NJU-PIN I-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN IV=True v_max=800"
         ;;
 
     1.3.4) echo "Simulate 1D NJU-PIN C-V ..."
-        ./python/run_batchjob.py devsim "solve_cv_pin.py"
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN CV=True v_max=400"
         ;;
 
-    1.3.4T) echo "Simulate 1D NJU-PIN C-V..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN CV=True v_max=400"
+    1.3.2Si) echo "Build 1D HPK-PIN structure ..."
+        raser "./python/hpk_pin_5mm_5mm_mesh.py"
+        ;;
+
+    1.3.3Si) echo "Simulate 1D HPK-PIN I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN IV=True v_max=800"
+        ;;
+
+    1.3.4Si) echo "Simulate 1D HPK-PIN C-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN CV=True v_max=400"
         ;;
 
     1.3.5) echo "Build 1D SICAR1 LGAD structure ..."
@@ -249,18 +253,10 @@ case $option in
         ;;
 
     1.3.6) echo "Simulate 1D SICAR1 LGAD I-V ..."
-        ./python/run_batchjob.py devsim "solve_iv_lgad.py"
-        ;;
-
-    1.3.6T) echo "Simulate 1D SICAR1 LGAD I-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD IV=True v_max=800"
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-        ./python/run_batchjob.py devsim "solve_cv_lgad.py"
-        ;;
-
-    1.3.7T) echo "Simulate 1D SICAR1 LGAD C-V..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD CV=True v_max=400"
         ;;
 
@@ -338,16 +334,11 @@ case $option in
     1.3.10) echo "Simulate 3D NJU-PIN I-V"
         raser "./python/pin_3d_iv.py"
         ;;
-    
-    1.3.11) echo "Simulate irradiated NJU PIN"
-        ./python/run_batchjob.py devsim "solve_iv_irr.py"
-        ./python/run_batchjob.py devsim "solve_cv_irr.py"
-        ;;
 
-    1.3.11T) echo "Simulate irradiated NJU PIN I-V C-V..."
+    1.3.11) echo "Simulate irradiated NJU PIN I-V C-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True IV=True v_max=800"
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True CV=True v_max=400"
-        esac
+esac
 }
 
 sub_1_4(){
@@ -355,7 +346,7 @@ case $option in
     1.4.1) echo "SiC-PIN beam monitor" 
         raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
         ;;
-        esac
+esac
 }
 
 sub_1_5(){
@@ -363,7 +354,7 @@ case $option in
     1.5.1) echo "alpha or gamma SiC-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor" 
         ;;
-        esac
+esac
 }
 
 sub_1_6(){
@@ -384,7 +375,7 @@ case $option in
     1.6.3) echo "get time resolution for Ring-PIN"
         ./python/add_noise_raser.py output/pin3D/Ring-PIN/_d=52.0_v=-500.0_tmp=300.0_thick=100.0_radius=None 1
         ;;
-        esac
+esac
 }
 
 sub_1_7(){
@@ -392,7 +383,7 @@ case $option in
     1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
         raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip"
         ;;
-        esac
+esac
 }
 
 sub_2_1(){
@@ -421,7 +412,7 @@ case $option in
 		./python/time_scan.py  output/lgad3D/SICAR-1/time_resolution_scan.csv draw_voltage 0
         ./python/time_scan.py  output/lgad3D/SICAR-1/gain_efficiency_scan.csv gain_voltage 0
 		;;
-    esac
+esac
 }
 
 
@@ -451,7 +442,7 @@ case $option in
 		./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/time_resolution_scan.csv draw_voltage 0
         ./python/time_scan.py  output/lgad3D/HPK-Si-LGAD/gain_efficiency_scan.csv gain_voltage 0
 		;;
-    esac
+esac
 }
 
 
@@ -475,7 +466,7 @@ case $option in
                 "TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-PIN/ parameter_alter=True fx_rel=$x"
             done 
         ;;  
-        esac
+esac
 }
 
 
@@ -526,7 +517,7 @@ case $option in
         ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
         ;;
 
-        esac
+esac
 }
 
 sub_3_3(){
@@ -544,7 +535,7 @@ case $option in
                 "TCTtest.py det_name=NJU-SiC-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-SiC-PIN/ parameter_alter=True fz_rel=$z"
             done
         ;;
-        esac
+esac
 }
 
 sub_4_1(){
@@ -576,20 +567,20 @@ case $option in
 	4.1.4) echo "get time resolution vs draw voltage"
 		./python/time_scan.py  output/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
 		;;
-        esac
+esac
 }
 
 sub_5_1(){
 case $option in 
     5.1.1) echo "T1 circuit simulation and get raw data ..."
-        apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw paras/T1.cir
+        raser "ngspice -b -r t1.raw paras/T1.cir" 
         echo "raw data file t1.raw has been saved in fig/t1.raw"
         ;;
 
     5.1.2) echo "get T1 circuit simulation result figure ..."
-        ./python/NGspice_get_fig.py t1.raw
+        raser "./python/NGspice_get_fig.py t1.raw"
         ;;
-        esac
+esac
 }
 
 
@@ -733,4 +724,4 @@ case $option in
     5.1.*) echo "NGspice simulation"
         sub_5_1 option
         ;;
-		esac
+esac

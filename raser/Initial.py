@@ -52,12 +52,12 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    CreateSiliconDriftDiffusion(device, region)
+    CreateDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+            CreateDriftDiffusionAtContact(device, region, i, True)
         else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)
+            CreateDriftDiffusionAtContact(device, region, i)
 
 def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=None):
     ####
@@ -77,7 +77,7 @@ def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=Non
     ###
     ### Set up equations
     ###
-    CreateSiliconDriftDiffusionIrradiated(device, region)
+    CreateDriftDiffusionIrradiated(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateSiliconDriftDiffusionAtContact(device, region, i, True)
@@ -105,6 +105,6 @@ def ImprovedDriftDiffusionInitialSolution(device, region, circuit_contacts=None)
     CreateImprovedDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+            CreateDriftDiffusionAtContact(device, region, i, True)
         else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)
+            CreateDriftDiffusionAtContact(device, region, i)
