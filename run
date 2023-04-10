@@ -465,7 +465,14 @@ case $option in
                 ./python/run_batchjob.py pintct/NJU-PIN \
                 "TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-PIN/ parameter_alter=True fx_rel=$x"
             done 
+        ;;
+
+    3.1.4) echo "SiC-PIN top-TCT basic information and T1 simulation by ngspice"
+        raser "./python/TCT_T1.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
+        apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw output/T1_new.cir
+        raser "./python/ngspice.py"
         ;;  
+        
 esac
 }
 

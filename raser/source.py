@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser, pulse_time=1e-9, t_step=50e-12):
+    def __init__(self, my_d, laser, pulse_time=20e-9, t_step=50e-12):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
