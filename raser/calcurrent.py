@@ -138,7 +138,7 @@ class Carrier:
                 q = self.charge * e0
                 dU_w = U_w_2 - U_w_1
                 self.signal[j].append(q*dU_w)
-
+        
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
