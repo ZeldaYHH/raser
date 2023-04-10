@@ -10,7 +10,6 @@ def T1():
     current_SiC = array("d")
     T_SiC = array("d")
 
-    #time.sleep(111)
     myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
     myt = myFile.tree
     for entry in myt:
@@ -38,54 +37,37 @@ def T1():
                     break
             break
 
-
     t_start = t1
     t_rise = t2 - t1
     t_fall = t3 - t2
 
     now = time.strftime("%Y_%m%d_%H%M")
 
-    path = "fig/" + str(now)
-    os.makedirs(path)   		
-
-    # with open('paras/T1.cir', 'r') as f:
-    #     lines = f.readlines()
-    #     lines[113] = 'I1 2 0 pulse(0 ' + str(c_max) + 'u ' + str(t_start) + 'n ' + str(t_rise) + 'n ' + str(t_fall) + 'n 0.00000001n ' + str((T_ele[len(T_ele) - 1])) + 'n 0)\n'
-    #     lines[140] = 'tran 0.1p ' + str((T_ele[len(T_ele) - 1])) + 'n\n'
-    #     lines[142] = 'wrdata ' + path + '/t1.raw v(out)\n'
-    #     f.close()
-    # with open(path + '/T1_new.cir', 'w') as f:
-    #     f.writelines(lines)
-    #     f.close()
-    
-    #os.system('apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw ' + path + '/T1_new.cir')
+    path = os.path.join("fig", str(now))
+    os.makedirs(path)
     
     volt_out = array("d")
     T_out = array("d")
     with open('output/t1.raw') as f:
         lines = f.readlines()
         for line in lines:
-            volt_out.append(float(line.split()[1])*1e3)
-            T_out.append(float(line.split()[0])*1e9)
+            volt_out.append(float(line.split()[1]) * 1e3)
+            T_out.append(float(line.split()[0]) * 1e9)
 
     current_in = array("d")
     T_in = array("d")
     t_in = 0
     c_in = 0
     while t_in < T_ele[len(T_ele) - 1]:
-        if t_in < t_start:
-            current_in.append(0)
-            T_in.append(t_in)
-            t_in = t_in + 0.05
-        elif t_in >= t_start and t_in < t_start + t_rise:
+        if t_in >= t_start and t_in < t_start + t_rise:
             current_in.append(c_in)
             T_in.append(t_in)
-            c_in = c_in + c_max*0.05/t_rise
+            c_in = c_in + c_max * 0.05/t_rise
             t_in = t_in + 0.05
         elif t_in >= t_start + t_rise and t_in < t_start + t_rise + t_fall:
             current_in.append(c_in)
             T_in.append(t_in)
-            c_in = c_in - c_max*0.05/t_fall
+            c_in = c_in - c_max * 0.05/t_fall
             t_in = t_in + 0.05
         else:
             current_in.append(0)
@@ -100,9 +82,9 @@ def T1():
     print(len(volt_out))
     print(T_ele[length_ele - 1])
 
-    with open(path + '/volt_out.csv', 'w') as f:
+    with open(os.path.join(path, 'volt_out.csv'), 'w') as f:
         lines = []
-        lines.append('v,t\n')
+        lines.append('v(V),t(ns)\n')
         for i in range(0,length_out):
             lines.append(str(volt_out[i]) + ',' + str(T_out[i]) + '\n')
         f.writelines(lines)
@@ -111,8 +93,8 @@ def T1():
     ROOT.gROOT.SetBatch()    
     c = ROOT.TCanvas('c','c',700,600)
 
-    f2 = ROOT.TGraph(length_SiC, T_SiC, current_SiC)
     f1 = ROOT.TGraph(length_ele, T_ele, volt_ele)
+    f2 = ROOT.TGraph(length_SiC, T_SiC, current_SiC)
     f3 = ROOT.TGraph(length_in, T_in, current_in)
     f4 = ROOT.TGraph(length_out, T_out, volt_out)
 
@@ -131,12 +113,6 @@ def T1():
     f1.GetYaxis().SetTitleSize(0.05)
     f1.GetYaxis().SetTitleOffset(0.7)
 
-    f3.GetYaxis().SetTitle('Voltage [mV]')
-    f3.GetYaxis().SetLimits(0,min(volt_ele))
-    f3.GetYaxis().CenterTitle()
-    f3.GetYaxis().SetTitleSize(0.05)
-    f3.GetYaxis().SetTitleOffset(0.7)
-
     f2.SetLineColor(8)
     f2.SetLineWidth(2)
 
@@ -147,9 +123,9 @@ def T1():
     f4.SetLineWidth(2)
     
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
+    legend.AddEntry(f1, "voltage:simulation", "l")
     legend.AddEntry(f2, "current:e+h", "l")
     legend.AddEntry(f3, "current:T1-input", "l")
-    legend.AddEntry(f1, "voltage:simulation", "l")
     legend.AddEntry(f4, "voltage:T1-output", "l")
     legend.SetBorderSize(0)
 
@@ -162,7 +138,7 @@ def T1():
     f4.Draw('L')
     legend.Draw("same")
 
-    c.SaveAs('fig/' + str(now) + '/t1.pdf')
+    c.SaveAs(os.path.join('fig', str(now), 't1.pdf'))
     
 
 if __name__ == '__main__':

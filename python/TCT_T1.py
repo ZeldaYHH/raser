@@ -30,7 +30,6 @@ drawsave.save_current(dset,my_d,my_l,my_current,"fz_abs")
 current_SiC = array("d")
 T_SiC = array("d")
 
-#time.sleep(111)
 myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
 myt = myFile.tree
 for entry in myt:
@@ -57,7 +56,6 @@ for i in range(0, len(current_SiC)):
                 t3 = T_SiC[j]
                 break
         break
-
 
 t_start = t1
 t_rise = t2 - t1

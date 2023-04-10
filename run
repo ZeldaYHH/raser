@@ -473,6 +473,9 @@ case $option in
         raser "./python/ngspice.py"
         ;;  
         
+    3.1.5) echo "SiC-PIN top-TCT basic information and T1 simulation by ngspice"
+        raser "ngspice -b -r t1.raw paras/T1.cir" 
+        ;;  
 esac
 }
 

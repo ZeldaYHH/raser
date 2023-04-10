@@ -25,7 +25,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         2021/08/31
     """
     now = time.strftime("%Y_%m%d_%H%M")
-    path = "fig/" + now + "/"
+    path = os.path.join("fig", now, )
     create_path(path) 
     if "plugin" in my_d.det_model:
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
@@ -57,9 +57,9 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
 
 def save(dset,my_d,my_l,ele_current,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = "output/" + "pintct/" + dset.det_name + "/"
+        path = os.path.join("output", "pintct", dset.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = "output/" + "lgadtct/" + dset.det_name + "/"
+        path = os.path.join("output", "lgadtct", dset.det_name, )
     create_path(path) 
     L=eval("round(my_l.{})".format(key))
     #L is defined by different keys
@@ -703,15 +703,15 @@ def get_beam_number(my_g4p,ele_current):
     
 def save_current(dset,my_d,my_l,my_current,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = "output/" + "pintct/" + dset.det_name + "/"
+        path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = "output/" + "lgadtct/" + dset.det_name + "/"
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
     create_path(path) 
-    L=eval("round(my_l.{})".format(key))
+    L = eval("round(my_l.{})".format(key))
     #L is defined by different keys
     time = array('d', [999.])
     current = array('d', [999.])
-    fout = ROOT.TFile(path+"sim-TCT-current"+str(L)+".root", "RECREATE")
+    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("time", time, "time/D")
     t_out.Branch("current", current, "current/D")
