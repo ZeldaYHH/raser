@@ -700,7 +700,7 @@ def get_beam_number(my_g4p,ele_current):
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
-
+    
 def save_current(dset,my_d,my_l,my_current,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
