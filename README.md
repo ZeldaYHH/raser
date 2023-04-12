@@ -5,7 +5,11 @@ RASER
 
 
 [![Latest Version][pypi-image]][pypi-url] 
-  
+
+Setup 
+====== 
+Download cfg/install.sh to your home dir and ./install.sh 
+
 
 Document  
 ======
