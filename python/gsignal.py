@@ -75,6 +75,7 @@ def main():
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
+        drawsave.cce(my_d,my_f,my_current)
         return
     
     my_f = raser.FenicsCal(my_d,dset.fenics)
