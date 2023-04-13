@@ -437,36 +437,33 @@ class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):
         super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
         self.tol_elenumber = my_f.tol_elenumber
-        # convolute the signal with the laser pulse shape in time
-        convolved_positive_cu = ROOT.TH1F("convolved_charge+", "Positive Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        convolved_negative_cu = ROOT.TH1F("convolved_charge-", "Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        convolved_gain_positive_cu = ROOT.TH1F("convolved_gain_charge+","Gain Positive Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        convolved_gain_negative_cu = ROOT.TH1F("convolved_gain_charge-","Gain Negative Current",
-                                     self.n_bin, self.t_start, self.t_end)
-        convolved_sum_cu = ROOT.TH1F("convolved_charge","Total Current",
-                                self.n_bin, self.t_start, self.t_end)
         
-        convolved_positive_cu.Reset()
-        convolved_negative_cu.Reset()
-        convolved_gain_positive_cu.Reset()
-        convolved_gain_negative_cu.Reset()
-        convolved_sum_cu.Reset()
-
-        self.signalConvolution(self.positive_cu,my_l.timePulse,convolved_positive_cu)
-        self.signalConvolution(self.negative_cu,my_l.timePulse,convolved_negative_cu)
-        self.signalConvolution(self.gain_positive_cu,my_l.timePulse,convolved_gain_positive_cu)
-        self.signalConvolution(self.gain_negative_cu,my_l.timePulse,convolved_gain_negative_cu)
-        self.signalConvolution(self.sum_cu,my_l.timePulse,convolved_sum_cu)
-
-        self.positive_cu = []
-        self.negative_cu = []
-        self.gain_positive_cu = []
-        self.gain_negative_cu = []
-        self.sum_cu = []
         for i in range(self.tol_elenumber):
+            
+            # convolute the signal with the laser pulse shape in time
+            convolved_positive_cu = ROOT.TH1F("convolved_charge+", "Positive Current",
+                                        self.n_bin, self.t_start, self.t_end)
+            convolved_negative_cu = ROOT.TH1F("convolved_charge-", "Negative Current",
+                                        self.n_bin, self.t_start, self.t_end)
+            convolved_gain_positive_cu = ROOT.TH1F("convolved_gain_charge+","Gain Positive Current",
+                                        self.n_bin, self.t_start, self.t_end)
+            convolved_gain_negative_cu = ROOT.TH1F("convolved_gain_charge-","Gain Negative Current",
+                                        self.n_bin, self.t_start, self.t_end)
+            convolved_sum_cu = ROOT.TH1F("convolved_charge","Total Current",
+                                    self.n_bin, self.t_start, self.t_end)
+            
+            convolved_positive_cu.Reset()
+            convolved_negative_cu.Reset()
+            convolved_gain_positive_cu.Reset()
+            convolved_gain_negative_cu.Reset()
+            convolved_sum_cu.Reset()
+
+            self.signalConvolution(self.positive_cu[i],my_l.timePulse,convolved_positive_cu)
+            self.signalConvolution(self.negative_cu[i],my_l.timePulse,convolved_negative_cu)
+            self.signalConvolution(self.gain_positive_cu[i],my_l.timePulse,convolved_gain_positive_cu)
+            self.signalConvolution(self.gain_negative_cu[i],my_l.timePulse,convolved_gain_negative_cu)
+            self.signalConvolution(self.sum_cu[i],my_l.timePulse,convolved_sum_cu)
+
             self.positive_cu[i] = convolved_positive_cu
             self.negative_cu[i] = convolved_negative_cu
             self.gain_positive_cu[i] = convolved_gain_positive_cu
