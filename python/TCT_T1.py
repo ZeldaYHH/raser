@@ -24,8 +24,8 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
-drawsave.save(dset,my_d,my_l,ele_current,"fz_abs")
-drawsave.save_current(dset,my_d,my_l,my_current,"fz_abs")
+drawsave.save(dset,my_d,my_l,ele_current,my_f,"fz_abs")
+drawsave.save_current(dset,my_d,my_l,my_current,my_f,"fz_abs")
 
 current_SiC = array("d")
 T_SiC = array("d")
@@ -33,7 +33,7 @@ T_SiC = array("d")
 myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
 myt = myFile.tree
 for entry in myt:
-    current_SiC.append(entry.current * 1e3)
+    current_SiC.append(entry.current0 * 1e3)
     T_SiC.append(entry.time * 1e9)
 
 volt_ele = array("d")
@@ -67,7 +67,7 @@ with open('paras/T1.cir', 'r') as f:
     lines[140] = 'tran 0.1p ' + str((T_ele[len(T_ele) - 1])) + 'n\n'
     lines[142] = 'wrdata output/t1.raw v(out)\n'
     f.close()
-with open('output/T1_new.cir', 'w') as f:
+with open('output/T1_tmp.cir', 'w') as f:
     f.writelines(lines)
     f.close()
 

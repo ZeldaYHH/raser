@@ -43,7 +43,7 @@ class Carrier:
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
         self.charge = charge
         self.signal = [[] for j in range(tol_elenumber)]
-        
+
         if self.charge == 0:
             self.end_condition = "zero charge"
         else:
@@ -197,7 +197,7 @@ class CalCurrent:
             self.sum_cu[i].Reset()
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
-        self.get_current(my_f.tol_elenumber)
+        self.get_current(my_d,my_f.tol_elenumber)
         if my_d.det_model == "lgad3D":
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             self.gain_positive_cu.Reset()
@@ -253,7 +253,7 @@ class CalCurrent:
                                     self.n_bin, self.t_start, self.t_end))
             
         
-    def get_current(self,tol_elenumber):
+    def get_current(self,my_d,tol_elenumber):
         test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
         for j in range(tol_elenumber):
@@ -263,7 +263,9 @@ class CalCurrent:
                 if (len(hole.signal[j])!=0):
                     sum_max_hole=sum_max_hole+max(hole.signal[j])/self.t_bin
                     sum_min_hole=sum_min_hole+min(hole.signal[j])/self.t_bin
-            if(sum_max_hole>1e-11 or abs(sum_min_hole)>1e-11):
+            if(sum_max_hole<1e-11 or abs(sum_min_hole)<1e-11) and (my_d.det_model == "Si_Strip"):
+                pass
+            else:
                 for hole in self.holes:
                     for i in range(len(hole.path)-1):
                         test_p.Fill(hole.path[i][3],hole.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
@@ -280,7 +282,9 @@ class CalCurrent:
                 if (len(electron.signal[j])!=0):
                     sum_max_electron=sum_max_electron+max(electron.signal[j])/self.t_bin
                     sum_min_electron=sum_min_electron+min(electron.signal[j])/self.t_bin
-            if(sum_max_hole>1e-11 or abs(sum_min_hole)>1e-11):
+            if(sum_max_hole<1e-11 or abs(sum_min_hole)<1e-11) and (my_d.det_model == "Si_Strip"):
+                pass
+            else:
                 for electron in self.electrons:             
                     for i in range(len(electron.path)-1):
                         test_n.Fill(electron.path[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
