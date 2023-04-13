@@ -701,6 +701,35 @@ def get_beam_number(my_g4p,ele_current):
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
     
+
+
+def cce(my_d,my_f,my_current):
+
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "fig/" + now + "/"
+    create_path(path) 
+
+    charge=array('d')
+    x=array('d')
+    for i in range(my_f.tol_elenumber):
+        x.append(i+1)
+        sum_charge=0
+        for j in range(my_current.n_bin):
+            sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
+        charge.append(sum_charge)
+    n=int(len(charge))
+
+    c1=ROOT.TCanvas("c1","canvas1",1000,1000)
+    cce=ROOT.TGraph(n,x,charge)
+    cce.SetMarkerStyle(3)
+    cce.Draw()
+    cce.SetTitle("Charge Collection Efficiency")
+    cce.GetXaxis().SetTitle("elenumber")
+    cce.GetYaxis().SetTitle("charge[Coulomb]")
+    c1.SaveAs(path+"_cce.pdf")
+    c1.SaveAs(path+"_cce.root")
+    
+
 def save_current(dset,my_d,my_l,my_current,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
