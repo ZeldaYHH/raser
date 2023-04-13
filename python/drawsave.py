@@ -25,7 +25,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         2021/08/31
     """
     now = time.strftime("%Y_%m%d_%H%M")
-    path = os.path.join("fig", now, )
+    path = os.path.join("fig", str(now),'' )
     create_path(path) 
     if "plugin" in my_d.det_model:
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
@@ -55,29 +55,33 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(dset,my_d,my_l,ele_current,key):
+def save(dset,my_d,my_l,ele_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join("output", "pintct", dset.det_name, )
+        path = "output/" + "pintct/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join("output", "lgadtct", dset.det_name, )
+        path = "output/" + "lgadtct/" + dset.det_name + "/"
     create_path(path) 
     L=eval("round(my_l.{})".format(key))
     #L is defined by different keys
-    volt = array('d', [999.])
-    time = array('d', [999.])
-    variation = array('d', [999.])
-    fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("volt", volt, "volt/D")
-    t_out.Branch("time", time, "time/D")
-    t_out.Branch(key, variation, "{}/D".format(key))
-    for i in range(ele_current.BB_ele.GetNbinsX()):
-          time[0]=i*ele_current.time_unit
-          volt[0]=ele_current.BB_ele[i]
-          variation[0]=L
-          t_out.Fill()
-    t_out.Write()
-    fout.Close()
+    for j in range(my_f.tol_elenumber):
+        volt = array('d', [999.])
+        time = array('d', [999.])
+        variation = array('d', [999.])
+        if my_f.tol_elenumber==1:
+            fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
+        else:
+            fout = ROOT.TFile(path+"sim-TCT"+str(L)+"No_"+str(j)+".root", "RECREATE")
+        t_out = ROOT.TTree("tree", "signal")
+        t_out.Branch("volt", volt, "volt/D")
+        t_out.Branch("time", time, "time/D")
+        t_out.Branch(key, variation, "{}/D".format(key))
+        for i in range(ele_current.BB_ele[j].GetNbinsX()):
+            time[0]=i*ele_current.time_unit
+            volt[0]=ele_current.BB_ele[j][i]
+            variation[0]=L
+            t_out.Fill()
+        t_out.Write()
+        fout.Close()
 
 def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
@@ -441,7 +445,7 @@ def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag="")
     axis.SetTextFont(40)
     axis.SetLabelColor(2)
     axis.SetLabelSize(0.035)
-    axis.SetLabelFont(40)
+    axis.SetLabelFont(42)
     axis.SetTitle("Ampl [mV]")
     axis.SetTitleFont(40)
     axis.SetTitleOffset(1.2)
@@ -730,11 +734,11 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.root")
     
 
-def save_current(dset,my_d,my_l,my_current,key):
+def save_current(dset,my_d,my_l,my_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
+        path = os.path.join('output', 'pintct', str(dset.det_name),'' )
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
+        path = os.path.join('output', 'lgadtct', str(dset.det_name),'' )
     create_path(path) 
     L = eval("round(my_l.{})".format(key))
     #L is defined by different keys
@@ -743,9 +747,10 @@ def save_current(dset,my_d,my_l,my_current,key):
     fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("time", time, "time/D")
-    t_out.Branch("current", current, "current/D")
+    for i in range(my_f.tol_elenumber):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
     for j in range(my_current.n_bin):
-        current[0]=my_current.sum_cu.GetBinContent(j)
+        current[0]=my_current.sum_cu[i].GetBinContent(j)
         time[0]=j*my_current.t_bin
         t_out.Fill()
     t_out.Write()

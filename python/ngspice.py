@@ -13,7 +13,7 @@ def T1():
     myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
     myt = myFile.tree
     for entry in myt:
-        current_SiC.append(entry.current * 1e3)
+        current_SiC.append(entry.current0 * 1e3)
         T_SiC.append(entry.time * 1e9)
 
     volt_ele = array("d")
