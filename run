@@ -135,6 +135,8 @@ usage_4_1() {
 usage_5_1() {
     printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
     printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result figure ..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.3"    "get CSA circuit simulation and get raw data ..." 
+    printf "\n\t%-5s  %-40s\n"  "5.1.4"    "get CSA circuit simulation result figure ..." 
     printf "\n"
 }
 
@@ -587,6 +589,15 @@ case $option in
 
     5.1.2) echo "get T1 circuit simulation result figure ..."
         raser "./python/NGspice_get_fig.py t1.raw"
+        ;;
+
+    5.1.3) echo "CSA circuit simulation and get raw data ..."
+        raser "ngspice -b -r csa.raw paras/csa.cir" 
+        echo "raw data file csa.raw has been saved in fig/csa.raw"
+        ;;
+
+    5.1.4) echo "get CSA circuit simulation result figure ..."
+        raser "./python/NGspice_get_fig.py csa.raw"
         ;;
 esac
 }

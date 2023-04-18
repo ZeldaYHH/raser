@@ -21,6 +21,8 @@ def read_file(file_path,file_name):
 def main():
     file_path = 'fig/'
     file_name = sys.argv[1]
+    com_name=file_name.split('.')[0]
+    fig_name=file_path + com_name + '.pdf'
     time,volt = [],[]
 
     time,volt = read_file(file_path,file_name)
@@ -48,8 +50,9 @@ def main():
 
     c.cd()
     f1.Draw('AL')
-    c.SaveAs('fig/T1.pdf')
+    c.SaveAs(fig_name)
+    print("figure  has been saved in " , fig_name)
 
 if __name__ == '__main__':
     main()
-    print("figure file T1.pdf has been saved in fig/T1.pdf")
+    
