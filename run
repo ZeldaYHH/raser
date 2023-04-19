@@ -63,6 +63,7 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.9"    "Improve Simulate 1D NJU-PIN I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.10"   "Simulate 3D NJU-PIN I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.11"   "Simulate irradiated NJU-PIN"
+    printf "\n\t%-5s  %-40s\n"  "1.3.12"   "plot improved 1D NJU-PIN I-V"
 }
 
 usage_1_4() { 
@@ -166,7 +167,7 @@ raser(){
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json" 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
@@ -174,7 +175,7 @@ case $option in
 		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/NJU-PIN \
-                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
+                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
         done
         ;;
 
@@ -189,7 +190,7 @@ case $option in
             for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py pin3D/NJU-PIN \
-                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/ parameter_alter=True voltage=$[-500-j*20]"
+                "gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/ parameter_alter=True voltage=$[-500-j*20]"
             done
         done
         ;;
@@ -207,7 +208,7 @@ esac
 sub_1_2(){
 case $option in 
     1.2.1) echo "Si-PIN basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
+        raser "./python/gsignal.py det_name=HPK-Si-PIN  parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
         ;;
 
     1.2.2) echo "batch model with total number, split with step number"
@@ -215,7 +216,7 @@ case $option in
 		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/HPK-Si-PIN \
-                "gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
+                "gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
         done
         ;;
 
@@ -334,10 +335,9 @@ case $option in
         ;;
 
     1.3.9) echo "improve simulate 1D NJU-PIN I-V ..."
-        #raser "./python/nju_pin_5mm_2Dmesh.py"
         raser "./python/solve_iv_pin_improved.py"        
         ;;
-        
+       
     1.3.10) echo "Simulate 3D NJU-PIN I-V"
         raser "./python/pin_3d_iv.py"
         ;;
@@ -345,13 +345,19 @@ case $option in
     1.3.11) echo "Simulate irradiated NJU PIN I-V C-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True IV=True v_max=800"
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True CV=True v_max=400"
+        ;;
+        
+    1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
+        raser "./python/plot_nju_pin_iv_improved.py"
+        ;;
+            
 esac
 }
 
 sub_1_4(){
 case $option in 
     1.4.1) echo "SiC-PIN beam monitor" 
-        raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor" 
+        raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor geant4_model=beam_monitor geant4_parfile=paras/geant4_setting.json"
         ;;
 esac
 }
@@ -359,7 +365,7 @@ esac
 sub_1_5(){
 case $option in 
     1.5.1) echo "alpha or gamma SiC-PIN basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor" 
+        raser "./python/gsignal.py det_name=NJU-PIN-reactor parfile=paras/setting.json reactor geant4_model=reactor geant4_parfile=paras/geant4_setting.json" 
         ;;
 esac
 }
@@ -367,7 +373,7 @@ esac
 sub_1_6(){
 case $option in 
     1.6.1) echo "ring electrode SiC-PIN basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json"
+        raser "./python/gsignal.py det_name=Ring-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
         ;;
 
     1.6.2) echo "batch model with total number, split with step number"
@@ -375,7 +381,7 @@ case $option in
 		for ((i=0;i<20;i++))
         do
             ./python/run_batchjob.py pin3D/Ring-PIN \
-                "gsignal.py det_name=Ring-PIN parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/pin3D/Ring-PIN/"
+                "gsignal.py det_name=Ring-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/pin3D/Ring-PIN/"
         done
         ;;
 
@@ -388,7 +394,7 @@ esac
 sub_1_7(){
 case $option in 
     1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
-        raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip"
+        raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip geant4_model=Si_strip geant4_parfile=paras/geant4_setting.json"
         ;;
 esac
 }
@@ -396,7 +402,7 @@ esac
 sub_2_1(){
 case $option in 
     2.1.1) echo "SiC-LGAD basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=SICAR-1 parfile=paras/setting.json" 
+        raser "./python/gsignal.py det_name=SICAR-1 parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
         ;;
 
 	2.1.2) echo "batch model with total number, split with step number"
@@ -406,7 +412,7 @@ case $option in
             for ((j=0;j<4;j++))
             do
                 ./python/run_batchjob.py lgad3D/SICAR-1 \
-                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-500-j*100]"
+                "gsignal.py det_name=SICAR-1 parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=True voltage=$[-500-j*100]"
             done
         done
         ;;
@@ -426,7 +432,7 @@ esac
 sub_2_2(){
 case $option in 
     2.2.1) echo "Si-LGAD basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=HPK-Si-LGAD parfile=paras/setting.json"
+        raser "./python/gsignal.py det_name=HPK-Si-LGAD  parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
         ;;
 
     2.2.2) echo "batch model with total number, split with step number"
@@ -436,7 +442,7 @@ case $option in
             for ((j=1;j<=5;j++))
             do
                 ./python/run_batchjob.py lgad3D/HPK-Si-LGAD \
-                "gsignal.py det_name=HPK-Si-LGAD parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=True voltage=$[200+j*10]"
+                "gsignal.py det_name=HPK-Si-LGAD parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=True voltage=$[200+j*10]"
             done
         done
         ;;
@@ -476,7 +482,7 @@ case $option in
 
     3.1.4) echo "SiC-PIN top-TCT basic information and T1 simulation by ngspice"
         raser "./python/TCT_T1.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
-        raser "ngspice -b -r t1.raw paras/T1.cir" 
+        raser "ngspice -b -r t1.raw output/T1_tmp.cir"
         raser "./python/ngspice.py"
         ;;  
 esac
@@ -554,7 +560,7 @@ esac
 sub_4_1(){
 case $option in 
     4.1.1) echo "3D-SiC basic information for RASER simulation ..."
-        raser "./python/gsignal.py det_name=plugin3D parfile=paras/setting.json"
+        raser "./python/gsignal.py det_name=plugin3D parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
 		;;
 
     4.1.2) echo "run 3D-SiC batch model with total number, split with step number ..."
@@ -564,7 +570,7 @@ case $option in
             for ((j=0;j<10;j++))
             do
                 ./python/run_batchjob.py plugin3D/plugin3D \
-                "gsignal.py det_name=plugin3D parfile=paras/setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
+                "gsignal.py det_name=plugin3D parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=True voltage=$[-500+j*50]"
                 # doping=$[10+j*10]
                 # temp=$[300+j*30]
                 # lz=$[150.0+j*30]

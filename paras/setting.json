@@ -17,15 +17,6 @@
         "mesh" : 32,
         "xyscale" : 10,
 
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
-
         "t_rise" : 0.7,
         "t_fall" : 1.1,
         "trans_imp" : 38,
@@ -53,15 +44,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -92,14 +74,6 @@
 
         "mesh" : 500,
         "xyscale" : 50,
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 15000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -129,15 +103,6 @@
 
         "mesh" : 32,
         "xyscale" : 1,
-        
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 5000,
-        "par_iny" : 5000,
-        "par_inz" : 17000,
-        "par_outx" : 5000,
-        "par_outy" : 5000,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -165,15 +130,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -206,14 +162,6 @@
 
         "mesh" : 500,
         "xyscale" : 50,
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 15000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -241,15 +189,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 2500,
-        "par_iny" : 2500,
-        "par_inz" : 17000,
-        "par_outx" : 2500,
-        "par_outy" : 2500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -281,15 +220,6 @@
         "e_r_inner" : 200,
         "e_r_outer" : 250,
 
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
-
         "t_rise" : 0.7,
         "t_fall" : 1.1,
         "trans_imp" : 38,
@@ -302,7 +232,7 @@
 
     {
         "steplength" : 0.1,
-        "total_events" : 1000000,
+        "total_events" : 30000,
         "det_name" : "NJU-PIN-reactor",
         "det_model" : "planar3D",
 
@@ -316,15 +246,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 2500,
-        "par_iny" : 2500,
-        "par_inz" : 100,
-        "par_outx" : 2500,
-        "par_outy" : 2500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -342,7 +263,7 @@
         "det_name" : "Si_Strip",
         "det_model" : "planar3D",
 
-        "lx" : 550,
+        "lx" : 770,
         "ly" : 5000,
         "lz" : 100,
         "doping" : -1,
@@ -350,17 +271,8 @@
         "temp" : 300.0,
         "material" : "Si",
 
-        "mesh" : 300,
+        "mesh" : 600,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 305,
-        "par_iny" : 2500,
-        "par_inz" : 105,
-        "par_outx" : 305,
-        "par_outy" : 2500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -373,6 +285,6 @@
 
         "striplenth" : 110,
         "elelenth" : 60,
-        "tol_elenumber" : 5
+        "tol_elenumber" : 8
     }
 ]

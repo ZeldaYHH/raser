@@ -25,7 +25,10 @@ class FenicsCal2D:
         self.electric_field(my_d)
         self.u_w_bc=[]
         for elenumber in range(self.tol_elenumber):
-            self.u_w_bc.append(self.boundary_definition_w_p(my_d,elenumber))
+            if (elenumber<my_d.l_x/self.striplenth):
+                self.u_w_bc.append(self.boundary_definition_w_p(my_d,elenumber))
+            else:
+                self.u_w_bc.append(self.boundary_definition_p_w_p(my_d))
         self.weighting_potential(my_d)
         
 
@@ -56,6 +59,16 @@ class FenicsCal2D:
             raise NameError(self.det_model)
 
         return u_bc_l
+
+    def boundary_definition_p_w_p(self,my_d):
+        if "planar" in self.det_model:
+            u_bc_l = self.boundary_definition_planar(my_d,1.0,0.0)
+            pass
+        else:
+            raise NameError(self.det_model)
+
+        return u_bc_l
+
 
     def boundary_definition_planar(self,my_d,p_ele,n_ele):
         """
