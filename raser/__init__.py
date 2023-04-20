@@ -1,7 +1,6 @@
 from sys import modules
 from raser.geometry import R3dDetector
 from raser.pyfenics import FenicsCal
-from raser.g4particles import Particles
 from raser.calcurrent import CalCurrentG4P
 from raser.calcurrent import CalCurrentLaser
 from raser.elereadout import Amplifier
@@ -9,6 +8,6 @@ from raser.setting import Setting
 from raser.model import Material
 from raser.model import Avalanche
 from raser.source import TCTTracks
-from raser.g4beam_monitor import Beammonitor
 from raser.g4SiITk import SiITk
-from raser.g4reactor import reactor
+from raser.pyfenics2D import FenicsCal2D
+from raser.g4simulation import Particles
