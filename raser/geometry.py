@@ -70,6 +70,11 @@ class R3dDetector:
         if self.det_model == "planarRing":
             self.e_r_inner = det_dic['e_r_inner']
             self.e_r_outer = det_dic['e_r_outer']
+        
+        if 'trapping_time' in det_dic:
+            self.trapping_time=det_dic['trapping_time']
+        else:
+            self.trapping_time=float('inf')
 
     def full_depletion_voltage(self):
         if self.material == 'Si':

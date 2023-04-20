@@ -33,10 +33,15 @@ class Setting:
         self.input2dic(parameters)
         self.det_name = self._pardic['det_name']
         self.read_par(self._pardic['parfile'])
+
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
             self.read_par_laser(self._pardic['laser_parfile'])
-        
+
+        if "geant4_model" in self._pardic:
+            self.geant4_model = self._pardic['geant4_model']
+            self.read_par_geant4(self._pardic['geant4_parfile'])
+
         p = self.paras
         self.total_events = int(p['total_events'])
         #self.g4seed = 0 
@@ -77,6 +82,27 @@ class Setting:
                 laser_paras[x] = laser_paras[x]
         self.laser_paras = laser_paras
 
+    def read_par_geant4(self,jsonfile):
+        with open(jsonfile) as f:
+            dic_pars = json.load(f)
+        for dic_par in dic_pars:
+            if dic_par['geant4_model'] in self.geant4_model:
+                geant4_paras = dic_par
+        for x in geant4_paras: 
+            if self.is_number(geant4_paras[x]):          
+                geant4_paras[x] = float(geant4_paras[x])
+            else:
+                geant4_paras[x] = geant4_paras[x]
+        for y in geant4_paras['object']:
+            for z in geant4_paras['object'][y]:
+                for k in geant4_paras['object'][y][z]:
+                    if self.is_number(geant4_paras['object'][y][z][k]):
+                        geant4_paras['object'][y][z][k] = float(geant4_paras['object'][y][z][k])
+                    else:
+                        geant4_paras['object'][y][z][k] = geant4_paras['object'][y][z][k]
+        self.geant4_paras = geant4_paras
+
+
     @property
     def detector(self):
         """
@@ -111,8 +137,8 @@ class Setting:
             detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
                         'doping':p['doping'], 'steplength':p['steplength']
-                        }
-            
+                       }
+        
         if "planarRing" in self.det_model:
             detector = {'det_model':'planarRing', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'e_r_inner':p['e_r_inner'],'e_r_outer':p['e_r_outer'],
@@ -141,6 +167,8 @@ class Setting:
                             'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
                             'steplength':p['steplength'], 'avalanche_model':p['avalanche_model']
                             }
+        if "trapping_time" in p:
+            detector['trapping_time']=p['trapping_time']
         return detector
 
     def electron_custom(self,electrodes):
@@ -171,17 +199,26 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            fenics = {'det_model':'planar3D', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+            if "Si_Strip" in self.det_name:
+                fenics = {'det_model':'planar3D', 
+                        'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                        "striplenth":p['striplenth'], "elelenth":p['elelenth'], "tol_elenumber":p['tol_elenumber']}
+            else:
+                fenics = {'det_model':'planar3D', 
+                        'mesh':p['mesh'], "xyscale":p['xyscale'],
+                        "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "planarRing" in self.det_model:
             fenics = {'det_model':'planarRing', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "lgad3D" in self.det_model:
             fenics = {'det_model':'lgad3D',
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         if "plugin3D" in self.det_model:
             fenics = {'det_model':'plugin3D', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
+                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
         return fenics
 
     @property
@@ -207,12 +244,15 @@ class Setting:
         ---------
             2021/09/02
         """
-        p = self.paras
+        p = self.geant4_paras
         pygeant4 = {'det_model':self.det_model,
                     'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                     'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
                     "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
+                    "par_type":p['par_type'], "par_energy":p['par_energy'],
+                    "world":p['world'], "object":p['object'],'model':p['geant4_model']
                     }
+        
         return pygeant4
 
     @property
@@ -321,7 +361,7 @@ class Setting:
         try:
             float(s)
             return True
-        except ValueError:
+        except (TypeError, ValueError):
             pass
         try:
             import unicodedata

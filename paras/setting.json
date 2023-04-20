@@ -5,33 +5,25 @@
         "det_name" : "NJU-PIN",
         "det_model" : "planar3D",
 
-        "lx" : 1000,
-        "ly" : 1000,
+        "lx" : 5000,
+        "ly" : 5000,
         "lz" : 100,
-        "doping" : 10,  
+        "doping" : 52,  
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
+        "trapping_time":7.89e-9,
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
+        "BBGain" : 2.52,
+        "BB_imp" : 80,
         "OscBW" : 2
     },
 
@@ -48,18 +40,10 @@
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
+        "trapping_time":7.89e-9,
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -90,14 +74,6 @@
 
         "mesh" : 500,
         "xyscale" : 50,
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 15000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -127,15 +103,6 @@
 
         "mesh" : 32,
         "xyscale" : 1,
-        
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 5000,
-        "par_iny" : 5000,
-        "par_inz" : 17000,
-        "par_outx" : 5000,
-        "par_outy" : 5000,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -163,15 +130,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 17000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -204,14 +162,6 @@
 
         "mesh" : 500,
         "xyscale" : 50,
-        "maxstep" : 1,
-        "g4_vis" : 0,
-        "par_inx" : 500,
-        "par_iny" : 500,
-        "par_inz" : 15000,
-        "par_outx" : 500,
-        "par_outy" : 500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -239,15 +189,6 @@
 
         "mesh" : 32,
         "xyscale" : 10,
-
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 2500,
-        "par_iny" : 2500,
-        "par_inz" : 17000,
-        "par_outx" : 2500,
-        "par_outy" : 2500,
-        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,
@@ -297,7 +238,7 @@
 
     {
         "steplength" : 0.1,
-        "total_events" : 1000000,
+        "total_events" : 30000,
         "det_name" : "NJU-PIN-reactor",
         "det_model" : "planar3D",
 
@@ -312,15 +253,6 @@
         "mesh" : 32,
         "xyscale" : 10,
 
-        "maxstep" : 2,
-        "g4_vis" : 0,
-        "par_inx" : 2500,
-        "par_iny" : 2500,
-        "par_inz" : 100,
-        "par_outx" : 2500,
-        "par_outy" : 2500,
-        "par_outz" : 0.0,
-
         "t_rise" : 0.7,
         "t_fall" : 1.1,
         "trans_imp" : 38,
@@ -329,5 +261,36 @@
         "BBGain" : 19500,
         "BB_imp" : 10,
         "OscBW" : 2
+    },
+
+    {
+        "steplength" : 0.1,
+        "total_events" : 1000,
+        "det_name" : "Si_Strip",
+        "det_model" : "planar3D",
+
+        "lx" : 770,
+        "ly" : 5000,
+        "lz" : 100,
+        "doping" : -1,
+        "voltage" : 200,
+        "temp" : 300.0,
+        "material" : "Si",
+
+        "mesh" : 600,
+        "xyscale" : 10,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 19500,
+        "BB_imp" : 10,
+        "OscBW" : 2,
+
+        "striplenth" : 110,
+        "elelenth" : 60,
+        "tol_elenumber" : 8
     }
 ]

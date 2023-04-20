@@ -15,6 +15,8 @@ class FenicsCal:
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
+        self.tol_elenumber=fen_dic["tol_elenumber"]
+        
         if self.det_model != "plugin3D":
             self.fl_z=my_d.depletion_depth
         else:
@@ -321,7 +323,7 @@ class FenicsCal:
             f = fenics.Constant(e0*my_d.d_neff*1e6/perm0/perm_mat)
         return f
 
-    def get_w_p(self,px,py,pz):
+    def get_w_p(self,px,py,pz,i):
         """
         @description: 
             Get weighting potential at the (x,y,z) position

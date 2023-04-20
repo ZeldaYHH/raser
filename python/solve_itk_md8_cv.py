@@ -9,9 +9,10 @@ from raser import Physics
 from raser import Node
 from raser import Initial
 
-import sicar1_lgad_mesh
+import itk_md8_mesh
 
 import matplotlib
+#matplotlib.use('Agg') 
 import matplotlib.pyplot
 import csv
 import math
@@ -19,17 +20,17 @@ import math
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="1D_SICAR1_LGAD"
-region="1D_SICAR1_LGAD"
+device="1D_ITK_MD8"
+region="1D_ITK_MD8"
 
 # Area factor
 # 1D 1cm*1cm
-# DUT 5mm* 5mm
-area_factor = 4.0
+# DUT 0.8cm* 0.8cm
+area_factor = 1.0/(0.8*0.8)
 
-sicar1_lgad_mesh.CreateMesh(device=device, region=region)
-sicar1_lgad_mesh.SetDoping(device=device, region=region)
-sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/sicar1_lgad_doping.png")
+itk_md8_mesh.Create1DMesh(device=device, region=region)
+itk_md8_mesh.SetDoping(device=device, region=region)
+itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
@@ -38,9 +39,6 @@ devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 devsim.circuit_element(name="V1", n1=Physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
-
-# For converge
-devsim.set_parameter(name = "n_i", value=1e10)
 
 # Initial DC solution
 Initial.InitialSolution(device, region, circuit_contacts="top")
@@ -55,7 +53,7 @@ reverse_v=0.0
 ssac_voltage = []
 ssac_top_cap = []
 
-f = open("./output/devsim/sicar1_lgad_reverse_cv.csv", "w")
+f = open("./output/devsim/itk_md8_reverse_cv.csv", "w")
 header = ["Voltage","Capacitance"]
 writer = csv.writer(f)
 writer.writerow(header)
@@ -71,7 +69,7 @@ while reverse_v < 400.0:
     reverse_v += 1.0
 
     ssac_voltage.append(0-reverse_v)
-    ssac_top_cap.append(cap*(1e12)/area_factor)
+    ssac_top_cap.append(abs(cap*(1e12))/area_factor)
 
     writer.writerow([0-reverse_v,cap*(1e12)/area_factor])
 
@@ -82,6 +80,5 @@ fig=matplotlib.pyplot.figure(num=4,figsize=(4,4))
 matplotlib.pyplot.plot(ssac_voltage, ssac_top_cap)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Capacitance (pF)')
-#matplotlib.pyplot.axis([-200, 0, 0, 20])
-matplotlib.pyplot.savefig("./output/devsim/sicar1_lgad_reverse_cv.png")
-#write_devices(file="diode_1d.dat", type="tecplot")
+matplotlib.pyplot.savefig("./output/devsim/itk_md8_reverse_cv.png")
+

@@ -10,7 +10,8 @@ import matplotlib
 import matplotlib.pyplot
 import math
 
-# NJU PIN 5mm*5mm 
+#  MD8
+# 0.8cm*0.8cm
 
 # 1d
 def Create1DMesh(device, region):
@@ -22,19 +23,19 @@ def Create1DMesh(device, region):
     devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
     devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-5, tag="mid")
     devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="dio", pos=100*1e-4, ps=1e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
     devsim.add_1d_contact  (mesh="dio", name="top", tag="top", material="metal")
     devsim.add_1d_contact  (mesh="dio", name="bot", tag="bot", material="metal")
-    devsim.add_1d_region   (mesh="dio", material="SiliconCarbide", region=region, tag1="top", tag2="bot")
+    devsim.add_1d_region   (mesh="dio", material="Silicon", region=region, tag1="top", tag2="bot")
     devsim.finalize_mesh(mesh="dio")
     devsim.create_device(mesh="dio", device=device)
 
-def SetDoping(device, region, bulk_doping="5.2e13"):
+def SetDoping(device, region, bulk_doping="4.7e12"):
     '''
       Doping
     '''
-    Node.CreateNodeModel(device, region, "Acceptors", "1.0e19*step(1e-4-x)")
-    Node.CreateNodeModel(device, region, "Donors",    "%s*step(x-1e-4)"%bulk_doping)
+    Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
+    Node.CreateNodeModel(device, region, "Acceptors",    "%s*step(x-1e-4)"%bulk_doping)
     Node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
@@ -61,12 +62,12 @@ def main():
     if not (os.path.exists("./output/devsim")):
         os.makedirs("./output/devsim")
 
-    device="1D_NJU_PIN"
-    region="1D_NJU_PIN"
+    device="1D_ITK_MD8"
+    region="1D_ITK_MD8"
 
     Create1DMesh(device=device, region=region)
     SetDoping(device=device, region=region)
-    Draw_Doping(device=device, region=region, path="./output/devsim/1D_NJU_PIN_doping.png")
+    Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_doping.png")
 
 if __name__ == '__main__':
     main()
