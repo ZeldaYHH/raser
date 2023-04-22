@@ -690,13 +690,13 @@ case $option in
         sub_1_7 option
         ;;
     1.8) echo "ITk MD8 simulation"
-        usage_1_7
+        usage_1_8
         echo "Please enter your option: " 
         read option 
-        sub_1_7 option 
+        sub_1_8 option 
         ;;
     1.8.*) echo "ITk MD8 simulation"
-        sub_1_7 option
+        sub_1_8 option
         ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
