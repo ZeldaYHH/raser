@@ -497,10 +497,13 @@ case $option in
         ;;
 
     3.1.4) echo "SiC-PIN top-TCT basic information and T1 simulation by ngspice"
-        raser "./python/TCT_T1.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json"
+        raser "./python/TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=top_TCT laser_parfile=paras/laser_setting.json ngspice"
         raser "ngspice -b -r t1.raw output/T1_tmp.cir"
-        raser "./python/ngspice.py"
         ;;  
+
+    3.1.5) echo "get T1 circuit simulation result figure ..."
+        raser "./python/ngspice.py"
+        ;;
 esac
 }
 
