@@ -182,7 +182,7 @@ class Amplifier:
         Ci = 3.5e-11  #fF
         Qfrac = 1.0/(1.0+self.CDet*1e-12/Ci)
         
-        self.CSA_ele.append(ROOT.TH1F("electronics"+str(k), "electronics",
+        self.CSA_ele.append(ROOT.TH1F("electronics"+str(k+1), "electronics",
                                 self.IMaxSh, 0, self.IMaxSh*self.time_unit))
         for i in range(self.IMaxSh):
             if self.sh_max == 0.0:
@@ -205,7 +205,7 @@ class Amplifier:
             and save in the th1f
         """
         
-        self.BB_ele.append(ROOT.TH1F("electronics BB"+str(k),"electronics BB",
+        self.BB_ele.append(ROOT.TH1F("electronics BB"+str(k+1),"electronics BB",
                                 self.IMaxSh,0,self.IMaxSh*self.time_unit))
         for i in range(len(self.BBGraph)+1):
             if i == 0:

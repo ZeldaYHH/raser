@@ -12,6 +12,10 @@ from raser.model import Mobility
 from raser.model import Avalanche
 from raser.model import Vector
 
+t_bin = 50e-12
+t_end = 60e-9
+t_start = 0
+
 class Carrier:
     """
     Description:
@@ -192,6 +196,11 @@ class CalCurrent:
         
         self.drifting_loop(my_d, my_f)
 
+        self.t_bin = t_bin
+        self.t_end = t_end
+        self.t_start = t_start
+        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
+
         self.current_define(my_f.tol_elenumber)
         for i in range(my_f.tol_elenumber):
             self.sum_cu[i].Reset()
@@ -201,8 +210,8 @@ class CalCurrent:
         if my_d.det_model == "lgad3D":
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             for i in range(my_f.tol_elenumber):
-                self.positive_cu[i].Reset()
-                self.negative_cu[i].Reset()
+                self.gain_positive_cu[i].Reset()
+                self.gain_negative_cu[i].Reset()
             self.get_current_gain(my_f.tol_elenumber)
 
     def drifting_loop(self, my_d, my_f):
@@ -230,11 +239,6 @@ class CalCurrent:
         @Modify:
             2021/08/31
         """
-        self.t_bin = 50e-12
-        self.t_end = 60e-9
-        self.t_start = 0
-        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
-
         self.positive_cu=[]
         self.negative_cu=[]
         self.gain_positive_cu=[]
@@ -242,15 +246,15 @@ class CalCurrent:
         self.sum_cu=[]
 
         for i in range(tol_elenumber):
-            self.positive_cu.append(ROOT.TH1F("charge+"+str(i), "Positive Current",
+            self.positive_cu.append(ROOT.TH1F("charge+"+str(i+1), " No."+str(i+1)+"Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.negative_cu.append(ROOT.TH1F("charge-"+str(i), "Negative Current",
+            self.negative_cu.append(ROOT.TH1F("charge-"+str(i+1), " No."+str(i+1)+"Negative Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.gain_positive_cu.append(ROOT.TH1F("gain_charge+"+str(i),"Gain Positive Current",
+            self.gain_positive_cu.append(ROOT.TH1F("gain_charge+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.gain_negative_cu.append(ROOT.TH1F("gain_charge-"+str(i),"Gain Negative Current",
+            self.gain_negative_cu.append(ROOT.TH1F("gain_charge-"+str(i+1)," No."+str(i+1)+"Gain Negative Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.sum_cu.append(ROOT.TH1F("charge"+str(i),"Total Current"+" No."+str(i+1)+"electron",
+            self.sum_cu.append(ROOT.TH1F("charge"+str(i+1),"Total Current"+" No."+str(i+1)+"electrode",
                                     self.n_bin, self.t_start, self.t_end))
             
         
@@ -301,8 +305,8 @@ class CalCurrent:
             self.gain_negative_cu[i] = self.gain_current.negative_cu[i]
             self.gain_positive_cu[i] = self.gain_current.positive_cu[i]
         for i in range(tol_elenumber):
-            self.sum_cu[i].Add(self.positive_cu[i])
-            self.sum_cu[i].Add(self.negative_cu[i])
+            self.sum_cu[i].Add(self.gain_negative_cu[i])
+            self.sum_cu[i].Add(self.gain_positive_cu[i])
     
 class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''
@@ -346,6 +350,11 @@ class CalCurrentGain(CalCurrent):
                                                     my_f.tol_elenumber))
 
         self.drifting_loop(my_d, my_f)
+
+        self.t_bin = t_bin
+        self.t_end = t_end
+        self.t_start = t_start
+        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
 
         self.current_define(my_f.tol_elenumber)
         for i in range(my_f.tol_elenumber):
@@ -412,21 +421,13 @@ class CalCurrentGain(CalCurrent):
         @Modify:
             2021/08/31
         """
-        self.t_bin = 50e-12
-        self.t_end = 5.0e-9
-        self.t_start = 0
-        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
-
         self.positive_cu=[]
         self.negative_cu=[]
-        self.gain_positive_cu=[]
-        self.gain_negative_cu=[]
-        self.sum_cu=[]
 
         for i in range(tol_elenumber):
-            self.positive_cu.append(ROOT.TH1F("charge+"+str(i), "Positive Current",
+            self.positive_cu.append(ROOT.TH1F("gain_charge+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.negative_cu.append(ROOT.TH1F("charge-"+str(i), "Negative Current",
+            self.negative_cu.append(ROOT.TH1F("gain_charge-"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
         
     def get_current(self,my_d,tol_elenumber):
@@ -447,6 +448,24 @@ class CalCurrentGain(CalCurrent):
                         test_p.Fill(hole.path[i][3],hole.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
                     self.positive_cu[j].Add(test_p)
                     test_p.Reset()
+
+        test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
+        test_n.Reset()
+        for j in range(tol_elenumber):
+            sum_max_electron=0
+            sum_min_electron=0
+            for electron in self.electrons:
+                if (len(electron.signal[j])!=0):
+                    sum_max_electron=sum_max_electron+max(electron.signal[j])/self.t_bin
+                    sum_min_electron=sum_min_electron+min(electron.signal[j])/self.t_bin
+            if(sum_max_hole<1e-11 or abs(sum_min_hole)<1e-11) and (my_d.det_model == "Si_Strip"):
+                pass
+            else:
+                for electron in self.electrons:             
+                    for i in range(len(electron.path)-1):
+                        test_n.Fill(electron.path[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
+                    self.negative_cu[j].Add(test_n)
+                    test_n.Reset()
 
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
