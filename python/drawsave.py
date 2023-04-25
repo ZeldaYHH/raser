@@ -714,7 +714,6 @@ def cce(my_d,my_f,my_current):
     create_path(path) 
 
     charge=array('d')
-    cce_percent=array('d')
     x=array('d')
     for i in range(my_f.tol_elenumber):
         x.append(i+1)
@@ -722,18 +721,15 @@ def cce(my_d,my_f,my_current):
         for j in range(my_current.n_bin):
             sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
         charge.append(sum_charge)
-    for i in charge:
-        cce_percent.append(i/min(charge)*100)
-    'cce_percent=charge/min(charge)*100'
     n=int(len(charge))
 
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    cce=ROOT.TGraph(n,x,cce_percent)
+    cce=ROOT.TGraph(n,x,charge)
     cce.SetMarkerStyle(3)
     cce.Draw()
     cce.SetTitle("Charge Collection Efficiency")
     cce.GetXaxis().SetTitle("elenumber")
-    cce.GetYaxis().SetTitle("Charge Collection Efficiency")
+    cce.GetYaxis().SetTitle("charge[Coulomb]")
     c1.SaveAs(path+"_cce.pdf")
     c1.SaveAs(path+"_cce.root")
     
@@ -759,3 +755,74 @@ def save_current(dset,my_d,my_l,my_current,my_f,key):
             t_out.Fill()
         t_out.Write()
         fout.Close()
+
+def set_input(dset,my_current,my_l,my_d,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pintct', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
+    L = eval("round(my_l.{})".format(key))
+    current=[]
+    time=[]
+    myFile = ROOT.TFile(os.path.join(path,"sim-TCT-current")+str(L)+".root")
+    myt = myFile.tree
+    for entry in myt:
+       current.append(entry.current0)
+       time.append(entry.time)
+    input_c=[]
+    if abs(min(current))>max(current): #set input signal
+        c_max=min(current)
+        for i in range(0, len(current)):
+            if current[i] < c_max * 0.01:
+                input_c.append(str(0))
+                input_c.append(str(0))
+                input_c.append(str(time[i]))
+                input_c.append(str(0))
+                break
+            else:
+                current[i]=0
+        for j in range(i, len(current)):
+            input_c.append(str(time[j]))
+            input_c.append(str(current[j]))
+            if current[j] > c_max * 0.01:
+                break
+        input_c.append(str(time[j]))
+        input_c.append(str(0))
+        input_c.append(str(time[len(time)-1]))
+        input_c.append(str(0))
+        for k in range(j, len(current)):
+            current[i]=0
+    else:
+        c_max=max(current)
+        for i in range(0, len(current)):
+            current[i]=0
+            if current[i] > c_max * 0.01:
+                input_c.append(str(0))
+                input_c.append(str(0))
+                input_c.append(str(time[i]))
+                input_c.append(str(0))
+                break
+        for j in range(i, len(current)):
+            input_c.append(str(time[j]))
+            input_c.append(str(current[j]))
+            if current[j] < c_max * 0.01:
+                break
+        input_c.append(str(time[j]))
+        input_c.append(str(0))
+        input_c.append(str(time[len(time)-1]))
+        input_c.append(str(0))
+        for k in range(j, len(current)):
+            current[i]=0
+    in_put=array("d",[0.])
+    t=array("d",[0.])
+    fout = ROOT.TFile(os.path.join(path, "input") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", t, "time/D")
+    t_out.Branch("current", in_put, "current/D")
+    for m in range(my_current.n_bin):
+        in_put[0]=current[m]
+        t[0]=time[m]
+        t_out.Fill()
+    t_out.Write()
+    fout.Close()
+    return input_c
