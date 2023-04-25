@@ -753,9 +753,9 @@ def save_current(dset,my_d,my_l,my_current,my_f,key):
     t_out.Branch("time", time, "time/D")
     for i in range(my_f.tol_elenumber):
         t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-            for j in range(my_current.n_bin):
-                current[0]=my_current.sum_cu[i].GetBinContent(j)
-                time[0]=j*my_current.t_bin
-                t_out.Fill()
-            t_out.Write()
-            fout.Close()
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+        fout.Close()
