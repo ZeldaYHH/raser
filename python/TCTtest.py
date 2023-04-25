@@ -16,6 +16,8 @@ if "parameter_alter=True" in args:
     key,_,value=args[-1].rpartition('=')
     value=float(value)
     dset.laser_paras.update({key:value})
+else:
+    key = ""
 my_d = raser.R3dDetector(dset)
 my_f = raser.FenicsCal(my_d, dset.fenics)
 my_l = raser.TCTTracks(my_d, dset.laser)

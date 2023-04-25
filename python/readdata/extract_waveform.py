@@ -7,6 +7,7 @@ from array import array
 
 def save_experiment_data(z_init,t_init,myt,out):
     for j in range(50+1):
+        rel_z = 0.02*j
         z_0 = str(1e-3*j) # in milimeter
         n = myt.Draw("-(volt-aBlineMean):(time-{})".format(t_init),
                      "Vbias==-200\
@@ -25,7 +26,7 @@ def save_experiment_data(z_init,t_init,myt,out):
         volt = array('d',[999.])
         time = array('d',[999.])
         z = array('d',[999.])
-        fout = ROOT.TFile(out+str(j)+".root", "RECREATE")
+        fout = ROOT.TFile(out+str(rel_z)+".root", "RECREATE")
         t_out = ROOT.TTree("tree", "signal")
         t_out.Reset()
         t_out.Branch("volt", volt, "volt/D")
@@ -39,7 +40,7 @@ def save_experiment_data(z_init,t_init,myt,out):
         t_out.Write()
         fout.Close()
         del t_out
-        print(out+str(j)+".root Saved")
+        print(out+str(rel_z)+".root Saved")
 
 myPinFile = ROOT.TFile("/afs/ihep.ac.cn/users/f/fuchenxi/disk/1/edge_voltage_2019_10_24_15_12_57_HPK-EPI-W2-200-DS-SE5PINNM-01.txt.root")
 myPinTree = myPinFile.Get("edge")

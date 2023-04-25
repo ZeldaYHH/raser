@@ -52,10 +52,11 @@ def collect_data(path, model, volt_scale, time_scale):
     sum_l=0
 
     for L in range(51):
+        rel_z = round(0.02*L,2)
         volt=array("d",[0.])
         time=array("d",[0.])
-        Z.append(L)     
-        rootfile=path+model+str(L)+".root"
+        Z.append(rel_z)     
+        rootfile=path+model+str(rel_z)+".root"
         print(str(rootfile))
         volt,time=read_rootfile(rootfile,volt_scale,time_scale)
         mean=0
@@ -68,10 +69,11 @@ def collect_data(path, model, volt_scale, time_scale):
     l=int(round(np.true_divide(sum_l,51)))
 
     for L in range(51):
+        rel_z = round(0.02*L,2)
         volt=array("d",[0.])
         time=array("d",[0.])
         sum_v=0
-        rootfile=path+model+str(L)+".root"
+        rootfile=path+model+str(rel_z)+".root"
         volt,time=read_rootfile(rootfile,volt_scale, time_scale)
         J=len(volt)
         field=get_elefield(volt,k,l)
