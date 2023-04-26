@@ -126,7 +126,7 @@ usage_3_2() {
     printf "\n\t%-5s  %-40s\n"  "3.2.4"    "get volt-time for Si-LGAD, multi points z [0,50]"
     printf "\n\t%-5s  %-40s\n"  "3.2.5"    "analyse eTCT rootfiles"
     printf "\n\t%-5s  %-40s\n"  "3.2.6"    "get volt-time from experiment"
-    printf "\n\t%-5s  %-40s\n"  "3.2.7"   "analyse eTCT rootfiles with experiment data"
+    printf "\n\t%-5s  %-40s\n"  "3.2.7"    "analyse eTCT rootfiles with experiment data"
     printf "\n"
 }
 
@@ -353,9 +353,9 @@ case $option in
         raser "./python/pin_3d_iv.py"
         ;;
 
-    1.3.11) echo "Simulate irradiated NJU PIN I-V C-V ..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True IV=True v_max=800"
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN irradiation=True CV=True v_max=400"
+    1.3.11) echo "Simulate irradiated HPK PIN I-V C-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN irradiation=True IV=True v_max=800"
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_HPK_PIN irradiation=True CV=True v_max=800"
         ;;
         
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."

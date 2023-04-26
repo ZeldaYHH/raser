@@ -137,7 +137,8 @@ def solve_iv(device,region,v_max,para_dict):
 
         writer_iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
 
-        if(reverse_v%100.0==0 and reverse_v<v_max_field):
+        voltage_step = 100
+        if(reverse_v%voltage_step==0 and reverse_v<v_max_field):
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
             x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
             E = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
@@ -222,6 +223,18 @@ def draw_cv(V,C,device,condition):
     matplotlib.pyplot.ylabel('Capacitance (pF)')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
     fig3.savefig("./output/devsim/{}_reverse_cv.png".format(device+condition))
+    fig3.clear()
+
+    fig4=matplotlib.pyplot.figure(num=4,figsize=(4,4))
+    C_minus2 = []
+    for c in C:
+        C_minus2.append(1/c**2)
+    matplotlib.pyplot.plot(V, C_minus2)
+    matplotlib.pyplot.xlabel('Voltage (V)')
+    matplotlib.pyplot.ylabel('1/C^2 (pF^{-2})')
+    #matplotlib.pyplot.axis([-200, 0, 0, 20])
+    fig4.savefig("./output/devsim/{}_reverse_c^-2v.png".format(device+condition))
+    fig4.clear()
 
 def draw_ele_field(device, positions,intensities, bias_voltages,condition):
     fig1=matplotlib.pyplot.figure()

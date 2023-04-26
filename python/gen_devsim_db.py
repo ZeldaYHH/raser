@@ -39,6 +39,12 @@ def CreateGlobalConstant():
 
 def CreateSiliconCarbideConstant():
     # define SiliconCarbide parameters
+    N_c=3.25e15
+    N_v=4.8e15
+    devsim.add_db_entry(material="SiliconCarbide",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
+    devsim.add_db_entry(material="SiliconCarbide",parameter="N_v",value=N_v, unit="/cm^3", description="effective density of states in valence band")
+    E_g=3.26*1.6*1e-19
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="E_g",    value=E_g,       unit="J",         description="E_g")
     # material
     devsim.add_db_entry(material="SiliconCarbide",   parameter="eps",    value=9.76,      unit="1",         description="Dielectric Constant")
     devsim.add_db_entry(material="SiliconCarbide",   parameter="n_i",    value=3.89e-9,   unit="/cm^3",     description="Intrinsic Electron Concentration")
@@ -53,7 +59,13 @@ def CreateSiliconCarbideConstant():
 
 
 def CreateSiliconConstant():
-    # define SiliconCarbide parameters
+    # define Silicon parameters
+    N_c=2.8e19
+    N_v=1.1e19
+    devsim.add_db_entry(material="Silicon",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
+    devsim.add_db_entry(material="Silicon",parameter="N_v",value=N_v, unit="/cm^3", description="effective density of states in valence band")
+    E_g=1.12*1.6*1e-19
+    devsim.add_db_entry(material="Silicon",   parameter="E_g",    value=E_g,       unit="J",         description="E_g")
     # material
     devsim.add_db_entry(material="Silicon",   parameter="eps",    value=11.9,      unit="1",         description="Dielectric Constant")
     devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=1.02e10,   unit="/cm^3",     description="Intrinsic Electron Concentration")
@@ -271,17 +283,13 @@ def CreateVanOvenstraetenImpact():
 
 def SetTrapParametersSiliconCarbide():
     #add defect parameters
-    N_c=3.25e15
-    N_v=4.8e15
-    devsim.add_db_entry(material="SiliconCarbide",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
-    devsim.add_db_entry(material="SiliconCarbide",parameter="N_v",value=N_v, unit="/cm^3", description="effective density of states in conduction band")
     k=1.3806503e-23 
     T0=300
     #Z1/2
     E_t11=-0.67*1.6e-19 #J
     E_t12=-2.56*1.6e-19
-    n_11=N_c*math.exp(E_t11/(k*T0))
-    p_11=N_v*math.exp(E_t12/(k*T0))
+    n_11="N_c*{}".format(math.exp(E_t11/(k*T0)))
+    p_11="N_v*{}".format(math.exp(E_t12/(k*T0)))
     devsim.add_db_entry(material="SiliconCarbide", parameter="N_t1",value=0, unit="/cm^3", description="density of Z1/2")#4.1e13 from paper
     devsim.add_db_entry(material="SiliconCarbide", parameter="r_n1",value=2e-7, unit="cm^3/s",description="electron capture constant of Z1/2")
     devsim.add_db_entry(material="SiliconCarbide", parameter="r_p1",value=3e-7, unit="cm^3/s",description="hole capture constant of Z1/2")
@@ -292,8 +300,8 @@ def SetTrapParametersSiliconCarbide():
     #EH6/7
     E_t21=-1.65*1.6e-19 #J
     E_t22=-1.58*1.6e-19
-    n_12=N_c*math.exp(E_t21/(k*T0))
-    p_12=N_v*math.exp(E_t22/(k*T0))
+    n_12="N_c*{}".format(math.exp(E_t21/(k*T0)))
+    p_12="N_v*{}".format(math.exp(E_t22/(k*T0)))
     devsim.add_db_entry(material="SiliconCarbide",parameter="N_t2",value=0, unit="/cm^3", description="density of EH6/7")#3.9e13 from paper
     devsim.add_db_entry(material="SiliconCarbide",parameter="r_n2",value=2.4e-7, unit="cm^3/s", description="electron capture constant of EH6/7")
     devsim.add_db_entry(material="SiliconCarbide",parameter="r_p2",value=5e-11, unit="cm^3/s", description="hole capture constant of EH6/7")

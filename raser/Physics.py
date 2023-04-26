@@ -388,34 +388,41 @@ def CreateNetGeneration(device, region):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
 
-def CreateIrradiatedCharge(device, region):
+def CreateIrradiatedCharge(device, region,Neutron_eq=1e16):
     '''
     Add Deep Levels from Irradiated Defect 
     able to Catch Carriers Directly and Keep Them Trapped
     '''
-    # imaginary defect
-    sigma_n_irr=1e-12
-    sigma_p_irr=1e-13
-    N_t_irr=1e13
-    v_T=1e7
-    E_g=3.26*1.6*1e-19
-    E_t1=0.6*1.6*1e-19
-    E_t2=-0.8*1.6*1e-19
-    devsim.add_db_entry(material="global",   parameter="sigma_n_irr",     value=sigma_n_irr,   unit="s/cm^2",     description="sigma_n")
-    devsim.add_db_entry(material="global",   parameter="sigma_p_irr",     value=sigma_p_irr,   unit="s/cm^2",     description="sigma_p")
-    devsim.add_db_entry(material="global",   parameter="N_t_irr",     value=N_t_irr,   unit="cm^(-3)",     description="N_t")
+    e = 1.6*1e-19
+    v_T = 1e7
     devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
-    devsim.add_db_entry(material="global",   parameter="E_g",     value=E_g,   unit="J",     description="E_g")
-    devsim.add_db_entry(material="global",   parameter="E_t1",     value=E_t1,   unit="J",     description="E_t1")
-    devsim.add_db_entry(material="global",   parameter="E_t2",     value=E_t2,   unit="J",     description="E_t2")
+    
+    names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
+    E_ts_ev      = [0.56-0.1 , 0.56-0.458, 0.56-0.545, -0.56+0.48, -0.56+0.36]
+    g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ] # cm^-1
+    sigma_n_irrs = [2.300e-14, 2.551e-14 , 4.478e-15 , 4.166e-15 , 3.230e-17 ]
+    sigma_p_irrs = [2.920e-16, 1.551e-13 , 6.709e-15 , 1.965e-16 , 2.036e-14 ]
 
-    c_n = "(v_T * sigma_n_irr)"
-    e_n = "(N_c * exp(-(E_g/2 - E_t1)/k_T0))"
-    c_p = "(v_T * sigma_p_irr)"
-    e_p = "(N_v * exp(-(E_t2 - (-E_g/2))/k_T0))"
+    n_t_irr_n = "0"
+    n_t_irr_p = "0"
+    
+    for name, E_t_ev, g_int, sigma_n_irr, sigma_p_irr in zip(names, E_ts_ev, g_ints, sigma_n_irrs, sigma_p_irrs):
+        E_t = E_t_ev * e
+        N_t_irr = g_int*Neutron_eq
+        
+        devsim.add_db_entry(material="global",   parameter="sigma_n_irr_"+name,     value=sigma_n_irr,   unit="s/cm^2",     description="sigma_n_"+name)
+        devsim.add_db_entry(material="global",   parameter="sigma_p_irr_"+name,     value=sigma_p_irr,   unit="s/cm^2",     description="sigma_p_"+name)
+        devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
+        devsim.add_db_entry(material="global",   parameter="E_t_"+name,     value=E_t,   unit="J",     description="E_t_"+name)
 
-    n_t_irr_n = "N_t_irr * {c_n} * Electrons /({c_n} * Electrons + {e_n})".format(c_n=c_n,e_n=e_n)
-    n_t_irr_p = "N_t_irr * {c_p} * Holes /({c_p} * Holes + {e_p})".format(c_p=c_p,e_p=e_p)
+        c_n = "(v_T * sigma_n_irr_{name})".format(name=name)
+        e_n = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=name)
+        c_p = "(v_T * sigma_p_irr_{name})".format(name=name)
+        e_p = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=name)
+
+        n_t_irr_n += "+(N_t_irr_{name} * {c_n} * Electrons /({c_n} * Electrons + {e_n}))".format(name=name,c_n=c_n,e_n=e_n)
+        n_t_irr_p += "+(N_t_irr_{name} * {c_p} * Holes /({c_p} * Holes + {e_p}))".format(name=name,c_p=c_p,e_p=e_p)
+
     CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
     CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
     for i in ("Electrons", "Holes", "Potential"):
@@ -424,9 +431,9 @@ def CreateIrradiatedCharge(device, region):
 
 def CreateIrradiatedGeneration(device, region):
     c_n = "(v_T * sigma_n_irr)"
-    e_n = "(N_c * exp(-(E_g/2 - E_t1)/k_T0))"
+    e_n = "(N_c * exp(-(E_g/2 - E_t)/k_T0))"
     c_p = "(v_T * sigma_p_irr)"
-    e_p = "(N_v * exp(-(E_t2 - (-E_g/2))/k_T0))"
+    e_p = "(N_v * exp(-(E_t - (-E_g/2))/k_T0))"
 
     R_n_irr = "(N_t_irr-TrappedElectrons)*{c_n}*Electrons-TrappedElectrons*{e_n}".format(c_n=c_n,e_n=e_n)
     R_p_irr = "(N_t_irr-TrappedHoles)*{c_p}*Holes-TrappedHoles*{e_p}".format(c_p=c_p,e_p=e_p)

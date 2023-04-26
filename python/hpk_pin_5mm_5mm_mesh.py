@@ -29,7 +29,7 @@ def Create1DMesh(device, region):
     devsim.finalize_mesh(mesh="dio")
     devsim.create_device(mesh="dio", device=device)
 
-def SetDoping(device, region, bulk_doping="1e12"):
+def SetDoping(device, region, bulk_doping="5e12"):
     '''
       Doping
     '''
