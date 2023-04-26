@@ -605,7 +605,7 @@ esac
 sub_6_1(){
 case $option in 
     6.1.1) echo "create two pixel detector..."
-        raser "./python/telescope.py det_name=NJU-PIN parfile=paras/setting.json"
+        raser "./raser/telescope.py"
         ;;
 esac
 }
