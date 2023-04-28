@@ -8,7 +8,7 @@ upload:
 
 merge: 
 	git remote update 
-	git merge upsteam/main 
+	git merge upstream/main 
 
 clean: 
 	rm -rf dist raser.egg-info  
