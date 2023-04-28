@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 
 from geant4_pybind import *
 
@@ -332,5 +333,5 @@ if ui == None:
     UImanager.ApplyCommand(command+fileName)
 else:
     # interactive mode
-    UImanager.ApplyCommand("/control/execute init_vis.mac")
+    UImanager.ApplyCommand("/control/execute init_vistelescope.mac")
     ui.SessionStart()
