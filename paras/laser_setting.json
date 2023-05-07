@@ -9,7 +9,7 @@
     
         "wavelength" : 355,
         "tau" : 10e-9,
-        "pulse_energy" : 2e-16,
+        "pulse_energy" : 8e-16,
         "widthBeamWaist" : 20,
     
         "r_step" : 5,
@@ -30,7 +30,7 @@
     
         "wavelength" : 660,
         "tau" : 350e-12,
-        "pulse_energy" : 2e-16,
+        "pulse_energy" : 8e-16,
         "widthBeamWaist" : 5,
     
         "r_step" : 1,
@@ -51,7 +51,7 @@
     
         "wavelength" : 660,
         "tau" : 350e-12,
-        "pulse_energy" : 2e-16,
+        "pulse_energy" : 8e-16,
         "widthBeamWaist" : 5,
     
         "r_step" : 2,
@@ -72,7 +72,7 @@
     
         "wavelength" : 1064,
         "tau" : 350e-12,
-        "pulse_energy" : 2e-16,
+        "pulse_energy" : 8e-16,
         "widthBeamWaist" : 8,
     
         "r_step" : 1,
