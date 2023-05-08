@@ -63,6 +63,8 @@ class Amplifier:
         self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
         self.tau_BBA =  math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))    #BB_out
 
+        print("tau_BB=",self.tau_BBA)
+
     def sampling_charge(self,my_current,mintstep):
         """ Transform current to charge 
         with changing bin width to oscilloscope bin width
@@ -165,7 +167,7 @@ class Amplifier:
                                 * math.exp(-j*self.time_unit/self.tau_scope)
         self.Iout_BB_RC[i+j] += (dif_shaper_Q)/self.tau_BBA \
                                 * math.exp(-j*self.time_unit/self.tau_BBA)
-        self.BBGraph[i+j] = 1e+3 * self.BBGain * self.Iout_BB_RC[i+j]
+        self.BBGraph[i+j] = self.BBGain * self.Iout_BB_RC[i+j]
         self.Vout_scope[i+j] = 50 * self.Iout_C50[i+j]
 #        if (abs(self.BBGraph[i+j]) > 800):
 #            self.BBGraph[i+j] = 800*self.BBGraph[i+j]/abs(self.BBGraph[i+j])
@@ -201,7 +203,7 @@ class Amplifier:
         print("CSA_time=%s" %(time_t*self.time_unit))
 
     def fill_BB_th1f(self,k):
-        """ Change charge to amplitude [mV]
+        """ Change charge to amplitude [V]
             and save in the th1f
         """
         

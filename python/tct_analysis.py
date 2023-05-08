@@ -53,42 +53,24 @@ def collect_data(path, model, volt_scale, time_scale):
     elefield= array("d")
     volts = []
     times = []
-    sum_k=0
-    sum_l=0
+    baseline = 0
 
     for L in range(51):
         rel_z = round(0.02*L,2)
-        volt=array("d",[0.])
-        time=array("d",[0.])
-        Z.append(L)     
-        rootfile=path+model+str(rel_z)+".root"
-        print(str(rootfile))
-        volt,time=read_rootfile(rootfile,volt_scale,time_scale)
-        mean=0
-        J=len(volt)
-        amplitude.append(max(volt))
-        k,l=get_average(volt,time,J,mean)
-        sum_k+=k      
-        sum_l+=l
-    k=int(round(np.true_divide(sum_k,51)))
-    l=int(round(np.true_divide(sum_l,51)))
+        Z.append(L)
 
-    for L in range(51):
-        rel_z = round(0.02*L,2)
         volt=array("d",[0.])
         time=array("d",[0.])
-        sum_v=0
         rootfile=path+model+str(rel_z)+".root"
-        volt,time=read_rootfile(rootfile,volt_scale, time_scale)
+        volt,time=read_rootfile(rootfile, volt_scale, time_scale)
         volts.append(volt)
         times.append(time)
         J=len(volt)
-        field=get_elefield(volt,k,l)
-        elefield.append(field)
-        cha=get_charge(volt,J)
-        charge.append(cha)
-        rt=get_risetime(volt,time,J,mean)
-        risetime.append(rt)  
+
+        amplitude.append(max(volt))
+        elefield.append(get_elefield(volt,time,J,baseline))
+        charge.append(get_charge(volt,J))
+        risetime.append(get_risetime(volt,time,J,baseline))  
       
     return amplitude, charge, risetime, elefield, Z, volts, times
 
@@ -119,21 +101,18 @@ def add_noise(rootfile,J,v1,t1):
     t_out.Write()
     fout.Close()
 
-def get_average(volt,time,J,mean):
+def get_elefield(volt,time,J,baseline):
     Vmax=max(volt)
     for k in range(1,J):
-        if (volt[k-1] - mean)<0.4*(Vmax-mean)<(volt[k] - mean):
+        if (volt[k-1] - baseline)<0.4*(Vmax - baseline)<(volt[k] - baseline):
             break
     for l in range(J-1):
-        if (volt[l] - mean)<0.6*(Vmax - mean)<(volt[l+1] - mean):
+        if (volt[l] - baseline)<0.6*(Vmax - baseline)<(volt[l+1] - baseline):
             break
-    return k,l 
-
-def get_elefield(volt,k,l):
     sum_volt=0
     for j in range(k,l+1):
         sum_volt+=volt[j]
-    return sum_volt
+    return sum_volt/(l+1-k)
 
 def get_charge(volt,J):
     sum_charge=0
@@ -141,15 +120,15 @@ def get_charge(volt,J):
         sum_charge+=volt[j]
     return sum_charge
 
-def get_risetime(volt,time,J,mean):
+def get_risetime(volt,time,J,baseline):
     x=array("d")
     y=array("d")
     Vmax=max(volt)
     for k in range(1,J):
-        if (volt[k-1] - mean)<0.2*(Vmax-mean)<(volt[k] - mean):
+        if (volt[k-1] - baseline)<0.2*(Vmax-baseline)<(volt[k] - baseline):
             break
     for l in range(J-1):
-        if (volt[l] - mean)<0.8*(Vmax - mean)<(volt[l+1] - mean):
+        if (volt[l] - baseline)<0.8*(Vmax - baseline)<(volt[l+1] - baseline):
             break
     n=l-k+1
     for j in range(k,l+1):
@@ -161,8 +140,8 @@ def get_risetime(volt,time,J,mean):
     graph1.Fit(f)
     b=f.GetParameter(1)
     c=f.GetParameter(0)
-    e1=np.true_divide((0.2*(Vmax-mean)-c),b)
-    e2=np.true_divide((0.8*(Vmax-mean)-c),b)
+    e1=np.true_divide((0.2*(Vmax-baseline)-c),b)
+    e2=np.true_divide((0.8*(Vmax-baseline)-c),b)
     risetime=np.true_divide((e2-e1),0.6)
     return risetime
 
@@ -239,9 +218,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
     if name == 'Elefield':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,1.5)
+            mg.GetYaxis().SetRangeUser(0,0.6)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.05)
+            mg.GetYaxis().SetRangeUser(0,0.02)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'
@@ -296,7 +275,7 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
     mg.Add(graph2)
     mg.Draw('ap')
     
-    mg.GetYaxis().SetTitle('signal [mV]')
+    mg.GetYaxis().SetTitle('signal [V]')
     mg.GetXaxis().SetTitle('time [ns]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
