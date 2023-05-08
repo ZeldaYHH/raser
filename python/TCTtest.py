@@ -45,8 +45,6 @@ if "scan=True" in args: #assume parameter alter
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     else:
         raise NameError
-    drawsave.create_path(path) 
-    drawsave.draw_current(my_d,my_current,ele_current.BB_ele, "BB", path, "_"+args[-1])
 else:
     drawsave.draw_plots(my_d,ele_current,my_f,None,my_current,my_l)
 # now = time.strftime("%Y_%m%d_%H%M")

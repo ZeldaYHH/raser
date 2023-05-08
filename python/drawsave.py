@@ -40,20 +40,6 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_nocarrier3D(path,my_l)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
-     
-def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
-    """
-    @description:
-        Draw electric field ,drift path and energy deposition
-    @param:
-        None     
-    @Returns:
-        None
-    @Modify:
-        2021/08/31
-    """
-    create_path("fig/")
-    draw_current(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
 def save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
