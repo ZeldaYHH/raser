@@ -296,7 +296,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r,k):
         e_v.SetTitle("potential "+d_r[4])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weighting potential "+d_r[4]+" No."+str(k-2)+"electron") 
+        e_v.SetTitle("weighting potential "+d_r[4]+" No."+str(k-2)+"electrode") 
         f_v=my_f.get_w_p(input_x,input_y,input_z,k-3)
     return f_v,e_v
 
@@ -464,8 +464,8 @@ def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag="")
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.root")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electrode"+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electrode"+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
