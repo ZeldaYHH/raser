@@ -28,7 +28,7 @@ def main():
         Particles -- Electron and hole paris distibution
         CalCurrent -- Drift of e-h pais and induced current
         Amplifier -- Readout electronics simulation
-        drawplot -- Draw electric field ,drift path and energy deposition        
+        draw_plots -- Draw electric field ,drift path and energy deposition        
     Modify:
     ---------
         2021/09/02
@@ -65,7 +65,7 @@ def main():
         my_g4p = raser.Particles(my_d, my_f, dset)
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
+        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
     if "Si_Strip" in args:
@@ -73,7 +73,7 @@ def main():
         my_g4p = raser.Particles(my_d, my_f, dset)
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
+        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         drawsave.cce(my_d,my_f,my_current)
         return
     
@@ -84,7 +84,7 @@ def main():
         #if "lgad" in dset.det_model:
         #   print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)
+        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
@@ -142,7 +142,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
             effective_number += 1
             my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
             ele_current = raser.Amplifier(my_current, dset.amplifier)
-            drawsave.savedata(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
+            drawsave.save_signal_TTree_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)

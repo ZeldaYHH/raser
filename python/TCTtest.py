@@ -38,17 +38,15 @@ if "ngspice" in args:
         f.writelines(lines)
         f.close()
 if "scan=True" in args: #assume parameter alter
-    drawsave.save(dset,my_d,my_l,ele_current,my_f,key)
+    drawsave.save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key)
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     else:
         raise NameError
-    drawsave.create_path(path) 
-    drawsave.draw_plot(my_d,my_current,ele_current.BB_ele, "BB", path, "_"+args[-1])
 else:
-    drawsave.drawplot(my_d,ele_current,my_f,None,my_current,my_l)
+    drawsave.draw_plots(my_d,ele_current,my_f,None,my_current,my_l)
 # now = time.strftime("%Y_%m%d_%H%M")
 # path = "fig/" + now + "/"
 # drawsave.create_path(path)

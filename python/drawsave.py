@@ -13,7 +13,7 @@ import sys
 import os
 import time
 
-def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
+def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     @description:
         Draw electric field ,drift path and energy deposition
@@ -33,29 +33,15 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field_1D(my_d,my_f,path)
         draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     for i in range(my_f.tol_elenumber):
-        draw_plot(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
-        draw_plot(my_d, my_current,ele_current.BB_ele,i,"BB",path)
+        draw_current(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
+        draw_current(my_d, my_current,ele_current.BB_ele,i,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
-     
-def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
-    """
-    @description:
-        Draw electric field ,drift path and energy deposition
-    @param:
-        None     
-    @Returns:
-        None
-    @Modify:
-        2021/08/31
-    """
-    create_path("fig/")
-    draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(dset,my_d,my_l,ele_current,my_f,key):
+def save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join("output", "pintct", dset.det_name, )
     elif "lgad3D" in my_d.det_model:
@@ -83,7 +69,29 @@ def save(dset,my_d,my_l,ele_current,my_f,key):
         t_out.Write()
         fout.Close()
 
-def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
+def save_current(dset,my_d,my_l,my_current,my_f,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pintct', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
+    create_path(path) 
+    L = eval("round(my_l.{})".format(key))
+    #L is defined by different keys
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    for i in range(my_f.tol_elenumber):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+        fout.Close()
+
+def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
@@ -105,9 +113,9 @@ def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
                        + "_radius=None")
     
     create_path(output_path)
-    save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
+    save_signal_csv(ele_current,my_g4p,batch_number,start_n,output_path)
 
-def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
+def save_signal_csv(ele_current,my_g4p,number,start_n,output_path="none"):
     """ Save induced current after CSA and BB"""
     charge = "_charge=%.2f_"%(ele_current.qtot*1e15)  #fc
     e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
@@ -365,7 +373,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag=""):
+def draw_current(my_d, my_current, ele_current, tol_elenumber, model, path, tag=""):
     """
     @description:
         Save current in root file
@@ -733,29 +741,6 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.pdf")
     c1.SaveAs(path+"_cce.root")
     
-
-def save_current(dset,my_d,my_l,my_current,my_f,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    create_path(path) 
-    L = eval("round(my_l.{})".format(key))
-    #L is defined by different keys
-    time = array('d', [999.])
-    current = array('d', [999.])
-    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", time, "time/D")
-    for i in range(my_f.tol_elenumber):
-        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-        for j in range(my_current.n_bin):
-            current[0]=my_current.sum_cu[i].GetBinContent(j)
-            time[0]=j*my_current.t_bin
-            t_out.Fill()
-        t_out.Write()
-        fout.Close()
-
 def set_input(dset,my_current,my_l,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
