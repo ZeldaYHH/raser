@@ -333,5 +333,5 @@ if ui == None:
     UImanager.ApplyCommand(command+fileName)
 else:
     # interactive mode
-    UImanager.ApplyCommand("/control/execute init_vistelescope.mac")
+    UImanager.ApplyCommand("/control/execute ./cfg/init_vistelescope.mac")
     ui.SessionStart()
