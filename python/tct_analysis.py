@@ -55,6 +55,28 @@ def collect_data(path, model, volt_scale, time_scale):
     times = []
     baseline = 0
 
+    sum_k=0
+    sum_l=0
+
+    for L in range(51):
+
+        rel_z = round(0.02*L,2)
+        volt=array("d",[0.])
+        time=array("d",[0.])
+        Z.append(L)     
+        rootfile=path+model+str(rel_z)+".root"
+        print(str(rootfile))
+        volt,time=read_rootfile(rootfile,volt_scale,time_scale)
+        mean=0
+        J=len(volt)
+        amplitude.append(max(volt))
+        k,l=get_average(volt,time,J,mean)
+        sum_k+=k      
+        sum_l+=l
+
+    k=int(round(np.true_divide(sum_k,51)))
+    l=int(round(np.true_divide(sum_l,51)))
+
     for L in range(51):
         rel_z = round(0.02*L,2)
         Z.append(L)
@@ -68,7 +90,7 @@ def collect_data(path, model, volt_scale, time_scale):
         J=len(volt)
 
         amplitude.append(max(volt))
-        elefield.append(get_elefield(volt,time,J,baseline))
+        elefield.append(get_elefield(volt,k,l))
         charge.append(get_charge(volt,J))
         risetime.append(get_risetime(volt,time,J,baseline))  
       
@@ -100,8 +122,8 @@ def add_noise(rootfile,J,v1,t1):
           t_out.Fill()
     t_out.Write()
     fout.Close()
-
-def get_elefield(volt,time,J,baseline):
+    
+def get_average(volt,time,J,baseline):
     Vmax=max(volt)
     for k in range(1,J):
         if (volt[k-1] - baseline)<0.4*(Vmax - baseline)<(volt[k] - baseline):
@@ -109,10 +131,13 @@ def get_elefield(volt,time,J,baseline):
     for l in range(J-1):
         if (volt[l] - baseline)<0.6*(Vmax - baseline)<(volt[l+1] - baseline):
             break
+    return k,l
+
+def get_elefield(volt,k,l):
     sum_volt=0
     for j in range(k,l+1):
         sum_volt+=volt[j]
-    return sum_volt/(l+1-k)
+    return sum_volt
 
 def get_charge(volt,J):
     sum_charge=0
@@ -218,9 +243,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
     if name == 'Elefield':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.6)
+            mg.GetYaxis().SetRangeUser(0,1.5)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.02)
+            mg.GetYaxis().SetRangeUser(0,0.05)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'
