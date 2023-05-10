@@ -43,9 +43,9 @@ class Mobility:
     def __init__(self,mat_name):
         self.mat_name = mat_name
 
-    def cal_mobility(self, det, Neff, charge, electric_field):
+    def cal_mobility(self, temperature, Neff, charge, electric_field):
 
-        T = det.temperature # K
+        T = temperature # K
         E = electric_field  # V/cm
 
         Neff = abs(Neff)
