@@ -5,6 +5,7 @@
 import devsim
 import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from raser import Node
 import matplotlib
 #matplotlib.use('Agg')

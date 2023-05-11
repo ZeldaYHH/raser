@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-
 import devsim 
 import os
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from raser import Physics
 from raser import Node
@@ -12,6 +12,7 @@ from raser import Initial
 import nju_pin_5mm_5mm_mesh
 import hpk_pin_5mm_5mm_mesh
 import sicar1_lgad_mesh
+import itk_md8_mesh
 
 import matplotlib
 #matplotlib.use('Agg') 
@@ -71,6 +72,8 @@ def set_mesh(device,region):
         device_mesh = sicar1_lgad_mesh
     elif device == "1D_HPK_PIN":
         device_mesh = hpk_pin_5mm_5mm_mesh
+    elif device == "1D_ITK_MD8":
+        device_mesh = itk_md8_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
@@ -91,7 +94,10 @@ def initial_solution(device,region,para_dict):
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
-        Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
+        if device == "1D_ITK_MD8":
+            Initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts="top")
+        else:
+            Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
 
 def set_defect(paras):

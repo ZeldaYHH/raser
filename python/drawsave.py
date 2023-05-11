@@ -712,6 +712,42 @@ def get_beam_number(my_g4p,ele_current):
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
+
+
+def get1_beam_number(my_g4p,ele_current):
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/" + "SiITk/" + now + "/" 
+    create_path(path) 
+    number = array('d',[999.])
+    hittotal = array('d',[999.])
+    number[0] = int(-ele_current.max_BB_height/18.8)
+    hittotal[0]=my_g4p.hittotal
+    fout = ROOT.TFile(path + "SiITk.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "beam_number")
+    t_out.Branch("cal_number", number, "cal_number/D")
+    t_out.Branch("real_number", hittotal, "real_number/D")
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()
+
+    c1=ROOT.TCanvas("c1","canvas1",1000,1000)
+    h1 = ROOT.TH1F("Edep_device", "Energy deposition in Si device0", 100, 0., 1)
+    h2 = ROOT.TH1F("Edep_device1", "Energy deposition in Si device1", 100, 0., 1)
+    for i in range (len(my_g4p.edep_devices)):
+        h1.Fill(my_g4p.edep_devices[i])
+        h2.Fill(my_g4p.edep_devices1[i])
+    h1.Draw()
+    h1.GetXaxis().SetTitle("energy[MeV]")
+    h1.GetYaxis().SetTitle("number")
+    c1.SaveAs(path+"_energy1.pdf")
+    c1.SaveAs(path+"_energy.root")
+    
+    c2=ROOT.TCanvas("c2","canvas2",1000,1000)
+    h2.Draw()
+    h2.GetXaxis().SetTitle("energy[MeV]")
+    h2.GetYaxis().SetTitle("number")
+    c2.SaveAs(path+"_energy2.pdf")
+    c2.SaveAs(path+"_energy.root")
     
 
 
@@ -811,3 +847,6 @@ def set_input(dset,my_current,my_l,my_d,key):
     t_out.Write()
     fout.Close()
     return input_c
+
+
+        

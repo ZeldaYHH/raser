@@ -9,7 +9,7 @@
 import sys
 import os
 import time
-#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
 import drawsave
 import math
@@ -58,7 +58,19 @@ def main():
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.get_beam_number(my_g4p,ele_current)
+        return  
+
+    if "proton-irrad" in args:
+        my_f = raser.FenicsCal2D(my_d,dset.fenics)
+        my_g4p = raser.SiITk(my_d, my_f, dset)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        drawsave.get1_beam_number(my_g4p,ele_current)
+        drawsave.cce(my_d,my_f,my_current)
         return
+
+
+
     
     if "reactor" in args:
         my_f = raser.FenicsCal(my_d,dset.fenics)

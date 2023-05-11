@@ -32,6 +32,8 @@ usage() {
 
     printf "\n\t%-9s  %-40s\n"  "6.1"       "Telescope"
 
+    printf "\n\t%-9s  %-40s"    "7.1"       "Si strip"
+
     printf "\n"
 }
 
@@ -143,6 +145,21 @@ usage_4_1() {
 	printf "\n\t%-5s  %-40s\n"  "4.1.4"    "get time resolution vs draw voltage ..." 
     printf "\n"
 }
+
+usage_7_1() { 
+	printf "\n\t%-5s  %-40s\n"  "7.1.1"    "Si sensor Energy deposition"  
+
+    printf "\n"
+}
+
+usage_7_2() { 
+    printf "\n\t%-5s  %-40s\n"  "7.2.1"    "Initial DataBase of DEVSIM" 
+    printf "\n\t%-5s  %-40s\n"  "7.2.2"    "Build 1D itk structure"
+    printf "\n\t%-5s  %-40s\n"  "7.2.3"    "Simulate 1D itk I-V"
+
+    printf "\n"
+}
+
 
 usage_5_1() {
     printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
@@ -619,6 +636,39 @@ case $option in
 esac
 }
 
+sub_7_1(){
+case $option in 
+
+    7.1.1) echo "Si sensor energy deposition" 
+        raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad" 
+        ;;
+        esac
+    
+
+}
+
+sub_7_2(){
+case $option in 
+
+    7.2.1) echo "Initial DataBase of DEVSIM ..."
+        raser "./python/gen_devsim_db.py"
+        ;;
+
+    7.2.2) echo "Build 1D ITk MD8 structure ..."
+        raser "./python/itk_md8_mesh.py"
+        ;;
+
+    7.2.3) echo "Simulate 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "solve_iv_itk.py"
+        ;;
+        
+    7.2.4) echo "Simulate irradiated minisensor I-V C-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800"
+
+        ;;
+        esac
+}
+
 sub_5_1(){
 case $option in 
     5.1.1) echo "T1 circuit simulation and get raw data ..."
@@ -778,6 +828,25 @@ case $option in
         ;;
     3.3.*) echo  "RASER simulate edge-TCT"
         sub_3_3 option
+        ;;
+
+    7.1) echo "RASER simulate ITk-Si-strip"
+        usage_7_1
+        echo "Please enter your option: " 
+        read option 
+        sub_7_1 option 
+        ;;
+    7.1.*) echo "RASER simulate ITk-Si-strip"
+        sub_7_1 option
+        ;;
+    7.2) echo "DEVSIM"
+        usage_7_2
+        echo "Please enter your option: " 
+        read option 
+        sub_7_2 option 
+        ;;
+    7.2.*) echo "DEVSIM"
+        sub_7_2 option
         ;;
 
     4.1) echo "RASER simulate 3D-SiC"
