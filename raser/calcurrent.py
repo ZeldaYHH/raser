@@ -86,7 +86,7 @@ class Carrier:
         
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
         mobility = Mobility(my_d.material)
-        mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
+        mu = mobility.cal_mobility(my_d.temperature, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
         velocity = mu*average_intensity
 
         # get diffution from mobility and temperature

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 '''
 Description:  Define physical models for different materials   
@@ -9,6 +10,8 @@ Description:  Define physical models for different materials
 """ Define Material """
 
 import math
+import matplotlib.pyplot as plt
+import os
 
 class Material:
 
@@ -20,12 +23,12 @@ class Material:
         # material par
         self.si_par_dict = {'Permittivity' : 11.5,\
                              'Avalanche': 'vanOverstraeten',\
-                             'Mobility' : 'unknown'\
+                             'Mobility' : 'Selberherr'\
                             }
 
         self.sic_par_dict = {'Permittivity' : 9.76,\
                              'Avalanche': 'Hatakeyama',\
-                             'Mobility' : 'unknown'\
+                             'Mobility' : 'Das'\
                             }
 
         # global data base
@@ -40,59 +43,97 @@ class Material:
 """ Define Mobility Model """
 
 class Mobility:
-    def __init__(self,mat_name):
+    def __init__(self,mat_name,model_name=None):
         self.mat_name = mat_name
+        if model_name == None: #default models
+            if self.mat_name == "Si":
+                #self.model_name == "Selberherr"
+                self.model_name = "Selberherr"
+            if self.mat_name == "SiC":
+                self.model_name = "Das"
+        else:
+            self.model_name = model_name
 
-    def cal_mobility(self, det, Neff, charge, electric_field):
+    def cal_mobility(self, temperature, Neff, charge, electric_field):
 
-        T = det.temperature # K
+        T = temperature # K
         E = electric_field  # V/cm
 
-        Neff = abs(Neff)
+        Neff = abs(Neff) # um^-3
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
-            if(charge>0):
-                alpha = 0.34
-                ulp = 124 * math.pow(T / 300, -2)
-                uminp = 15.9
-                Crefp = 1.76e19
-                betap = 1.213 * math.pow(T / 300.0, 0.17)
-                vsatp = 2e7 * math.pow(T / 300.0, 0.52)
-                lfm = uminp + ulp/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-                hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0 / betap))  
-            else:
-                alpha = 0.61
-                ulp = 947 * math.pow(T / 300, -2)
-                Crefp = 1.94e19
-                betap = 1 * math.pow(T / 300, 0.66)
-                vsatp = 2e7 * math.pow(T / 300, 0.87)
-                lfm = ulp/ (1 + math.pow(Neff*1e12 / Crefp, alpha))
-                hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0/betap))
+            if self.model_name == "Das":
+                if(charge>0):
+                    alpha = 0.34
+                    ulp = 124 * math.pow(T / 300, -2)
+                    uminp = 15.9
+                    Crefp = 1.76e19
+                    betap = 1.213 * math.pow(T / 300.0, 0.17)
+                    vsatp = 2e7 * math.pow(T / 300.0, 0.52)
+                    lfm = uminp + ulp/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
+                    hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0 / betap))  
+                else:
+                    alpha = 0.61
+                    ulp = 947 * math.pow(T / 300, -2)
+                    Crefp = 1.94e19
+                    betap = 1 * math.pow(T / 300, 0.66)
+                    vsatp = 2e7 * math.pow(T / 300, 0.87)
+                    lfm = ulp/ (1 + math.pow(Neff*1e12 / Crefp, alpha))
+                    hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0/betap))
 
         # Si mobility
         if(self.mat_name == 'Si'):
-            alpha = 0.72*math.pow(T/300.0,0.065)
-            if(charge>0):
-                ulp = 460.0 * math.pow(T / 300.0, -2.18)
-                uminp = 45.0*math.pow(T / 300.0, -0.45)
-                Crefp = 2.23e17*math.pow(T / 300.0, 3.2)
-                betap = 1.0
-                vsatp = 9.05e6 * math.sqrt(math.tanh(312.0/T))
-                lfm = uminp + (ulp-uminp)/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-                hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatp, betap), 1.0 / betap))                        
-            else:
-                uln = 1430.0 * math.pow(T / 300.0, -2.0)
-                uminn = 80.0*math.pow(T / 300.0, -0.45)
-                Crefn = 1.12e17*math.pow(T/300.0,3.2)
-                betan = 2
-                vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
-                lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
-                hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
+            if self.model_name == "Selberherr":
+                """Selberherr 1990"""
+                alpha = 0.72*math.pow(T/300.0,0.065)
+                if(charge>0):
+                    ulp = 460.0 * math.pow(T / 300.0, -2.18)
+                    uminp = 45.0*math.pow(T / 300.0, -0.45)
+                    Crefp = 2.23e17*math.pow(T / 300.0, 3.2)
+                    betap = 1.0
+                    vsatp = 9.05e6 * math.sqrt(math.tanh(312.0/T))
+                    #vsatp = 1.45e7 * math.sqrt(math.tanh(312.0/T))
+                    lfm = uminp + (ulp-uminp)/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
+                    hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatp, betap), 1.0 / betap))                        
+                else:
+                    uln = 1430.0 * math.pow(T / 300.0, -2.0)
+                    uminn = 80.0*math.pow(T / 300.0, -0.45)
+                    Crefn = 1.12e17*math.pow(T/300.0,3.2)
+                    betan = 2
+                    vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
+                    lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
+                    hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
 
         return hfm
+    
+    def draw_velocity(self, temperature, Neff):
+        x_field = []
+        y_electron_mob = []
+        y_hole_mob = []
 
+        for i in range(1001):
+            x_step = 1000
+            x = i * x_step
+            y_e = x*self.cal_mobility(temperature,Neff,-1,x)
+            y_h = x*self.cal_mobility(temperature,Neff,+1,x)
+            x_field.append(x)
+            y_electron_mob.append(y_e)
+            y_hole_mob.append(y_h)
 
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(x_field,y_electron_mob,label="electron")
+        ax.plot(x_field,y_hole_mob,label="hole")
+        ax.legend(loc='upper left')
+        plt.xscale("log")
+        plt.yscale("log")
+        plt.xlabel("ElectricField  [V/cm]")
+        plt.ylabel("Velocity [cm^2/V*s]")
+        plt.title("Mobility Model")
+        plt.grid(True,ls = '--',which="both")
+        fig.show()
+        fig.savefig("./output/model/"+self.mat_name+"Mobility.png")
 
 """ Define Avalanche Model """
 
@@ -250,3 +291,13 @@ class Vector:
         o2 = self.components[1]-Vector_b.components[1]
         o3 = self.components[2]-Vector_b.components[2]
         return Vector(o1,o2,o3)
+
+
+if __name__ == "__main__":
+    #usage: apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif raser/model.py
+    if not (os.path.exists("./output/model")):
+        os.makedirs("./output/model")
+    mob = Mobility("Si")
+    mob.draw_velocity(300,5)
+    mob = Mobility("SiC")
+    mob.draw_velocity(300,50)

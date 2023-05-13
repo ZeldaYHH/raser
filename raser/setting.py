@@ -279,7 +279,7 @@ class Setting:
             the Wavelength of Laser in nm
         tau : float
             the Full-width at Half-maximum (FWHM) of the Beam Temporal Profile
-        power : float
+        pulse_energy : float
             the Energy per Laser Pulse
         widthBeamWaist : float
             the Width of the Beam Waist of the Laser in um
@@ -302,7 +302,7 @@ class Setting:
             p = self.laser_paras
             laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
-                    "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
+                    "wavelength":p["wavelength"],"tau":p["tau"],"pulse_energy":p["pulse_energy"],"widthBeamWaist":p["widthBeamWaist"],
                     'r_step':p['r_step'],'h_step':p['h_step'],
                     'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
                     }

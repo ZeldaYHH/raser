@@ -123,7 +123,7 @@
         "lx" : 1300,
         "ly" : 1300,
         "lz" : 50,
-        "doping" : -1,
+        "doping" : -5,
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",
@@ -136,7 +136,7 @@
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
+        "BBGain" : 100,
         "BB_imp" : 10,
         "OscBW" : 2
     },
@@ -150,9 +150,9 @@
         "ly" : 1300,
         "lz" : 50,
         "part" : 3,
-        "doping1" : -1,
-        "doping2" : -1.937e4,
-        "doping3" : -1,
+        "doping1" : -5,
+        "doping2" : -1.925e4,
+        "doping3" : -5,
         "control_bond" : 1.0,
         "avalanche_bond" : 2.0,
         "voltage" : 200,
@@ -168,7 +168,7 @@
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
+        "BBGain" : 100,
         "BB_imp" : 10,
         "OscBW" : 2
     },
@@ -219,6 +219,43 @@
 
         "e_r_inner" : 200,
         "e_r_outer" : 250,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 19500,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+
+    {
+        "steplength" : 0.1,
+        "total_events" : 10000,
+        "det_name" : "ITk-Si-strip",
+        "det_model" : "planar3D",
+
+        "lx" : 10000,
+        "ly" : 10000,
+        "lz" : 305,
+        "doping" : -1,  
+        "voltage" : 200,
+        "temp" : 300.0,
+        "material" : "Si",
+
+        "mesh" : 32,
+        "xyscale" : 10,
+
+        "maxstep" : 2,
+        "g4_vis" : 0,
+        "par_inx" : 5000,
+        "par_iny" : 5000,
+        "par_inz" : 17000,
+        "par_outx" : 5000,
+        "par_outy" : 5000,
+        "par_outz" : 0.0,
 
         "t_rise" : 0.7,
         "t_fall" : 1.1,

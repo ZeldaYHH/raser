@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser, pulse_time=20e-9, t_step=50e-12):
+    def __init__(self, my_d, laser, pulse_time=1e-9, t_step=50e-12):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
@@ -34,7 +34,7 @@ class TCTTracks():
         #laser parameters
         self.wavelength = laser["wavelength"]*1e-3 #um
         self.tau = laser["tau"]
-        self.power = laser["power"]
+        self.pulse_energy = laser["pulse_energy"]
         self.widthBeamWaist = laser["widthBeamWaist"]#um
         if "l_Reyleigh" not in laser:
             self.l_Rayleigh = np.pi*self.widthBeamWaist**2*self.refractionIndex/self.wavelength
@@ -153,7 +153,7 @@ class TCTTracks():
         #referring to the vertical and horizontal distance from the focus 
         w_0 = self.widthBeamWaist / 2
         wSquared = (w_0 ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
-        intensity = ((self.power) / self.tau)\
+        intensity = ((self.pulse_energy) / self.tau)\
                     * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * wSquared * 1e-12))\
                     * np.exp((-2 * r2 / wSquared))\
                     * self.t_step

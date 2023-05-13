@@ -376,7 +376,9 @@ def CreateNetGeneration(device, region):
     if devsim.get_material(device=device, region=region) == "SiliconCarbide":
         Gn = "-q * (USRH+R_z+R_h6-1e12)"
         Gp = "+q * (USRH+R_z+R_h6-1e12)"
-
+    if devsim.get_material(device=device, region=region) == "Silicon":
+        Gn = "-q * (USRH)"
+        Gp = "+q * (USRH)"
     else:
         Gn = "-q * (USRH-1e12)"
         Gp = "+q * (USRH-1e12)"
@@ -387,6 +389,7 @@ def CreateNetGeneration(device, region):
     for i in ("Electrons", "Holes"):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
+        
 
 def CreateIrradiatedCharge(device, region,Neutron_eq=1e16):
     '''
@@ -443,6 +446,101 @@ def CreateIrradiatedGeneration(device, region):
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
+    
+    
+def CreateSiIrradiatedCharge(device, region):
+
+    # imaginary defect: perugia model
+    flux = 1.12e15
+    sigma_e_acc1=1e-15
+    sigma_h_acc1=1e-14
+    sigma_e_acc2=7e-15
+    sigma_h_acc2=7e-14
+    eta_acc1=1.613
+    eta_acc2=0.9
+    sigma_e_donor=3.23e-13
+    sigma_h_donor=3.23e-14
+    eta_donor=0.9
+    
+    E_acc1=0.42
+    E_acc2=0.46
+    E_donor=0.36
+    
+    N_t_acc1 = flux*eta_acc1
+    N_t_acc2 = flux*eta_acc2
+    N_t_donor = flux*eta_donor
+    
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_e_acc1",     value=sigma_e_acc1,   unit="cm^(-2)",     description="sigma_e_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_h_acc1",     value=sigma_h_acc1,   unit="cm^(-2)",     description="sigma_h_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_e_acc2",     value=sigma_e_acc2,   unit="cm^(-2)",     description="sigma_e_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_h_acc2",     value=sigma_h_acc2,   unit="cm^(-2)",     description="sigma_h_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_e_donor",     value=sigma_e_donor,   unit="cm^(-2)",     description="sigma_e_donor")
+    devsim.add_db_entry(material="Silicon",   parameter="sigma_h_donor",     value=sigma_h_donor,   unit="cm^(-2)",     description="sigma_h_donor")
+    devsim.add_db_entry(material="Silicon",   parameter="eta_acc1",     value=eta_acc1,   unit="cm^(-1)",     description="eta_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="eta_acc2",     value=eta_acc2,   unit="cm^(-1)",     description="eta_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="eta_donor",     value=eta_donor,   unit="cm^(-1)",     description="eta_donor")
+
+    devsim.add_db_entry(material="Silicon",   parameter="N_t_acc1",     value=N_t_acc1,   unit="cm^(-3)",     description="N_t_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="N_t_acc2",     value=N_t_acc2,   unit="cm^(-3)",     description="N_t_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="N_t_donor",     value=N_t_donor,   unit="cm^(-3)",     description="N_t_donor")
+    devsim.add_db_entry(material="Silicon",   parameter="E_acc1",     value=E_acc1,   unit="J",     description="E_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="E_acc2",     value=E_acc2,   unit="J",     description="E_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="E_donor",     value=E_donor,   unit="J",     description="E_donor")
+
+    v_T=1e7
+    devsim.add_db_entry(material="Silicon",   parameter="v_T_elec",     value=v_T,   unit="cm/s",     description="N_t_acc1")
+    devsim.add_db_entry(material="Silicon",   parameter="v_T_hole",     value=v_T,   unit="cm/s",     description="N_t_acc2")
+
+
+
+
+
+def CreateSiIrradiatedGeneration(device, region):
+    
+    c_n = "(v_T * sigma_n_irr)"
+    e_n = "(N_c * exp(-(E_g/2 - E_t)/k_T0))"
+    c_p = "(v_T * sigma_p_irr)"
+    e_p = "(N_v * exp(-(E_t - (-E_g/2))/k_T0))"
+    
+    k = 1.3806503e-23  # J/K
+    T0 = 300.0         # K    
+    devsim.add_db_entry(material="Silicon",   parameter="kT0",    value=k*T0,       unit="J",        description="k*T0")
+    
+    # e_acc1_posi= "(exp(E_acc1 / kT0))"  #T0 = 300K
+    # e_acc1_nega= "(exp(-(E_acc1 / kT0)))" 
+    # e_acc2_posi= "(exp(E_acc2 / kT0))"  
+    # e_acc2_nega= "(exp(-(E_acc2 / kT0)))" 
+    # e_donor_posi= "(exp(E_donor / kT0))"  
+    # e_donor_nega= "(exp(-(E_donor / kT0)))"  
+    
+    e_acc1_posi= "(exp(E_acc1 / V_T0))"  #T0 = 300K
+    e_acc1_nega= "(exp(-(E_acc1 / V_T0)))" 
+    e_acc2_posi= "(exp(E_acc2 / V_T0))"  
+    e_acc2_nega= "(exp(-(E_acc2 / V_T0)))" 
+    e_donor_posi= "(exp(E_donor / V_T0))"  
+    e_donor_nega= "(exp(-(E_donor / V_T0)))"  
+    
+    R_acc1_up = "(v_T_hole *v_T_elec * sigma_e_acc1 * sigma_h_acc1 * N_t_acc1 * (Electrons*Holes - n_i * n_i))"
+    R_acc1_down1 = "(v_T_elec * sigma_e_acc1 *(Electrons + n_i *{e_acc1_posi}))".format(e_acc1_posi=e_acc1_posi)
+    R_acc1_down2 = "(v_T_hole * sigma_h_acc1 *(Holes + n_i *{e_acc1_nega}))".format(e_acc1_nega=e_acc1_nega)
+    R_acc1 = "{R_acc1_up}/({R_acc1_down1}+{R_acc1_down2})".format(R_acc1_up=R_acc1_up,R_acc1_down1=R_acc1_down1,R_acc1_down2=R_acc1_down2)
+    
+    R_acc2_up = "(v_T_hole *v_T_elec * sigma_e_acc2 * sigma_h_acc2 * N_t_acc2 * (Electrons*Holes - n_i * n_i))"
+    R_acc2_down1 = "(v_T_elec * sigma_e_acc2 *(Electrons + n_i *{e_acc2_posi}))".format(e_acc2_posi=e_acc2_posi)
+    R_acc2_down2 = "(v_T_hole * sigma_h_acc2 *(Holes + n_i *{e_acc2_nega}))".format(e_acc2_nega=e_acc2_nega)
+    R_acc2 = "{R_acc2_up}/({R_acc2_down1}+{R_acc2_down2})".format(R_acc2_up=R_acc2_up,R_acc2_down1=R_acc2_down1,R_acc2_down2=R_acc2_down2)
+    
+    R_donor_up = "(v_T_hole *v_T_elec * sigma_e_donor * sigma_h_donor * N_t_donor * (Electrons*Holes - n_i * n_i))"
+    R_donor_down1 = "(v_T_elec * sigma_e_donor *(Electrons + n_i *{e_donor_posi}))".format(e_donor_posi=e_donor_posi)
+    R_donor_down2 = "(v_T_hole * sigma_h_donor *(Holes + n_i *{e_donor_nega}))".format(e_donor_nega=e_donor_nega)
+    R_donor = "{R_donor_up}/({R_donor_down1}+{R_donor_down2})".format(R_donor_up=R_donor_up,R_donor_down1=R_donor_down1,R_donor_down2=R_donor_down2)
+    print("\n\n\n\n"+R_donor+"\n\n\n\n")
+
+    Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
+    Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gd)
+    CreateNodeModel(device, region, "HoleGeneration", Ga)
 
 '''
 def CreateMobility(device, region):
@@ -575,6 +673,28 @@ def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSRH1(device, region)
     CreateSRH2(device, region)
     CreateNetGeneration(device, region)
+    #CreateMobility(device, region)
+    CreateECE(device, region, mu_n)
+    CreateHCE(device, region, mu_p)
+    
+
+def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+    CreatePE(device, region)
+    CreateBernoulli(device, region)
+    CreateSRH(device, region)
+
+    CreateNetGeneration(device, region)
+    #CreateMobility(device, region)
+    CreateECE(device, region, mu_n)
+    CreateHCE(device, region, mu_p)
+
+
+def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
+    CreateSiIrradiatedCharge(device, region)
+#    CreatePEIrradiated(device, region)
+    CreateBernoulli(device, region)
+    CreateSRH(device, region)
+    CreateSiIrradiatedGeneration(device, region)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
