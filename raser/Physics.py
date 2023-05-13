@@ -334,11 +334,20 @@ def CreateTunnelingAndAvalanche(device,region):
     CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
     CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
     
-    R_BTBT="3.11*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e4)"
+    R_improved="3.11*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e4)"
+    CreateEdgeModel(device,region,"R_improved",R_improved)
+    CreateEdgeModelDerivatives(device,region,"R_improved",R_improved,"Potential")
+    R_BTBT="1e21*abs(ElectricField)^2.5*exp(-0.8e7/(1+abs(ElectricField)))"
     CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
     CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
-    ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
-    ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
+    devsim.edge_from_node_model(device=device,region=region,node_model="USRH")
+    R_TAT="2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*USRH@n1"
+    CreateEdgeModel(device,region,"R_TAT",R_TAT)
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Holes")
+    ImpactGen_n = "+q*(%s+R_improved)"%(Ion_coeff_rate)
+    ImpactGen_p = "-q*(%s+R_improved)"%(Ion_coeff_rate)
 
     CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
