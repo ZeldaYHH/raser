@@ -550,7 +550,7 @@ case $option in
         step=1
         k=0.02
 
-            for ((j=0;j<51;j++))
+            for ((j=-10;j<61;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py pintct/HPK-Si-PIN \
@@ -561,7 +561,7 @@ case $option in
     3.2.4) echo "get volt-time for Si-LGAD edge-TCT, multi points z [0,50]"
         step=1
         k=0.02
-            for ((j=0;j<51;j++))
+            for ((j=-10;j<61;j++))
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py lgadtct/HPK-Si-LGAD \

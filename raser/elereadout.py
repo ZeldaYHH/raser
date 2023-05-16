@@ -61,7 +61,7 @@ class Amplifier:
         tau_BB_RC = 1.0e-12*self.BB_imp*self.CDet     #BB RC
         tau_BB_BW = 0.35/(1.0e9*self.BBW)/2.2    #BB Tau
         self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
-        self.tau_BBA =  math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))    #BB_out
+        self.tau_BBA = 1.33*math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))    #BB_out
 
         print("tau_BB=",self.tau_BBA)
 
