@@ -71,7 +71,7 @@
         "refractionIndex" : 3.51,
     
         "wavelength" : 1064,
-        "tau" : 500e-12,
+        "tau" : 600e-12,
         "pulse_energy" : 1e-12,
         "widthBeamWaist" : 14,
     
