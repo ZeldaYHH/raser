@@ -661,6 +661,10 @@ case $option in
     7.2.3) echo "Simulate 1D itk I-V ..."
         ./python/run_batchjob.py devsim "solve_iv_itk.py"
         ;;
+    
+    7.2.3Si) echo "Simulate 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=800"
+        ;;
         
     7.2.4) echo "Simulate irradiated minisensor I-V C-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800"

@@ -6,14 +6,20 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from raser import Setting
 from raser import Node
 import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot
 import math
 
+
 #  MD8
 # 0.8cm*0.8cm
+args = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
+dset = Setting(args)
+det_dic = dset.detector    
+doping=str(det_dic['doping'])+"e12"
 
 # 1d
 def Create1DMesh(device, region):
@@ -32,7 +38,8 @@ def Create1DMesh(device, region):
     devsim.finalize_mesh(mesh="dio")
     devsim.create_device(mesh="dio", device=device)
 
-def SetDoping(device, region, bulk_doping="4.7e12"):
+
+def SetDoping(device, region, bulk_doping=doping):#default doping 4.7e12
     '''
       Doping
     '''
@@ -63,13 +70,18 @@ def Draw_Doping(device, region, path):
 def main():
     if not (os.path.exists("./output/devsim")):
         os.makedirs("./output/devsim")
+    
 
     device="1D_ITK_MD8"
     region="1D_ITK_MD8"
+    if not (os.path.exists("./output/devsim/"+device+"_"+doping)):
+        os.makedirs("./output/devsim/"+device+"_"+doping)
+
 
     Create1DMesh(device=device, region=region)
-    SetDoping(device=device, region=region)
-    Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_doping.png")
+    SetDoping(device=device, region=region, bulk_doping=doping)
+    
+    Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_"+doping+".png")
 
 if __name__ == '__main__':
     main()

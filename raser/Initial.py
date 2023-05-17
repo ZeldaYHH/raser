@@ -52,7 +52,10 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    CreateDriftDiffusion(device, region)
+    if device == "1D_ITK_MD8":
+        CreateSiDriftDiffusion(device, region)
+    else:
+        CreateDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateDriftDiffusionAtContact(device, region, i, True)

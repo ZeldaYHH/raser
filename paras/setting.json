@@ -237,10 +237,10 @@
         "det_name" : "ITk-Si-strip",
         "det_model" : "planar3D",
 
-        "lx" : 10000,
-        "ly" : 10000,
+        "lx" : 8000,
+        "ly" : 8000,
         "lz" : 305,
-        "doping" : -1,  
+        "doping" : 2.6,  
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",

@@ -45,7 +45,6 @@ def PrintCurrents(device, contact):
     print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
 
 
-
 def CreateSiliconPotentialOnly(device, region):
     '''
       Creates the physical models for a Silicon region
@@ -534,7 +533,7 @@ def CreateSiIrradiatedGeneration(device, region):
     R_donor_down1 = "(v_T_elec * sigma_e_donor *(Electrons + n_i *{e_donor_posi}))".format(e_donor_posi=e_donor_posi)
     R_donor_down2 = "(v_T_hole * sigma_h_donor *(Holes + n_i *{e_donor_nega}))".format(e_donor_nega=e_donor_nega)
     R_donor = "{R_donor_up}/({R_donor_down1}+{R_donor_down2})".format(R_donor_up=R_donor_up,R_donor_down1=R_donor_down1,R_donor_down2=R_donor_down2)
-    print("\n\n\n\n"+R_donor+"\n\n\n\n")
+    
 
     Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
     Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
@@ -682,7 +681,6 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
-
     CreateNetGeneration(device, region)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
@@ -691,7 +689,7 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
 
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSiIrradiatedCharge(device, region)
-#    CreatePEIrradiated(device, region)
+    CreatePEIrradiated(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
     CreateSiIrradiatedGeneration(device, region)
