@@ -60,14 +60,14 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
 
         # Shape
         shape1_mat = nist.FindOrBuildMaterial("G4_SI")
-        pos1 = G4ThreeVector(0, 2*cm, -7*cm)
+        pos1 = G4ThreeVector(0, 2*cm, -2*cm)
 
         # Conical section shape
-        shape1_dxa = 12*cm
-        shape1_dxb = 12*cm
+        shape1_dxa = 6*cm
+        shape1_dxb = 6*cm
         shape1_dya = 10*cm
         shape1_dyb = 10*cm
-        shape1_dz = 6*cm
+        shape1_dz = 0.5*cm
         solidShape1 = G4Trd("Shape1",  # its name
                             0.5*shape1_dxa, 0.5*shape1_dxb,
                             0.5*shape1_dya, 0.5*shape1_dyb, 0.5*shape1_dz)  # its size
@@ -87,14 +87,14 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
 
         # Shape 2
         shape2_mat = nist.FindOrBuildMaterial("G4_SI")
-        pos2 = G4ThreeVector(0, -1*cm, 7*cm)
+        pos2 = G4ThreeVector(0, 2*cm, 2*cm)
 
         # Trapezoid shape
-        shape2_dxa = 12*cm
-        shape2_dxb = 12*cm
+        shape2_dxa = 6*cm
+        shape2_dxb = 6*cm
         shape2_dya = 10*cm
         shape2_dyb = 10*cm
-        shape2_dz = 6*cm
+        shape2_dz = 0.5*cm
         solidShape2 = G4Trd("Shape2",  # its name
                             0.5*shape2_dxa, 0.5*shape2_dxb,
                             0.5*shape2_dya, 0.5*shape2_dyb, 0.5*shape2_dz)  # its size
@@ -243,10 +243,10 @@ class B1PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
         # default particle kinematic
         particleTable = G4ParticleTable.GetParticleTable()
-        particle = particleTable.FindParticle("gamma")
+        particle = particleTable.FindParticle("pi+")
         self.fParticleGun.SetParticleDefinition(particle)
         self.fParticleGun.SetParticleMomentumDirection(G4ThreeVector(0, 0, 1))
-        self.fParticleGun.SetParticleEnergy(6*MeV)
+        self.fParticleGun.SetParticleEnergy(120*GeV)
 
     def GeneratePrimaries(self, anEvent):
         # this function is called at the begining of each event
@@ -333,5 +333,5 @@ if ui == None:
     UImanager.ApplyCommand(command+fileName)
 else:
     # interactive mode
-    UImanager.ApplyCommand("/control/execute init_vistelescope.mac")
+    UImanager.ApplyCommand("/control/execute ./cfg/init_vistelescope.mac")
     ui.SessionStart()

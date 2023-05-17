@@ -6,7 +6,7 @@ import ROOT
 from array import array
 
 def save_experiment_data(z_init,t_init,myt,out):
-    for j in range(50+1):
+    for j in range(-10, 60+1):
         rel_z = 0.02*j
         z_0 = str(1e-3*j) # in milimeter
         n = myt.Draw("-(volt-aBlineMean):(time-{})".format(t_init),
@@ -48,10 +48,10 @@ myLgadFile = ROOT.TFile("/afs/ihep.ac.cn/users/f/fuchenxi/disk/1/edge_voltage_20
 myLgadTree = myLgadFile.Get("edge")
 # myPinTree.Show(17) # checkout the members
 
-z_init_pin = "11.985"
+z_init_pin = "11.986"
 z_init_lgad = "11.954"
-t_init_pin = "11.0"
-t_init_lgad = "10.85"
+t_init_pin = "11.05"
+t_init_lgad = "11.00"
 
 save_experiment_data(z_init_pin,t_init_pin,myPinTree,"output/pintct/HPK-Si-PIN/exp-TCT")
 save_experiment_data(z_init_lgad,t_init_lgad,myLgadTree,"output/lgadtct/HPK-Si-LGAD/exp-TCT")

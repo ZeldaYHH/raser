@@ -33,7 +33,8 @@ class FenicsCal:
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.u_bc,self.u_w_bc = self.boundary_definition(my_d)
         self.weighting_potential(my_d)
-        self.electric_field(my_d)
+        #self.electric_field(my_d)
+        self.electric_field_with_carrier(my_d)
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -226,13 +227,23 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
+        if my_d.material == 'Si':
+            perm_mat = 11.7  
+        elif my_d.material == 'SiC':
+            perm_mat = 9.76  
+        else:
+            raise NameError(my_d.material)
+             
+        e0 = 1.60217733e-19
+        perm0 = 8.854187817e-12   #F/m
+
         # Define variational problem
         # original problem: -Δu = f
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
         f = self.f_expression(my_d)
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = f*v*fenics.dx
+        L = (f*e0/perm0/perm_mat)*v*fenics.dx
         # Compute solution
         self.u = fenics.Function(self.V)
         fenics.solve(a == L, self.u, self.u_bc,
@@ -253,30 +264,40 @@ class FenicsCal:
             2023/03/13
         """
         # Define variational problem
-        # original problem: -Δu = f(1-exp(±u/u_T)), + for n-doped bulk and - for p
+        # original problem: -Δu = (N-exp(u/u_T)+exp(-u/u_T))/ε
         # u_var = exp(±u/u_T)
 
         # under construction
+        if my_d.material == 'Si':
+            perm_mat = 11.7  
+        elif my_d.material == 'SiC':
+            perm_mat = 9.76  
+        else:
+            raise NameError(my_d.material)
+             
+        e0 = 1.60217733e-19
+        perm0 = 8.854187817e-12   #F/m
         
         kboltz=8.617385e-5 #eV/K
         u_T = kboltz * my_d.temperature/1 # u_T = kT/q
+        n_i = 3.89e-9 #Silicon Carbide
 
-        def q(u):
+        def carrier(u):
             "Return nonlinear coefficient"
-            if my_d.voltage <0:
-                return 1 - fenics.exp(u/u_T)**2
-            else:
-                return 1 - fenics.exp(-u/u_T)**2
+            return n_i * (-fenics.exp(u/u_T)+fenics.exp(-u/u_T))
 
-        u = fenics.TrialFunction(self.V)
-        v = fenics.TestFunction(self.V)
-        f = self.f_expression(my_d)
-        F = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx - f*v*(q(u))*fenics.dx
-        # Compute solution
         self.u = fenics.Function(self.V)
-        fenics.solve(F == 0, self.u, self.u_bc,
-                     solver_parameters=dict(linear_solver='gmres',
-                     preconditioner='ilu'))
+        v = fenics.TestFunction(self.V)
+        du = fenics.TrialFunction(self.V)
+        f = self.f_expression(my_d)
+        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0/perm0/perm_mat)*v*fenics.dx
+        J = fenics.derivative(F, self.u, du)
+        for volt in range(501):
+            u_bc = self.boundary_definition_planar(None,volt,0)
+            eq = fenics.NonlinearVariationalProblem(F, self.u, u_bc, J)
+            solver = fenics.NonlinearVariationalSolver(eq)
+            solver.solve()
+
         # Calculate electric field
         W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
         self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
@@ -294,33 +315,24 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if my_d.material == 'Si':
-            perm_mat = 11.7  
-        elif my_d.material == 'SiC':
-            perm_mat = 9.76  
-        else:
-            raise NameError(my_d.material)
-             
-        e0 = 1.60217733e-19
-        perm0 = 8.854187817e-12   #F/m
         if "lgad3D" in self.det_model:
             if my_d.part == 2:
                 f = fenics.Expression('x[2] < width + tol ? charge1 : charge2',\
                                       degree = 0, width = my_d.avalanche_bond,\
-                                      charge1 = e0*my_d.doping1*1e6/perm0/perm_mat,\
-                                      charge2 = e0*my_d.doping2*1e6/perm0/perm_mat,\
+                                      charge1 = my_d.doping1,\
+                                      charge2 = my_d.doping2,\
                                       tol = self.tol)
             elif my_d.part == 3:
                 f = fenics.Expression('x[2] < width1 - tol ? charge1 : (x[2] > width2 + tol ? charge3 : charge2)',\
                                       degree = 0, width1 = my_d.control_bond, width2 = my_d.avalanche_bond,\
-                                      charge1 = e0*my_d.doping1*1e6/perm0/perm_mat,\
-                                      charge2 = e0*my_d.doping2*1e6/perm0/perm_mat,\
-                                      charge3 = e0*my_d.doping3*1e6/perm0/perm_mat,\
+                                      charge1 = my_d.doping1,\
+                                      charge2 = my_d.doping2,\
+                                      charge3 = my_d.doping3,\
                                       tol = self.tol)
             else:
                 raise ValueError
         else:
-            f = fenics.Constant(e0*my_d.d_neff*1e6/perm0/perm_mat)
+            f = fenics.Constant(my_d.d_neff*1e6)
         return f
 
     def get_w_p(self,px,py,pz,i):

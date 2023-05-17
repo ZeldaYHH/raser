@@ -454,7 +454,7 @@ def draw_current(my_d, my_current, ele_current, tol_elenumber, model, path, tag=
     axis.SetLabelColor(2)
     axis.SetLabelSize(0.035)
     axis.SetLabelFont(42)
-    axis.SetTitle("Ampl [mV]")
+    axis.SetTitle("Ampl [V]")
     axis.SetTitleFont(40)
     axis.SetTitleOffset(1.2)
     #axis.CenterTitle()

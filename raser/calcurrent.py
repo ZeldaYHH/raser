@@ -7,9 +7,9 @@ Description:  Simulate e-h pairs drifting and calculate induced current
 '''
 import random
 import numpy as np
+import math
 import ROOT
-from raser.model import Mobility
-from raser.model import Avalanche
+from raser.model import Material
 from raser.model import Vector
 
 t_bin = 50e-12
@@ -39,19 +39,19 @@ class Carrier:
     Modify:
         2022/10/28
     """
-    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge,tol_elenumber):
+    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge, material, tol_elenumber):
         self.d_x = d_x_init
         self.d_y = d_y_init
         self.d_z = d_z_init
         self.t = t_init
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
-        self.charge = charge
         self.signal = [[] for j in range(tol_elenumber)]
+        self.end_condition = 0
 
+        self.cal_mobility = Material(material).cal_mobility
+        self.charge = charge
         if self.charge == 0:
             self.end_condition = "zero charge"
-        else:
-            self.end_condition = 0
 
     def not_in_sensor(self,my_d):
         if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
@@ -60,7 +60,7 @@ class Carrier:
             self.end_condition = "out of bound"
         return self.end_condition
 
-    def drift_single_step(self,step,my_d,my_f):
+    def drift_single_step(self,my_d,my_f,step=1):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
         if(intensity!=0):
@@ -85,8 +85,8 @@ class Carrier:
             return
         
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
-        mobility = Mobility(my_d.material)
-        mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
+        mobility = Material(my_d.material)
+        mu = mobility.cal_mobility(my_d.temperature, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
         velocity = mu*average_intensity
 
         # get diffution from mobility and temperature
@@ -122,7 +122,6 @@ class Carrier:
             self.d_z = self.d_z+delta_z+dif_z
         #time
         self.t = self.t+delta_t
-
         #record
         self.path.append([self.d_x,self.d_y,self.d_z,self.t]) 
 
@@ -148,7 +147,7 @@ class Carrier:
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
         if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
-            self.end_condition = "zero velocity"
+            self.end_condition = "zero drift force"
         '''elif wpot>(1-1e-5):
             self.end_condition = "reached cathode"
         elif wpot<1e-5:
@@ -183,13 +182,15 @@ class CalCurrent:
                                track_position[i][2],\
                                track_position[i][3],\
                                -1*ionized_pairs[i],\
-                                my_f.tol_elenumber)
+                               my_d.material,\
+                               my_f.tol_elenumber)
             hole = Carrier(track_position[i][0],\
                            track_position[i][1],\
                            track_position[i][2],
                            track_position[i][3],\
                            ionized_pairs[i],\
-                            my_f.tol_elenumber)
+                           my_d.material,\
+                           my_f.tol_elenumber)
             if not electron.not_in_sensor(my_d):
                 self.electrons.append(electron)
                 self.holes.append(hole)
@@ -217,12 +218,12 @@ class CalCurrent:
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
-                electron.drift_single_step(my_d.steplength, my_d, my_f)
+                electron.drift_single_step(my_d, my_f)
                 electron.drift_end(my_f)
             electron.get_signal(my_f,my_d)
         for hole in self.holes:
             while not hole.not_in_sensor(my_d):
-                hole.drift_single_step(my_d.steplength, my_d, my_f)
+                hole.drift_single_step(my_d, my_f)
                 hole.drift_end(my_f)
             hole.get_signal(my_f,my_d)
 
@@ -313,8 +314,9 @@ class CalCurrentGain(CalCurrent):
     def __init__(self, my_d, my_f, my_current):
         self.electrons = [] # gain carriers
         self.holes = []
-        my_ava = Avalanche(my_d.avalanche_model)
-        gain_rate = self.gain_rate(my_d,my_f,my_ava)
+        cal_coefficient = Material(my_d.material).cal_coefficient
+        gain_rate = self.gain_rate(my_d,my_f,cal_coefficient)
+
         print("gain_rate="+str(gain_rate))
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
@@ -324,14 +326,16 @@ class CalCurrentGain(CalCurrent):
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
                                               -1*hole.charge*gain_rate,\
-                                                my_f.tol_elenumber))
+                                              my_d.material,\
+                                              my_f.tol_elenumber))
                 if gain_rate>5:
                     self.holes.append(Carrier(hole.path[-1][0],\
                                               hole.path[-1][1],\
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
                                               hole.charge*gain_rate/np.log(gain_rate),\
-                                                my_f.tol_elenumber))
+                                              my_d.material,\
+                                              my_f.tol_elenumber))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
@@ -340,14 +344,16 @@ class CalCurrentGain(CalCurrent):
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
                                           -1*electron.charge*gain_rate,\
-                                            my_f.tol_elenumber))
+                                          my_d.material,\
+                                          my_f.tol_elenumber))
                 if gain_rate>5:
                     self.electrons.append(Carrier(electron.path[-1][0],\
                                                   electron.path[-1][1],\
                                                   my_d.avalanche_bond,\
                                                   electron.path[-1][3],\
                                                   electron.charge*gain_rate/np.log(gain_rate),\
-                                                    my_f.tol_elenumber))
+                                                  my_d.material,\
+                                                  my_f.tol_elenumber))
 
         self.drifting_loop(my_d, my_f)
 
@@ -362,7 +368,7 @@ class CalCurrentGain(CalCurrent):
             self.negative_cu[i].Reset()
         self.get_current(my_d,my_f.tol_elenumber)
 
-    def gain_rate(self, my_d, my_f, my_ava):
+    def gain_rate(self, my_d, my_f, cal_coefficient):
 
         # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
         # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
@@ -372,10 +378,10 @@ class CalCurrentGain(CalCurrent):
         alpha_n_list = np.zeros(n)
         alpha_p_list = np.zeros(n)
         for i in range(n):
-            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in um
+            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/um
             E_field = Vector(Ex,Ey,Ez).get_length() * 1e4 # in V/cm
-            alpha_n = my_ava.cal_coefficient(E_field, -1, my_d.temperature)
-            alpha_p = my_ava.cal_coefficient(E_field, +1, my_d.temperature)
+            alpha_n = cal_coefficient(E_field, -1, my_d.temperature)
+            alpha_p = cal_coefficient(E_field, +1, my_d.temperature)
             alpha_n_list[i] = alpha_n
             alpha_p_list[i] = alpha_p
 

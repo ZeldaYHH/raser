@@ -22,7 +22,8 @@ class FenicsCal2D:
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh2D, 'P', 1)
         self.u_bc = self.boundary_definition(my_d)
-        self.electric_field(my_d)
+        #self.electric_field(my_d)
+        self.electric_field_with_carrier(my_d)
         self.u_w_bc=[]
         for elenumber in range(self.tol_elenumber):
             if (elenumber<my_d.l_x/self.striplenth):
@@ -133,6 +134,45 @@ class FenicsCal2D:
         W = fenics.VectorFunctionSpace(self.mesh2D, 'P', 1)
         self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
                                                        self.u.dx(1))),W)
+
+    def electric_field_with_carrier(self,my_d):    
+        """
+        @description:
+            Solve Poisson equation with carrier density 
+            to get potential and electric field of undepleted device
+        @Modify:
+            2023/03/13
+        """
+        # Define variational problem
+        # original problem: -Δu = (N-exp(u/u_T)+exp(-u/u_T))/ε
+        # u_var = exp(±u/u_T)
+
+        # under construction
+        
+        kboltz=8.617385e-5 #eV/K
+        u_T = kboltz * my_d.temperature/1 # u_T = kT/q
+
+        n_i = 3.89e-9 #Silicon Carbide
+
+        def carrier(u):
+            "Return nonlinear coefficient"
+            return n_i * (-fenics.exp(u/u_T)+fenics.exp(-u/u_T))/8.854187817e-12/9.76
+        
+        self.u = fenics.Function(self.V)
+        v = fenics.TestFunction(self.V)
+        du = fenics.TrialFunction(self.V)
+        f = self.f_expression(my_d)
+        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - (f+carrier(self.u))*v*fenics.dx
+        J = fenics.derivative(F, self.u, du)
+        eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
+        solver = fenics.NonlinearVariationalSolver(eq)
+        solver.solve()
+
+        # Calculate electric field
+        W = fenics.VectorFunctionSpace(self.mesh2D, 'P', 1)
+        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
+                                                       self.u.dx(1))),W)
+  
         
     
     def f_expression(self,my_d):
