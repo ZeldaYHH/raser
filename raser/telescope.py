@@ -470,4 +470,3 @@ else:
     # interactive mode
     UImanager.ApplyCommand("/control/execute ./cfg/init_vistelescope.mac")
     ui.SessionStart()
-    #123
