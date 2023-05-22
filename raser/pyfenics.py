@@ -243,7 +243,7 @@ class FenicsCal:
         v = fenics.TestFunction(self.V)
         f = self.f_expression(my_d)
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = (f*e0/perm0/perm_mat)*v*fenics.dx
+        L = (f*1e6*e0/perm0/perm_mat)*v*fenics.dx
         # Compute solution
         self.u = fenics.Function(self.V)
         fenics.solve(a == L, self.u, self.u_bc,
@@ -290,7 +290,7 @@ class FenicsCal:
         v = fenics.TestFunction(self.V)
         du = fenics.TrialFunction(self.V)
         f = self.f_expression(my_d)
-        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0/perm0/perm_mat)*v*fenics.dx
+        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0*1e6/perm0/perm_mat)*v*fenics.dx
         J = fenics.derivative(F, self.u, du)
 
         eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
@@ -339,7 +339,7 @@ class FenicsCal:
             else:
                 raise ValueError
         else:
-            f = fenics.Constant(my_d.d_neff*1e6)
+            f = fenics.Constant(my_d.d_neff)
         return f
 
     def get_w_p(self,px,py,pz,i):
