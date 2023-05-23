@@ -20,7 +20,7 @@ class FenicsCal:
 
         self.tol = 1e-14
         self.bias_voltage = my_d.voltage
-        if self.det_model == "planarRing":
+        if "planarRing" in self.det_model:
             # under construction
             self.e_r_inner = my_d.e_r_inner
             self.e_r_outer = my_d.e_r_outer

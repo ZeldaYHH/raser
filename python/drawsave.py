@@ -106,7 +106,7 @@ def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,star
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
     elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(eval(my_d.doping.replace("z",0.5).replace("tol",1e-10))) 
+        output_path = (output + "_d="+str(eval(my_d.doping.replace("z",0.5))) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 

@@ -208,7 +208,7 @@ class CalCurrent:
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
         self.get_current(my_d,my_f.tol_elenumber)
-        if my_d.det_model == "lgad3D":
+        if "lgad3D" in my_d.det_model:
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             for i in range(my_f.tol_elenumber):
                 self.gain_positive_cu[i].Reset()

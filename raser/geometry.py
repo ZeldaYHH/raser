@@ -38,7 +38,7 @@ class R3dDetector:
 
         self.doping = det_dic['doping']
 
-        if self.det_model == "lgad3D":
+        if "lgad3D" in self.det_model:
             self.avalanche_bond = det_dic['avalanche_bond']
             self.avalanche_model = det_dic['avalanche_model']
             self.doping_cpp = det_dic['doping_cpp']
@@ -51,7 +51,7 @@ class R3dDetector:
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
 
-        if self.det_model == "planarRing":
+        if "planarRing" in self.det_model:
             self.e_r_inner = det_dic['e_r_inner']
             self.e_r_outer = det_dic['e_r_outer']
         
@@ -110,8 +110,7 @@ class R3dDetector:
         return e_t_y
 
     def doping_function(self,z):
-        if self.det_model == "lgad3D":
-            tol = 1e-10
+        if "lgad3D" in self.det_model:
             Neff = eval(self.doping)
         else:
             Neff = self.doping
