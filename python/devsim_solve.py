@@ -113,6 +113,7 @@ def set_defect(paras):
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=float(paras["N_t_HS6"]),   unit="cm^(-3)",     description="N_t_HS6")
 
 def solve_iv(device,region,v_max,para_dict):
+    global area_factor
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -186,7 +187,7 @@ def solve_iv(device,region,v_max,para_dict):
     devsim.close_db()
 
     draw_iv(reverse_voltage, reverse_top_current, device, condition)
-    draw_ele_field(device, positions,intensities, bias_voltages,condition)
+    drawsave_ele_field(device, positions,intensities, bias_voltages,condition)
 
 def solve_cv(device,region,v_max,para_dict,frequency):
     condition = ""
@@ -270,7 +271,7 @@ def draw_cv(V,C,device,condition):
     fig4.savefig("./output/devsim/{}_reverse_c^-2v.png".format(device+condition))
     fig4.clear()
 
-def draw_ele_field(device, positions,intensities, bias_voltages,condition):
+def drawsave_ele_field(device, positions,intensities, bias_voltages,condition):
     fig1=matplotlib.pyplot.figure()
     ax1 = fig1.add_subplot(111)
     for (x,E,V) in zip(positions,intensities, bias_voltages):
@@ -283,6 +284,16 @@ def draw_ele_field(device, positions,intensities, bias_voltages,condition):
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electricfield.png".format(device+condition))
+
+    if not (os.path.exists("./output/devsim/{}/".format(device+condition))):
+        os.makedirs("./output/devsim/{}/".format(device+condition))
+    for (x,E,V) in zip(positions,intensities, bias_voltages):
+        header_iv = ["Depth [cm]","E (V/cm)"]
+        f=open("./output/devsim/{}/".format(device+condition)+str(V)+'V_x_E.csv','w')
+        writer_E = csv.writer(f)
+        writer_E.writerow(header_iv)
+        for (per_x,per_E) in zip(x,E):
+            writer_E.writerow([float(per_x),float(per_E)])
 
 if __name__ == "__main__":
     main()

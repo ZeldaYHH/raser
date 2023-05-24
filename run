@@ -264,7 +264,7 @@ case $option in
         raser "./python/nju_pin_5mm_5mm_mesh.py"
         ;;
 
-    1.3.3) echo "Simulate 1D NJU-PIN I-V ..."
+    1.3.3) echo "Simulate 1D NJU-PIN I-V and electricfield ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN IV=True v_max=800"
         ;;
 
