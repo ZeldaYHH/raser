@@ -12,13 +12,12 @@ import mshr
 #Calculate the weighting potential and electric field
 class FenicsCal:
     def __init__(self,my_d,fen_dic):
-        self.det_model = fen_dic['det_model']
+        self.det_model = my_d.det_model
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z
-        self.tol_elenumber=fen_dic["tol_elenumber"]
+        self.read_ele_num=fen_dic["read_ele_num"]
 
-        self.tol = 1e-14
         self.bias_voltage = my_d.voltage
         if "planarRing" in self.det_model:
             # under construction
@@ -65,7 +64,7 @@ class FenicsCal:
         elif "lgad3D" in self.det_model: # under construction
             self.mesh3D = fenics.BoxMesh(fenics.Point(0, 0, 0),
                                          fenics.Point(self.fl_x, self.fl_y, self.fl_z), 
-                                         5, 5, int(mesh_number))
+                                         1, 1, 1000)
         
         else:
             raise(NameError)        
@@ -182,7 +181,7 @@ class FenicsCal:
                                 p_1 = p_ele, p_2 = n_ele)
 
         def boundary(x, on_boundary):
-            return abs(x[2])<self.tol or abs(x[2]-self.fl_z)<self.tol
+            return abs(x[2])<1e-14 or abs(x[2]-self.fl_z)<1e-14
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
     
@@ -192,10 +191,10 @@ class FenicsCal:
                                 p_1 = p_ele, p_2 = n_ele)
         def boundary(x, on_boundary):
             #under construction
-            return (abs(x[2])<self.tol
+            return (abs(x[2])<1e-14
                     and (((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) > self.e_r_inner**2
                     and ((x[0]-my_d.l_x/2)**2 + (x[1]-my_d.l_y/2)**2) < self.e_r_outer**2)
-                    or abs(x[2]-self.fl_z)<self.tol)
+                    or abs(x[2]-self.fl_z)<1e-14)
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l 
 
@@ -239,9 +238,9 @@ class FenicsCal:
         # original problem: -Δu = f
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-        f = self.f_expression(my_d)
+        Neff = self.doping_expression(my_d)
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = (f*1e6*e0/perm0/perm_mat)*v*fenics.dx # 1e6 for converting the length dimentions of perm0 to μm
+        L = (Neff*1e6*e0/perm0/perm_mat)*v*fenics.dx # 1e6 for converting the length dimentions of perm0 to μm
         # Compute solution
         self.u = fenics.Function(self.V)
         fenics.solve(a == L, self.u, self.u_bc,
@@ -252,20 +251,16 @@ class FenicsCal:
         self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
                                                        self.u.dx(1),
                                                        self.u.dx(2))),W)
-
+        
+    
     def electric_field_with_carrier(self,my_d):    
         """
         @description:
             Solve Poisson equation with carrier density 
             to get potential and electric field of undepleted device
         @Modify:
-            2023/03/13
+            2023/05/27
         """
-        # Define variational problem
-        # original problem: -Δu = (N-n_i*exp(u/u_T)+n_i*exp(-u/u_T))/ε
-        # u_var = exp(±u/u_T)
-
-        # under construction
         if my_d.material == 'Si':
             perm_mat = 11.7  
         elif my_d.material == 'SiC':
@@ -274,42 +269,66 @@ class FenicsCal:
             raise NameError(my_d.material)
              
         e0 = 1.60217733e-19
-        perm0 = 8.854187817e-12   #F/m
-        
-        kboltz=8.617385e-5 #eV/K
+        perm0 = 8.854187817e-12   #F/m  
+        kboltz = 8.617385e-5 #eV/K
         u_T = kboltz * my_d.temperature/1 # u_T = kT/q
-        n_i = 3.89e3 #Silicon Carbide, um^-3
+        n_i = 6.95e-3 #Silicon, um^-3
 
-        def carrier(u):
-            "Return nonlinear coefficient"
-            return n_i * (-fenics.exp(u/u_T)+fenics.exp(-u/u_T))
+        P1 = fenics.FiniteElement('P', fenics.tetrahedron, 1)
+        element = fenics.MixedElement([P1, P1, P1])
+        V = fenics.FunctionSpace(self.mesh3D, element)
 
-        self.u = fenics.Function(self.V)
-        v = fenics.TestFunction(self.V)
-        du = fenics.TrialFunction(self.V)
-        f = self.f_expression(my_d)
-        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0*1e6/perm0/perm_mat)*v*fenics.dx
-        J = fenics.derivative(F, self.u, du)
+        funcs = fenics.Function(V)
+        u, p, n = fenics.split(funcs) # Electric Potential, Electron Density, Hole Density
+        v_u, v_p, v_n = fenics.TestFunctions(V)
 
-        eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
-        solver = fenics.NonlinearVariationalSolver(eq)
-        prm     = solver.parameters
-        prm['nonlinear_solver']                                     = 'newton'
-        prm['newton_solver']['linear_solver']                       = 'gmres'
-        prm['newton_solver']['preconditioner']                      = 'jacobi'
-        prm['newton_solver']['relaxation_parameter']                = 1.0
-        prm['newton_solver']['krylov_solver']['maximum_iterations'] = int(1e3)
-        prm['newton_solver']['krylov_solver']['absolute_tolerance'] = 1e-20
-        prm['newton_solver']['krylov_solver']['nonzero_initial_guess'] = True
-        solver.solve()
+        Neff = self.doping_expression(my_d)
+        Neff_0 = eval(my_d.doping.replace("z","0"))
+        Neff_end = eval(my_d.doping.replace("z","self.fl_z"))
+
+        u_D = fenics.Expression('x[2]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = my_d.voltage, p_2 = 0)
+
+        p_D = fenics.Expression('x[2]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = 0.5*(-Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5), 
+                                p_2 = 0.5*(-Neff_end + (Neff_end**2 + 4*n_i**2)**0.5))
+        
+        n_D = fenics.Expression('x[2]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = 0.5*(Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5), 
+                                p_2 = 0.5*(Neff_end + (Neff_end**2 + 4*n_i**2)**0.5))
+
+        def boundary(x, on_boundary):
+            return abs(x[2])<1e-14 or abs(x[2]-self.fl_z)<1e-14
+        
+        u_bc = fenics.DirichletBC(V.sub(0), u_D, boundary)
+        p_bc = fenics.DirichletBC(V.sub(1), p_D, boundary)
+        n_bc = fenics.DirichletBC(V.sub(2), n_D, boundary)
+
+        g_expression = fenics.Constant(0)
+
+        a_u = fenics.dot(fenics.grad(u), fenics.grad(v_u))*fenics.dx
+        a_p = fenics.dot(fenics.grad(p), fenics.grad(v_p))*u_T*fenics.dx
+        a_n = fenics.dot(fenics.grad(n), fenics.grad(v_n))*(-u_T)*fenics.dx
+
+        L_u = ((Neff+n-p)*1e6*e0/perm0/perm_mat)*v_u*fenics.dx
+        L_p = (fenics.inner(fenics.grad(u),fenics.grad(p))+g_expression)*v_p*fenics.dx
+        L_n = (fenics.inner(fenics.grad(u),fenics.grad(n))+g_expression)*v_n*fenics.dx
+
+        fenics.solve(a_u+a_p+a_n-L_u-L_p-L_n == 0 , funcs, [u_bc, p_bc, n_bc],
+                     solver_parameters = {"newton_solver":{ "linear_solver" : "gmres"}})
+        self.u,_,_ = funcs.split()
 
         # Calculate electric field
         W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
         self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
                                                        self.u.dx(1),
                                                        self.u.dx(2))),W)
-        
-    def f_expression(self,my_d):
+
+
+    def doping_expression(self,my_d):
         """
         @description: 
             Cal f_value of Poisson equation
@@ -321,7 +340,7 @@ class FenicsCal:
             2021/08/31
         """
         if "lgad3D" in self.det_model or "Carrier" in self.det_model:  
-            f = fenics.Expression(my_d.doping_cpp, degree = 0, tol = self.tol)
+            f = fenics.Expression(my_d.doping_cpp, degree = 0, tol = 1e-14)
         else:
             f = fenics.Constant(my_d.doping)
         return f

@@ -164,6 +164,34 @@
     },
 
     {
+        "total_events" : 10000,
+        "det_name" : "HPK-Si-LGAD-Carrier",
+        "det_model" : "lgad3D_Carrier",
+        "lx" : 1300,
+        "ly" : 1300,
+        "lz" : 55,
+        "doping" : "1e6 if (z < 1) else (-5 if (z < 2) else (-1.917e4 if (z < 3) else -5 if (z < 53) else -1e6))",
+        "doping_cpp" : "x[2] < 1 - tol? 1e6 : (x[2] < 2 - tol ? -5 : (x[2] < 3 + tol ? -1.917e4 : (x[2] < 53 + tol ? -5 : -1e6)))",
+        "avalanche_bond" : 2.0,
+        "voltage" : 200,
+        "temp" : 300.0,
+        "material" : "Si",
+        "avalanche_model" : "vanOverstraeten",
+
+        "mesh" : 500,
+        "xyscale" : 50,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 100,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+    {
         "total_events" : 1000,
         "det_name" : "NJU-PIN-Beam-monitor",
         "det_model" : "planar3D",
@@ -307,6 +335,6 @@
 
         "striplenth" : 110,
         "elelenth" : 60,
-        "tol_elenumber" : 8
+        "read_ele_num" : 8
     }
 ]

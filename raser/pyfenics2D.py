@@ -12,20 +12,18 @@ class FenicsCal2D:
         self.fl_y=my_d.l_y
         self.fl_z=my_d.l_z
 
-        self.tol = 1e-14
         self.bias_voltage = my_d.voltage
 
         self.striplenth=fen_dic["striplenth"]
         self.elelenth=fen_dic["elelenth"]
-        self.tol_elenumber=int(fen_dic["tol_elenumber"])
+        self.read_ele_num=int(fen_dic["read_ele_num"])
         
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh2D, 'P', 1)
         self.u_bc = self.boundary_definition(my_d)
         self.electric_field(my_d)
-        #self.electric_field_with_carrier(my_d)
         self.u_w_bc=[]
-        for elenumber in range(self.tol_elenumber):
+        for elenumber in range(self.read_ele_num):
             if (elenumber<my_d.l_x/self.striplenth):
                 self.u_w_bc.append(self.boundary_definition_w_p(my_d,elenumber))
             else:
@@ -83,7 +81,7 @@ class FenicsCal2D:
                                 p_1 = p_ele, p_2 = n_ele)
 
         def boundary(x, on_boundary):
-            return abs(x[1])<self.tol or abs(x[1]-self.fl_z)<self.tol
+            return abs(x[1])<1e-14 or abs(x[1]-self.fl_z)<1e-14
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
     
@@ -104,10 +102,10 @@ class FenicsCal2D:
                                 p_1 = p_ele, p_2 = n_ele)
 
         def boundary(x, on_boundary):
-            return ((abs(x[1])<self.tol and 
-                        x[0]>self.striplenth*elenumber+self.tol and
-                      x[0]<self.striplenth*elenumber+self.elelenth+self.tol)
-                    or (abs(x[1]-self.fl_z)<self.tol))
+            return ((abs(x[1])<1e-14 and 
+                        x[0]>self.striplenth*elenumber+1e-14 and
+                      x[0]<self.striplenth*elenumber+self.elelenth+1e-14)
+                    or (abs(x[1]-self.fl_z)<1e-14))
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
 
@@ -122,9 +120,9 @@ class FenicsCal2D:
         # original problem: -Δu = f
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-        f = self.f_expression(my_d)
+        Neff = self.doping_expression(my_d)
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = f*v*fenics.dx
+        L = Neff*v*fenics.dx
         # Compute solution
         self.u = fenics.Function(self.V)
         fenics.solve(a == L, self.u, self.u_bc,
@@ -134,48 +132,9 @@ class FenicsCal2D:
         W = fenics.VectorFunctionSpace(self.mesh2D, 'P', 1)
         self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
                                                        self.u.dx(1))),W)
-
-    def electric_field_with_carrier(self,my_d):    
-        """
-        @description:
-            Solve Poisson equation with carrier density 
-            to get potential and electric field of undepleted device
-        @Modify:
-            2023/03/13
-        """
-        # Define variational problem
-        # original problem: -Δu = (N-exp(u/u_T)+exp(-u/u_T))/ε
-        # u_var = exp(±u/u_T)
-
-        # under construction
-        
-        kboltz=8.617385e-5 #eV/K
-        u_T = kboltz * my_d.temperature/1 # u_T = kT/q
-
-        n_i = 3.89e-9 #Silicon Carbide
-
-        def carrier(u):
-            "Return nonlinear coefficient"
-            return n_i * (-fenics.exp(u/u_T)+fenics.exp(-u/u_T))/8.854187817e-12/9.76
-        
-        self.u = fenics.Function(self.V)
-        v = fenics.TestFunction(self.V)
-        du = fenics.TrialFunction(self.V)
-        f = self.f_expression(my_d)
-        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - (f+carrier(self.u))*v*fenics.dx
-        J = fenics.derivative(F, self.u, du)
-        eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
-        solver = fenics.NonlinearVariationalSolver(eq)
-        solver.solve()
-
-        # Calculate electric field
-        W = fenics.VectorFunctionSpace(self.mesh2D, 'P', 1)
-        self.grad_u = fenics.project(fenics.as_vector((self.u.dx(0),
-                                                       self.u.dx(1))),W)
-  
         
     
-    def f_expression(self,my_d):
+    def doping_expression(self,my_d):
         """
         @description: 
             Cal f_value of Poisson equation
@@ -259,7 +218,7 @@ class FenicsCal2D:
         L_w = f_w*v_w*fenics.dx
         # Compute solution
         self.u_w=[]
-        for elenumber in range(self.tol_elenumber):
+        for elenumber in range(self.read_ele_num):
             self.u_w.append(fenics.Function(self.V))
             fenics.solve(a_w == L_w, self.u_w[elenumber], self.u_w_bc[elenumber])
         

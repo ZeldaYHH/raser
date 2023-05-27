@@ -479,6 +479,10 @@ case $option in
         raser "./python/gsignal.py det_name=HPK-Si-LGAD  parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
         ;;
 
+    2.2.1C) echo "Si-LGAD basic information for RASER simulation ..."
+        raser "./python/gsignal.py det_name=HPK-Si-LGAD-Carrier parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json Carrier"
+        ;;
+
     2.2.2) echo "batch model with total number, split with step number"
         step=50000
 		for ((i=1;i<=4;i++))
