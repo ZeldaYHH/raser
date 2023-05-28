@@ -69,9 +69,14 @@ def main():
         drawsave.cce(my_d,my_f,my_current)
         return
 
+    if "Carrier" in args:
+        my_f = raser.FenicsCal1D(my_d,dset.fenics)
+        my_g4p = raser.Particles(my_d, my_f, dset)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        drawsave.get_beam_number(my_g4p,ele_current)
+        return  
 
-
-    
     if "reactor" in args:
         my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.Particles(my_d, my_f, dset)

@@ -152,6 +152,9 @@ class Setting:
                              'avalanche_model':p['avalanche_model'],
                              'doping_cpp':p['doping_cpp']})
 
+        if "Carrier" in self.det_model:
+            detector.update({'doping_cpp':p['doping_cpp']})
+
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
         return detector
