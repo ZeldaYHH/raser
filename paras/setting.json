@@ -7,33 +7,6 @@
         "lx" : 5000,
         "ly" : 5000,
         "lz" : 100,
-        "doping" : 52,  
-        "voltage" : -500,
-        "temp" : 300.0,
-        "material" : "SiC",
-        "trapping_time":7.89e-9,
-
-        "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 2.52,
-        "BB_imp" : 80,
-        "OscBW" : 2
-    },
-
-    {
-        "total_events" : 1000,
-        "det_name" : "NJU-SiC-PIN",
-        "det_model" : "planar3D",
-
-        "lx" : 5000,
-        "ly" : 5000,
-        "lz" : 100,
         "doping" : 52,
         "voltage" : -500,
         "temp" : 300.0,
