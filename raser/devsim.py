@@ -1,4 +1,12 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+@File    :   devsim.py
+@Time    :   2023/06/04
+@Author  :   Henry Stone 
+@Version :   1.0
+'''
+
 import os
 import csv
 from scipy.interpolate import interp1d
@@ -29,8 +37,12 @@ class DevsimCal:
                     self.elefield.append(fargs[1]/1e4) #V/cm -> V/um         
                 except Exception as e:
                     pass
-        for i in range(len(self.elefield)):
-            self.gradu.append(sum(self.elefield[:i+1])*(self.lz[2]-self.lz[1]))
+        self.gradu.append(0)
+        grad = 0
+        for i in range(len(self.elefield)-1):
+            grad = grad + (self.elefield[i]+self.elefield[i+1]) * \
+                            (self.lz[i+1]-self.lz[i]) / 2
+            self.gradu.append(grad)
 
     def get_e_field(self, x, y, depth):
         f_ef = interp1d(self.lz, self.elefield, 
@@ -40,47 +52,10 @@ class DevsimCal:
         return 0, 0, f_ef(depth) #x, y方向为0
     
     def get_w_p(self, x, y, depth, i):
-        """
-        threeD_out_column = self.threeD_out_column
-        if threeD_out_column:   
-            f_w_p = 1.0
-        else:
-            scale_px=x%self.fl_x
-            scale_py=y%self.fl_y
-            scale_pz=depth
-            try:
-                f_w_p = self.u_w(scale_px,scale_py,scale_pz)
-            except RuntimeError:
-                f_w_p = 0.0
-        return f_w_p
-        """
         f_p = 1 - (1/self.l_z) * depth
         return f_p
     
     def get_potential(self, x, y, depth):
-        f_p = 1 - (1/self.l_z) * depth
-        return f_p
-    
-    def getgradu(self, depth):
-        f_u = interp1d(self.lz, self.gradu, kind = 'linear')
+        f_u = interp1d(self.lz, self.gradu, 
+                       kind = 'linear', fill_value="extrapolate")
         return f_u(depth)
-
-    def threeD_out_column(self,px,py,pz):
-        """
-        @description: 
-           Judge whether (x,y,z) position is in sensor fenics range
-        @reture:
-            False: not
-            True:  in
-        @Modify:
-            2021/08/31
-        """
-        if "plugin3D" in self.det_model:
-            if (px < self.sx_l or px > self.sx_r
-                or py < self.sy_l or py > self.sy_r):
-                threeD_out_column=True
-            else:
-                threeD_out_column=False
-        elif "planar3D" or "lgad3D" or "planarRing" in self.det_model:
-            threeD_out_column=False
-        return threeD_out_column
