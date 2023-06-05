@@ -21,7 +21,7 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser, pulse_time=1e-9, t_step=50e-12):
+    def __init__(self, my_d, laser, t_step=50e-12):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
@@ -36,6 +36,7 @@ class TCTTracks():
         self.tau = laser["tau"]
         self.pulse_energy = laser["pulse_energy"]
         self.widthBeamWaist = laser["widthBeamWaist"]#um
+        self.central_time = laser["central_time"]
         if "l_Reyleigh" not in laser:
             self.l_Rayleigh = np.pi*self.widthBeamWaist**2*self.refractionIndex/self.wavelength
         else:
@@ -55,8 +56,7 @@ class TCTTracks():
         self.r_step = laser["r_step"]#um
         self.h_step = laser["h_step"]#um
         self.t_step = t_step#s
-
-        self.pulse_time = pulse_time        
+      
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
@@ -100,7 +100,7 @@ class TCTTracks():
             list(np.ravel(XC)),\
             list(np.ravel(YC)),\
             list(np.ravel(ZC)),\
-            [self.pulse_time for x in np.ravel(XC)]])))
+            [self.central_time for x in np.ravel(XC)]])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
         print(len(self.ionized_pairs))
 

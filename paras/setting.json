@@ -7,33 +7,6 @@
         "lx" : 5000,
         "ly" : 5000,
         "lz" : 100,
-        "doping" : 52,  
-        "voltage" : -500,
-        "temp" : 300.0,
-        "material" : "SiC",
-        "trapping_time":7.89e-9,
-
-        "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 2.52,
-        "BB_imp" : 80,
-        "OscBW" : 2
-    },
-
-    {
-        "total_events" : 1000,
-        "det_name" : "NJU-SiC-PIN",
-        "det_model" : "planar3D",
-
-        "lx" : 5000,
-        "ly" : 5000,
-        "lz" : 100,
         "doping" : 52,
         "voltage" : -500,
         "temp" : 300.0,
@@ -48,7 +21,7 @@
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
+        "BBGain" : 100,
         "BB_imp" : 10,
         "OscBW" : 2
     },
@@ -61,7 +34,7 @@
         "ly" : 1000,
         "lz" : 50,
         "doping" : "1.85e5 if (z < 1.0) else 1e2",
-        "doping_cpp" : "x[2] < 1.0 + tol ? 1.85e5 : 1e2",
+        "doping_cpp" : "z < 1.0 + tol ? 1.85e5 : 1e2",
         "avalanche_bond" : 1.0,
         "voltage" : -500,
         "temp" : 300.0,
@@ -76,7 +49,7 @@
         "trans_imp" : 38,
         "CDet" : 30,
         "BBW" : 0.66,
-        "BBGain" : 19500,
+        "BBGain" : 100,
         "BB_imp" : 10,
         "OscBW" : 2
     },
@@ -136,6 +109,33 @@
     },
 
     {
+        "total_events" : 1000,
+        "det_name" : "HPK-Si-PIN-Carrier",
+        "det_model" : "planar3D_Carrier",
+
+        "lx" : 1300,
+        "ly" : 1300,
+        "lz" : 50,
+        "doping" : "1e6 if (z < 1.0) else (-5 if (z < 49.0) else -1e6)",
+        "doping_cpp" : "z < 1.0 - tol ? 1e6 : (z < 49.0 + tol ? -5 : -1e6)",
+        "voltage" : 0,
+        "temp" : 300.0,
+        "material" : "Si",
+
+        "mesh" : 10000,
+        "xyscale" : 10,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 100,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+    {
         "total_events" : 10000,
         "det_name" : "HPK-Si-LGAD",
         "det_model" : "lgad3D",
@@ -143,7 +143,7 @@
         "ly" : 1300,
         "lz" : 50,
         "doping" : "-5 if (z < 1.0) else (-1.917e4 if (z < 2.0) else -5)",
-        "doping_cpp" : "x[2] < 1.0 - tol ? -5 : (x[2] < 2.0 + tol ? -1.917e4 : -5)",
+        "doping_cpp" : "z < 1.0 - tol ? -5 : (z < 2.0 + tol ? -1.917e4 : -5)",
         "avalanche_bond" : 2.0,
         "voltage" : 200,
         "temp" : 300.0,
@@ -151,6 +151,34 @@
         "avalanche_model" : "vanOverstraeten",
 
         "mesh" : 500,
+        "xyscale" : 50,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 100,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+    {
+        "total_events" : 10000,
+        "det_name" : "HPK-Si-LGAD-Carrier",
+        "det_model" : "lgad3D_Carrier",
+        "lx" : 1300,
+        "ly" : 1300,
+        "lz" : 50,
+        "doping" : "1e6 if (z < 1) else (-5 if (z < 2) else (-1.917e4 if (z < 3) else -5 if (z < 49) else -1e6))",
+        "doping_cpp" : "z < 1 - tol? 1e6 : (z < 2 - tol ? -5 : (z < 3 + tol ? -1.917e4 : (z < 49 + tol ? -5 : -1e6)))",
+        "avalanche_bond" : 2.0,
+        "voltage" : 200,
+        "temp" : 300.0,
+        "material" : "Si",
+        "avalanche_model" : "vanOverstraeten",
+
+        "mesh" : 10000,
         "xyscale" : 50,
 
         "t_rise" : 0.7,
@@ -307,6 +335,6 @@
 
         "striplenth" : 110,
         "elelenth" : 60,
-        "tol_elenumber" : 8
+        "read_ele_num" : 8
     }
 ]

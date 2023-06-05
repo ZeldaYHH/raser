@@ -42,6 +42,9 @@ class R3dDetector:
             self.avalanche_bond = det_dic['avalanche_bond']
             self.avalanche_model = det_dic['avalanche_model']
             self.doping_cpp = det_dic['doping_cpp']
+
+        if "Carrier" in self.det_model:
+            self.doping_cpp = det_dic['doping_cpp']
             
         if 'plugin3D' in self.det_model: 
             self.e_r = det_dic['e_r']
