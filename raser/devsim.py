@@ -20,11 +20,8 @@ class DevsimCal:
         self.gradu = []
         self.lz = []
         self.l_z = my_d.l_z
-        self.det_model = dev_dic['det_model']
-        self.fl_x=my_d.l_x/dev_dic['xyscale']  
-        self.fl_y=my_d.l_y/dev_dic['xyscale']
         self.readfile(filepath)
-        self.tol_elenumber=dev_dic["tol_elenumber"]
+
 
     def readfile(self, filepath):
         i = 0
@@ -47,8 +44,6 @@ class DevsimCal:
     def get_e_field(self, x, y, depth):
         f_ef = interp1d(self.lz, self.elefield, 
                         kind='linear', fill_value="extrapolate")
-        #print(depth)        
-        #print(f_ef(depth))
         return 0, 0, f_ef(depth) #x, y方向为0
     
     def get_w_p(self, x, y, depth, i):
