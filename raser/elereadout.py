@@ -31,7 +31,7 @@ class Amplifier:
         self.CSA_ele=[]
         self.BB_ele = []
 
-        self.tol_elenumber = my_current.tol_elenumber
+        self.read_ele_num = my_current.read_ele_num
         CSA_par = ampl_par[0]
         BB_par = ampl_par[1]
         self.ampli_define(CSA_par,BB_par)
@@ -61,9 +61,8 @@ class Amplifier:
         tau_BB_RC = 1.0e-12*self.BB_imp*self.CDet     #BB RC
         tau_BB_BW = 0.35/(1.0e9*self.BBW)/2.2    #BB Tau
         self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
-        self.tau_BBA = 1.33*math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))    #BB_out
-
-        print("tau_BB=",self.tau_BBA)
+        # self.tau_BBA = math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))
+        self.tau_BBA = 5e-10
 
     def sampling_charge(self,my_current,mintstep):
         """ Transform current to charge 
@@ -71,7 +70,7 @@ class Amplifier:
         """
         self.max_num=[]
         self.itot=[]
-        for i in range(self.tol_elenumber):
+        for i in range(self.read_ele_num):
             self.max_num.append(my_current.sum_cu[i].GetNbinsX())
             self.itot.append([0.0]*self.max_num[i])
 
@@ -80,9 +79,9 @@ class Amplifier:
         self.time_unit = my_current.t_bin*self.undersampling
         self.CDet_j = 0     # CSA readout mode
         
-        self.qtot = [0.0]*self.tol_elenumber
+        self.qtot = [0.0]*self.read_ele_num
         # get total charge
-        for k in range(self.tol_elenumber):
+        for k in range(self.read_ele_num):
             i=0
             for j in range(0,self.max_hist_num,self.undersampling):
                 self.itot[k][i] = my_current.sum_cu[k].GetBinContent(j)
@@ -107,11 +106,11 @@ class Amplifier:
         """
         IMaxSh = self.IMaxSh
         preamp_Q = [] 
-        for i in range(self.tol_elenumber):
+        for i in range(self.read_ele_num):
             preamp_Q.append([0.0]*IMaxSh)
         step=1
 
-        for k in range(self.tol_elenumber):
+        for k in range(self.read_ele_num):
             for i in range(IMaxSh-step):
                 if(i>0 and i <self.max_hist_num-step):
                     preamp_Q[k][i] = 0.0
@@ -120,7 +119,7 @@ class Amplifier:
                 elif (i != 0):
                     preamp_Q[k][i]=0.0
 
-        for k in range(self.tol_elenumber):
+        for k in range(self.read_ele_num):
             self.CSA_p_init()
             self.BB_p_init()
             for i in range(IMaxSh-step):

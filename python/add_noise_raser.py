@@ -870,19 +870,20 @@ def loop_addNoise(input_file,rset,tree_class,model):
 
                 addNoise = AddNoise() 
                 rset.write_list(path,addNoise.list_c)
-                #if len(addNoise.list_c)>5:
-                addNoise.add_n(addNoise.list_c) 
-                #if "plugin3D" not in model \
-                #or (addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
-                #and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9):
+                if len(addNoise.list_c)>5:
+                    addNoise.add_n(addNoise.list_c) 
+                    
+                if "plugin3D" not in model \
+                or (addNoise.ampl_paras["max_BB_pulse_time"] > 0 \
+                and addNoise.ampl_paras["max_BB_pulse_time"] < 3.0e-9):
 
-                judge_threshold(addNoise,rset,tree_class,"BB") 
-                judge_threshold(addNoise,rset,tree_class,"CSA")
-                tree_class.fill_vector(rset,addNoise) 
-                #if addNoise.CFD_time_r["BB"]>0:      
-                tree_class.tree_out.Fill()
-                rset.effective_event_number += 1
-                tree_class.init_parameter()
+                    judge_threshold(addNoise,rset,tree_class,"BB") 
+                    judge_threshold(addNoise,rset,tree_class,"CSA")
+                    tree_class.fill_vector(rset,addNoise) 
+                    #if addNoise.CFD_time_r["BB"]>0:      
+                    tree_class.tree_out.Fill()
+                    rset.effective_event_number += 1
+                    tree_class.init_parameter()
             else:
                 break
     efficiency = rset.effective_event_number / Events[0]

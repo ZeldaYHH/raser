@@ -152,6 +152,9 @@ class Setting:
                              'avalanche_model':p['avalanche_model'],
                              'doping_cpp':p['doping_cpp']})
 
+        if "Carrier" in self.det_model:
+            detector.update({'doping_cpp':p['doping_cpp']})
+
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
         return detector
@@ -183,27 +186,16 @@ class Setting:
             2022/05/15
         """
         p = self.paras
-        if "planar3D" in self.det_model:
-            if "Si_Strip" in self.det_name:
-                fenics = {'det_model':'planar3D', 
-                        'mesh':p['mesh'], "xyscale":p['xyscale'], 
-                        "striplenth":p['striplenth'], "elelenth":p['elelenth'], "tol_elenumber":p['tol_elenumber']}
-            else:
-                fenics = {'det_model':'planar3D', 
-                        'mesh':p['mesh'], "xyscale":p['xyscale'],
-                        "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
-        if "planarRing" in self.det_model:
-            fenics = {'det_model':'planarRing', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
-                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
-        if "lgad3D" in self.det_model:
-            fenics = {'det_model':'lgad3D',
-                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
-                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
-        if "plugin3D" in self.det_model:
-            fenics = {'det_model':'plugin3D', 
-                      'mesh':p['mesh'], "xyscale":p['xyscale'], 
-                      "striplenth":p['lx'], "elelenth":p['lx'], "tol_elenumber":1}
+        fenics = {'mesh':p['mesh'], 
+                  "xyscale":p['xyscale'], 
+                  "striplenth":p['lx'], 
+                  "elelenth":p['lx'], 
+                  "read_ele_num":1}
+        
+        if "Si_Strip" in self.det_name:
+            fenics["striplenth"] = p['striplenth']
+            fenics["elelenth"] = p['elelenth']
+            fenics["read_ele_num"] = p['read_ele_num']
         return fenics
 
     @property
@@ -288,7 +280,7 @@ class Setting:
             laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
                     "wavelength":p["wavelength"],"tau":p["tau"],"pulse_energy":p["pulse_energy"],"widthBeamWaist":p["widthBeamWaist"],
-                    'r_step':p['r_step'],'h_step':p['h_step'],
+                    'r_step':p['r_step'],'h_step':p['h_step'], 'central_time':p["central_time"],
                     'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
                     }
             if p['tech'] == "SPA":
