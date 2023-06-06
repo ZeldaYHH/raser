@@ -6,432 +6,411 @@ from geant4_pybind import *
 import math
 import sys
 
+class B2aDetectorMessenger(G4UImessenger):
 
-class B1DetectorConstruction(G4VUserDetectorConstruction):
+    def __init__(self, detector):
+        super().__init__()
+        self.fDetectorConstruction = detector
+
+        self.fB2Directory = G4UIdirectory("/B2/")
+        self.fB2Directory.SetGuidance("UI commands specific to this example.")
+
+        self.fDetDirectory = G4UIdirectory("/B2/det/")
+        self.fDetDirectory.SetGuidance("Detector construction control")
+
+        self.fChamMatCmd = G4UIcmdWithAString("/B2/det/setChamberMaterial", self)
+        self.fChamMatCmd.SetGuidance("Select Material of the Chamber.")
+        self.fChamMatCmd.SetParameterName("choice", False)
+        self.fChamMatCmd.AvailableForStates(G4State_PreInit, G4State_Idle)
+
+        self.fStepMaxCmd = G4UIcmdWithADoubleAndUnit("/B2/det/stepMax", self)
+        self.fStepMaxCmd.SetGuidance("Define a step max")
+        self.fStepMaxCmd.SetParameterName("stepMax", False)
+        self.fStepMaxCmd.SetUnitCategory("Length")
+        self.fStepMaxCmd.AvailableForStates(G4State_Idle)
+
+    def SetNewValue(self, command, newValue):
+        if command == self.fChamMatCmd:
+            self.fDetectorConstruction.SetChamberMaterial(newValue)
+        elif command == self.fStepMaxCmd:
+            self.fDetectorConstruction.SetMaxStep(
+                G4UIcmdWithADoubleAndUnit.GetNewDoubleValue(newValue))
+
+class B2TrackerHit(G4VHit):
+
+    def __init__(self, trackID, Name,chamberNb, edep, truthpos,hitpos):
+        super().__init__()
+        self.fTrackID = trackID
+        self.fChamberNb = chamberNb
+        self.fEdep = edep
+        self.fTruthPos = truthpos
+        self.fHitPos = hitpos
+        self.fName = Name
+
+    def Draw(self):
+        vVisManager = G4VVisManager.GetConcreteInstance()
+        if vVisManager != None:
+            circle = G4Circle(self.fTruthPos)
+            circle = G4Circle(self.fHitPos)
+            circle.SetScreenSize(4)
+            circle.SetFillStyle(G4Circle.filled)
+            colour = G4Colour(1, 0, 0)
+            attribs = G4VisAttributes(colour)
+            circle.SetVisAttributes(attribs)
+            vVisManager.Draw(circle)
+
+    def Print(self):
+        print("trackID:", self.fTrackID,"Name:",self.fName, self.fChamberNb, "Edep:", end=" ")
+        print(G4BestUnit(self.fEdep, "Energy"), "TruthPosition:", G4BestUnit(self.fTruthPos, "Length"),
+              "HitPosition:", G4BestUnit(self.fHitPos, "Length"))
+
+
+class B2HitsCollection(G4VHitsCollection):
+
+    def __init__(self, detName, colNam):
+        super().__init__(detName, colNam)
+        self.collection = []
+
+    def __getitem__(self, i):
+        return self.collection[i]
+
+    def insert(self, item):
+        self.collection.append(item)
+
+    def GetHit(self, i):
+        return self.collection[i]
+
+    def GetSize(self):
+        return len(self.collection)
+
+
+class B2TrackerSD(G4VSensitiveDetector):
+
+    def __init__(self, name, hitsCollectionName):
+        
+        super().__init__(name)
+        self.collectionName.insert(hitsCollectionName)
+        print("Jiaqi_B2TrackerSD_init()")
+
+    def Initialize(self, hce):
+        # Create hits collection
+        #self.fHitsCollection = None
+        print("Jiaqi_B2TrackerSD.Initialize()")
+        self.fHitsCollection = B2HitsCollection(
+            self.SensitiveDetectorName, self.collectionName[0])
+
+        # Add this collection in hce
+        hcID = G4SDManager.GetSDMpointer().GetCollectionID(self.collectionName[0])
+        hce.AddHitsCollection(hcID, self.fHitsCollection)
+
+    def ProcessHits(self, aStep, rOhist):
+        # energy deposit
+        edep = aStep.GetTotalEnergyDeposit()
+        print("Jiaqi_B2TrackerSD.ProcessHits()1=",
+              "TrackID:",aStep.GetTrack().GetTrackID(),
+              "Name:",aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName(),
+               aStep.GetPreStepPoint().GetTouchable().GetCopyNumber(),
+              "Edep:",edep,
+              "TruthPosition",aStep.GetPreStepPoint().GetPosition(),
+              "HitPosition:",aStep.GetPostStepPoint().GetPosition())
+        
+        if edep == 0:
+            return False
+
+        newHit = B2TrackerHit(aStep.GetTrack().GetTrackID(),
+                              aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName(),
+                              aStep.GetPreStepPoint().GetTouchable().GetCopyNumber(),
+                              edep,
+                              aStep.GetPreStepPoint().GetPosition(),
+                              aStep.GetPostStepPoint().GetPosition())
+        
+
+        self.fHitsCollection.insert(newHit)
+        # newHit.Print()
+        return True
+
+    def EndOfEvent(self, hce):
+        print("Jiaqi_B2TrackerSD.EndOfEvent")
+        if self.verboseLevel > 1:
+            nofHits = self.fHitsCollection.GetSize()
+            print("-------->Hits Collection: in this event there are", nofHits,
+                  "hits in the tracker chambers:")
+            for i in range(nofHits):
+                self.fHitsCollection[i].Print()
+
+
+class B2aDetectorConstruction(G4VUserDetectorConstruction):
 
     def __init__(self):
         super().__init__()
-        self.fScoringVolume = None
+        self.fMessenger = B2aDetectorMessenger(self)
 
-    def Construct(self):
-        nist = G4NistManager.Instance()
-        env_sizeXY = 35*cm
-        env_sizeZ = 35*cm
-        env_mat = nist.FindOrBuildMaterial("G4_AIR")
+        self.fNbOfChambers = 3
+        self.fLogicChamber = []
+        self.fCheckOverlaps = True
 
-        # Option to switch on/off checking of volumes overlaps
-        checkOverlaps = True
+    def DefineMaterials(self):
+        nistManager = G4NistManager.Instance()
 
-        # World
-        world_sizeXY = 1.2*env_sizeXY
-        world_sizeZ = 1.2*env_sizeZ
-        world_mat = nist.FindOrBuildMaterial("G4_AIR")
+        # Air defined using NIST Manager
+        nistManager.FindOrBuildMaterial("G4_AIR")
 
-        solidWorld = G4Box("World", 0.5*world_sizeXY, 0.5 *
-                           world_sizeXY, 0.5*world_sizeZ)
+        # Xenon gas defined using NIST Manager
+        self.fChamberMaterial = nistManager.FindOrBuildMaterial("G4_Si")
 
-        logicWorld = G4LogicalVolume(solidWorld, world_mat, "World")
+        # Print materials
+        print(G4Material.GetMaterialTable())
 
-        physWorld = G4PVPlacement(None,              # no rotation
-                                  G4ThreeVector(),   # at (0,0,0)
-                                  logicWorld,        # its logical volume
-                                  "World",           # its name
-                                  None,              # its mother  volume
-                                  False,             # no boolean operation
-                                  0,                 # copy number
-                                  checkOverlaps)     # overlaps checking
+    def DefineVolumes(self):
+        air = G4Material.GetMaterial("G4_AIR")
 
-        # Envelope
-        solidEnv = G4Box("Envelope", 0.5*env_sizeXY,
-                         0.5*env_sizeXY, 0.5*env_sizeZ)
+        # Sizes of the principal geometrical components (solids)
 
-        logicEnv = G4LogicalVolume(solidEnv,    # its solid
-                                   env_mat,     # its material
-                                   "Envelope")  # its name
+        chamberSpacing = 10*mm  # from chamber center to center!
 
-        G4PVPlacement(None,              # no rotation
-                      G4ThreeVector(),   # at (0,0,0)
-                      logicEnv,          # its logical volume
-                      "Envelope",        # its name
-                      logicWorld,        # its mother  volume
-                      True,              # no boolean operation
-                      0,                 # copy number
-                      checkOverlaps)     # overlaps checking
+        chamberWidth = 10*mm  # width of the chambers
+        trackerLength = (self.fNbOfChambers+1)*chamberSpacing
 
-        # Shape
-        shape1_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos1 = G4ThreeVector(-2*cm, 2*cm, 2*cm)
+        worldLength = 1.2*trackerLength
+        trackerSize = 0.5*trackerLength   # Half length of the Tracker
 
-        # Conical section shape
-        shape1_dxa = 6*cm
-        shape1_dxb = 6*cm
-        shape1_dya = 10*cm
-        shape1_dyb = 10*cm
-        shape1_dz = 0.5*cm
-        solidShape1 = G4Trd("Shape1",  # its name
-                            0.5*shape1_dxa, 0.5*shape1_dxb,
-                            0.5*shape1_dya, 0.5*shape1_dyb, 0.5*shape1_dz)  # its size
+        # Definitions of Solids, Logical Volumes, Physical Volumes  World
+        G4GeometryManager.GetInstance().SetWorldMaximumExtent(worldLength)
 
-        logicShape1 = G4LogicalVolume(solidShape1,  # its solid
-                                      shape1_mat,   # its material
-                                      "Shape1")     # its name
+        print("Computed tolerance =",
+              G4GeometryTolerance.GetInstance().GetSurfaceTolerance()/mm, "mm")
 
-        G4PVPlacement(None,           # no rotation
-                      pos1,           # at position
-                      logicShape1,    # its logical volume
-                      "Shape1",       # its name
-                      logicEnv,       # its mother  volume
-                      False,          # no boolean operation
-                      0,              # copy number
-                      checkOverlaps)  # overlaps checking
+        worldS = G4Box("world",                                      # its name
+                       worldLength/2, worldLength/2, worldLength/2)  # its size
 
-        # Shape 2
-        shape2_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos2 = G4ThreeVector(-2*cm, 2*cm, 4*cm)
+        worldLV = G4LogicalVolume(
+            worldS,    # its solid
+            air,       # its material
+            "World")   # its name
 
-        # Trapezoid shape
-        shape2_dxa = 6*cm
-        shape2_dxb = 6*cm
-        shape2_dya = 10*cm
-        shape2_dyb = 10*cm
-        shape2_dz = 0.5*cm
-        solidShape2 = G4Trd("Shape2",  # its name
-                            0.5*shape2_dxa, 0.5*shape2_dxb,
-                            0.5*shape2_dya, 0.5*shape2_dyb, 0.5*shape2_dz)  # its size
-
-        logicShape2 = G4LogicalVolume(solidShape2,  # its solid
-                                      shape2_mat,   # its material
-                                      "Shape2")     # its name
-
-        G4PVPlacement(None,            # no rotation
-                      pos2,            # at position
-                      logicShape2,     # its logical volume
-                      "Shape2",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
+        # Must place the World Physical volume unrotated at (0,0,0).
+        worldPV = G4PVPlacement(
+            None,                  # no rotation
+            G4ThreeVector(),       # at (0,0,0)
+            worldLV,               # its logical volume
+            "World",               # its name
+            None,                  # its mother  volume
+            False,                 # no boolean operations
+            0,                     # copy number
+            self.fCheckOverlaps)   # checking overlaps
         
-         # Shape 3
-        shape3_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos3 = G4ThreeVector(-2*cm, 2*cm, 6*cm)
+        # Tracker
+        positionTracker = G4ThreeVector(0, 0, 0)
+        trackerS = G4Box("tracker", trackerSize, trackerSize, trackerSize)
 
-        # Trapezoid shape
-        shape3_dxa = 6*cm
-        shape3_dxb = 6*cm
-        shape3_dya = 10*cm
-        shape3_dyb = 10*cm
-        shape3_dz = 0.5*cm
-        solidShape3 = G4Trd("Shape3",  # its name
-                            0.5*shape3_dxa, 0.5*shape3_dxb,
-                            0.5*shape3_dya, 0.5*shape3_dyb, 0.5*shape3_dz)  # its size
+        trackerLV = G4LogicalVolume(trackerS, air, "Tracker", None, None, None)
 
-        logicShape3 = G4LogicalVolume(solidShape3,  # its solid
-                                      shape3_mat,   # its material
-                                      "Shape3")     # its name
-
-        G4PVPlacement(None,            # no rotation
-                      pos3,            # at position
-                      logicShape3,     # its logical volume
-                      "Shape3",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
+        G4PVPlacement(None,                 # no rotation
+                      positionTracker,      # at (x,y,z)
+                      trackerLV,            # its logical volume
+                      "Tracker",            # its name
+                      worldLV,              # its mother  volume
+                      False,                # no boolean operations
+                      0,                    # copy number
+                      self.fCheckOverlaps)  # checking overlaps
         
-          # Shape 4
-        shape4_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos4 = G4ThreeVector(-2*cm, 2*cm, 8*cm)
+        # Visualization attributes
+        boxVisAtt = G4VisAttributes(G4Colour(1, 1, 1))
+        chamberVisAtt = G4VisAttributes(G4Colour(1, 1, 0))
 
-        # Trapezoid shape
-        shape4_dxa = 6*cm
-        shape4_dxb = 6*cm
-        shape4_dya = 10*cm
-        shape4_dyb = 10*cm
-        shape4_dz = 0.5*cm
-        solidShape4 = G4Trd("Shape4",  # its name
-                            0.5*shape4_dxa, 0.5*shape4_dxb,
-                            0.5*shape4_dya, 0.5*shape4_dyb, 0.5*shape4_dz)  # its size
+        worldLV.SetVisAttributes(boxVisAtt)
+        trackerLV.SetVisAttributes(boxVisAtt)
+          
+          # Tracker segments
+        print("There are", self.fNbOfChambers, "chambers in the tracker region.")
+        print("The chambers are", chamberWidth/mm, "mm of", self.fChamberMaterial.GetName())
+        print("The distance between chamber is", chamberSpacing/mm,  "mm")
 
-        logicShape4 = G4LogicalVolume(solidShape4,  # its solid
-                                      shape4_mat,   # its material
-                                      "Shape4")     # its name
+        firstPosition = -trackerSize + chamberSpacing
+        firstLength = trackerLength/10
+        lastLength = trackerLength
 
-        G4PVPlacement(None,            # no rotation
-                      pos4,            # at position
-                      logicShape4,     # its logical volume
-                      "Shape4",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
         
-        # Shape 5
-        shape5_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos5 = G4ThreeVector(-2*cm, 2*cm, 10*cm)
+        if self.fNbOfChambers > 0:
+            
+            if chamberSpacing < chamberWidth:
+                G4Exception("B2aDetectorConstruction::DefineVolumes()",
+                            "InvalidSetup", G4ExceptionSeverity.FatalException, "Width>Spacing")
+                
+        for copyNo in range(self.fNbOfChambers):
+            Zposition = firstPosition + copyNo * chamberSpacing
 
-        # Trapezoid shape
-        shape5_dxa = 6*cm
-        shape5_dxb = 6*cm
-        shape5_dya = 10*cm
-        shape5_dyb = 10*cm
-        shape5_dz = 0.5*cm
-        solidShape5 = G4Trd("Shape5",  # its name
-                            0.5*shape5_dxa, 0.5*shape5_dxb,
-                            0.5*shape5_dya, 0.5*shape5_dyb, 0.5*shape5_dz)  # its size
+            chamberS = G4Box("Chamber_solid", 6*mm, 10*mm, 0.5*mm)
 
-        logicShape5 = G4LogicalVolume(solidShape5,  # its solid
-                                      shape5_mat,   # its material
-                                      "Shape5")     # its name
+            self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
 
-        G4PVPlacement(None,            # no rotation
-                      pos5,            # at position
-                      logicShape5,     # its logical volume
-                      "Shape5",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
+            self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
 
-        # Shape 6
-        shape6_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos6 = G4ThreeVector(-2*cm, 2*cm, 12*cm)
+            G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(0, 0, Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps
 
-        # Trapezoid shape
-        shape6_dxa = 6*cm
-        shape6_dxb = 6*cm
-        shape6_dya = 10*cm
-        shape6_dyb = 10*cm
-        shape6_dz = 0.5*cm
-        solidShape6 = G4Trd("Shape6",  # its name
-                            0.5*shape6_dxa, 0.5*shape6_dxb,
-                            0.5*shape6_dya, 0.5*shape6_dyb, 0.5*shape6_dz)  # its size
+        # Example of User Limits
+        # Below is an example of how to set tracking constraints in a given
+        # logical volume
+        # Sets a max step length in the tracker region, with G4StepLimiter
 
-        logicShape6 = G4LogicalVolume(solidShape6,  # its solid
-                                      shape6_mat,   # its material
-                                      "Shape6")     # its name
-
-        G4PVPlacement(None,            # no rotation
-                      pos6,            # at position
-                      logicShape6,     # its logical volume
-                      "Shape6",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
-        
-        # Shape 7
-        shape7_mat = nist.FindOrBuildMaterial("G4_Si")
-        pos7 = G4ThreeVector(-2*cm, 2*cm, 14*cm)
-
-        # Trapezoid shape
-        shape7_dxa = 6*cm
-        shape7_dxb = 6*cm
-        shape7_dya = 10*cm
-        shape7_dyb = 10*cm
-        shape7_dz = 0.5*cm
-        solidShape7 = G4Trd("Shape7",  # its name
-                            0.5*shape7_dxa, 0.5*shape7_dxb,
-                            0.5*shape7_dya, 0.5*shape7_dyb, 0.5*shape7_dz)  # its size
-
-        logicShape7 = G4LogicalVolume(solidShape7,  # its solid
-                                      shape7_mat,   # its material
-                                      "Shape7")     # its name
-
-        G4PVPlacement(None,            # no rotation
-                      pos7,            # at position
-                      logicShape7,     # its logical volume
-                      "Shape7",        # its name
-                      logicEnv,        # its mother  volume
-                      False,           # no boolean operation
-                      0,               # copy number
-                      checkOverlaps)   # overlaps checking
-
-        # Set Shape4 as scoring volume
-        self.fScoringVolume = logicShape4
+        maxStep = 0.5*chamberWidth
+        self.fStepLimit = G4UserLimits(maxStep)
+        trackerLV.SetUserLimits(self.fStepLimit)
 
 
         # always return the physical World
-        return physWorld
+        return worldPV
+
+    def Construct(self):
+        self.DefineMaterials()
+        return self.DefineVolumes()
+
+    def ConstructSDandField(self):
+        # Sensitive detectors
+        trackerChamberSDname = "B2/TrackerChamberSD"
+        self.aTrackerSD = B2TrackerSD(trackerChamberSDname, "TrackerHitsCollection")
+        G4SDManager.GetSDMpointer().AddNewDetector(self.aTrackerSD)
+        # Setting aTrackerSD to all logical volumes with the same name
+        # of "Chamber_LV".
+        self.SetSensitiveDetector("Chamber_LV", self.aTrackerSD, True)
+
+    def GetChamber0(self):
+       return self.fLogicChamber[0]
 
 
-class B1RunAction(G4UserRunAction):
+    def SetChamberMaterial(self, materialName):
+        nistManager = G4NistManager.Instance()
+        pttoMaterial = nistManager.FindOrBuildMaterial(materialName)
+        if self.fChamberMaterial != pttoMaterial:
+            if pttoMaterial != None:
+                self.fChamberMaterial = pttoMaterial
+                for copyNo in range(self.fNbOfChambers):
+                    if self.fLogicChamber[copyNo] != None:
+                        self.fLogicChamber[copyNo].SetMaterial(self.fChamberMaterial)
+                print("\n----> The chambers are made of", materialName)
+            else:
+                print("\n-->  WARNING from SetChamberMaterial :", materialName, "not found")
+
+    def SetMaxStep(self, maxStep):
+        if self.fStepLimit != None and maxStep > 0:
+            self.fStepLimit.SetMaxAllowedStep(maxStep)
+
+    def SetCheckOverlaps(self, checkOverlaps):
+        self.fCheckOverlaps = checkOverlaps
+
+
+class B2RunAction(G4UserRunAction):
 
     def __init__(self):
         super().__init__()
-        milligray = 1.e-3*gray
-        microgray = 1.e-6*gray
-        nanogray = 1.e-9*gray
-        picogray = 1.e-12*gray
-
-        G4UnitDefinition("milligray", "milliGy", "Dose", milligray)
-        G4UnitDefinition("microgray", "microGy", "Dose", microgray)
-        G4UnitDefinition("nanogray", "nanoGy", "Dose", nanogray)
-        G4UnitDefinition("picogray", "picoGy", "Dose", picogray)
-
-        self.edep = G4Accumulable(0)
-        self.edep2 = G4Accumulable(0)
-
-        accumulableManager = G4AccumulableManager.Instance()
-        accumulableManager.RegisterAccumulable(self.edep)
-        accumulableManager.RegisterAccumulable(self.edep2)
+        G4RunManager.GetRunManager().SetPrintProgress(1000)
 
     def BeginOfRunAction(self, aRun):
+        # inform the runManager to save random number seed
         G4RunManager.GetRunManager().SetRandomNumberStore(False)
 
-        accumulableManager = G4AccumulableManager.Instance()
-        accumulableManager.Reset()
 
-    def EndOfRunAction(self, aRun):
-        nofEvents = aRun.GetNumberOfEvent()
-        if nofEvents == 0:
-            return
-
-        # Merge accumulables
-        accumulableManager = G4AccumulableManager.Instance()
-        accumulableManager.Merge()
-
-        edep = self.edep.GetValue()
-        edep2 = self.edep2.GetValue()
-
-        # Compute dose = total energy deposit in a run and its variance
-        rms = edep2 - edep*edep/nofEvents
-        if rms > 0:
-            rms = math.sqrt(rms)
-        else:
-            rms = 0
-
-        detectorConstruction = G4RunManager.GetRunManager().GetUserDetectorConstruction()
-        mass = detectorConstruction.fScoringVolume.GetMass()
-        dose = edep/mass
-        rmsDose = rms/mass
-
-        generatorAction = G4RunManager.GetRunManager().GetUserPrimaryGeneratorAction()
-        runCondition = ""
-        if generatorAction != None and isinstance(generatorAction, B1PrimaryGeneratorAction):
-            particleGun = generatorAction.fParticleGun
-            runCondition += particleGun.GetParticleDefinition().GetParticleName() + "(s)"
-            runCondition += " of "
-            particleEnergy = particleGun.GetParticleEnergy()
-            runCondition += "{:.5g}".format(G4BestUnit(particleEnergy, "Energy"))
-
-        if self.IsMaster():
-            print("--------------------End of Global Run-----------------------")
-        else:
-            print("--------------------End of Local Run------------------------")
-
-        print(" The run consists of", nofEvents, runCondition)
-        print(" Cumulated dose per run, in scoring volume: ", end="")
-        print("{:.5f} rms = {:.5f}".format(G4BestUnit(dose, "Dose"), G4BestUnit(rmsDose, "Dose")))
-        print("------------------------------------------------------------")
-        print("")
-
-    def AddEdep(self, edep):
-        self.edep += edep
-        self.edep2 += edep*edep
-
-
-class B1EventAction(G4UserEventAction):
-
-    def __init__(self, runAction):
-        super().__init__()
-        self.fRunAction = runAction
-
-    def BeginOfEventAction(self, anEvent):
-        self.fEdep = 0
-
-    def EndOfEventAction(self, anEvent):
-        self.fRunAction.AddEdep(self.fEdep)
-
-    def AddEdep(self, edep):
-        self.fEdep += edep
-
-
-class B1SteppingAction(G4UserSteppingAction):
-
-    def __init__(self, eventAction):
-        super().__init__()
-        self.fEventAction = eventAction
-        self.fScoringVolume = None
-
-    def UserSteppingAction(self, aStep):
-        if self.fScoringVolume == None:
-            detectorConstruction = G4RunManager.GetRunManager().GetUserDetectorConstruction()
-            self.fScoringVolume = detectorConstruction.fScoringVolume
-
-        volume = aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume()
-
-        # check if we are in scoring volume
-        if volume != self.fScoringVolume:
-            return
-
-        # collect energy deposited in this step
-        edepStep = aStep.GetTotalEnergyDeposit()
-        self.fEventAction.AddEdep(edepStep)
-
-
-class B1PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
+class B2PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
 
     def __init__(self):
         super().__init__()
-        self.fEnvelopeBox = None
-        self.fParticleGun = G4ParticleGun(1)
+        nofParticles = 1
+        self.fParticleGun = G4ParticleGun(nofParticles)
 
         # default particle kinematic
-        particleTable = G4ParticleTable.GetParticleTable()
-        particle = particleTable.FindParticle("pi+")
-        self.fParticleGun.SetParticleDefinition(particle)
+        particleDefinition = G4ParticleTable.GetParticleTable().FindParticle("pi+")
+        self.fParticleGun.SetParticleDefinition(particleDefinition)
         self.fParticleGun.SetParticleMomentumDirection(G4ThreeVector(0, 0, 1))
         self.fParticleGun.SetParticleEnergy(120*GeV)
 
     def GeneratePrimaries(self, anEvent):
-        # this function is called at the begining of each event
+        # This function is called at the begining of event
 
         # In order to avoid dependence of PrimaryGeneratorAction
-        # on DetectorConstruction class we get Envelope volume
+        # on DetectorConstruction class we get world volume
         # from G4LogicalVolumeStore.
-        envSizeXY = 0
-        envSizeZ = 0
-        if self.fEnvelopeBox == None:
-            envLV = G4LogicalVolumeStore.GetInstance().GetVolume("Envelope")
-            if envLV != None:
-                self.fEnvelopeBox = envLV.GetSolid()
+        worldZHalfLength = 0
+        worldLV = G4LogicalVolumeStore.GetInstance().GetVolume("World")
+        worldBox = None
+        if worldLV != None:
+            worldBox = worldLV.GetSolid()
 
-        if self.fEnvelopeBox != None:
-            envSizeXY = self.fEnvelopeBox.GetXHalfLength()*2
-            envSizeZ = self.fEnvelopeBox.GetZHalfLength()*2
+        if worldBox != None:
+            worldZHalfLength = worldBox.GetZHalfLength()
         else:
-            msg = "Envelope volume of box shape not found.\n"
-            msg += "Perhaps you have changed geometry.\n"
-            msg += "The gun will be place at the center."
-            G4Exception("B1PrimaryGeneratorAction::GeneratePrimaries()",
-                        "MyCode0002", G4ExceptionSeverity.JustWarning, msg)
+            print("World volume of box not found.", file=sys.stderr)
+            print("Perhaps you have changed geometry.", file=sys.stderr)
+            print("The gun will be place in the center.", file=sys.stderr)
 
-        x0=-2*cm
-        y0=2*cm
-        z0=0*cm
-
-        self.fParticleGun.SetParticlePosition(G4ThreeVector(x0, y0, z0))
+        # Note that this particular case of starting a primary particle on the world boundary
+        # requires shooting in a direction towards inside the world.
+        self.fParticleGun.SetParticlePosition(G4ThreeVector(0, 0, -worldZHalfLength))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
 
 
-class B1ActionInitialization(G4VUserActionInitialization):
+class B2EventAction(G4UserEventAction):
+    def EndOfEventAction(self, event):
+        # get number of stored trajectories
+        trajectoryContainer = event.GetTrajectoryContainer()
+        n_trajectories = 0
+        if trajectoryContainer != None:
+            n_trajectories = trajectoryContainer.entries()
+
+        # periodic printing
+        eventID = event.GetEventID()
+        if eventID < 100 or eventID % 100 == 0:
+            print(">>> Event:", eventID)
+            if trajectoryContainer != None:
+                print("   ", n_trajectories, "trajectories stored in this event.")
+
+            hc = event.GetHCofThisEvent().GetHC(0)
+            print("   ", hc.GetSize(), "hits stored in this event")
+
+class B2SteppingAction(G4UserSteppingAction):
+    
+    def UserSteppingAction(self, aStep):
+        #print("Jiaqi_UserSteppingAction() =",aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName())
+        detectorConstruction = G4RunManager.GetRunManager().GetUserDetectorConstruction()
+        chamber0 = 0
+
+        if detectorConstruction:
+             chamber0 = detectorConstruction.GetChamber0()
+
+        edepStep = aStep.GetTotalEnergyDeposit()
+
+        volume = aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume()
+
+        if volume != chamber0:
+         return
+        print("Jiaqi_UserSteppingAction() =",
+              "TrackID:",aStep.GetTrack().GetTrackID(),
+              "Name:",aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName(),
+               aStep.GetPreStepPoint().GetTouchable().GetCopyNumber(),
+              "Edep:",edepStep,
+              "TruthPosition",aStep.GetPreStepPoint().GetPosition(),
+              "HitPosition:",aStep.GetPostStepPoint().GetPosition())
+
+
+class B2ActionInitialization(G4VUserActionInitialization):
 
     def BuildForMaster(self):
-        self.SetUserAction(B1RunAction())
+        self.SetUserAction(B2RunAction())
 
     def Build(self):
-        self.SetUserAction(B1PrimaryGeneratorAction())
+        self.SetUserAction(B2PrimaryGeneratorAction())
+        self.SetUserAction(B2RunAction())
+        self.SetUserAction(B2EventAction())
+        self.SetUserAction(B2SteppingAction())
 
-        runAction = B1RunAction()
-        self.SetUserAction(runAction)
-
-        eventAction = B1EventAction(runAction)
-        self.SetUserAction(eventAction)
-
-        self.SetUserAction(B1SteppingAction(eventAction))
-
-
+# Detect interactive mode (if no arguments) and define UI session
 ui = None
 if len(sys.argv) == 1:
     ui = G4UIExecutive(len(sys.argv), sys.argv)
@@ -439,34 +418,37 @@ if len(sys.argv) == 1:
 # Optionally: choose a different Random engine...
 # G4Random.setTheEngine(MTwistEngine())
 
+# Construct the default run manager
 runManager = G4RunManagerFactory.CreateRunManager(G4RunManagerType.Serial)
 
-runManager.SetUserInitialization(B1DetectorConstruction())
+# Set mandatory initialization classes
+runManager.SetUserInitialization(B2aDetectorConstruction())
 
-# Physics list
 physicsList = FTFP_BERT()
-physicsList.SetVerboseLevel(1)
-
+physicsList.RegisterPhysics(G4StepLimiterPhysics())
 runManager.SetUserInitialization(physicsList)
 
-# User action initialization
-runManager.SetUserInitialization(B1ActionInitialization())
+# Set user action classes
+runManager.SetUserInitialization(B2ActionInitialization())
 
+# Initialize visualization
 visManager = G4VisExecutive()
 # G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-# visManager = G4VisExecutive("Quiet")
+# visManager = G4VisExecutive("Quiet");
 visManager.Initialize()
 
-# Get the User Interface manager
+# Get the pointer to the User Interface manager
 UImanager = G4UImanager.GetUIpointer()
 
-# # Process macro or start UI session
+# Process macro or start UI session
 if ui == None:
     # batch mode
-    command = "/control/execute ./cfg/"
+    command = "/control/execute ./cfg/ "
     fileName = sys.argv[1]
     UImanager.ApplyCommand(command+fileName)
 else:
     # interactive mode
     UImanager.ApplyCommand("/control/execute ./cfg/init_vistelescope.mac")
+    if ui.IsGUI():
+        UImanager.ApplyCommand("/control/execute ./cfg/gui.mac")
     ui.SessionStart()
