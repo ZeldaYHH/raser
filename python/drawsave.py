@@ -797,27 +797,6 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.root")
     
 
-def save_current(dset,my_d,my_current,my_f,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    create_path(path) 
-    L = eval("round(my_l.{})".format(key))
-    #L is defined by different keys
-    time = array('d', [999.])
-    current = array('d', [999.])
-    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", time, "time/D")
-    for i in range(my_f.tol_elenumber):
-        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-        for j in range(my_current.n_bin):
-            current[0]=my_current.sum_cu[i].GetBinContent(j)
-            time[0]=j*my_current.t_bin
-            t_out.Fill()
-        t_out.Write()
-    fout.Close()
 
 def set_input(dset,my_current,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
