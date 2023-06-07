@@ -36,24 +36,15 @@ class R3dDetector:
         self.material = det_dic['material']
         self.det_model = det_dic['det_model']
 
-        if self.det_model == "lgad3D":
-            self.avalanche_model = det_dic['avalanche_model']
+        self.doping = det_dic['doping']
 
-            self.part = det_dic['part']
-            if self.part == 2:
-                self.avalanche_bond = det_dic['avalanche_bond']
-                self.doping1 = det_dic['doping1']
-                self.doping2 = det_dic['doping2']
-            elif self.part == 3:
-                self.control_bond = det_dic['control_bond']
-                self.avalanche_bond = det_dic['avalanche_bond']
-                self.doping1 = det_dic['doping1']
-                self.doping2 = det_dic['doping2']
-                self.doping3 = det_dic['doping3']
-            else:
-                raise ValueError
-        else:
-            self.d_neff = det_dic['doping'] 
+        if "lgad3D" in self.det_model:
+            self.avalanche_bond = det_dic['avalanche_bond']
+            self.avalanche_model = det_dic['avalanche_model']
+            self.doping_cpp = det_dic['doping_cpp']
+
+        if "Carrier" in self.det_model:
+            self.doping_cpp = det_dic['doping_cpp']
             
         if 'plugin3D' in self.det_model: 
             self.e_r = det_dic['e_r']
@@ -62,11 +53,8 @@ class R3dDetector:
                 self.set_3D_electrode(det_dic['e_r'],det_dic['e_gap'])
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
-        else:
-            self.v_FD, self.depletion_depth = self.full_depletion_voltage()
-            print (self.v_FD,self.depletion_depth)
 
-        if self.det_model == "planarRing":
+        if "planarRing" in self.det_model:
             self.e_r_inner = det_dic['e_r_inner']
             self.e_r_outer = det_dic['e_r_outer']
         
@@ -74,89 +62,6 @@ class R3dDetector:
             self.trapping_time=det_dic['trapping_time']
         else:
             self.trapping_time=float('inf')
-
-    def full_depletion_voltage(self):
-        if self.material == 'Si':
-            perm_mat = 11.7  
-        elif self.material == 'SiC':
-            perm_mat = 9.76  
-        else:
-            raise NameError(self.material)
-             
-        e0 = 1.60217733e-19
-        perm0 = 8.854187817e-12   #F/m
-
-        if self.det_model != "lgad3D":
-            z1 = self.l_z
-            c1 = -e0*self.d_neff*1e6/perm0/perm_mat
-            v_FD = c1 * (z1**2 / 2)
-        else:
-            if self.part == 2:
-                z1 = self.avalanche_bond
-                z2 = self.l_z - self.avalanche_bond
-                c1 = -e0*self.doping1*1e6/perm0/perm_mat
-                c2 = -e0*self.doping2*1e6/perm0/perm_mat
-                v_FD = c1 * (z1**2 / 2)\
-                     + c2 * z2 * z1 \
-                     + c2 * (z2**2 / 2)
-
-            elif self.part == 3:
-                z1 = self.control_bond
-                z2 = self.avalanche_bond - self.control_bond
-                z3 = self.l_z - self.avalanche_bond
-                c1 = -e0*self.doping1*1e6/perm0/perm_mat
-                c2 = -e0*self.doping2*1e6/perm0/perm_mat
-                c3 = -e0*self.doping3*1e6/perm0/perm_mat
-                v_FD = c1 * (z1**2 / 2)\
-                     + c2 * z2 * z1 \
-                     + c2 * (z2**2 / 2)\
-                     + c3 * z3 * z1\
-                     + c3 * z3 * z2\
-                     + c3 * (z3**2 / 2)
-        
-        if abs(v_FD) < abs(self.voltage):
-            depletion_depth = self.l_z
-        else:
-            if self.det_model != "lgad3D":
-                depletion_depth = (2*abs(self.voltage/c1))**0.5 - 1
-            else:
-                if self.part == 2:
-                    c = abs(self.voltage) - abs(c1 * (z1**2 / 2))
-                    if c < 0:
-                        raise ValueError(self.voltage)
-                    
-                    for i in range(101):
-                        z = self.l_z
-                        a = self.avalanche_bond
-                        d = a + i*(z-a)/100
-                        if abs(c1 * (z1**2 / 2)\
-                         + c2 * d * z1 \
-                         + c2 * (d**2 / 2)) > abs(v_FD):
-                            depletion_depth = d-1.5
-                        break
-
-                elif self.part == 3:
-                    c = abs(self.voltage)\
-                        - abs(c1 * (z1**2 / 2)\
-                        + c2 * z2 * z1 \
-                        + c2 * (z2**2 / 2))
-                    if c < 0:
-                        raise ValueError(self.voltage)
-                    
-                    for i in range(101):
-                        z = self.l_z
-                        a = self.avalanche_bond
-                        d = a + i*(z-a)/100
-                        if abs(c1 * (z1**2 / 2)\
-                         + c2 * z2 * z1 \
-                         + c2 * (z2**2 / 2)\
-                         + c3 * d * z1\
-                         + c3 * d * z2\
-                         + c3 * (d**2 / 2)) > abs(v_FD):
-                            depletion_depth = d-1.5
-                        break
-
-        return v_FD, depletion_depth
 
     def set_3D_electrode(self,e_r,e_gap=0):
         """
@@ -207,20 +112,9 @@ class R3dDetector:
             sys.exit(0)            
         return e_t_y
 
-    def Neff(self,z):
-        if self.det_model == "lgad3D":
-            if self.part == 2:
-                if (z < self.avalanche_bond):
-                    Neff = self.doping1
-                else:
-                    Neff = self.doping2
-            elif self.part == 3:
-                if (z < self.control_bond):
-                    Neff = self.doping1
-                elif (z > self.avalanche_bond):
-                    Neff = self.doping3
-                else:
-                    Neff = self.doping2
+    def doping_function(self,z):
+        if "lgad3D" in self.det_model:
+            Neff = eval(self.doping)
         else:
-            Neff = self.d_neff
+            Neff = self.doping
         return Neff

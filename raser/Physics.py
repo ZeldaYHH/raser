@@ -434,7 +434,7 @@ def CreateNetGeneration_test(device, region,constant):
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
   
 
-def CreateIrradiatedCharge(device, region, Neutron_eq=1e16):
+def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
     '''
     Add Deep Levels from Irradiated Defect 
     able to Catch Carriers Directly and Keep Them Trapped
@@ -462,13 +462,14 @@ def CreateIrradiatedCharge(device, region, Neutron_eq=1e16):
         devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
         devsim.add_db_entry(material="global",   parameter="E_t_"+name,     value=E_t,   unit="J",     description="E_t_"+name)
 
-        c_n = "(v_T * sigma_n_irr_{name})".format(name=name)
-        e_n = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=name)
-        c_p = "(v_T * sigma_p_irr_{name})".format(name=name)
-        e_p = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=name)
+        r_n = "(v_T * sigma_n_irr_{name})".format(name=name)#c_n
+        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=name)#e_n
+        r_p = "(v_T * sigma_p_irr_{name})".format(name=name)#c_p
+        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=name)#e_p
 
-        n_t_irr_n += "+(N_t_irr_{name} * {c_n} * Electrons /({c_n} * Electrons + {e_n}))".format(name=name,c_n=c_n,e_n=e_n)
-        n_t_irr_p += "+(N_t_irr_{name} * {c_p} * Holes /({c_p} * Holes + {e_p}))".format(name=name,c_p=c_p,e_p=e_p)
+        #n_t_irr_n += "+(N_t_irr_{name}".format(name=name)
+        n_t_irr_n += "+(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        n_t_irr_p += "+(N_t_irr_{name} - {n_t_irr_n})".format(name=name,n_t_irr_n=n_t_irr_n)
         #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
         R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=name)
 

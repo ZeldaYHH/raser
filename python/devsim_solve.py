@@ -100,7 +100,15 @@ def initial_solution(device,region,para_dict):
             Initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts="top")
         else:
             Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
+        """names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
+        g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ]
+        for Neutron_eq in range(int(2e11),int(5e11),int(1e11)):
+            for name, g_int in zip(names, g_ints):
+                N_t_irr = g_int*Neutron_eq
+                devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
+            devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
+            print("Neutron_eq="+str(Neutron_eq))"""
+        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
 
 def set_defect(paras):
     #Z_1/2
@@ -113,6 +121,7 @@ def set_defect(paras):
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=float(paras["N_t_HS6"]),   unit="cm^(-3)",     description="N_t_HS6")
 
 def solve_iv(device,region,v_max,para_dict):
+    global area_factor
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -186,7 +195,7 @@ def solve_iv(device,region,v_max,para_dict):
     devsim.close_db()
 
     draw_iv(reverse_voltage, reverse_top_current, device, condition)
-    draw_ele_field(device, positions,intensities, bias_voltages,condition)
+    drawsave_ele_field(device, positions,intensities, bias_voltages,condition)
 
 def solve_cv(device,region,v_max,para_dict,frequency):
     condition = ""
@@ -270,7 +279,7 @@ def draw_cv(V,C,device,condition):
     fig4.savefig("./output/devsim/{}_reverse_c^-2v.png".format(device+condition))
     fig4.clear()
 
-def draw_ele_field(device, positions,intensities, bias_voltages,condition):
+def drawsave_ele_field(device, positions,intensities, bias_voltages,condition):
     fig1=matplotlib.pyplot.figure()
     ax1 = fig1.add_subplot(111)
     for (x,E,V) in zip(positions,intensities, bias_voltages):
@@ -283,6 +292,16 @@ def draw_ele_field(device, positions,intensities, bias_voltages,condition):
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electricfield.png".format(device+condition))
+
+    if not (os.path.exists("./output/devsim/{}/".format(device+condition))):
+        os.makedirs("./output/devsim/{}/".format(device+condition))
+    for (x,E,V) in zip(positions,intensities, bias_voltages):
+        header_iv = ["Depth [cm]","E (V/cm)"]
+        f=open("./output/devsim/{}/".format(device+condition)+str(V)+'V_x_E.csv','w')
+        writer_E = csv.writer(f)
+        writer_E.writerow(header_iv)
+        for (per_x,per_E) in zip(x,E):
+            writer_E.writerow([float(per_x),float(per_E)])
 
 if __name__ == "__main__":
     main()
