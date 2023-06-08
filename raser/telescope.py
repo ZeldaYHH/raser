@@ -64,7 +64,6 @@ class B2TrackerHit(G4VHit):
         print(G4BestUnit(self.fEdep, "Energy"), "TruthPosition:", G4BestUnit(self.fTruthPos, "Length"),
               "HitPosition:", G4BestUnit(self.fHitPos, "Length"))
 
-
 class B2HitsCollection(G4VHitsCollection):
 
     def __init__(self, detName, colNam):
@@ -144,6 +143,7 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
     def __init__(self):
         super().__init__()
         self.fMessenger = B2aDetectorMessenger(self)
+        self.fScoringVolume = None
 
         self.fNbOfChambers = 3
         self.fLogicChamber = []
@@ -166,9 +166,9 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
 
         # Sizes of the principal geometrical components (solids)
 
-        chamberSpacing = 10*mm  # from chamber center to center!
+        chamberSpacing = 100*um  # from chamber center to center!
 
-        chamberWidth = 10*mm  # width of the chambers
+        chamberWidth = 100*um  # width of the chambers
         trackerLength = (self.fNbOfChambers+1)*chamberSpacing
 
         worldLength = 1.2*trackerLength
@@ -178,7 +178,7 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
         G4GeometryManager.GetInstance().SetWorldMaximumExtent(worldLength)
 
         print("Computed tolerance =",
-              G4GeometryTolerance.GetInstance().GetSurfaceTolerance()/mm, "mm")
+              G4GeometryTolerance.GetInstance().GetSurfaceTolerance()/um, "um")
 
         worldS = G4Box("world",                                      # its name
                        worldLength/2, worldLength/2, worldLength/2)  # its size
@@ -221,10 +221,12 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
         worldLV.SetVisAttributes(boxVisAtt)
         trackerLV.SetVisAttributes(boxVisAtt)
           
+        self.fScoringVolume = trackerLV
+
           # Tracker segments
         print("There are", self.fNbOfChambers, "chambers in the tracker region.")
-        print("The chambers are", chamberWidth/mm, "mm of", self.fChamberMaterial.GetName())
-        print("The distance between chamber is", chamberSpacing/mm,  "mm")
+        print("The chambers are", chamberWidth/um, "um of", self.fChamberMaterial.GetName())
+        print("The distance between chamber is", chamberSpacing/um,  "um")
 
         firstPosition = -trackerSize + chamberSpacing
         firstLength = trackerLength/10
@@ -240,7 +242,7 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
         for copyNo in range(self.fNbOfChambers):
             Zposition = firstPosition + copyNo * chamberSpacing
 
-            chamberS = G4Box("Chamber_solid", 6*mm, 10*mm, 0.5*mm)
+            chamberS = G4Box("Chamber_solid", 60*um, 100*um, 5*um)
 
             self.fLogicChamber += [G4LogicalVolume(chamberS,
                                                    self.fChamberMaterial, "Chamber_LV", None, None, None)]
@@ -284,6 +286,12 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
 
     def GetChamber0(self):
        return self.fLogicChamber[0]
+    
+    def GetChamber1(self):
+       return self.fLogicChamber[1]
+    
+    def GetChamber2(self):
+       return self.fLogicChamber[2]
 
 
     def SetChamberMaterial(self, materialName):
@@ -373,30 +381,55 @@ class B2EventAction(G4UserEventAction):
 
             hc = event.GetHCofThisEvent().GetHC(0)
             print("   ", hc.GetSize(), "hits stored in this event")
-
+            
 class B2SteppingAction(G4UserSteppingAction):
     
+    def __init__(self):
+        super().__init__()
+        self.fScoringVolume = None
+        self.hitpos0 = None
+        self.hitpos1 = None
+        self.hitpos2 = None
     def UserSteppingAction(self, aStep):
         #print("Jiaqi_UserSteppingAction() =",aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName())
         detectorConstruction = G4RunManager.GetRunManager().GetUserDetectorConstruction()
-        chamber0 = 0
+        if self.fScoringVolume == None:
+            self.fScoringVolume = detectorConstruction.fScoringVolume
+            chamber0 = 0
+            chamber1 = 0
+            chamber2 = 0
 
         if detectorConstruction:
              chamber0 = detectorConstruction.GetChamber0()
+             chamber1 = detectorConstruction.GetChamber1()
+             chamber2 = detectorConstruction.GetChamber2()
+        if aStep.GetTrack().GetTrackID() == 1:
+           PreStepVolume = aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume()
 
+           if PreStepVolume == self.fScoringVolume:
+               PostStepVolume = aStep.GetPostStepPoint().GetTouchable().GetVolume().GetLogicalVolume()
+               if PostStepVolume == chamber0:
+                 self.hitpos0 = aStep.GetPostStepPoint().GetPosition()
+                 return self.hitpos0
+               
+               if PostStepVolume == chamber1:
+                 self.hitpos1 = aStep.GetPostStepPoint().GetPosition()
+                 return self.hitpos1
+
+               if PostStepVolume == chamber2:
+                self.hitpos2 = aStep.GetPostStepPoint().GetPosition()
+                return self.hitpos2
+        if  self.hitpos0 != None and self.hitpos1 != None and self.hitpos2 != None:
+             print("hitpos0:",G4BestUnit(self.hitpos0,"Length"),
+                   "hitpos1:",G4BestUnit(self.hitpos1,"Length"),
+                   "hitpos2:",G4BestUnit(self.hitpos2,"Length"),
+                   "位置分辨:",G4BestUnit((self.hitpos0 + self.hitpos2)/2 - self.hitpos1,"Length"))
+             return
         edepStep = aStep.GetTotalEnergyDeposit()
 
-        volume = aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume()
+       
 
-        if volume != chamber0:
-         return
-        print("Jiaqi_UserSteppingAction() =",
-              "TrackID:",aStep.GetTrack().GetTrackID(),
-              "Name:",aStep.GetPreStepPoint().GetTouchable().GetVolume().GetLogicalVolume().GetName(),
-               aStep.GetPreStepPoint().GetTouchable().GetCopyNumber(),
-              "Edep:",edepStep,
-              "TruthPosition",aStep.GetPreStepPoint().GetPosition(),
-              "HitPosition:",aStep.GetPostStepPoint().GetPosition())
+        
 
 
 class B2ActionInitialization(G4VUserActionInitialization):
