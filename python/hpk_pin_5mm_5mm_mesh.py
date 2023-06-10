@@ -33,8 +33,8 @@ def SetDoping(device, region, bulk_doping="5e12"):
     '''
       Doping
     '''
-    Node.CreateNodeModel(device, region, "Acceptors", "1.0e19*step(1e-4-x)")
-    Node.CreateNodeModel(device, region, "Donors",    "%s*(step((50e-4)-x)-step(1e-4-x)) + 1.0e18*(step((151e-4)-x)-step((50e-4)-x))"%bulk_doping)
+    Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
+    Node.CreateNodeModel(device, region, "Acceptors",    "%s*(step((50e-4)-x)-step(1e-4-x)) + 1.0e18*(step((151e-4)-x)-step((50e-4)-x))"%bulk_doping)
     Node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")

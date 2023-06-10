@@ -118,6 +118,7 @@ usage_3_1() {
     printf "\n\t%-5s  %-40s\n"  "3.1.2"    "SiC-LGAD top-TCT basic information ..."
     printf "\n\t%-5s  %-40s\n"  "3.1.4"    "SiC-PIN top-TCT using ngspice ..."
     printf "\n\t%-5s  %-40s\n"  "3.1.5"    "get T1 circuit simulation result figure"
+    printf "\n\t%-5s  %-40s\n"  "3.1.6"    "Si-Strip top-TCT basic information ..."
     printf "\n"
 }
 
@@ -392,6 +393,24 @@ case $option in
     1.4.1) echo "SiC-PIN beam monitor" 
         raser "./python/gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json beammonitor geant4_model=beam_monitor geant4_parfile=paras/geant4_setting.json"
         ;;
+    
+    1.4.2) echo "batch model with total number, split with step number"
+		step=1000
+		for ((i=0;i<100;i++))
+        do
+            ./python/run_batchjob.py pin3D/NJU-PIN \
+                "gsignal.py det_name=NJU-PIN-Beam-monitor parfile=paras/setting.json geant4_model=beam_monitor geant4_parfile=paras/geant4_setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
+        done
+        ;;
+    1.4.3) echo "batch model with total number, split with step number"
+		step=1000
+        d=80
+		for ((i=$d;i<$d+1;i++))
+        do
+            ./python/run_batchjob.py pin3D/NJU-PIN \
+                "T1creat.py  current=$step number=$i"
+        done
+        ;;
 esac
 }
 
@@ -556,6 +575,21 @@ case $option in
 
     3.1.5) echo "get T1 circuit simulation result figure ..."
         raser "./python/ngspice.py"
+        ;;
+
+    3.1.6) echo "Si-Strip top-TCT basic information ..."
+        raser "./python/TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si laser_parfile=paras/laser_setting.json"
+        ;;
+
+    3.1.7) echo "get volt-time for Si-Strip top-TCT, multi points x [0,550]"
+        step=1
+        k=0.01
+            for ((j=0;j<101;j++))
+            do
+                x=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
+                ./python/run_batchjob.py pintct/Si_Strip \
+                "TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/Si_Strip/ parameter_alter=True fx_rel=$x"
+            done 
         ;;
 esac
 }
