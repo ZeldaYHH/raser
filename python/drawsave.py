@@ -69,7 +69,7 @@ def save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key):
         t_out.Write()
         fout.Close()
 
-def save_current(dset,my_d,my_l,my_current,my_f,key):
+def save_current(dset,my_d,my_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
@@ -810,7 +810,7 @@ def save_current(dset,my_d,my_current,my_f,key):
     fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("time", time, "time/D")
-    for i in range(my_f.tol_elenumber):
+    for i in range(my_f.read_ele_num):
         t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
         for j in range(my_current.n_bin):
             current[0]=my_current.sum_cu[i].GetBinContent(j)
