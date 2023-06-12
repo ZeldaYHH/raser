@@ -69,7 +69,7 @@ def save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key):
         t_out.Write()
         fout.Close()
 
-def save_current(dset,my_d,my_l,my_current,my_f,key):
+def save_current(dset,my_d,my_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
