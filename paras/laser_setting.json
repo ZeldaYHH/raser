@@ -9,7 +9,7 @@
     
         "wavelength" : 355,
         "tau" : 10e-9,
-        "pulse_energy" : 8e-13,
+        "pulse_energy" : 1.23e-11,
         "widthBeamWaist" : 20,
         "central_time" : 20e-9,
     
@@ -18,7 +18,7 @@
 
         "fx_rel" : 0.5,
         "fy_rel" : 0.5,
-        "fz_rel" : -0.5       
+        "fz_rel" : 0   
     },
 
     {
@@ -33,7 +33,7 @@
         "tau" : 350e-12,
         "pulse_energy" : 8e-13,
         "widthBeamWaist" : 5,
-        "central_time" : 1e-9,
+        "central_time" : 20e-9,
     
         "r_step" : 1,
         "h_step" : 1,
@@ -55,7 +55,7 @@
         "tau" : 350e-12,
         "pulse_energy" : 8e-13,
         "widthBeamWaist" : 5,
-        "central_time" : 1e-9,
+        "central_time" : 20e-9,
     
         "r_step" : 2,
         "h_step" : 10,
@@ -77,7 +77,7 @@
         "tau" : 600e-12,
         "pulse_energy" : 1e-12,
         "widthBeamWaist" : 14,
-        "central_time" : 1e-9,
+        "central_time" : 20e-9,
     
         "r_step" : 2,
         "h_step" : 100,
@@ -122,7 +122,7 @@
         "pulse_energy" : 5e-11,
         "widthBeamWaist" : 1,
         "l_Rayleigh" : 15.7,
-        "central_time" : 1e-9,
+        "central_time" : 20e-9,
         
         "r_step" : 1,
         "h_step" : 1,

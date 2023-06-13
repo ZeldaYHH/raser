@@ -26,13 +26,13 @@ def T1():
     c_n = c_t.Draw("1000*current0:time","","goff")
     graph1 = ROOT.TGraph(c_n,c_t.GetV2(),c_t.GetV1())
     #A-mA
-
+    """
     m_file = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-50.root")
     m_t = m_file.Get("tree")
     m_n = m_t.Draw("volt:time","","goff")
     graph2 = ROOT.TGraph(m_n,m_t.GetV2(),m_t.GetV1())
     #mV
-
+    """
     in_file = ROOT.TFile("output/pintct/NJU-PIN/input-50.root")
     in_t = in_file.Get("tree")
     in_n = in_t.Draw("1000*current:time","","goff")
@@ -56,8 +56,8 @@ def T1():
     graph1.SetLineColor(8)
     graph1.SetLineWidth(2)
 
-    graph2.SetLineColor(2)
-    graph2.SetLineWidth(2)
+    #graph2.SetLineColor(2)
+    #graph2.SetLineWidth(2)
     
     graph3.SetLineColor(4)
     graph3.SetLineWidth(2)
@@ -66,7 +66,7 @@ def T1():
     graph4.SetLineWidth(2)
 
     mg.Add(graph1)
-    mg.Add(graph2)
+    #mg.Add(graph2)
     mg.Add(graph3)
     mg.Add(graph4)
     mg.GetYaxis().SetTitle('Current [mA]')
@@ -77,7 +77,7 @@ def T1():
     mg.GetXaxis().SetTitleSize(0.05)
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
-    legend.AddEntry(graph2, "voltage:simulation", "l")
+    #legend.AddEntry(graph2, "voltage:simulation", "l")
     legend.AddEntry(graph1, "current:e+h", "l")
     legend.AddEntry(graph3, "current:T1-input", "l")
     legend.AddEntry(graph4, "voltage:T1-output", "l")
