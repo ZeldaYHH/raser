@@ -19,11 +19,15 @@ if "parameter_alter=True" in args:
 else:
     key = ""
 my_d = raser.R3dDetector(dset)
-#my_f = raser.FenicsCal(my_d, dset.fenics)
 
 e_field_filepath = './output/devsim/1D_NJU_PIN/'\
                     + str(-int(my_d.voltage)) + '.0V_x_E.csv'
-my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
+try:
+    my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
+except FileNotFoundError:
+    print("devsim field not found, using fenics to build the field")
+    my_f = raser.FenicsCal(my_d,dset.fenics)
+
 my_l = raser.TCTTracks(my_d, dset.laser)
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
