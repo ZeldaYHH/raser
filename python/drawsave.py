@@ -24,7 +24,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     @Modify:
         2021/08/31
     """
-    now = time.strftime("%Y_%m%d_%H%M")
+    now = time.strftime("%Y_%m%d_%H%M%S")
     path = os.path.join("fig", str(now),'' )
     create_path(path) 
     if "plugin" in my_d.det_model:
@@ -38,6 +38,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
+        draw_nocarrier2D(path,my_l)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 

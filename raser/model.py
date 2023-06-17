@@ -40,6 +40,11 @@ class Material:
 
     def cal_mobility(self, temperature, input_doping, charge, electric_field):
         """ Define Mobility Model """
+        # L for lattice
+        # I for impurity
+        # F for driving force (saturation)
+        # C for carrier (not included)
+        # S for surface (not included)
 
         T = temperature # K
         t = T/300
@@ -51,16 +56,16 @@ class Material:
             if self.mobility_model == "Das":
                 Neff = abs(Neff) # um^-3
                 if(charge>0):
-                    mu_L_p = 124 * math.pow(t, -2) # L for lattice
+                    mu_L_p = 124 * math.pow(t, -2)
                     mu_min_p = 15.9
 
                     C_ref_p = 1.76e19
                     alpha_p = 0.34
-                    mu_LI_p = mu_min_p + mu_L_p/(1.0 + math.pow(Neff / C_ref_p, alpha_p)) # I for ionized scattering from impurities
+                    mu_LI_p = mu_min_p + mu_L_p/(1.0 + math.pow(Neff / C_ref_p, alpha_p)) 
 
                     beta_p = 1.213 * math.pow(t, 0.17)
                     v_sat_p = 2e7 * math.pow(t, 0.52) # saturate velocity
-                    mu_LIF_p = mu_LI_p / (math.pow(1.0 + math.pow(mu_LI_p * E / v_sat_p, beta_p), 1.0 / beta_p)) # F for driving force  
+                    mu_LIF_p = mu_LI_p / (math.pow(1.0 + math.pow(mu_LI_p * E / v_sat_p, beta_p), 1.0 / beta_p))
 
                     mu = mu_LIF_p
                 else:
@@ -198,7 +203,7 @@ class Material:
         plt.title("Mobility Model")
         plt.grid(True,ls = '--',which="both")
         fig.show()
-        fig.savefig("./output/model/"+self.mat_name+"Mobility.png")
+        fig.savefig("./output/model/"+self.mat_name+"Mobility"+self.mobility_model+".png")
 
     def cal_coefficient(self, electric_field, charges, temperature):
         """ Define Avalanche Model """
