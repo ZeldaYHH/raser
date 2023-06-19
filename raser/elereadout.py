@@ -167,7 +167,7 @@ class Amplifier:
         self.Iout_BB_RC[i+j] += (dif_shaper_Q)/self.tau_BBA \
                                 * math.exp(-j*self.time_unit/self.tau_BBA)
         self.BBGraph[i+j] = self.BBGain * self.Iout_BB_RC[i+j]
-        self.Vout_scope[i+j] = 50 * self.Iout_C50[i+j]
+        self.Vout_scope[i+j] = 50 * self.Iout_C50[i+j] # the input impedance of the amplifier is 50 Ohm
 #        if (abs(self.BBGraph[i+j]) > 800):
 #            self.BBGraph[i+j] = 800*self.BBGraph[i+j]/abs(self.BBGraph[i+j])
 

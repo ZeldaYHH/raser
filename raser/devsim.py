@@ -12,16 +12,16 @@ import csv
 from scipy.interpolate import interp1d
 import math
 
-
 class DevsimCal:
     def __init__(self, filepath, my_d, dev_dic):
-        self.elefield = []
+        self.voltage = my_d.voltage
         self.protential = []
-        self.gradu = []
-        self.lz = []
         self.l_z = my_d.l_z
+        self.read_ele_num = dev_dic['read_ele_num']        
+        self.lz = []
+        self.elefield = []
+        self.gradu = []
         self.readfile(filepath)
-
 
     def readfile(self, filepath):
         i = 0
@@ -35,9 +35,9 @@ class DevsimCal:
                 except Exception as e:
                     pass
         self.gradu.append(0)
-        grad = 0
+        grad = self.voltage
         for i in range(len(self.elefield)-1):
-            grad = grad + (self.elefield[i]+self.elefield[i+1]) * \
+            grad = grad - (self.elefield[i]+self.elefield[i+1]) * \
                             (self.lz[i+1]-self.lz[i]) / 2
             self.gradu.append(grad)
 
@@ -47,7 +47,10 @@ class DevsimCal:
         return 0, 0, f_ef(depth) #x, y方向为0
     
     def get_w_p(self, x, y, depth, i):
-        f_p = 1 - (1/self.l_z) * depth
+        if depth >= 1:
+            f_p = (1/(self.l_z-1)) * (depth-1)
+        else:
+            f_p = 0
         return f_p
     
     def get_potential(self, x, y, depth):

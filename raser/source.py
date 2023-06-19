@@ -102,7 +102,24 @@ class TCTTracks():
             list(np.ravel(ZC)),\
             [self.central_time for x in np.ravel(XC)]])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
-        print(len(self.ionized_pairs))
+
+        # seperate the carrier groups to simulate diffusion
+        group_unit = 100 # the max number of carriers in one group
+        cut = 0.1
+        temp_position, temp_pairs = [],[]
+        for position, pairs in zip(self.track_position, self.ionized_pairs):
+            if pairs < cut:
+                continue
+            else:
+                k = int(pairs//group_unit + 1) # divide the carrier pairs into k groups
+                for i in range(k):
+                    temp_position.append(position)
+                    temp_pairs.append(pairs/k)
+
+        self.track_position = temp_position
+        self.ionized_pairs = temp_pairs
+
+        print(len(self.ionized_pairs),"pairs of carrier models to drift")
 
     def change_coordinate(self):
         #from cylindral coordinate (axis parallel with the beam, origin at focus)

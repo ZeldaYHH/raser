@@ -13,7 +13,7 @@ from raser.model import Material
 from raser.model import Vector
 
 t_bin = 50e-12
-t_end = 5e-9
+t_end = 60e-9
 t_start = 0
 
 class Carrier:
@@ -60,7 +60,7 @@ class Carrier:
             self.end_condition = "out of bound"
         return self.end_condition
 
-    def drift_single_step(self,my_d,my_f,step=1):
+    def drift_single_step(self,my_d,my_f,step=0.1):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
         if(intensity!=0):
@@ -146,7 +146,7 @@ class Carrier:
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (e_field[2] < 1 and self.d_z < 2):
             self.end_condition = "zero drift force"
         '''elif wpot>(1-1e-5):
             self.end_condition = "reached cathode"
