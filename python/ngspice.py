@@ -21,19 +21,19 @@ def T1():
 
     mg=ROOT.TMultiGraph("mg","")
     
-    c_file = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
+    c_file = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current0.5.root")
     c_t = c_file.Get("tree")
     c_n = c_t.Draw("1000*current0:time","","goff")
     graph1 = ROOT.TGraph(c_n,c_t.GetV2(),c_t.GetV1())
     #A-mA
     """
-    m_file = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-50.root")
+    m_file = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT0.5.root")
     m_t = m_file.Get("tree")
     m_n = m_t.Draw("volt:time","","goff")
     graph2 = ROOT.TGraph(m_n,m_t.GetV2(),m_t.GetV1())
     #mV
     """
-    in_file = ROOT.TFile("output/pintct/NJU-PIN/input-50.root")
+    in_file = ROOT.TFile("output/pintct/NJU-PIN/input0.5.root")
     in_t = in_file.Get("tree")
     in_n = in_t.Draw("1000*current:time","","goff")
     graph3 = ROOT.TGraph(in_n,in_t.GetV2(),in_t.GetV1())
@@ -86,7 +86,7 @@ def T1():
     mg.Draw('al')
     legend.Draw("")
 
-    now = time.strftime("%Y_%m%d_%H%M")
+    now = time.strftime("%Y_%m%d_%H%M%S")
     path = os.path.join("fig", str(now))
     os.makedirs(path)
     c.SaveAs(os.path.join('fig', str(now), 't1.pdf'))

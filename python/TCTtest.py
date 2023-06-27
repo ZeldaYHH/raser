@@ -32,8 +32,8 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
 if "ngspice" in args:
-    drawsave.save_current(dset,my_d,my_current,my_f,"fz_abs")
-    input_p=drawsave.set_input(dset,my_current,my_d,"fz_abs")
+    drawsave.save_current(dset,my_d,my_l,my_current,my_f,"fx_rel")
+    input_p=drawsave.set_input(dset,my_current,my_l,my_d,"fx_rel")
     input_c=','.join(input_p)
     with open('paras/T1.cir', 'r') as f:
         lines = f.readlines()
