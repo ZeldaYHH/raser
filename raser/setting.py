@@ -155,8 +155,13 @@ class Setting:
         if "Carrier" in self.det_model:
             detector.update({'doping_cpp':p['doping_cpp']})
 
+     
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
+        
+        # if "Irradiation" in p:
+        #     detector['Irradiation']=p['Irradiation']
+        
         return detector
 
     def electron_custom(self,electrodes):

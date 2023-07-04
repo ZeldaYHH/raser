@@ -63,6 +63,12 @@ class R3dDetector:
         else:
             self.trapping_time=float('inf')
 
+        # if 'Irradiation' in det_dic:
+        #     self.Irradiation=det_dic['Irradiation']
+        #     self.trapping_time = ((-0.526435)*math.log10(self.Irradiation)+7.889182)*1e-9
+        # else:
+        #     self.trapping_time=float('inf')
+
     def set_3D_electrode(self,e_r,e_gap=0):
         """
         @description: 

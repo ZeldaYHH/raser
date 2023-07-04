@@ -24,7 +24,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     @Modify:
         2021/08/31
     """
-    now = time.strftime("%Y_%m%d_%H%M")
+    now = time.strftime("%Y_%m%d_%H%M%S")
     path = os.path.join("fig", str(now),'' )
     create_path(path) 
     if "plugin" in my_d.det_model:
@@ -38,6 +38,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         draw_nocarrier3D(path,my_l)
+        draw_nocarrier2D(path,my_l)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 
@@ -75,7 +76,7 @@ def save_current(dset,my_d,my_l,my_current,my_f,key):
     elif "lgad3D" in my_d.det_model:
         path = os.path.join('output', 'lgadtct', dset.det_name, )
     create_path(path) 
-    L = eval("round(my_l.{})".format(key))
+    L = eval("my_l.{}".format(key))
     #L is defined by different keys
     time = array('d', [999.])
     current = array('d', [999.])
@@ -818,34 +819,13 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.root")
     
 
-def save_current(dset,my_d,my_current,my_f,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    create_path(path) 
-    L = eval("round(my_l.{})".format(key))
-    #L is defined by different keys
-    time = array('d', [999.])
-    current = array('d', [999.])
-    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", time, "time/D")
-    for i in range(my_f.tol_elenumber):
-        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-        for j in range(my_current.n_bin):
-            current[0]=my_current.sum_cu[i].GetBinContent(j)
-            time[0]=j*my_current.t_bin
-            t_out.Fill()
-        t_out.Write()
-    fout.Close()
 
-def set_input(dset,my_current,my_d,key):
+def set_input(dset,my_current,my_l,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
         path = os.path.join('output', 'lgadtct', dset.det_name, )
-    L = eval("round(my_l.{})".format(key))
+    L = eval("my_l.{}".format(key))
     current=[]
     time=[]
     myFile = ROOT.TFile(os.path.join(path,"sim-TCT-current")+str(L)+".root")
