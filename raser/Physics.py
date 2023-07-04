@@ -53,8 +53,8 @@ def CreateSiliconPotentialOnly(device, region):
         print("Creating Node Solution Potential")
         CreateSolution(device, region, "Potential")
     elec_i = "n_i*exp(Potential/V_T0)"
-    hole_i = "n_i*exp(-Potential/V_T0)"
-    #hole_i = "n_i^2/IntrinsicElectrons"
+    #hole_i = "n_i*exp(-Potential/V_T0)"
+    hole_i = "n_i^2/IntrinsicElectrons"
     charge_i = "kahan3(IntrinsicHoles, -IntrinsicElectrons, NetDoping)"
     pcharge_i = "-q * IntrinsicCharge"
 
@@ -398,7 +398,7 @@ def CreateNetGeneration(device, region):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
         
-def CreateNetGeneration_test(device, region,constant):
+def CreateNetGeneration_test(device, region,constant="+0"):
 
     #Gn = "-q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
     #Gp = "+q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
@@ -632,6 +632,7 @@ def CreateECE(device, region, mu_n):
              )
 
 
+
 def CreateHCE(device, region, mu_p):
     CreateHoleCurrent(device, region, mu_p)
     PCharge = "q * Holes"
@@ -645,6 +646,9 @@ def CreateHCE(device, region, mu_p):
              node_model="HoleGeneration", 
              edge_volume_model="ImpactGen_p"
              )
+
+    
+
 
 def CreateECE_improved(device, region, mu_n):
     CreateElectronCurrent(device, region, mu_n)
@@ -699,6 +703,7 @@ def CreatePEIrradiated(device, region):
     devsim.equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialNodeCharge", edge_model="PotentialEdgeFlux",
              time_node_model="", variable_update="log_damp") 
+    
 
 def CreateDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
@@ -724,7 +729,7 @@ def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
-def CreateSiDriftDiffusion(device, region,constant, mu_n="mu_n", mu_p="mu_p"):
+def CreateSiDriftDiffusion(device, region,constant="+0", mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
@@ -733,6 +738,45 @@ def CreateSiDriftDiffusion(device, region,constant, mu_n="mu_n", mu_p="mu_p"):
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
+
+def CreateSiDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
+    '''
+      Restrict electrons and holes to their equilibrium values
+      Integrates current into circuit
+    '''
+    contact_electrons_model = "Electrons - ifelse(NetDoping > 0, {0}, n_i^2/{1})".format(celec_model, chole_model)
+    contact_holes_model = "Holes - ifelse(NetDoping < 0, +{1}, +n_i^2/{0})".format(celec_model, chole_model)
+    contact_electrons_name = "{0}nodeelectrons".format(contact)
+    contact_holes_name = "{0}nodeholes".format(contact)
+
+    CreateContactNodeModel(device, contact, contact_electrons_name, contact_electrons_model)
+    #TODO: The simplification of the ifelse statement is time consuming
+
+    CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_electrons_name, "Electrons"), "1")
+
+    CreateContactNodeModel(device, contact, contact_holes_name, contact_holes_model)
+    CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_holes_name, "Holes"), "1")
+
+    #TODO: keyword args
+    if is_circuit:
+        devsim.contact_equation(device=device, contact=contact, name="ElectronContinuityEquation",
+                         node_model=contact_electrons_name,
+                         edge_current_model="ElectronCurrent", circuit_node=GetContactBiasName(contact))
+
+        devsim.contact_equation(device=device, contact=contact, name="HoleContinuityEquation",
+                         node_model=contact_holes_name,
+                         edge_current_model="HoleCurrent", circuit_node=GetContactBiasName(contact))
+
+    else:
+        devsim.contact_equation(device=device, contact=contact, name="ElectronContinuityEquation",
+                         node_model=contact_electrons_name,
+                         edge_current_model="ElectronCurrent")
+
+        devsim.contact_equation(device=device, contact=contact, name="HoleContinuityEquation",
+                         node_model=contact_holes_name,
+                         edge_current_model="HoleCurrent")
+
+
 
 
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):

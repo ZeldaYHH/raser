@@ -23,16 +23,16 @@ det_dic = dset.detector
 doping=str(det_dic['doping'])
 
 # 1d
-def Create1DMesh(device, region):
+def Create2DMesh(device, region):
     '''
       Meshing
     '''
-    devsim.create_1d_mesh(mesh="dio")
-    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="top")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
-    devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-5, tag="mid")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
+    devsim.create_2d_mesh(mesh="dio")
+    devsim.add_2d_mesh_line(mesh="dio", dir="x", pos=0, ps=1e-4, tag="top")
+    devsim.add_2d_mesh_line(mesh="dio", dir="x", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
+    devsim.add_2d_mesh_line(mesh="dio", dir="x", pos=1e-4, ps=1e-5, tag="mid")
+    devsim.add_2d_mesh_line(mesh="dio", dir="x", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
+    devsim.add_2d_mesh_line(mesh="dio", dir="x", pos=305*1e-4, ps=1e-4, tag="bot")
 
     # devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-5, tag="top")
     # devsim.add_1d_mesh_line(mesh="dio", pos=(0.5e-4)-(0.25e-4), ps=1e-5, tag="jun_up")
@@ -46,30 +46,11 @@ def Create1DMesh(device, region):
     devsim.finalize_mesh(mesh="dio")
     devsim.create_device(mesh="dio", device=device)
 
-def Create1DMesh_2(device, region):
-    '''
-      Meshing
-    '''
-    devsim.create_1d_mesh(mesh="dio")
-    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-6, tag="top")
-    devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-7, tag="mid")
-    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
-
-
-    
-    devsim.add_1d_contact  (mesh="dio", name="top", tag="top", material="metal")
-    devsim.add_1d_contact  (mesh="dio", name="bot", tag="bot", material="metal")
-    devsim.add_1d_region   (mesh="dio", material="Silicon", region=region, tag1="top", tag2="bot")
-    devsim.finalize_mesh(mesh="dio")
-    devsim.create_device(mesh="dio", device=device)
-
-
 
 def SetDoping(device, region, bulk_doping=doping):#default doping 4.7e12
     '''
       Doping
     '''
-    #Node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
     Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
     #Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(0.5e-4-x)")
     Node.CreateNodeModel(device, region, "Acceptors",    "%s*step(x-1e-4)"%bulk_doping)
@@ -107,7 +88,6 @@ def main():
 
 
     Create1DMesh(device=device, region=region)
-    #Create1DMesh_2(device=device, region=region)
     SetDoping(device=device, region=region, bulk_doping=doping)
     
     Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_"+doping+".png")

@@ -731,7 +731,7 @@ sub_7_1(){
 case $option in 
 
     7.1.1) echo "Si sensor energy deposition" 
-        raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad" 
+        raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad geant4_model=ITk-Si-strip geant4_parfile=paras/geant4_setting.json" 
         ;;
         esac
     
@@ -750,7 +750,7 @@ case $option in
         ;;
 
     7.2.3) echo "Simulate 1D itk I-V ..."
-        ./python/run_batchjob.py devsim "solve_iv_itk.py plus 7.1e13"
+        ./python/run_batchjob.py devsim "solve_iv_itk.py plus 0e26"
         ;;
     
     7.2.3Si) echo "Simulate 1D itk I-V ..."

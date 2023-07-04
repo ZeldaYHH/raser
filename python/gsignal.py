@@ -63,10 +63,10 @@ def main():
     if "proton-irrad" in args:
         my_f = raser.FenicsCal2D(my_d,dset.fenics)
         my_g4p = raser.SiITk(my_d, my_f, dset)
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.get1_beam_number(my_g4p,ele_current)
-        drawsave.cce(my_d,my_f,my_current)
+        #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        #ele_current = raser.Amplifier(my_current, dset.amplifier)
+        drawsave.get1_beam_number(my_g4p)
+        #drawsave.cce(my_d,my_f,my_current)
         return
 
     if "Carrier" in args:

@@ -734,40 +734,61 @@ def get_beam_number(my_g4p,ele_current):
     c1.SaveAs(path+"_energy.root")
 
 
-def get1_beam_number(my_g4p,ele_current):
+def get1_beam_number(my_g4p):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "output/" + "SiITk/" + now + "/" 
     create_path(path) 
     number = array('d',[999.])
     hittotal = array('d',[999.])
-    number[0] = int(-ele_current.max_BB_height/18.8)
-    hittotal[0]=my_g4p.hittotal
-    fout = ROOT.TFile(path + "SiITk.root", "RECREATE")
-    t_out = ROOT.TTree("tree", "beam_number")
-    t_out.Branch("cal_number", number, "cal_number/D")
-    t_out.Branch("real_number", hittotal, "real_number/D")
-    t_out.Fill()
-    t_out.Write()
-    fout.Close()
+    # number[0] = int(-ele_current.max_BB_height/18.8)
+    # hittotal[0]=my_g4p.hittotal
+    # fout = ROOT.TFile(path + "SiITk.root", "RECREATE")
+    # t_out = ROOT.TTree("tree", "beam_number")
+    # t_out.Branch("cal_number", number, "cal_number/D")
+    # t_out.Branch("real_number", hittotal, "real_number/D")
+    # t_out.Fill()
+    # t_out.Write()
+    # fout.Close()
 
-    c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    h1 = ROOT.TH1F("Edep_device", "Energy deposition in Si device0", 100, 0., 1)
-    h2 = ROOT.TH1F("Edep_device1", "Energy deposition in Si device1", 100, 0., 1)
+    c1=ROOT.TCanvas("c1","canvas1",1200,1000)
+    h1 = ROOT.TH1F("Edep", "Energy deposition in W208", 100, 0., 1)
+    h2 = ROOT.TH1F("Edep", "Energy deposition in W207", 100, 0., 1)
+    h3 = ROOT.TH1F("Edep", "Energy deposition in W199", 100, 0., 1)
     for i in range (len(my_g4p.edep_devices)):
         h1.Fill(my_g4p.edep_devices[i])
         h2.Fill(my_g4p.edep_devices1[i])
+        h3.Fill(my_g4p.edep_devices2[i])
     h1.Draw()
     h1.GetXaxis().SetTitle("energy[MeV]")
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy1.pdf")
-    c1.SaveAs(path+"_energy.root")
+    c1.SaveAs(path+"_energy1.root")
     
-    c2=ROOT.TCanvas("c2","canvas2",1000,1000)
+    c2=ROOT.TCanvas("c2","canvas2",1200,1000)
     h2.Draw()
     h2.GetXaxis().SetTitle("energy[MeV]")
     h2.GetYaxis().SetTitle("number")
     c2.SaveAs(path+"_energy2.pdf")
-    c2.SaveAs(path+"_energy.root")
+    c2.SaveAs(path+"_energy2.root")
+    
+    c3=ROOT.TCanvas("c3","canvas3",1200,1000)
+    h3.Draw()
+    h3.GetXaxis().SetTitle("energy[MeV]")
+    h3.GetYaxis().SetTitle("number")
+    c3.SaveAs(path+"_energy3.pdf")
+    c3.SaveAs(path+"_energy3.root")
+    
+    # c4=ROOT.TCanvas("c4","canvas4",1000,1000)
+    # h1.SetMarkerStyle(kFullCircle)
+    # h2.SetMarkerStyle(kFullSquare)
+    # h3.SetMarkerStyle(kFullTriangleUp)
+    # h1.Draw()
+    # h2.Draw("same")
+    # h3.Draw("same")
+    # h1.GetXaxis().SetTitle("energy[MeV]")
+    # h1.GetYaxis().SetTitle("number")
+    # c4.SaveAs(path+"_energyall.pdf")
+    # c4.SaveAs(path+"_energyall.root")    
     
 
 

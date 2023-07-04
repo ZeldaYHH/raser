@@ -248,14 +248,14 @@
 
 
     {
-        "total_events" : 10000,
+        "total_events" : 100000,
         "det_name" : "ITk-Si-strip",
         "det_model" : "planar3D",
 
         "lx" : 8000,
         "ly" : 8000,
         "lz" : 305,
-        "doping" : 4.7,  
+        "doping" : "4.7e12",  
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",

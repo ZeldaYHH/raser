@@ -25,8 +25,8 @@ class SiITk:
         physics_list.RegisterPhysics(g4b.G4StepLimiterPhysics())
         gRunManager.SetUserInitialization(physics_list)
         # define global parameter
-        global s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle
-        s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[],[]
+        global s_eventIDs,s_edep_devices,s_edep_devices1,s_edep_devices2,s_p_steps,s_energy_steps,s_events_angle
+        s_eventIDs,s_edep_devices,s_edep_devices1,s_edep_devices2,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[],[],[]
         
         global hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2
         hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2=0,0,0,0,0,0
@@ -57,6 +57,7 @@ class SiITk:
             for single_step in p_step] for p_step in self.p_steps]
         self.edep_devices=s_edep_devices
         self.edep_devices1=s_edep_devices1
+        self.edep_devices2=s_edep_devices2
         self.events_angle=s_events_angle
 
         hittotal=0
@@ -86,7 +87,7 @@ class SiITk:
         self.energy_steps=[newtype_energy]      #new particle's every step' energy
         
 
-        del s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle
+        del s_eventIDs,s_edep_devices,s_edep_devices1,s_edep_devices2,s_p_steps,s_energy_steps,s_events_angle
         del hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2
         
     def __del__(self):
@@ -211,14 +212,35 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                             colour = [1,0,0],
                             mother = 'world')
 
-        # self.create_Al_box(
-        #                     name = "Foil",
-        #                     sidex = 5000*g4b.um,
-        #                     sidey = 5000*g4b.um,
-        #                     sidez = 10*g4b.um,
-        #                     translation = [tx_all,ty_all,tz_device-0.5*device_z],
-        #                     colour = [2,0,0],
-        #                     mother = 'world')
+        self.create_Al_box(
+                            name = "Sheet",
+                            sidex = 10000*g4b.um,
+                            sidey = 10000*g4b.um,
+                            sidez = device_z,
+                            translation = [tx_all,ty_all,tz_device-2*device_z],
+                            colour = [2,0,0],
+                            mother = 'world')
+        
+        self.create_si_box(
+                            name = "Device2",
+                            sidex = device_x,
+                            sidey = device_y,
+                            sidez = device_z,
+                            translation = [tx_all,ty_all,tz_device-3*device_z],
+                            material_si = "G4_Si",
+                            colour = [3,0,0],
+                            mother = 'world')
+        
+        self.create_Al_box(
+                            name = "Foil",
+                            sidex = 5000*g4b.um,
+                            sidey = 5000*g4b.um,
+                            sidez = 10*g4b.um,
+                            translation = [tx_all,ty_all,tz_device-3*device_z-10*g4b.um],
+                            colour = [2,0,0],
+                            mother = 'world')
+        
+
 
         self.maxStep = maxStep*g4b.um
         self.fStepLimit = g4b.G4UserLimits(self.maxStep)
@@ -369,6 +391,7 @@ class MyEventAction(g4b.G4UserEventAction):
     def BeginOfEventAction(self, event):
         self.edep_device=0.
         self.edep_device1=0.
+        self.edep_device2=0.
         self.event_angle = 0.
         self.p_step = []
         self.energy_step = []
@@ -383,7 +406,7 @@ class MyEventAction(g4b.G4UserEventAction):
             self.event_angle = cal_angle(point_a,point_b)
         else:
             self.event_angle = None
-        save_geant4_events(eventID,self.edep_device,self.edep_device1,
+        save_geant4_events(eventID,self.edep_device,self.edep_device1,self.edep_device2,
                            self.p_step,self.energy_step,self.event_angle)
      
 
@@ -399,11 +422,18 @@ class MyEventAction(g4b.G4UserEventAction):
                            point_in.getY()*1000,point_in.getZ()*1000])
         self.energy_step.append(edep)    
 
-def save_geant4_events(eventID,edep_device,edep_device1,p_step,energy_step,event_angle):
+    def RecordDevice2(self, edep,point_in,point_out):
+        self.edep_device2 += edep
+        self.p_step.append([point_in.getX()*1000,
+                           point_in.getY()*1000,point_in.getZ()*1000])
+        self.energy_step.append(edep)  
+
+def save_geant4_events(eventID,edep_device,edep_device1,edep_device2,p_step,energy_step,event_angle):
     if(len(p_step)>0):
         s_eventIDs.append(eventID)
         s_edep_devices.append(edep_device)
         s_edep_devices1.append(edep_device1)
+        s_edep_devices2.append(edep_device2)
         s_p_steps.append(p_step)
         s_energy_steps.append(energy_step)
         s_events_angle.append(event_angle)
@@ -411,6 +441,7 @@ def save_geant4_events(eventID,edep_device,edep_device1,p_step,energy_step,event
         s_eventIDs.append(eventID)
         s_edep_devices.append(edep_device)
         s_edep_devices1.append(edep_device1)
+        s_edep_devices2.append(edep_device2)
         s_p_steps.append([[0,0,0]])
         s_energy_steps.append([0])
         s_events_angle.append(event_angle)
@@ -450,6 +481,8 @@ class MySteppingAction(g4b.G4UserSteppingAction):
             self.fEventAction.RecordDevice(edep,point_in,point_out)
         if(volume_name == "Device1"):
             self.fEventAction.RecordDevice1(edep,point_in,point_out)
+        if(volume_name == "Device2"):
+            self.fEventAction.RecordDevice2(edep,point_in,point_out)
             
 
 

@@ -36,7 +36,7 @@ print()
 
 itk_md8_mesh.Create1DMesh(device=device, region=region)
 itk_md8_mesh.SetDoping(device=device, region=region)
-itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
+itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 
@@ -50,7 +50,8 @@ devsim.set_parameter(name = "extended_equation", value=True)
 args111 = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
 dset111 = Setting(args111)
 det_dic111 = dset111.detector    
-doping1=str(det_dic111['doping'])+"e12"
+doping1=str(det_dic111['doping'])
+
 sign1=sys.argv[1]
 constant1=sys.argv[2]
 ITK_MD8_doping=doping1
@@ -94,9 +95,10 @@ writer.writerow(header)
 fig1=matplotlib.pyplot.figure()
 ax1 = fig1.add_subplot(111)
 
-while reverse_v < 800.0:
+while reverse_v < 700.0:
 
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=reverse_v)
+    #devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     try:
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
     except devsim.error as msg:
@@ -108,11 +110,14 @@ while reverse_v < 800.0:
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       
     reverse_voltage.append(reverse_v)
+    #reverse_voltage.append(0-reverse_v)
     reverse_top_current.append(abs(reverse_top_total_current))
     writer.writerow([reverse_v,abs(reverse_top_total_current/area_factor)])
     writer_md8iv.writerow([reverse_v,abs(reverse_top_total_current/area_factor)])
+    #writer.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
+    #writer_md8iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)]) 
     
-    if(reverse_v%100.0==0):
+    if(reverse_v%50.0==0):
         devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
         x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values
         y = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
