@@ -33,7 +33,7 @@ area_factor = 4.0
 
 itk_md8_mesh.Create1DMesh(device=device, region=region)
 itk_md8_mesh.SetDoping(device=device, region=region)
-itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
+itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 

@@ -150,7 +150,7 @@ def get_elefield(volt,time,J):
     graph1.Fit(f,"Q")
     b=f.GetParameter(1)
     c=f.GetParameter(0)
-    t_0=np.true_divide(-c,b) + 0.5 #ns
+    t_0=np.true_divide(-c,b) + 0.1 #ns
     return c + b * t_0
 
 
@@ -261,9 +261,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
     if name == 'Elefield':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,1)
+            mg.GetYaxis().SetRangeUser(0,0.16)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.03)
+            mg.GetYaxis().SetRangeUser(0,0.007)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'

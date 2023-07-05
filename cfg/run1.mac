@@ -7,8 +7,8 @@
 /tracking/verbose 0
 /hits/verbose 2
 /run/initialize
-#/B2/det/stepMax 1.0 mm
-/gun/particle pi+
+/B2/det/stepMax 1.0 um
+/gun/particle neutron
 /gun/energy 120 GeV
 /run/beamOn 1
 
