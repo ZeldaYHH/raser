@@ -24,13 +24,13 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
-drawsave.save_signal_TTree(dset,my_d,my_l,ele_current,my_f,"fz_abs")
-drawsave.save_current(dset,my_d,my_l,my_current,my_f,"fz_abs")
+drawsave.save_signal_TTree(dset,my_d,my_l,ele_current,my_f,"fx_rel")
+drawsave.save_current(dset,my_d,my_l,my_current,my_f,"fx_rel")
 
 current_SiC = array("d")
 T_SiC = array("d")
 
-myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current-50.root")
+myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-current0.5.root")
 myt = myFile.tree
 for entry in myt:
     current_SiC.append(entry.current0 * 1e3)
@@ -39,7 +39,7 @@ for entry in myt:
 volt_ele = array("d")
 T_ele = array("d")
 
-myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT-50.root")
+myFile = ROOT.TFile("output/pintct/NJU-PIN/sim-TCT0.5.root")
 myt = myFile.tree
 for entry in myt:
     volt_ele.append(entry.volt)
