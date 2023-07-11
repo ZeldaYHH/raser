@@ -71,8 +71,6 @@ def CreateSiliconConstant():
     # material
     devsim.add_db_entry(material="Silicon",   parameter="eps",    value=11.9,      unit="1",         description="Dielectric Constant")
     devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=1.02e10,   unit="/cm^3",     description="Intrinsic Electron Concentration")
-    #devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=1.45e10,   unit="/cm^3",     description="Intrinsic Electron Concentration")
-    #devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=9.65e9,   unit="/cm^3",     description="Intrinsic Electron Concentration")
     # mobility
     devsim.add_db_entry(material="Silicon",   parameter="mu_n",   value=1450,      unit="cm^2/Vs",   description="Constant Mobility of Electron")
     devsim.add_db_entry(material="Silicon",   parameter="mu_p",   value=500,       unit="cm^2/Vs",   description="Constant Mobility of Hole")
@@ -83,8 +81,6 @@ def CreateSiliconConstant():
     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=1.02e10,   unit="/cm^3",     description="p1")
     #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
     #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
-    #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=5e-3,    unit="s",         description="Constant SRH Lifetime of Electron")
-    #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=5e-3,    unit="s",         description="Constant SRH Lifetime of Hole")
     devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Electron")
     devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Hole")
     #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=1.3e-4,    unit="s",         description="Constant SRH Lifetime of Electron")

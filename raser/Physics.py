@@ -53,8 +53,8 @@ def CreateSiliconPotentialOnly(device, region):
         print("Creating Node Solution Potential")
         CreateSolution(device, region, "Potential")
     elec_i = "n_i*exp(Potential/V_T0)"
-    #hole_i = "n_i*exp(-Potential/V_T0)"
-    hole_i = "n_i^2/IntrinsicElectrons"
+    hole_i = "n_i*exp(-Potential/V_T0)"
+    #hole_i = "n_i^2/IntrinsicElectrons"
     charge_i = "kahan3(IntrinsicHoles, -IntrinsicElectrons, NetDoping)"
     pcharge_i = "-q * IntrinsicCharge"
 
@@ -398,41 +398,6 @@ def CreateNetGeneration(device, region):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
         
-def CreateNetGeneration_test(device, region,constant="+0"):
-
-    #Gn = "-q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
-    #Gp = "+q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
-
-    #Gn = "-q * (USRH - 1e12)"
-    #Gp = "+q * (USRH - 1e12)"
-
-    #Gn = "-q * (USRH - 1e18*x*x)"
-    #Gp = "+q * (USRH - 1e18*x*x)"
-
-    if devsim.get_material(device=device, region=region) == "SiliconCarbide":
-        Gn = "-q * (USRH+R_z+R_h6-1e12)"
-        Gp = "+q * (USRH+R_z+R_h6-1e12)"
-        print("in SiC")
-    if devsim.get_material(device=device, region=region) == "Silicon":
-        Gn = "-q * (USRH{constant}-n_i/2/tau_n)".format(constant=constant)
-        Gp = "+q * (USRH{constant}-n_i/2/tau_n)".format(constant=constant)
-        print("in get material")
-    if device== "1D_ITK_MD8":
-        Gn = "-q * (USRH{constant}-n_i/2/tau_n)".format(constant=constant)
-        Gp = "+q * (USRH{constant}-n_i/2/tau_n)".format(constant=constant)
-        print("in device=md8")
-    else:
-        Gn = "-q * (USRH)"
-        Gp = "+q * (USRH)"
-        print("in else")
-
-    CreateNodeModel(device, region, "ElectronGeneration", Gn)
-    CreateNodeModel(device, region, "HoleGeneration", Gp)
-
-    for i in ("Electrons", "Holes"):
-        CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
-        CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
-  
 
 def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
     '''

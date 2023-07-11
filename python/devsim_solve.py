@@ -27,8 +27,7 @@ if not (os.path.exists("./output/devsim")):
 # Area factor
 # 1D 1cm*1cm
 # DUT 5mm* 5mm
-#area_factor = 4.0
-area_factor = 1.0/0.8/0.8
+area_factor = 4.0
 ITK_MD8_doping="eee"
 
 def main():
@@ -284,7 +283,7 @@ def draw_iv(V,I,device,condition):
     #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
     #if device == "1D_ITK_MD8":
     #    fig2.savefig("./output/devsim/{device}_{ITK_MD8_doping}/{device}_{condition}_reverse_iv.png".format(device=device,ITK_MD8_doping=ITK_MD8_doping,condition=condition))
-    fig2.savefig("./output/devsim/{}_reverse_iv_maxdiv50_withtrap.png".format(device+condition))
+    fig2.savefig("./output/devsim/{}_reverse_iv.png".format(device+condition))
     fig2.clear()
 
 def draw_cv(V,C,device,condition):

@@ -34,7 +34,7 @@ def InitialSolution(device, region, circuit_contacts=None):
             CreateSiliconPotentialOnlyContact(device, region, i)
 
 
-def DriftDiffusionInitialSolution(device, region,condition=None, circuit_contacts=None):
+def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
