@@ -85,10 +85,10 @@ def CreateSiliconConstant():
     #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
     #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=5e-3,    unit="s",         description="Constant SRH Lifetime of Electron")
     #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=5e-3,    unit="s",         description="Constant SRH Lifetime of Hole")
-    #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Electron")
-    #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Hole")
-    devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=1.3e-4,    unit="s",         description="Constant SRH Lifetime of Electron")
-    devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=1.3e-4,    unit="s",         description="Constant SRH Lifetime of Hole")
+    devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Electron")
+    devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=3e-2,    unit="s",         description="Constant SRH Lifetime of Hole")
+    #devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=1.3e-4,    unit="s",         description="Constant SRH Lifetime of Electron")
+    #devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=1.3e-4,    unit="s",         description="Constant SRH Lifetime of Hole")
 
 
 '''

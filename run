@@ -750,7 +750,7 @@ case $option in
         ;;
 
     7.2.3) echo "Simulate 1D itk I-V ..."
-        ./python/run_batchjob.py devsim "solve_iv_itk.py plus 0e26"
+        ./python/run_batchjob.py devsim "solve_iv_itk.py plus 0e29"
         ;;
     
     7.2.3Si) echo "Simulate 1D itk I-V ..."
