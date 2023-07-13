@@ -92,7 +92,9 @@ def initial_solution(device,region,para_dict):
     Initial.InitialSolution(device, region, circuit_contacts="top")
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
-
+    ### Drift diffusion simulation at equilibrium
+    Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
@@ -110,11 +112,7 @@ def initial_solution(device,region,para_dict):
             print("Neutron_eq="+str(Neutron_eq))"""
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400,maximum_divergence=300)
         
-    else:
-        ### Drift diffusion simulation at equilibrium
-        Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
-
+        
 def set_defect(paras):
     #Z_1/2
     devsim.add_db_entry(material="global",   parameter="sigma_n",     value=float(paras["sigma_n"]),   unit="s/cm^2",     description="sigma_n")
@@ -157,7 +155,7 @@ def solve_iv(device,region,v_max,para_dict):
         doping1=det_dic111['doping']
         ITK_MD8_doping=doping1
         area_factor = 1.0/(0.8*0.8)
-        f_md8iv = open("./output/devsim/"+device+"_"+"4.7e13"+"/"+device+condition+"_reverse_iv_maxdiv50_withtrap.csv", "w")
+        f_md8iv = open("./output/devsim/"+device+"_"+"4.7e14"+"/"+device+condition+"_reverse_iv_tau5e-6.csv", "w")
         header_md8iv = ["Voltage","Current"]
         writer_md8iv = csv.writer(f_md8iv)
         writer_md8iv.writerow(header_md8iv)
