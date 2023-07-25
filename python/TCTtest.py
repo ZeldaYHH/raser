@@ -25,12 +25,11 @@ else:
     key_string = ""
 my_d = raser.R3dDetector(dset)
 
-e_field_filepath = './output/devsim/1D_NJU_PIN/'\
-                    + str(-int(my_d.voltage)) + '.0V_x_E.csv'
-try:
-    my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
-except FileNotFoundError:
-    print("devsim field not found, using fenics to build the field")
+if('devsim' in args):
+    print("using devsim to build the field")
+    my_f = raser.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+else:
+    print("using fenics to build the field")
     my_f = raser.FenicsCal(my_d,dset.fenics)
 
 my_l = raser.TCTTracks(my_d, dset.laser)

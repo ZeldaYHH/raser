@@ -196,7 +196,7 @@ raser(){
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
