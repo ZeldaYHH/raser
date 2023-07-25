@@ -93,14 +93,12 @@ def main():
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         drawsave.cce(my_d,my_f,my_current)
         return
-    print(det_dic['voltage'])
-
-    e_field_filepath = './output/devsim/1D_NJU_PIN/'\
-                        + str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
-    try:
-        my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
-    except FileNotFoundError:
-        print("devsim field not found, using fenics to build the field")
+   
+    if('devsim' in args):
+        print("using devsim to build the field")
+        my_f = raser.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+    else:
+        print("using fenics to build the field")
         my_f = raser.FenicsCal(my_d,dset.fenics)
         
     my_g4p = raser.Particles(my_d, my_f, dset)
