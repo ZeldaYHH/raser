@@ -384,6 +384,9 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
+    1.3.20) echo "2Dcvfor v0.1"
+        raser "./python/2Dcv_v0.1.py"
+        ;;
             
 esac
 }
