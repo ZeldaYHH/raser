@@ -37,8 +37,8 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_current(my_d, my_current,ele_current.BB_ele,i,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
-        draw_nocarrier3D(path,my_l)
-        draw_nocarrier2D(path,my_l)
+        my_l.draw_nocarrier3D(path)
+        my_l.draw_nocarrier2D(path)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 
@@ -651,57 +651,6 @@ def draw_scat_angle(evnets_angle,angle,model):
     h2.SetLineColor(2)
     h2.Draw("HIST")    
     c1.SaveAs("scat_angle"+model+".pdf")
-
-def draw_nocarrier3D(path, my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","",\
-        int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
-        int((my_l.y_right_most - my_l.y_left_most) / my_l.y_step), my_l.y_left_most, my_l.y_right_most,\
-        int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw()
-    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
-    h.GetXaxis().SetTitleSize(0.05)
-    h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Width [\mu m]")
-    h.GetYaxis().SetTitleSize(0.05)
-    h.GetYaxis().SetLabelSize(0.05)
-    h.GetZaxis().SetTitle("Thick [\mu m]")
-    h.GetZaxis().SetTitleSize(0.05)
-    h.GetZaxis().SetLabelSize(0.05)
-    h.GetXaxis().SetTitleOffset(1.8)
-    h.GetYaxis().SetTitleOffset(2.2)
-    h.GetZaxis().SetTitleOffset(1.4)
-    c1.SetLeftMargin(0.15)
-    c1.SaveAs(path+"nocarrier_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+".pdf")  
-
-def draw_nocarrier2D(path, my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH2D("h","",\
-        int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
-        int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw("COLZ")
-    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
-    h.GetXaxis().SetTitleSize(0.05)
-    h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Thick [\mu m]")
-    h.GetYaxis().SetTitleSize(0.05)
-    h.GetYaxis().SetLabelSize(0.05)
-    h.GetZaxis().SetLabelSize(0.05)
-    c1.SetRightMargin(0.15)
-    c1.SetLeftMargin(0.12)
-    c1.SaveAs(path+"nocarrier2D_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+".pdf")  
 
 def get_beam_number(my_g4p,ele_current):
     now = time.strftime("%Y_%m%d_%H%M")

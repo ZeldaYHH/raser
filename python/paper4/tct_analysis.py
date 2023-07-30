@@ -95,36 +95,11 @@ def get_charge(volt,J):
     # t_bin = 50e-12 A = 100 τ_RC_D = 0.65e-9/2.2 C_D = 3.7e-12 result in fC
 
 def get_velprof(volt,time,J):
-    x=array("d")
-    y=array("d")
-    Vmax=max(volt)
-    for Max in range(J):
-        if volt[Max] - Vmax > -1e-5*Vmax:
+    t = 1.1 #ns
+    for j in range(J):
+        if time[j] >= t:
             break
-    for min in range(Max,0,-1):
-        if volt[min-1] > volt[min] and volt[min]<0.1*Vmax:
-            Vmin = volt[min]
-            break
-        else:
-            Vmin = volt[0]
-    for k in range(J):
-        if (volt[k] - Vmin)<0.1*(Vmax - Vmin)<(volt[k+1] - Vmin):
-            break
-    for l in range(J):
-        if (volt[l-1] - Vmin)<0.9*(Vmax - Vmin)<(volt[l] - Vmin):
-            break
-    n=l-k
-    for j in range(k,l+1):
-        x.append(time[j])
-        y.append(volt[j])
-
-    graph1 = ROOT.TGraph(n,x,y)
-    f=ROOT.TF1("f","[0]+[1]*x",0,10)
-    graph1.Fit(f,"Q")
-    b=f.GetParameter(1)
-    c=f.GetParameter(0)
-    t_0=np.true_divide(-c,b) + 0.1 #ns
-    return c + b * t_0
+    return volt[j]
 
 def get_difprof(volt,time,J):
     max_diff = 0
@@ -241,9 +216,9 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.16)
+            mg.GetYaxis().SetRangeUser(0,0.08)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.007)
+            mg.GetYaxis().SetRangeUser(0,0.015)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'
@@ -301,7 +276,7 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
 
     graph1.SetLineColor(2)
     graph2.SetLineColor(1)
-    graph3.SetLineColor(4)
+    graph3.SetLineColor(40)
     graph1.SetMarkerColor(2)
     graph2.SetMarkerColor(1)
     graph3.SetMarkerColor(4)
@@ -309,10 +284,12 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     graph2.SetMarkerStyle(4)
     graph3.SetMarkerStyle(32)
 
-    mg.Add(graph1)
-    mg.Add(graph2)
-    mg.Add(graph3)
-    mg.Draw('ap')
+    graph3.SetLineWidth(4)
+
+    mg.Add(graph1,"p")
+    mg.Add(graph2,"p")
+    mg.Add(graph3,"l")
+    mg.Draw("a")
 
     if name == 'Amplitude':
         Y_title = 'Amplitude [V]'
@@ -331,9 +308,9 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.16)
+            mg.GetYaxis().SetRangeUser(0,0.08)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.007)
+            mg.GetYaxis().SetRangeUser(0,0.015)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'
@@ -362,7 +339,7 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     legend = ROOT.TLegend(0.45,0.65, 0.81, 0.86)
     legend.AddEntry(graph1, "RASER simulation", "p")
     legend.AddEntry(graph2, "TCT measurement", "p")
-    legend.AddEntry(graph3, "Theory", "p")
+    legend.AddEntry(graph3, "Theory", "l")
     legend.SetTextSize(27)
     legend.SetTextFont(43)
 
@@ -397,7 +374,7 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,key,key_name,path):
 
     mg.Add(graph1)
     mg.Add(graph2)
-    mg.Draw('ALP')
+    mg.Draw('apl')
     
     mg.GetYaxis().SetTitle('Signal [V]')
     mg.GetXaxis().SetTitle('time [ns]')
@@ -436,7 +413,8 @@ def analysis_depth(path,output_path,pulse_energy_scale):
         draw_double_graphs(velprof,velprof_exp,Z,"z","VelProf",output_path)
         draw_double_graphs(difprof,difprof_exp,Z,"z","DifProf",output_path)
 
-        difprof_theory = dif_cal()
+        velprof_theory, difprof_theory = dif_cal()
+        draw_triple_graphs(velprof,velprof_exp,velprof_theory,Z,"z","VelProf",output_path)   
         draw_triple_graphs(difprof,difprof_exp,difprof_theory,Z,"z","DifProf",output_path)   
 
         for volt,time,volt_exp,time_exp,z in zip(volts, times, volts_exp, times_exp, list(Z)):
@@ -475,19 +453,23 @@ def dif_cal():
     my_lgad = raser.R3dDetector(lgad_set)
     my_lgad_field = raser.FenicsCal(my_lgad,lgad_set.fenics)
 
+    field = array("d")
     dif = array("d")
-    E_2 = my_lgad_field.get_e_field(650,650,2+0.01)[2]
+    E_2 = my_lgad_field.get_e_field(650,650,2)[2]
     for i in range(-8,59):
+        E = my_lgad_field.get_e_field(650,650,i)[2]
+        field.append(0.002*E)
         if i not in range(2,50):
-            dif.append(999.9) # fake value for not shown in the figure
+            dif.append(0) # fake value for not shown in the figure
             continue
-        E = my_lgad_field.get_e_field(650,650,i+0.01)[2]
-        delta_sigma = 2.8*(1+2*np.log(E_2/E))
-        C = (350e-12*1e5*1e6/2)**2/2/np.log(2) + (6.8/2)**2 # τ^2v^2 + w_0^2/4
-        C_2 = 1.064**2/4/np.pi**2/(6.8/2)**2/11.9**2
+        fE = (1+2*np.log(E_2/E))
+        C = (350e-12*1e5*1e6/2)**2/2/np.log(2) # τ^2v^2
+        z1C0 = (6.8/2)**2 # w_0^2/4
+        z1C2 = 1.064**2/4/np.pi**2/(6.8/2)**2/11.9**2
+        z2 = 2.8
         alpha = 9.87e-4
         def f(x):
-            return np.exp(-alpha*x)*alpha/(C_2*x**2 + C + delta_sigma)**0.5
+            return np.exp(-alpha*x)*alpha/(C + (z1C2 * x**2 + z1C0) * fE + z2 * fE**2)**0.5
 
         n = 1301
         x_list = np.linspace(0, 1300, n) # in cm
@@ -501,7 +483,7 @@ def dif_cal():
 
         dif.append(int_f)
 
-    return dif
+    return field,dif
 
 def main():
     path=sys.argv[1]

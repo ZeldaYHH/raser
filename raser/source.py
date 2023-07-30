@@ -189,3 +189,55 @@ class TCTTracks():
     def timePulse(self, t):
         # to reduce run time, convolute the time pulse function with the signal after the signal is calculated
         return np.exp(-4 * np.log(2) * t ** 2 / self.temporal_FWHM ** 2) / ((2*np.pi)**(1/2) * self.temporal_FWHM / (2 * (2*np.log(2))**(1/2)))
+    
+
+def draw_nocarrier3D(self,path):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    h = ROOT.TH3D("h","",\
+        int((self.x_right_most - self.x_left_most) / self.x_step), self.x_left_most, self.x_right_most,\
+        int((self.y_right_most - self.y_left_most) / self.y_step), self.y_left_most, self.y_right_most,\
+        int((self.z_right_most - self.z_left_most) / self.z_step), self.z_left_most, self.z_right_most)
+    for i in range(len(self.track_position)):
+        h.Fill(self.track_position[i][0], self.track_position[i][1], self.track_position[i][2], self.ionized_pairs[i])
+    h.Draw()
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
+    h.GetYaxis().SetTitle("Width [\mu m]")
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
+    h.GetZaxis().SetTitle("Thick [\mu m]")
+    h.GetZaxis().SetTitleSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
+    h.GetXaxis().SetTitleOffset(1.8)
+    h.GetYaxis().SetTitleOffset(2.2)
+    h.GetZaxis().SetTitleOffset(1.4)
+    c1.SetLeftMargin(0.15)
+    c1.SaveAs(path+"nocarrier_"\
+        +str(round(self.fx_rel,5))+"_"\
+        +str(round(self.fy_rel,5))+"_"\
+        +str(round(self.fz_rel,5))+".pdf")  
+
+def draw_nocarrier2D(self, path):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    h = ROOT.TH2D("h","",\
+        int((self.x_right_most - self.x_left_most) / self.x_step), self.x_left_most, self.x_right_most,\
+        int((self.z_right_most - self.z_left_most) / self.z_step), self.z_left_most, self.z_right_most)
+    for i in range(len(self.track_position)):
+        h.Fill(self.track_position[i][0], self.track_position[i][2], self.ionized_pairs[i])
+    h.Draw("COLZ")
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
+    h.GetYaxis().SetTitle("Thick [\mu m]")
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
+    c1.SetRightMargin(0.15)
+    c1.SetLeftMargin(0.12)
+    c1.SaveAs(path+"nocarrier2D_"\
+        +str(round(self.fx_rel,5))+"_"\
+        +str(round(self.fy_rel,5))+"_"\
+        +str(round(self.fz_rel,5))+".pdf")  
