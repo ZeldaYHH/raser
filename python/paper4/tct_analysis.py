@@ -216,7 +216,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.015)
 
@@ -230,7 +230,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     if name == 'DifProf':
         Y_title = '1/\sigma [\mu m^{-1}]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.07)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.003)
     
@@ -308,7 +308,7 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.015)
 
@@ -322,7 +322,7 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     if name == 'DifProf':
         Y_title = '1/\sigma [\mu m^{-1}]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.003)
     
@@ -377,7 +377,7 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,key,key_name,path):
     mg.Draw('apl')
     
     mg.GetYaxis().SetTitle('Signal [V]')
-    mg.GetXaxis().SetTitle('time [ns]')
+    mg.GetXaxis().SetTitle('Time [ns]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
     mg.GetXaxis().SetLabelSize(0.05)
@@ -462,14 +462,14 @@ def dif_cal():
         if i not in range(2,50):
             dif.append(0) # fake value for not shown in the figure
             continue
-        fE = (1+2*np.log(E_2/E))
+        fE = (E_2/E)**2
         C = (350e-12*1e5*1e6/2)**2/2/np.log(2) # τ^2v^2
         z1C0 = (6.8/2)**2 # w_0^2/4
         z1C2 = 1.064**2/4/np.pi**2/(6.8/2)**2/11.9**2
         z2 = 2.8
         alpha = 9.87e-4
         def f(x):
-            return np.exp(-alpha*x)*alpha/(C + (z1C2 * x**2 + z1C0) * fE + z2 * fE**2)**0.5
+            return np.exp(-alpha*x)*alpha/(C + (z1C2 * x**2 + z1C0) * fE + z2/2 * (fE-1))**0.5
 
         n = 1301
         x_list = np.linspace(0, 1300, n) # in cm
