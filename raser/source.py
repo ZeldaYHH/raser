@@ -104,8 +104,8 @@ class TCTTracks():
         self.ionized_pairs = list(np.ravel(self.projGrid))
 
         # seperate the carrier groups to simulate diffusion
-        group_unit = 100 # the max number of carriers in one group
-        cut = 0.1
+        group_unit = 10000000 # the max number of carriers in one group
+        cut = 10
         temp_position, temp_pairs = [],[]
         for position, pairs in zip(self.track_position, self.ionized_pairs):
             if pairs < cut:
@@ -118,7 +118,8 @@ class TCTTracks():
 
         self.track_position = temp_position
         self.ionized_pairs = temp_pairs
-
+        self.sum_ionized_pairs=sum(self.ionized_pairs)
+        print(max(self.ionized_pairs))
         print(len(self.ionized_pairs),"pairs of carrier models to drift")
         print(sum(self.ionized_pairs),"total pairs of carriers")
 

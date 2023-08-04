@@ -12,6 +12,7 @@ import ROOT
 import sys
 import os
 import time
+import csv
 
 def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
@@ -42,7 +43,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 
-def save_signal_TTree(dset,my_d,key,ele_current,my_f):
+def save_signal_TTree(dset,my_d,key,ele_current,my_f,my_l):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join("output", "pintct", dset.det_name, "data",)
     elif "lgad3D" in my_d.det_model:
@@ -51,6 +52,7 @@ def save_signal_TTree(dset,my_d,key,ele_current,my_f):
     for j in range(my_f.read_ele_num):
         volt = array('d', [999.])
         time = array('d', [999.])
+        pairs= array('d', [999.])
         if my_f.read_ele_num==1:
             fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key) + ".root", "RECREATE")
         else:
@@ -59,6 +61,9 @@ def save_signal_TTree(dset,my_d,key,ele_current,my_f):
         t_out.Branch("volt", volt, "volt/D")
         t_out.Branch("time", time, "time/D")
         for i in range(ele_current.CSA_ele[j].GetNbinsX()):
+        t_out.Branch("pairs", pairs, "pairs/D")
+        pairs[0]=my_l.sum_ionized_pairs
+        for i in range(ele_current.BB_ele[j].GetNbinsX()):
             time[0]=i*ele_current.time_unit
             volt[0]=ele_current.CSA_ele[j][i]
             t_out.Fill()
@@ -789,7 +794,7 @@ def set_input(dset,my_current,my_l,my_d,key):
                 break
             else:
                 current[i]=0
-        for j in range(i, len(current)):
+        for j in range(i+1, len(current)):
             input_c.append(str(time[j]))
             input_c.append(str(current[j]))
             if current[j] > c_max * 0.01:

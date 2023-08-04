@@ -31,7 +31,8 @@ def collect_data(path, model, volt_scale, time_scale, keys, key_name):
     for key in keys:
         volt=array("d",[0.])
         time=array("d",[0.])
-        rootfile=path+model+str(key)+key_name+".root"
+        rootfile=path+model+str(key)+".root"
+        #rootfile=path+model+str(key)+key_name+".root"
         volt,time=read_rootfile(rootfile, volt_scale, time_scale)
         volts.append(volt)
         times.append(time)
@@ -52,7 +53,7 @@ def read_rootfile(rootfile,volt_scale,time_scale):
     myFile = ROOT.TFile(str(rootfile))
     myt = myFile.tree
     for entry in myt:
-       v1.append(volt_scale*entry.volt)
+       v1.append(-volt_scale*entry.volt)
        t1.append(time_scale*entry.time)
        J=J+1
     return v1,t1
@@ -159,7 +160,27 @@ def draw_graphs(array1,keys,key_name,name,path):
     graph=ROOT.TGraph(n,keys,array1)
     graph.SetMarkerStyle(3)
     graph.Draw('ap')
+    graph.GetXaxis().SetTitle('z [um]')
 
+    if name == "Charge":
+        graph.GetYaxis().SetTitle('Charge [fC]')
+        graph.GetYaxis().SetRangeUser(0,1600000)
+
+    elif name == "Amplitude":
+        graph.GetYaxis().SetTitle('Amplitude [V]')
+        graph.GetYaxis().SetRangeUser(0,1.6)
+
+    elif name =="RiseTime":
+        graph.GetYaxis().SetTitle('RiseTime [ns]')
+        graph.GetYaxis().SetRangeUser(0,3)
+    
+    elif name =="VelProf":
+        graph.GetYaxis().SetTitle('Ve+Vh [a.u.]')
+        #graph.GetYaxis().SetRangeUser(0,0.7)
+
+    elif name =="DifProf":
+        graph.GetYaxis().SetTitle('\sigma^{-2} [a.u.]')
+        graph.GetYaxis().SetRangeUser(0,0.16e-6) 
     legend = ROOT.TLegend(0.6,0.7, 0.83, 0.89)
     legend.AddEntry(graph,"RASER Simulation", "p")
     legend.SetTextSize(18)
@@ -221,7 +242,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
             mg.GetYaxis().SetRangeUser(0,0.015)
 
     if name == 'RiseTime':
-        Y_title = 'RiseTime [ns]'
+        Y_title = 'RiseTime [s]'
         if 'LGAD' in path:
             mg.GetYaxis().SetRangeUser(0,1.5)
         else:
@@ -236,7 +257,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     
     mg.GetYaxis().SetTitle(Y_title)
     if key_name == "z":
-        mg.GetXaxis().SetTitle('z [\mu m]')
+        mg.GetXaxis().SetTitle('z [um]')
     elif key_name == "voltage":
         mg.GetXaxis().SetTitle('Reverse bias voltage [V]')
     mg.GetYaxis().SetLabelSize(0.05)
@@ -402,10 +423,10 @@ def analysis_depth(path,output_path,pulse_energy_scale):
     rel_z = array("d")
     for L in range(-8,59):
         Z.append(L)
-        rel_z.append(round(0.02*L,2))
+        rel_z.append(round(0.01 *L,2))
 
     if "experiment" in sys.argv:
-        amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
+        amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "ngspice", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
         amplitude_exp, charge_exp, risetime_exp, velprof_exp, difprof_exp, volts_exp, times_exp = collect_data(path, "exp-TCT", 1, 1, rel_z, 'fz_rel')
         draw_double_graphs(amplitude,amplitude_exp,Z,"z","Amplitude",output_path)
         draw_double_graphs(charge,charge_exp,Z,"z","Charge",output_path)
@@ -421,18 +442,19 @@ def analysis_depth(path,output_path,pulse_energy_scale):
             draw_double_signals(time,time_exp,volt,volt_exp,z,"z",output_path)
 
     else:
-        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
-        draw_graphs(amplitude,Z,"z","Amplitude",output_path)
+        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "ngspice", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
+        #draw_graphs(amplitude,Z,"z","Amplitude",output_path)
         draw_graphs(charge,Z,"z","Charge",output_path)
-        draw_graphs(risetime,Z,"z","RiseTime",output_path)
+        #draw_graphs(risetime,Z,"z","RiseTime",output_path)
         draw_graphs(velprof,Z,"z","VelProf",output_path)
-        draw_graphs(difprof,Z,"z","DifProf",output_path)
+        #draw_graphs(difprof,Z,"z","DifProf",output_path)
 
 def analysis_voltage(path,output_path,pulse_energy_scale):
     V = array("d")
     VN = array("i")
-    for L in range(60,220,20):
-        V.append(L)
+    for L in range(101):
+        s=round(0.01*L,2)
+        V.append(s)
         VN.append(-L)
 
     if "experiment" in sys.argv:
@@ -444,7 +466,7 @@ def analysis_voltage(path,output_path,pulse_energy_scale):
             draw_double_signals(time,time_exp,volt,volt_exp,v,"voltage",output_path)
 
     else:
-        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, V, 'voltage')
+        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "ngspice", pulse_energy_scale, 1e9, V, 'voltage')
         draw_graphs(charge,V,"voltage","Charge",output_path)
 
 def dif_cal():
