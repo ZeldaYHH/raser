@@ -2,7 +2,7 @@
 #From: library/debian:11.5   
 
 Bootstrap: localimage
-From: raser-1.2.sif  
+From: raser-1.3.sif  
 
 %post
     ## Use huaweicloud  
@@ -41,3 +41,6 @@ From: raser-1.2.sif
     ## NGSpice & KiCAD
     #apt -y install ngspice 
     #apt -y install kicad 
+
+    ## ALiBaVa 
+    pip install pylandau tqdm numba h5py PyYAML joblib 
