@@ -1,5 +1,4 @@
 """This file contains the basis analysis class for the ALiBaVa analysis"""
-#pylint: disable=C0103
 import logging
 import numpy as np
 from analysis_classes.nb_analysis_funcs import parallel_event_processing
@@ -98,7 +97,6 @@ class BaseAnalysis:
         # Get events with good timing and only process these events
         gtime = np.nonzero(np.logical_and(self.eventtiming >= self.main.timingWindow[0],
                                           self.eventtiming <= self.main.timingWindow[1]))
-        #self.eventtiming = self.eventtiming[gtime]
 
         # Warning: If you have a RS and pulseshape recognition enabled the
         # timing window has to be set accordingly

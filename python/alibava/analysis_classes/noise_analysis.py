@@ -1,5 +1,4 @@
 """Noise analysis of ALiBaVa files"""
-# pylint: disable=C0103,R0902,C0301,R0914,R0913
 import logging
 import pdb
 from time import time
@@ -8,7 +7,7 @@ from tqdm import tqdm
 from analysis_classes.nb_analysis_funcs import nb_noise_calc
 from analysis_classes.utilities import import_h5
 
-class NoiseAnalysis:# used
+class NoiseAnalysis:
     """This class contains all calculations and data concerning pedestals in
 	ALIBAVA files"""
     def __init__(self, path="", configs=None, logger=None):

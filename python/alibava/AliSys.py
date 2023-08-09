@@ -27,11 +27,11 @@ def main(args):
     for ped, cal, run in meas_files:
         it+=1
 
-        ped_data = NoiseAnalysis(ped, configs=cfg)# 删除congfig=
+        ped_data = NoiseAnalysis(ped, configs=cfg)
 
         results["NoiseAnalysis"] = ped_data
 
-        cal_data = Calibration(cal, Noise_calc=ped_data, configs=cfg)# 删除congfig=
+        cal_data = Calibration(cal, Noise_calc=ped_data, configs=cfg)
 
         results["Calibration"] = cal_data
 

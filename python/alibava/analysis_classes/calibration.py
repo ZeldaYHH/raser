@@ -1,11 +1,10 @@
 """This file contains the class for the ALiBaVa calibration"""
-#pylint: disable=C0103,C0301,R0913,R0902
 import logging
 import numpy as np
 from scipy.interpolate import CubicSpline
 from .utilities import import_h5
 
-class Calibration:# used
+class Calibration:
     """This class handles everything concerning the calibration.
 
     Charge Scan Details:
@@ -32,13 +31,11 @@ class Calibration:# used
         """
         self.log = logger or logging.getLogger(__class__.__name__)
 
-        # self.charge_cal = None
         self.delay_cal = None
         self.delay_data = None
         self.charge_data = None
         self.pedestal = Noise_calc.pedestal
         self.noisy_channels = Noise_calc.noisy_strips
-        # self.CMN = np.std(Noise_calc.CMnoise)
         self.coeff_per_ch = []
         self.mean_sig_all_ch = [] # mean signal per pulse over all channels
         self.gains_per_pulse = []
@@ -70,23 +67,21 @@ class Calibration:# used
 
         if not self.configs["use_charge_cal"]:
             self.use_predefined_cal_params()
-            #self.delay_calibration_calc(file_path)
         elif file_path == "":
             self.use_predefined_cal_params()
         else:
             self.charge_calibration_calc(file_path)
 
-    def use_predefined_cal_params(self):# used
+    def use_predefined_cal_params(self):
         """Uses the predefined calibration parameters from the calibration file"""
         self.log.info("Using predefined gain parameters: %s", self.configs["Gain_params"])
         self.meancoeff = self.configs["Gain_params"]
         self.ADC_sig = 1.
         self.charge_sig = 1.
         self.chargecoeff = [np.array(self.configs["Gain_params"]) for i in range(256)]
-        #self.gain_calc()
         # So every strip has the same gain
 
-    def charge_calibration_calc(self, charge_path):# used
+    def charge_calibration_calc(self, charge_path):
         """Analyze the calibration scan and calculate conversion parameters
         for converting ADC Signals to e Signals"""
 
@@ -110,8 +105,6 @@ class Calibration:# used
 
             # signals per pulse subtracted by pedestals and excluding noisy channels
             signals = np.array(self.charge_data["events"]["signal"][:]) - self.pedestal
-            # signals = np.delete(signals, self.noisy_channels, axis=1)
-            # Calculate size of pulse group to obtain number of injected signals per pulse step
             sigppulse = int(len(signals) / len(self.pulses))
 
             start = 0
@@ -129,8 +122,6 @@ class Calibration:# used
                 if self.polarity == -1:
                     meansig_neg_pulses = np.hstack(list(zip(raw_half[0:104:2], raw_half2[1:103:2])))
                     std_neg_pulses = np.hstack(list(zip(raw_half_std[0:104:2], raw_half2_std[1:103:2])))
-                    #meansig_neg_pulses = np.hstack(list(zip(raw_half[0::2], raw_half2[1::2])))
-                    #std_neg_pulses = np.hstack(list(zip(raw_half_std[0::2], raw_half2_std[1::2])))
                     self.meansig_charge.append(np.abs(meansig_neg_pulses))
                     self.sig_std.append(std_neg_pulses)
                 elif self.polarity == 1:
@@ -151,18 +142,12 @@ class Calibration:# used
             if np.mean(self.offset) > 5:
                 self.log.warning("Charge offset is greater then 5 ADC! This "
                                  "may be a result of bad calibration! Offset: {}".format(np.mean(self.offset)))
-            #self.meansig_charge = self.meansig_charge - offset
-            #for i, pul in enumerate(self.meansig_charge):
-            #    for j, val in enumerate(pul):
-            #        if val < 0:
-            #            self.meansig_charge[i][j] = 0
+
 
 
             # Calculate the mean over all channels for every pulse and then calc
             # a poly fit for the median gain curve
             # revise
-            # self.mean_sig_all_ch = np.median(self.meansig_charge, axis=1)#-np.mean(self.offset)
-            # self.mean_std_all_ch = np.median(self.sig_std, axis=1)#-np.mean(self.offset)
             self.mean_sig_all_ch = np.mean(self.meansig_charge, axis=1)
             self.mean_std_all_ch = np.mean(self.sig_std, axis=1)
             if self.mean_sig_all_ch[0] <= self.range[0] and self.mean_sig_all_ch[-1] >= self.range[0]:
@@ -189,7 +174,6 @@ class Calibration:# used
             self.channel_coeff = np.zeros([self.numChan, self.degpoly+1])
             for i in range(self.numChan):
                 if i not in self.noisy_channels:
-                    #self.log.debug("Fitting channel: {}".format(i))
                     try:
                         # Taking the correct channel from the means, this has the length of pulses, and the correct
                         # polarity is already accored to. Warning first value will always be cutted away,

@@ -1,5 +1,4 @@
 """This files contains analysis function optimizes by numba jit capabilities"""
-#pylint: disable=E1111,C0103
 from numba import jit, prange
 import numpy as np
 
@@ -163,8 +162,6 @@ def parallel_event_processing(goodtiming, timings, events, pedestal, meanCMN, me
             start=end+1
 
         # Todo: Currently not working due to performance issues
-        #results = Parallel(n_jobs=poolsize, verbose=1, backend='threading', require="sharedmem")(map(delayed(event_process_function_multithread),
-        #                                                                                           paramslist))
         results = []
         for i in prange(poolsize):
             results.append(event_process_function_multithread(paramslist[i]))

@@ -1,5 +1,4 @@
 """PlotData Class"""
-# pylint: disable=R0201,C0103,E0401,R0913
 import numpy as np
 import logging
 from scipy.stats import norm, rv_continuous
@@ -7,7 +6,6 @@ import matplotlib.pyplot as plt
 import logging
 import matplotlib.mlab as mlab
 from scipy import optimize
-# import pylandau
 from analysis_classes.utilities import handle_sub_plots
 from analysis_classes.utilities import create_dictionary
 import csv

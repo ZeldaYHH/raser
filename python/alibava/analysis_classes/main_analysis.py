@@ -1,6 +1,5 @@
 """This file contains the main loop class that loops over the complete
 run data"""
-#pylint: disable=R0902,R0915,C0103,C0301
 
 import logging
 from multiprocessing import Pool
@@ -94,11 +93,8 @@ class MainAnalysis:# used
 
         # Now process additional analysis stated in the config file
         # Load all plugins
-        #print('start ================')
         plugins = load_plugins(configs.get("additional_analysis", []))
-        #print("mmx:::",plugins)
         for name, plugin in plugins.items():
-            #print("main analysis mmx===================")
             self.log.info("Starting analysis: {}".format(name))
             analysis = plugin(self, configs.get(name, {}))
             self.outputdata[name] = analysis.run()
@@ -123,7 +119,7 @@ class MainAnalysis:# used
         self.Pool.join()
 
 
-    def configure_configs(self, configs):# used
+    def configure_configs(self, configs):
         """Takes every parent entry in the configs dict and makes a object for
         the main class"""
 
