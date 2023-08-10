@@ -18,6 +18,7 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.7"       "Si_Strip"
     printf "\n\t%-9s  %-40s\n"  "1.8"       "ITk MD8"
+    printf "\n\t%-9s  %-40s\n"  "1.9"       "ALiBaVa"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
@@ -187,7 +188,7 @@ else
 fi
 
 
-imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif
+imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.4.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
@@ -468,6 +469,14 @@ case $option in
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
         ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
         #raser "./python/solve_itk_md8_cv.py"
+        ;;
+esac
+}
+
+sub_1_9(){
+case $option in 
+    1.9.1) echo "ALiBaVa SiC PIN ..."
+        raser "./python/alibava/AliSys.py --config python/alibava/config/default_config.yml --data 20230809"
         ;;
 esac
 }
@@ -868,6 +877,15 @@ case $option in
         ;;
     1.8.*) echo "ITk MD8 simulation"
         sub_1_8 option
+        ;;
+    1.9) echo "ALBaVa"
+        usage_1_9
+        echo "Please enter your option: " 
+        read option 
+        sub_1_9 option 
+        ;;
+    1.9.*) echo "ALiBaVa"
+        sub_1_9 option
         ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
