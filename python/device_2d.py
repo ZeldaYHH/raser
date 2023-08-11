@@ -12,8 +12,8 @@ import os
 import devsim
 import matplotlib.pyplot
 
-if not (os.path.exists("./output/testdio")):
-    os.mkdir("./output/testdio")
+if not (os.path.exists("./output/testdiode")):
+    os.mkdir("./output/testdiode")
 
 
 
