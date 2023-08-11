@@ -3,7 +3,7 @@
 
 
 import devsim
-import dio2_element_physics
+import python.diode_element_physics as diode_element_physics
 import sys
 import math
 sys.path.append("..")
@@ -48,9 +48,9 @@ region="MyRegion"
 createMesh(device,region)
 
 
-dio2_element_physics.setMaterialParameters(device, region)
+diode_element_physics.setMaterialParameters(device, region)
 
-dio2_element_physics.createSolution(device, region, "Potential")
+diode_element_physics.createSolution(device, region, "Potential")
 
 ####
 #### NetDoping
@@ -76,11 +76,11 @@ def NetDoping(device=device, region=region):
 NetDoping(device,region)
 
 
-dio2_element_physics.createPotentialOnly(device, region)
+diode_element_physics.createPotentialOnly(device, region)
 
 
-dio2_element_physics.createPotentialOnlyContact(device, region, "top")
-dio2_element_physics.createPotentialOnlyContact(device, region, "bot")
+diode_element_physics.createPotentialOnlyContact(device, region, "top")
+diode_element_physics.createPotentialOnlyContact(device, region, "bot")
 
 ####
 #### Initial DC solution
@@ -92,8 +92,8 @@ devsim.write_devices(file="dio2_element_2d_potentialonly.flps", type="floops")
 ####
 #### drift diffusion
 ####
-dio2_element_physics.createSolution(device, region, "Electrons")
-dio2_element_physics.createSolution(device, region, "Holes")
+diode_element_physics.createSolution(device, region, "Electrons")
+diode_element_physics.createSolution(device, region, "Holes")
 
 ####
 #### create initial guess from dc only solution
@@ -101,10 +101,10 @@ dio2_element_physics.createSolution(device, region, "Holes")
 devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
 devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
 
-dio2_element_physics.createDriftDiffusion(device, region)
+diode_element_physics.createDriftDiffusion(device, region)
 
-dio2_element_physics.createDriftDiffusionAtContact(device, region, "top")
-dio2_element_physics.createDriftDiffusionAtContact(device, region, "bot")
+diode_element_physics.createDriftDiffusionAtContact(device, region, "top")
+diode_element_physics.createDriftDiffusionAtContact(device, region, "bot")
 
 
 
@@ -121,8 +121,8 @@ while v < 7:
    
     devsim.set_parameter(device=device, region=region, name="topbias", value=0-v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
-    dio2_element_physics.printCurrents(device, "top", 0-v)
-    dio2_element_physics.printCurrents(device, "bot", 0.0)
+    diode_element_physics.printCurrents(device, "top", 0-v)
+    diode_element_physics.printCurrents(device, "bot", 0.0)
     v += 0.1
 
     devsim.write_devices(file="./output/testdio/{0}_{1}dd.dat".format(type,v), type="floops")
