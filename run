@@ -18,6 +18,7 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.7"       "Si_Strip"
     printf "\n\t%-9s  %-40s\n"  "1.8"       "ITk MD8"
+    printf "\n\t%-9s  %-40s\n"  "1.9"       "ALiBaVa"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
@@ -187,11 +188,11 @@ else
 fi
 
 
-imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif
+imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.4.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
-    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs $imagefile $1 
+    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $imagefile $1 
 }
 
 sub_1_1(){
@@ -385,8 +386,11 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
-    1.3.20) echo "2Dcvfor v0.1"
-        raser "./python/2Dcv_v0.1.py"
+    1.3.20) echo "simulate simple 2d PN juction with 2diffrent doping"
+        raser "./python/device_2d.py PNjuction"
+        ;; 
+    1.3.21) echo "simulate simple 2d PN juction with Gain layer doping and bulk doping"
+        raser "./python/device_2d.py PNwithGainlayer" 
         ;;
             
 esac
@@ -452,6 +456,10 @@ case $option in
     1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
         raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip geant4_model=Si_strip geant4_parfile=paras/geant4_setting.json"
         ;;
+
+    1.7.2) echo "1.7.2"   "Si strip experiment analyse ..."
+        raser "./python/si_strip_analyse.py"
+        ;;
 esac
 }
 
@@ -468,6 +476,14 @@ case $option in
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
         ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
         #raser "./python/solve_itk_md8_cv.py"
+        ;;
+esac
+}
+
+sub_1_9(){
+case $option in 
+    1.9.1) echo "ALiBaVa SiC PIN ..."
+        raser "./python/alibava/AliSys.py --config python/alibava/config/default_config.yml --data 20230809"
         ;;
 esac
 }
@@ -868,6 +884,15 @@ case $option in
         ;;
     1.8.*) echo "ITk MD8 simulation"
         sub_1_8 option
+        ;;
+    1.9) echo "ALBaVa"
+        usage_1_9
+        echo "Please enter your option: " 
+        read option 
+        sub_1_9 option 
+        ;;
+    1.9.*) echo "ALiBaVa"
+        sub_1_9 option
         ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
