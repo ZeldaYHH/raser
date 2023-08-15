@@ -13,7 +13,7 @@ import sys
 import os
 import time
 
-def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
+def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     @description:
         Draw electric field ,drift path and energy deposition
@@ -24,7 +24,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     @Modify:
         2021/08/31
     """
-    now = time.strftime("%Y_%m%d_%H%M")
+    now = time.strftime("%Y_%m%d_%H%M%S")
     path = os.path.join("fig", str(now),'' )
     create_path(path) 
     if "plugin" in my_d.det_model:
@@ -32,97 +32,121 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     else:
         draw_ele_field_1D(my_d,my_f,path)
         draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
-    for i in range(my_f.tol_elenumber):
-        draw_plot(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
-        draw_plot(my_d, my_current,ele_current.BB_ele,i,"BB",path)
+    for i in range(my_f.read_ele_num):
+        draw_current(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
+        draw_current(my_d, my_current,ele_current.BB_ele,i,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
-        draw_nocarrier3D(path,my_l)
+        my_l.draw_nocarrier3D(path)
+        my_l.draw_nocarrier2D(path)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
-     
-def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
-    """
-    @description:
-        Draw electric field ,drift path and energy deposition
-    @param:
-        None     
-    @Returns:
-        None
-    @Modify:
-        2021/08/31
-    """
-    create_path("fig/")
-    draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(dset,my_d,my_l,ele_current,my_f,key):
+def save_signal_TTree(dset,my_d,key,ele_current,my_f):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join("output", "pintct", dset.det_name, )
+        path = os.path.join("output", "pintct", dset.det_name, "data",)
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join("output", "lgadtct", dset.det_name, )
+        path = os.path.join("output", "lgadtct", dset.det_name, "data",)
     create_path(path) 
-    L=eval("my_l.{}".format(key))
-    #L is defined by different keys
-    for j in range(my_f.tol_elenumber):
+    for j in range(my_f.read_ele_num):
         volt = array('d', [999.])
         time = array('d', [999.])
-        variation = array('d', [999.])
-        if my_f.tol_elenumber==1:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L) + ".root", "RECREATE")
+        if my_f.read_ele_num==1:
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key) + ".root", "RECREATE")
         else:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L)+"No_"+str(j)+".root", "RECREATE")
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key)+"No_"+str(j)+".root", "RECREATE")
         t_out = ROOT.TTree("tree", "signal")
         t_out.Branch("volt", volt, "volt/D")
         t_out.Branch("time", time, "time/D")
-        t_out.Branch(key, variation, "{}/D".format(key))
-        for i in range(ele_current.BB_ele[j].GetNbinsX()):
+        for i in range(ele_current.CSA_ele[j].GetNbinsX()):
             time[0]=i*ele_current.time_unit
-            volt[0]=ele_current.BB_ele[j][i]
-            variation[0]=L
+            volt[0]=ele_current.CSA_ele[j][i]
             t_out.Fill()
         t_out.Write()
         fout.Close()
 
-def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
+def save_current(dset,my_d,my_l,my_current,my_f,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pintct', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
+    create_path(path) 
+    L = eval("my_l.{}".format(key))
+    #L is defined by different keys
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    for i in range(my_f.read_ele_num):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+        fout.Close()
+
+def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
-    if "plugin" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
+    if "strip" in my_d.det_model: # under construction
+        for k in range(ele_current.read_ele_num):
+            output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
+                       + "_v="+str(my_d.voltage)
+                       + "_tmp="+str(my_d.temperature) 
+                       + "_thick="+str(my_d.l_z) 
+                       + "_electrode_number="+str(k))
+        
+            create_path(output_path)
+            save_signal_csv(ele_current,my_g4p,batch_number,start_n,k,output_path)
+
+    elif "plugin" in my_d.det_model:
+        output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_r) )
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
+
     elif "planar" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
+        output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
+
     elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.doping1) 
+        output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 
                        + "_radius=None")
-    
-    create_path(output_path)
-    save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
 
-def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
+    del ele_current.BB_ele
+    del ele_current.CSA_ele
+
+def save_signal_csv(ele_current,my_g4p,number,start_n,k,output_path="none"):
     """ Save induced current after CSA and BB"""
-    charge = "_charge=%.2f_"%(ele_current.qtot*1e15)  #fc
+    charge = "_charge=%.2f_"%(ele_current.qtot[k]*1e15)  #fc
     e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
     f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
-    for i in range(ele_current.BB_ele.GetNbinsX()):
+    for i in range(ele_current.BB_ele[k].GetNbinsX()):
         f1.write("%s,%s,%s \n"%(i*ele_current.time_unit,
-                                ele_current.CSA_ele[i],
-                                ele_current.BB_ele[i]))
+                                ele_current.CSA_ele[k][i],
+                                ele_current.BB_ele[k][i]))
     f1.close()
 
     print("output_file:%s"%output_file)
-    del ele_current.BB_ele
-    del ele_current.CSA_ele
 
 def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     """
@@ -142,7 +166,7 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.SetRightMargin(0.2)
     c1.SetBottomMargin(0.14)
     c1.SetRightMargin(0.12)
-    q = int(math.sqrt(my_f.tol_elenumber+2))+1
+    q = int(math.sqrt(my_f.read_ele_num+2))+1
     c1.Divide(q,q)
     model = ["E","P","WP"]
     e_field=[]
@@ -156,7 +180,7 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.GetPad(i).SetRightMargin(0.2)
     e_field.append(fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model,i))
     e_field[i-1].Draw("COLZ")
-    for i in range(3,my_f.tol_elenumber+3):
+    for i in range(3,my_f.read_ele_num+3):
         c1.cd(i)
         c1.GetPad(i).SetRightMargin(0.2)
         e_field.append(fill_his(model[2],depth,my_d,my_f,plane,sensor_model,i))
@@ -245,7 +269,7 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model,k):
     return e_v
 
 def fill_his_1D(model,my_d,my_f):
-    nz_e=500
+    nz_e=2000
     d_r=confirm_range_1D(my_d)
     e_v = ROOT.TH1F("","",nz_e,d_r[0],d_r[1])
     for i in range(nz_e):
@@ -257,11 +281,11 @@ def fill_his_1D(model,my_d,my_f):
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
                                 +math.pow(f_v[2],2))
-                e_v.GetYaxis().SetTitle(model+"[V/um]")                        
+                e_v.GetYaxis().SetTitle(model+"[V/\mu m]")                        
         except RuntimeError:
             f_v = 0.0
         e_v.SetBinContent(i+1,f_v)
-    e_v.GetXaxis().SetTitle("z[um]") 
+    e_v.GetXaxis().SetTitle("z[\mu m]") 
     return e_v
 
 def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r,k):
@@ -296,7 +320,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r,k):
         e_v.SetTitle("potential "+d_r[4])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weighting potential "+d_r[4]+" No."+str(k-2)+"electron") 
+        e_v.SetTitle("weighting potential "+d_r[4]+" No."+str(k-2)+"electrode") 
         f_v=my_f.get_w_p(input_x,input_y,input_z,k-3)
     return f_v,e_v
 
@@ -365,7 +389,7 @@ def confirm_range_1D(my_d):
     t_name = "z"
     return [l_xl,l_xr,t_name]
 
-def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag=""):
+def draw_current(my_d, my_current, ele_current, read_ele_num, model, path, tag=""):
     """
     @description:
         Save current in root file
@@ -389,51 +413,51 @@ def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag="")
     #my_current.sum_cu.GetXaxis().SetTitleOffset(1.2)
     #my_current.sum_cu.GetXaxis().SetTitleSize(0.05)
     #my_current.sum_cu.GetXaxis().SetLabelSize(0.04)
-    my_current.sum_cu[tol_elenumber].GetXaxis().SetNdivisions(510)
+    my_current.sum_cu[read_ele_num].GetXaxis().SetNdivisions(510)
     #my_current.sum_cu.GetYaxis().SetTitleOffset(1.1)
     #my_current.sum_cu.GetYaxis().SetTitleSize(0.05)
     #my_current.sum_cu.GetYaxis().SetLabelSize(0.04)
-    my_current.sum_cu[tol_elenumber].GetYaxis().SetNdivisions(505)
+    my_current.sum_cu[read_ele_num].GetYaxis().SetNdivisions(505)
     #my_current.sum_cu.GetXaxis().CenterTitle()
     #my_current.sum_cu.GetYaxis().CenterTitle() 
-    my_current.sum_cu[tol_elenumber].GetXaxis().SetTitle("Time [s]")
-    my_current.sum_cu[tol_elenumber].GetYaxis().SetTitle("Current [A]")
+    my_current.sum_cu[read_ele_num].GetXaxis().SetTitle("Time [s]")
+    my_current.sum_cu[read_ele_num].GetYaxis().SetTitle("Current [A]")
 
-    my_current.sum_cu[tol_elenumber].Draw("HIST")
-    my_current.positive_cu[tol_elenumber].Draw("SAME HIST")
-    my_current.negative_cu[tol_elenumber].Draw("SAME HIST")
-    my_current.gain_positive_cu[tol_elenumber].Draw("SAME HIST")
-    my_current.gain_negative_cu[tol_elenumber].Draw("SAME HIST")
-    my_current.sum_cu[tol_elenumber].Draw("SAME HIST")
+    my_current.sum_cu[read_ele_num].Draw("HIST")
+    my_current.positive_cu[read_ele_num].Draw("SAME HIST")
+    my_current.negative_cu[read_ele_num].Draw("SAME HIST")
+    my_current.gain_positive_cu[read_ele_num].Draw("SAME HIST")
+    my_current.gain_negative_cu[read_ele_num].Draw("SAME HIST")
+    my_current.sum_cu[read_ele_num].Draw("SAME HIST")
 
-    my_current.positive_cu[tol_elenumber].SetLineColor(877)#kViolet-3
-    my_current.negative_cu[tol_elenumber].SetLineColor(600)#kBlue
-    my_current.gain_positive_cu[tol_elenumber].SetLineColor(617)#kMagneta+1
-    my_current.gain_negative_cu[tol_elenumber].SetLineColor(867)#kAzure+7
-    my_current.sum_cu[tol_elenumber].SetLineColor(418)#kGreen+2
+    my_current.positive_cu[read_ele_num].SetLineColor(877)#kViolet-3
+    my_current.negative_cu[read_ele_num].SetLineColor(600)#kBlue
+    my_current.gain_positive_cu[read_ele_num].SetLineColor(617)#kMagneta+1
+    my_current.gain_negative_cu[read_ele_num].SetLineColor(867)#kAzure+7
+    my_current.sum_cu[read_ele_num].SetLineColor(418)#kGreen+2
 
-    my_current.positive_cu[tol_elenumber].SetLineWidth(2)
-    my_current.negative_cu[tol_elenumber].SetLineWidth(2)
-    my_current.gain_positive_cu[tol_elenumber].SetLineWidth(2)
-    my_current.gain_negative_cu[tol_elenumber].SetLineWidth(2)
-    my_current.sum_cu[tol_elenumber].SetLineWidth(2)
+    my_current.positive_cu[read_ele_num].SetLineWidth(2)
+    my_current.negative_cu[read_ele_num].SetLineWidth(2)
+    my_current.gain_positive_cu[read_ele_num].SetLineWidth(2)
+    my_current.gain_negative_cu[read_ele_num].SetLineWidth(2)
+    my_current.sum_cu[read_ele_num].SetLineWidth(2)
     c.Update()
 
-    if ele_current[tol_elenumber].GetMinimum() < 0:
-        rightmax = 1.1*ele_current[tol_elenumber].GetMinimum()
+    if ele_current[read_ele_num].GetMinimum() < 0:
+        rightmax = 1.1*ele_current[read_ele_num].GetMinimum()
     else:
-        rightmax = 1.1*ele_current[tol_elenumber].GetMaximum()
+        rightmax = 1.1*ele_current[read_ele_num].GetMaximum()
     if rightmax == 0:
         n_scale=0
-    elif ele_current[tol_elenumber].GetMinimum() <0:
+    elif ele_current[read_ele_num].GetMinimum() <0:
         n_scale = ROOT.gPad.GetUymin() / rightmax
     else:
         n_scale = ROOT.gPad.GetUymax() / rightmax
-    ele_current[tol_elenumber].Scale(n_scale)
-    ele_current[tol_elenumber].Draw("SAME HIST")
-    ele_current[tol_elenumber].SetLineWidth(2)   
-    ele_current[tol_elenumber].SetLineColor(8)
-    ele_current[tol_elenumber].SetLineColor(2)
+    ele_current[read_ele_num].Scale(n_scale)
+    ele_current[read_ele_num].Draw("SAME HIST")
+    ele_current[read_ele_num].SetLineWidth(2)   
+    ele_current[read_ele_num].SetLineColor(8)
+    ele_current[read_ele_num].SetLineColor(2)
     c.Update()
 
     axis = ROOT.TGaxis(ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymin(), 
@@ -446,26 +470,26 @@ def draw_plot(my_d, my_current, ele_current, tol_elenumber, model, path, tag="")
     axis.SetLabelColor(2)
     axis.SetLabelSize(0.035)
     axis.SetLabelFont(42)
-    axis.SetTitle("Ampl [mV]")
+    axis.SetTitle("Ampl [V]")
     axis.SetTitleFont(40)
     axis.SetTitleOffset(1.2)
     #axis.CenterTitle()
     axis.Draw("SAME HIST")
 
     legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
-    legend.AddEntry(my_current.negative_cu[tol_elenumber], "electron", "l")
-    legend.AddEntry(my_current.positive_cu[tol_elenumber], "hole", "l")
-    legend.AddEntry(my_current.gain_negative_cu[tol_elenumber], "gain electron", "l")
-    legend.AddEntry(my_current.gain_positive_cu[tol_elenumber], "gain hole", "l")
-    legend.AddEntry(my_current.sum_cu[tol_elenumber], "e+h", "l")
+    legend.AddEntry(my_current.negative_cu[read_ele_num], "electron", "l")
+    legend.AddEntry(my_current.positive_cu[read_ele_num], "hole", "l")
+    legend.AddEntry(my_current.gain_negative_cu[read_ele_num], "gain electron", "l")
+    legend.AddEntry(my_current.gain_positive_cu[read_ele_num], "gain hole", "l")
+    legend.AddEntry(my_current.sum_cu[read_ele_num], "e+h", "l")
     #legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     #legend.SetTextFont(43)
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(tol_elenumber+1)+"electron"+"_basic_infor.root")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.pdf")
+    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -628,57 +652,6 @@ def draw_scat_angle(evnets_angle,angle,model):
     h2.Draw("HIST")    
     c1.SaveAs("scat_angle"+model+".pdf")
 
-def draw_nocarrier3D(path, my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","",\
-        int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
-        int((my_l.y_right_most - my_l.y_left_most) / my_l.y_step), my_l.y_left_most, my_l.y_right_most,\
-        int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw()
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
-    h.GetXaxis().SetTitleSize(0.05)
-    h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Width [um]")
-    h.GetYaxis().SetTitleSize(0.05)
-    h.GetYaxis().SetLabelSize(0.05)
-    h.GetZaxis().SetTitle("Thick [um]")
-    h.GetZaxis().SetTitleSize(0.05)
-    h.GetZaxis().SetLabelSize(0.05)
-    h.GetXaxis().SetTitleOffset(1.8)
-    h.GetYaxis().SetTitleOffset(2.2)
-    h.GetZaxis().SetTitleOffset(1.4)
-    c1.SetLeftMargin(0.15)
-    c1.SaveAs(path+"nocarrier_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+".pdf")  
-
-def draw_nocarrier2D(path, my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH2D("h","",\
-        int((my_l.x_right_most - my_l.x_left_most) / my_l.x_step), my_l.x_left_most, my_l.x_right_most,\
-        int((my_l.z_right_most - my_l.z_left_most) / my_l.z_step), my_l.z_left_most, my_l.z_right_most)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw("COLZ")
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
-    h.GetXaxis().SetTitleSize(0.05)
-    h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Thick [um]")
-    h.GetYaxis().SetTitleSize(0.05)
-    h.GetYaxis().SetLabelSize(0.05)
-    h.GetZaxis().SetLabelSize(0.05)
-    c1.SetRightMargin(0.15)
-    c1.SetLeftMargin(0.12)
-    c1.SaveAs(path+"nocarrier2D_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+".pdf")  
-
 def get_beam_number(my_g4p,ele_current):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "output/" + "beam_monitor/" + now + "/" 
@@ -704,6 +677,63 @@ def get_beam_number(my_g4p,ele_current):
     h1.GetYaxis().SetTitle("number")
     c1.SaveAs(path+"_energy.pdf")
     c1.SaveAs(path+"_energy.root")
+
+
+def get1_beam_number(my_g4p):
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/" + "SiITk/" + now + "/" 
+    create_path(path) 
+    number = array('d',[999.])
+    hittotal = array('d',[999.])
+    # number[0] = int(-ele_current.max_BB_height/18.8)
+    # hittotal[0]=my_g4p.hittotal
+    # fout = ROOT.TFile(path + "SiITk.root", "RECREATE")
+    # t_out = ROOT.TTree("tree", "beam_number")
+    # t_out.Branch("cal_number", number, "cal_number/D")
+    # t_out.Branch("real_number", hittotal, "real_number/D")
+    # t_out.Fill()
+    # t_out.Write()
+    # fout.Close()
+
+    c1=ROOT.TCanvas("c1","canvas1",1200,1000)
+    h1 = ROOT.TH1F("Edep", "Energy deposition in W208", 100, 0., 1)
+    h2 = ROOT.TH1F("Edep", "Energy deposition in W207", 100, 0., 1)
+    h3 = ROOT.TH1F("Edep", "Energy deposition in W199", 100, 0., 1)
+    for i in range (len(my_g4p.edep_devices)):
+        h1.Fill(my_g4p.edep_devices[i])
+        h2.Fill(my_g4p.edep_devices1[i])
+        h3.Fill(my_g4p.edep_devices2[i])
+    h1.Draw()
+    h1.GetXaxis().SetTitle("energy[MeV]")
+    h1.GetYaxis().SetTitle("number")
+    c1.SaveAs(path+"_energy1.pdf")
+    c1.SaveAs(path+"_energy1.root")
+    
+    c2=ROOT.TCanvas("c2","canvas2",1200,1000)
+    h2.Draw()
+    h2.GetXaxis().SetTitle("energy[MeV]")
+    h2.GetYaxis().SetTitle("number")
+    c2.SaveAs(path+"_energy2.pdf")
+    c2.SaveAs(path+"_energy2.root")
+    
+    c3=ROOT.TCanvas("c3","canvas3",1200,1000)
+    h3.Draw()
+    h3.GetXaxis().SetTitle("energy[MeV]")
+    h3.GetYaxis().SetTitle("number")
+    c3.SaveAs(path+"_energy3.pdf")
+    c3.SaveAs(path+"_energy3.root")
+    
+    # c4=ROOT.TCanvas("c4","canvas4",1000,1000)
+    # h1.SetMarkerStyle(kFullCircle)
+    # h2.SetMarkerStyle(kFullSquare)
+    # h3.SetMarkerStyle(kFullTriangleUp)
+    # h1.Draw()
+    # h2.Draw("same")
+    # h3.Draw("same")
+    # h1.GetXaxis().SetTitle("energy[MeV]")
+    # h1.GetYaxis().SetTitle("number")
+    # c4.SaveAs(path+"_energyall.pdf")
+    # c4.SaveAs(path+"_energyall.root")    
     
 
 
@@ -715,14 +745,13 @@ def cce(my_d,my_f,my_current):
 
     charge=array('d')
     x=array('d')
-    for i in range(my_f.tol_elenumber):
+    for i in range(my_f.read_ele_num):
         x.append(i+1)
         sum_charge=0
         for j in range(my_current.n_bin):
             sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
         charge.append(sum_charge)
     n=int(len(charge))
-
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
     cce=ROOT.TGraph(n,x,charge)
     cce.SetMarkerStyle(3)
@@ -734,34 +763,13 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.root")
     
 
-def save_current(dset,my_d,my_l,my_current,my_f,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    create_path(path) 
-    L = eval("round(my_l.{})".format(key))
-    #L is defined by different keys
-    time = array('d', [999.])
-    current = array('d', [999.])
-    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", time, "time/D")
-    for i in range(my_f.tol_elenumber):
-        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-        for j in range(my_current.n_bin):
-            current[0]=my_current.sum_cu[i].GetBinContent(j)
-            time[0]=j*my_current.t_bin
-            t_out.Fill()
-        t_out.Write()
-        fout.Close()
 
 def set_input(dset,my_current,my_l,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
         path = os.path.join('output', 'lgadtct', dset.det_name, )
-    L = eval("round(my_l.{})".format(key))
+    L = eval("my_l.{}".format(key))
     current=[]
     time=[]
     myFile = ROOT.TFile(os.path.join(path,"sim-TCT-current")+str(L)+".root")
@@ -826,3 +834,31 @@ def set_input(dset,my_current,my_l,my_d,key):
     t_out.Write()
     fout.Close()
     return input_c
+
+def save_current_geant4(my_d,dset,event,my_current,my_g4p,start_n,my_f):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pin3D', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgad3D', dset.det_name, )
+    create_path(path) 
+    L = event
+    #L is defined by different keys
+    e_dep = array('d', [999.])
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "beam-monitor-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    
+    for i in range(my_f.tol_elenumber):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+    t_out.Branch("edep", e_dep, "edep/D")
+    e_dep[0] = my_g4p.edep_devices[event-start_n]
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()

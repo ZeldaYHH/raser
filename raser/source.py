@@ -21,23 +21,25 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser, pulse_time=20e-9, t_step=50e-12):
+    def __init__(self, my_d, laser):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
         #material parameters to certain wavelength of the beam
         self.refractionIndex = laser["refractionIndex"]
         if self.tech == "SPA":
-            self.alpha = laser["alpha"]
+            self.alpha = laser["alpha"] # m^-1
         if self.tech == "TPA":
             self.beta_2 = laser["beta_2"]
         #laser parameters
         self.wavelength = laser["wavelength"]*1e-3 #um
-        self.tau = laser["tau"]
-        self.power = laser["power"]
-        self.widthBeamWaist = laser["widthBeamWaist"]#um
+        self.temporal_FWHM = laser["temporal_FWHM"]
+        self.pulse_energy = laser["pulse_energy"]
+        self.spacial_FWHM = laser["spacial_FWHM"]#um
+        self.central_time = laser["central_time"]
         if "l_Reyleigh" not in laser:
-            self.l_Rayleigh = np.pi*self.widthBeamWaist**2*self.refractionIndex/self.wavelength
+            w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
+            self.l_Rayleigh = np.pi*w_0**2*self.refractionIndex/self.wavelength
         else:
             self.l_Rayleigh = laser["l_Rayleigh"]#um
         #the size of the detector
@@ -54,13 +56,11 @@ class TCTTracks():
         #accuracy parameters
         self.r_step = laser["r_step"]#um
         self.h_step = laser["h_step"]#um
-        self.t_step = t_step#s
-
-        self.pulse_time = pulse_time        
+      
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
-        self.r_char = self.widthBeamWaist / 2
+        self.r_char = self.spacial_FWHM / 2
         if self.tech == "SPA":
             self.h_char = max(my_d.l_x, my_d.l_y, my_d.l_z)
         elif self.tech == "TPA":
@@ -100,9 +100,27 @@ class TCTTracks():
             list(np.ravel(XC)),\
             list(np.ravel(YC)),\
             list(np.ravel(ZC)),\
-            [self.pulse_time for x in np.ravel(XC)]])))
+            [self.central_time for x in np.ravel(XC)]])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
-        print(len(self.ionized_pairs))
+
+        # seperate the carrier groups to simulate diffusion
+        group_unit = 100 # the max number of carriers in one group
+        cut = 0.1
+        temp_position, temp_pairs = [],[]
+        for position, pairs in zip(self.track_position, self.ionized_pairs):
+            if pairs < cut:
+                continue
+            else:
+                k = int(pairs//group_unit + 1) # divide the carrier pairs into k groups
+                for i in range(k):
+                    temp_position.append(position)
+                    temp_pairs.append(pairs/k)
+
+        self.track_position = temp_position
+        self.ionized_pairs = temp_pairs
+
+        print(len(self.ionized_pairs),"pairs of carrier models to drift")
+        print(sum(self.ionized_pairs),"total pairs of carriers")
 
     def change_coordinate(self):
         #from cylindral coordinate (axis parallel with the beam, origin at focus)
@@ -151,24 +169,75 @@ class TCTTracks():
     def getCarrierDensity(self, h, depth, r2):
         #return the carrier density of a given point in a given time period
         #referring to the vertical and horizontal distance from the focus 
-        w_0 = self.widthBeamWaist / 2
+        w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
         wSquared = (w_0 ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
-        intensity = ((self.power) / self.tau)\
-                    * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * wSquared * 1e-12))\
-                    * np.exp((-2 * r2 / wSquared))\
-                    * self.t_step
-
+        intensity = ((self.pulse_energy))\
+                    * (4 / (np.pi * wSquared * 1e-12))\
+                    * np.exp((-2 * r2 / wSquared)) # time distribution decoupled
+        
+        h_Planck = 6.626*1e-34
+        speedofLight = 2.998*1e8
         if self.tech == "SPA":
             # I = I_0 * exp(-αz)
             # dE_deposit = (αdz)dE_flux = (αdz)I*dSdt = (αI)*dVdt
             # dN_ehpair = dE_deposit / Energy_for_each_ionized_ehpair
             e0 = 1.60217733e-19
-            return self.alpha * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (3.6 * e0)
+            return self.alpha * self.wavelength * 1e-6 * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (h_Planck * speedofLight)
         elif self.tech == "TPA":
-            h_Planck = 6.626*1e-34
-            speedofLight = 2.998*1e8
             return self.beta_2 * self.wavelength * 1e-6 * intensity ** 2 / (2 * h_Planck * speedofLight)
         
     def timePulse(self, t):
         # to reduce run time, convolute the time pulse function with the signal after the signal is calculated
-        return np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)
+        return np.exp(-4 * np.log(2) * t ** 2 / self.temporal_FWHM ** 2) / ((2*np.pi)**(1/2) * self.temporal_FWHM / (2 * (2*np.log(2))**(1/2)))
+    
+
+def draw_nocarrier3D(self,path):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    h = ROOT.TH3D("h","",\
+        int((self.x_right_most - self.x_left_most) / self.x_step), self.x_left_most, self.x_right_most,\
+        int((self.y_right_most - self.y_left_most) / self.y_step), self.y_left_most, self.y_right_most,\
+        int((self.z_right_most - self.z_left_most) / self.z_step), self.z_left_most, self.z_right_most)
+    for i in range(len(self.track_position)):
+        h.Fill(self.track_position[i][0], self.track_position[i][1], self.track_position[i][2], self.ionized_pairs[i])
+    h.Draw()
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
+    h.GetYaxis().SetTitle("Width [\mu m]")
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
+    h.GetZaxis().SetTitle("Thick [\mu m]")
+    h.GetZaxis().SetTitleSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
+    h.GetXaxis().SetTitleOffset(1.8)
+    h.GetYaxis().SetTitleOffset(2.2)
+    h.GetZaxis().SetTitleOffset(1.4)
+    c1.SetLeftMargin(0.15)
+    c1.SaveAs(path+"nocarrier_"\
+        +str(round(self.fx_rel,5))+"_"\
+        +str(round(self.fy_rel,5))+"_"\
+        +str(round(self.fz_rel,5))+".pdf")  
+
+def draw_nocarrier2D(self, path):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    h = ROOT.TH2D("h","",\
+        int((self.x_right_most - self.x_left_most) / self.x_step), self.x_left_most, self.x_right_most,\
+        int((self.z_right_most - self.z_left_most) / self.z_step), self.z_left_most, self.z_right_most)
+    for i in range(len(self.track_position)):
+        h.Fill(self.track_position[i][0], self.track_position[i][2], self.ionized_pairs[i])
+    h.Draw("COLZ")
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.05)
+    h.GetYaxis().SetTitle("Thick [\mu m]")
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.05)
+    h.GetZaxis().SetLabelSize(0.05)
+    c1.SetRightMargin(0.15)
+    c1.SetLeftMargin(0.12)
+    c1.SaveAs(path+"nocarrier2D_"\
+        +str(round(self.fx_rel,5))+"_"\
+        +str(round(self.fy_rel,5))+"_"\
+        +str(round(self.fz_rel,5))+".pdf")  

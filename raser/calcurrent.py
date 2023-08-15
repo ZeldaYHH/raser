@@ -7,9 +7,9 @@ Description:  Simulate e-h pairs drifting and calculate induced current
 '''
 import random
 import numpy as np
+import math
 import ROOT
-from raser.model import Mobility
-from raser.model import Avalanche
+from raser.model import Material
 from raser.model import Vector
 
 t_bin = 50e-12
@@ -39,19 +39,19 @@ class Carrier:
     Modify:
         2022/10/28
     """
-    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge,tol_elenumber):
+    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge, material, read_ele_num):
         self.d_x = d_x_init
         self.d_y = d_y_init
         self.d_z = d_z_init
         self.t = t_init
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
-        self.charge = charge
-        self.signal = [[] for j in range(tol_elenumber)]
+        self.signal = [[] for j in range(read_ele_num)]
+        self.end_condition = 0
 
+        self.cal_mobility = Material(material).cal_mobility
+        self.charge = charge
         if self.charge == 0:
             self.end_condition = "zero charge"
-        else:
-            self.end_condition = 0
 
     def not_in_sensor(self,my_d):
         if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
@@ -60,7 +60,7 @@ class Carrier:
             self.end_condition = "out of bound"
         return self.end_condition
 
-    def drift_single_step(self,step,my_d,my_f):
+    def drift_single_step(self,my_d,my_f,step=0.1):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
         if(intensity!=0):
@@ -85,8 +85,8 @@ class Carrier:
             return
         
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
-        mobility = Mobility(my_d.material)
-        mu = mobility.cal_mobility(my_d, my_d.Neff(self.d_z+delta_z), self.charge, average_intensity)
+        mobility = Material(my_d.material)
+        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
         velocity = mu*average_intensity
 
         # get diffution from mobility and temperature
@@ -122,7 +122,6 @@ class Carrier:
             self.d_z = self.d_z+delta_z+dif_z
         #time
         self.t = self.t+delta_t
-
         #record
         self.path.append([self.d_x,self.d_y,self.d_z,self.t]) 
 
@@ -130,7 +129,7 @@ class Carrier:
         """Calculate signal from carrier path"""
         # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
         # signal = i*dt = q*dU_w(x)
-        for j in range(my_f.tol_elenumber):
+        for j in range(my_f.read_ele_num):
             for i in range(len(self.path)-1): # differentiate of weighting potential
                 U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
                 U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
@@ -147,8 +146,8 @@ class Carrier:
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2]==0):
-            self.end_condition = "zero velocity"
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (e_field[2] < 1 and self.d_z < 2):
+            self.end_condition = "zero drift force"
         '''elif wpot>(1-1e-5):
             self.end_condition = "reached cathode"
         elif wpot<1e-5:
@@ -183,13 +182,15 @@ class CalCurrent:
                                track_position[i][2],\
                                track_position[i][3],\
                                -1*ionized_pairs[i],\
-                                my_f.tol_elenumber)
+                               my_d.material,\
+                               my_f.read_ele_num)
             hole = Carrier(track_position[i][0],\
                            track_position[i][1],\
                            track_position[i][2],
                            track_position[i][3],\
                            ionized_pairs[i],\
-                            my_f.tol_elenumber)
+                           my_d.material,\
+                           my_f.read_ele_num)
             if not electron.not_in_sensor(my_d):
                 self.electrons.append(electron)
                 self.holes.append(hole)
@@ -201,32 +202,32 @@ class CalCurrent:
         self.t_start = t_start
         self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
 
-        self.current_define(my_f.tol_elenumber)
-        for i in range(my_f.tol_elenumber):
+        self.current_define(my_f.read_ele_num)
+        for i in range(my_f.read_ele_num):
             self.sum_cu[i].Reset()
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
-        self.get_current(my_d,my_f.tol_elenumber)
-        if my_d.det_model == "lgad3D":
+        self.get_current(my_d,my_f.read_ele_num)
+        if "lgad3D" in my_d.det_model:
             self.gain_current = CalCurrentGain(my_d, my_f, self)
-            for i in range(my_f.tol_elenumber):
+            for i in range(my_f.read_ele_num):
                 self.gain_positive_cu[i].Reset()
                 self.gain_negative_cu[i].Reset()
-            self.get_current_gain(my_f.tol_elenumber)
+            self.get_current_gain(my_f.read_ele_num)
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
-                electron.drift_single_step(my_d.steplength, my_d, my_f)
+                electron.drift_single_step(my_d, my_f)
                 electron.drift_end(my_f)
             electron.get_signal(my_f,my_d)
         for hole in self.holes:
             while not hole.not_in_sensor(my_d):
-                hole.drift_single_step(my_d.steplength, my_d, my_f)
+                hole.drift_single_step(my_d, my_f)
                 hole.drift_end(my_f)
             hole.get_signal(my_f,my_d)
 
-    def current_define(self,tol_elenumber):
+    def current_define(self,read_ele_num):
         """
         @description: 
             Parameter current setting     
@@ -245,7 +246,7 @@ class CalCurrent:
         self.gain_negative_cu=[]
         self.sum_cu=[]
 
-        for i in range(tol_elenumber):
+        for i in range(read_ele_num):
             self.positive_cu.append(ROOT.TH1F("charge+"+str(i+1), " No."+str(i+1)+"Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
             self.negative_cu.append(ROOT.TH1F("charge-"+str(i+1), " No."+str(i+1)+"Negative Current",
@@ -258,10 +259,10 @@ class CalCurrent:
                                     self.n_bin, self.t_start, self.t_end))
             
         
-    def get_current(self,my_d,tol_elenumber):
+    def get_current(self,my_d,read_ele_num):
         test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
-        for j in range(tol_elenumber):
+        for j in range(read_ele_num):
             sum_max_hole=0
             sum_min_hole=0
             for hole in self.holes:
@@ -280,7 +281,7 @@ class CalCurrent:
 
         test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
         test_n.Reset()
-        for j in range(tol_elenumber):
+        for j in range(read_ele_num):
             sum_max_electron=0
             sum_min_electron=0
             for electron in self.electrons:
@@ -296,15 +297,15 @@ class CalCurrent:
                     self.negative_cu[j].Add(test_n)
                     test_n.Reset()
     
-        for i in range(tol_elenumber):
+        for i in range(read_ele_num):
             self.sum_cu[i].Add(self.positive_cu[i])
             self.sum_cu[i].Add(self.negative_cu[i])
 
-    def get_current_gain(self,tol_elenumber):
-        for i in range(tol_elenumber):
+    def get_current_gain(self,read_ele_num):
+        for i in range(read_ele_num):
             self.gain_negative_cu[i] = self.gain_current.negative_cu[i]
             self.gain_positive_cu[i] = self.gain_current.positive_cu[i]
-        for i in range(tol_elenumber):
+        for i in range(read_ele_num):
             self.sum_cu[i].Add(self.gain_negative_cu[i])
             self.sum_cu[i].Add(self.gain_positive_cu[i])
     
@@ -313,41 +314,49 @@ class CalCurrentGain(CalCurrent):
     def __init__(self, my_d, my_f, my_current):
         self.electrons = [] # gain carriers
         self.holes = []
-        my_ava = Avalanche(my_d.avalanche_model)
-        gain_rate = self.gain_rate(my_d,my_f,my_ava)
+        cal_coefficient = Material(my_d.material).cal_coefficient
+        gain_rate, alpha_ratio = self.gain_rate(my_d,my_f,cal_coefficient)
+        fluctuation = gain_rate * alpha_ratio + (1 - 1/gain_rate) * (1 - alpha_ratio)
+
         print("gain_rate="+str(gain_rate))
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
             for hole in my_current.holes:
+                gain_rate_tmp = gain_rate + random.gauss(0.0,fluctuation)
                 self.electrons.append(Carrier(hole.path[-1][0],\
                                               hole.path[-1][1],\
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
-                                              -1*hole.charge*gain_rate,\
-                                                my_f.tol_elenumber))
-                if gain_rate>5:
-                    self.holes.append(Carrier(hole.path[-1][0],\
-                                              hole.path[-1][1],\
-                                              my_d.avalanche_bond,\
-                                              hole.path[-1][3],\
-                                              hole.charge*gain_rate/np.log(gain_rate),\
-                                                my_f.tol_elenumber))
+                                              -1*hole.charge*gain_rate_tmp,\
+                                              my_d.material,\
+                                              my_f.read_ele_num))
+                
+                self.holes.append(Carrier(hole.path[-1][0],\
+                                          hole.path[-1][1],\
+                                          my_d.avalanche_bond,\
+                                          hole.path[-1][3],\
+                                          hole.charge*gain_rate_tmp,\
+                                          my_d.material,\
+                                          my_f.read_ele_num))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
+                gain_rate_tmp = gain_rate + random.gauss(0.0,fluctuation)
                 self.holes.append(Carrier(electron.path[-1][0],\
                                           electron.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
-                                          -1*electron.charge*gain_rate,\
-                                            my_f.tol_elenumber))
-                if gain_rate>5:
-                    self.electrons.append(Carrier(electron.path[-1][0],\
-                                                  electron.path[-1][1],\
-                                                  my_d.avalanche_bond,\
-                                                  electron.path[-1][3],\
-                                                  electron.charge*gain_rate/np.log(gain_rate),\
-                                                    my_f.tol_elenumber))
+                                          -1*electron.charge*gain_rate_tmp,\
+                                          my_d.material,\
+                                          my_f.read_ele_num))
+
+                self.electrons.append(Carrier(electron.path[-1][0],\
+                                                electron.path[-1][1],\
+                                                my_d.avalanche_bond,\
+                                                electron.path[-1][3],\
+                                                electron.charge*gain_rate_tmp,\
+                                                my_d.material,\
+                                                my_f.read_ele_num))
 
         self.drifting_loop(my_d, my_f)
 
@@ -356,13 +365,13 @@ class CalCurrentGain(CalCurrent):
         self.t_start = t_start
         self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
 
-        self.current_define(my_f.tol_elenumber)
-        for i in range(my_f.tol_elenumber):
+        self.current_define(my_f.read_ele_num)
+        for i in range(my_f.read_ele_num):
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
-        self.get_current(my_d,my_f.tol_elenumber)
+        self.get_current(my_d,my_f.read_ele_num)
 
-    def gain_rate(self, my_d, my_f, my_ava):
+    def gain_rate(self, my_d, my_f, cal_coefficient):
 
         # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
         # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
@@ -372,10 +381,10 @@ class CalCurrentGain(CalCurrent):
         alpha_n_list = np.zeros(n)
         alpha_p_list = np.zeros(n)
         for i in range(n):
-            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in um
+            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/um
             E_field = Vector(Ex,Ey,Ez).get_length() * 1e4 # in V/cm
-            alpha_n = my_ava.cal_coefficient(E_field, -1, my_d.temperature)
-            alpha_p = my_ava.cal_coefficient(E_field, +1, my_d.temperature)
+            alpha_n = cal_coefficient(E_field, -1, my_d.temperature)
+            alpha_p = cal_coefficient(E_field, +1, my_d.temperature)
             alpha_n_list[i] = alpha_n
             alpha_p_list[i] = alpha_p
 
@@ -387,6 +396,7 @@ class CalCurrentGain(CalCurrent):
             alpha_minor_list = alpha_n_list
         diff_list = alpha_major_list - alpha_minor_list
         int_alpha_list = np.zeros(n-1)
+        alpha_ratio = max(alpha_minor_list)/max(alpha_major_list)
 
         for i in range(1,n):
             int_alpha = 0
@@ -406,9 +416,9 @@ class CalCurrentGain(CalCurrent):
             raise(ValueError)
         
         gain_rate = exp_list[n-2]/(1-det) -1
-        return gain_rate
+        return gain_rate, alpha_ratio
 
-    def current_define(self,tol_elenumber):
+    def current_define(self,read_ele_num):
         """
         @description: 
             Parameter current setting     
@@ -424,16 +434,16 @@ class CalCurrentGain(CalCurrent):
         self.positive_cu=[]
         self.negative_cu=[]
 
-        for i in range(tol_elenumber):
+        for i in range(read_ele_num):
             self.positive_cu.append(ROOT.TH1F("gain_charge+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
             self.negative_cu.append(ROOT.TH1F("gain_charge-"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
         
-    def get_current(self,my_d,tol_elenumber):
+    def get_current(self,my_d,read_ele_num):
         test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
-        for j in range(tol_elenumber):
+        for j in range(read_ele_num):
             sum_max_hole=0
             sum_min_hole=0
             for hole in self.holes:
@@ -451,7 +461,7 @@ class CalCurrentGain(CalCurrent):
 
         test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
         test_n.Reset()
-        for j in range(tol_elenumber):
+        for j in range(read_ele_num):
             sum_max_electron=0
             sum_min_electron=0
             for electron in self.electrons:
@@ -470,15 +480,15 @@ class CalCurrentGain(CalCurrent):
 class CalCurrentG4P(CalCurrent):
     def __init__(self, my_d, my_f, my_g4p, batch):
         G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
-        self.tol_elenumber = my_f.tol_elenumber
+        self.read_ele_num = my_f.read_ele_num
         super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
 
 class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):
         super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
-        self.tol_elenumber = my_f.tol_elenumber
+        self.read_ele_num = my_f.read_ele_num
         
-        for i in range(self.tol_elenumber):
+        for i in range(self.read_ele_num):
             
             # convolute the signal with the laser pulse shape in time
             convolved_positive_cu = ROOT.TH1F("convolved_charge+", "Positive Current",
@@ -515,7 +525,7 @@ class CalCurrentLaser(CalCurrent):
             pulse_responce = cu.GetBinContent(i)
             for j in range(-i,self.n_bin-i): 
                 time_pulse = timePulse(j*self.t_bin)
-                convolved_cu.Fill((i+j)*self.t_bin - 1e-14, pulse_responce*time_pulse)
+                convolved_cu.Fill((i+j)*self.t_bin - 1e-14, pulse_responce*time_pulse*self.t_bin)
                 #resolve float error
 
 class CarrierListFromG4P:

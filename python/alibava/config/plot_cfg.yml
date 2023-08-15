@@ -1,0 +1,27 @@
+Render:
+    Praktikum:
+        Plots:
+            - plot_rawnoise_ch
+        arrangement:
+            - 111
+
+Plot_single_event: 10000
+Plot_seed_cut: True
+Plot_seed_cut_langau: True
+RS_RUN: True
+Gain_cut: 1.5
+hitmap_max_clustersize: 3
+Upper_limits_conversion:
+    ADC_Signal: 250
+    e_Signal: 30000
+Fit_langau: True # Fit a langau or not (sometimes the data does not represent a langau at all)
+
+Timing2Dhist:
+    bins: 30
+    yrange: [-250, -1]
+    invertY: True # Can come in handy when handling negative ADC, warning this also applies to the other timing plots!!
+
+Efficiency_plot:
+    aim_eff: 0.95 # Target efficiency
+    max_range: 70000 # Upper bound of efficiency bound in electrons
+    step_size: 1 # Granularity of the plot in electrons

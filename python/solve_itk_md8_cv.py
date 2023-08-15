@@ -4,7 +4,7 @@
 import devsim 
 import os
 import sys
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from raser import Physics
 from raser import Node
 from raser import Initial
@@ -26,7 +26,9 @@ region="1D_ITK_MD8"
 # Area factor
 # 1D 1cm*1cm
 # DUT 0.8cm* 0.8cm
-area_factor = 1.0/(0.8*0.8)
+area_factor = 1.0/(0.76*0.76)
+
+
 
 itk_md8_mesh.Create1DMesh(device=device, region=region)
 itk_md8_mesh.SetDoping(device=device, region=region)
@@ -54,12 +56,12 @@ ssac_voltage = []
 ssac_top_cap = []
 
 f = open("./output/devsim/itk_md8_reverse_cv.csv", "w")
-header = ["Voltage","Capacitance"]
+header = ["Voltage","Capacitance^{-2}"]
 writer = csv.writer(f)
 writer.writerow(header)
 
 while reverse_v < 400.0: 
-    devsim.circuit_alter(name="V1", value=0-reverse_v)
+    devsim.circuit_alter(name="V1", value=reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
     #TODO: get out circuit information
     Physics.PrintCurrents(device, "bot")
@@ -68,17 +70,22 @@ while reverse_v < 400.0:
     print("capacitance {0} {1}".format(reverse_v, cap))
     reverse_v += 1.0
 
-    ssac_voltage.append(0-reverse_v)
-    ssac_top_cap.append(abs(cap*(1e12))/area_factor)
+    ssac_voltage.append(reverse_v)
 
-    writer.writerow([0-reverse_v,cap*(1e12)/area_factor])
+    if abs(cap*(1e12)) == 0:
+        result = None
+    else:
+        result = (area_factor/(abs(cap*(1e12))))**2
+    ssac_top_cap.append(result)
+
+    writer.writerow([reverse_v,result])
 
 f.close()
 devsim.close_db()
 
-fig=matplotlib.pyplot.figure(num=4,figsize=(4,4))
+fig=matplotlib.pyplot.figure(num=4,figsize=(8,8))
 matplotlib.pyplot.plot(ssac_voltage, ssac_top_cap)
 matplotlib.pyplot.xlabel('Voltage (V)')
-matplotlib.pyplot.ylabel('Capacitance (pF)')
+matplotlib.pyplot.ylabel('Capacitance^(-2) (pF)^(-2)')
 matplotlib.pyplot.savefig("./output/devsim/itk_md8_reverse_cv.png")
 

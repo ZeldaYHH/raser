@@ -74,11 +74,9 @@ class Particles:
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
-        self.init_tx_device =my_d.l_x/2.0
-        self.init_ty_device =my_d.l_y/2.0
         self.init_tz_device = 0    
-        self.p_steps_current=[[[single_step[0]+self.init_tx_device,
-                                single_step[1]+self.init_ty_device,
+        self.p_steps_current=[[[single_step[0]+my_d.l_x/2,
+                                single_step[1]+my_d.l_y/2,
                                 single_step[2]-self.init_tz_device]\
             for single_step in p_step] for p_step in self.p_steps]
         self.energy_steps=s_energy_steps
@@ -102,8 +100,8 @@ class Particles:
                     break
                 number=number+1
             newtype_step=s_p_steps[number]      #new particle's step
-            self.p_steps_current=[[[single_step[0]+self.init_tx_device,
-                                    single_step[1]+self.init_ty_device,
+            self.p_steps_current=[[[single_step[0]+my_d.l_x/2,
+                                    single_step[1]+my_d.l_y/2,
                                     single_step[2]-self.init_tz_device]\
                 for single_step in newtype_step]]
         
@@ -134,9 +132,9 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             detector={
                         "name" : "Device",
                         "material" : "G4_Si",
-                        "side_x" : my_d.l_x/2.0,
-                        "side_y" : my_d.l_y/2.0,
-                        "side_z" : my_d.l_z/2.0,
+                        "side_x" : my_d.l_x,
+                        "side_y" : my_d.l_y,
+                        "side_z" : my_d.l_z,
                         "colour" : [1,0,0],
                         "position_x" : 0,
                         "position_y" : 0,
@@ -153,9 +151,9 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                         "density" : 3.2,
                         "natoms_1" : 50,
                         "natoms_2" : 50,
-                        "side_x" : my_d.l_x/2.0,
-                        "side_y" : my_d.l_y/2.0,
-                        "side_z" : my_d.l_z/2.0,
+                        "side_x" : my_d.l_x,
+                        "side_y" : my_d.l_y,
+                        "side_z" : my_d.l_z,
                         "colour" : [1,0,0],
                         "position_x" : 0,
                         "position_y" : 0,
@@ -297,6 +295,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         self.particleGun.GeneratePrimaryVertex(event)
         if(self.geant4_model=="Time_resolution"):
             self.particleGun2.GeneratePrimaryVertex(event)
+            pass
 
 
 class MyRunAction(g4b.G4UserRunAction):

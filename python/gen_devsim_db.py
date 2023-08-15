@@ -62,6 +62,8 @@ def CreateSiliconConstant():
     # define Silicon parameters
     N_c=2.8e19
     N_v=1.1e19
+    #N_c=2.86e19
+    #N_v=2.66e19
     devsim.add_db_entry(material="Silicon",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
     devsim.add_db_entry(material="Silicon",parameter="N_v",value=N_v, unit="/cm^3", description="effective density of states in valence band")
     E_g=1.12*1.6*1e-19
@@ -72,6 +74,8 @@ def CreateSiliconConstant():
     # mobility
     devsim.add_db_entry(material="Silicon",   parameter="mu_n",   value=1450,      unit="cm^2/Vs",   description="Constant Mobility of Electron")
     devsim.add_db_entry(material="Silicon",   parameter="mu_p",   value=500,       unit="cm^2/Vs",   description="Constant Mobility of Hole")
+#    devsim.add_db_entry(material="Silicon",   parameter="mu_p",   value=505,       unit="cm^2/Vs",   description="Constant Mobility of Hole")
+
     # SRH
     devsim.add_db_entry(material="Silicon",   parameter="n1",     value=1.02e10,   unit="/cm^3",     description="n1")
     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=1.02e10,   unit="/cm^3",     description="p1")
