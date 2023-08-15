@@ -20,7 +20,9 @@ import matplotlib
 import matplotlib.pyplot
 import csv
 import math
-
+gaindoping = sys.argv[1]
+bulkdoping = sys.argv[2]
+#bulk_thickness = sys.argv[1]
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
@@ -78,8 +80,8 @@ def set_mesh(device,region):
         device_mesh = itk_md8_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
-    device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
-
+    device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_gaindoping_{0}_bulkdoping_{1}.png".format(gaindoping,bulkdoping))
+    #device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_bulk_thickness_{0}.png".format(bulk_thickness))
 def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
@@ -139,7 +141,7 @@ def solve_iv(device,region,v_max,para_dict):
 
     v_max_field=v_max
 
-    f_iv = open("./output/devsim/{}_reverse_iv.csv".format(device+condition), "w")
+    f_iv = open("./output/devsim/{}_reverse_iv_gaindoping_{}_bulkdoping_{}.csv".format(device+condition,gaindoping,bulkdoping), "w")
     header_iv = ["Voltage","Current"]
     writer_iv = csv.writer(f_iv)
     writer_iv.writerow(header_iv)
@@ -228,7 +230,7 @@ def solve_cv(device,region,v_max,para_dict,frequency):
     reverse_voltage = []
     ssac_top_cap = []
 
-    f_cv = open("./output/devsim/{}_reverse_cv.csv".format(device+condition), "w")
+    f_cv = open("./output/devsim/{}_reverse_cv_gaindoping_{}_bulkdoping_{}.csv".format(device+condition,gaindoping,bulkdoping), "w")
     header_cv = ["Voltage","Capacitance"]
     writer_cv = csv.writer(f_cv)
     writer_cv.writerow(header_cv)
@@ -281,7 +283,7 @@ def draw_iv(V,I,device,condition):
     #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
     #if device == "1D_ITK_MD8":
     #    fig2.savefig("./output/devsim/{device}_{ITK_MD8_doping}/{device}_{condition}_reverse_iv.png".format(device=device,ITK_MD8_doping=ITK_MD8_doping,condition=condition))
-    fig2.savefig("./output/devsim/{}_reverse_iv.png".format(device+condition))
+    fig2.savefig("./output/devsim/{0}_reverse_iv_gain_doping_{1}_bulk_{2}.png".format(device+condition,gaindoping,bulkdoping))
     fig2.clear()
 
 def draw_cv(V,C,device,condition):
@@ -290,7 +292,7 @@ def draw_cv(V,C,device,condition):
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('Capacitance (pF)')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
-    fig3.savefig("./output/devsim/{}_reverse_cv.png".format(device+condition))
+    fig3.savefig("./output/devsim/{0}_reverse_cv_gain_doping_{1}_bulk_{2}.png".format(device+condition,gaindoping,bulkdoping))
     fig3.clear()
 
     fig4=matplotlib.pyplot.figure(num=4,figsize=(4,4))

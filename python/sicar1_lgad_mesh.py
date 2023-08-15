@@ -8,7 +8,9 @@ from raser import Node
 import matplotlib
 import matplotlib.pyplot
 import math
-
+gaindoping = sys.argv[1]
+bulkdoping = sys.argv[2]
+#bulk_thickness = sys.argv[1]
 # 1D SICAR1 LGAD
 
 def Create1DMesh(device, region):
@@ -34,8 +36,11 @@ def SetDoping(device, region):
     #Node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
     #Node.CreateNodeModel(device, region, "Donors",    "1.0e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
 
+    #Node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
+    #Node.CreateNodeModel(device, region, "Donors",    "8.0e16*(step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e14*( step(({0}+1.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step(({0}+6.3e-4)-x) - step(({0}+1.3e-4)-x) )+ 2.0e18*( step(({0}+16.3e-4)-x) - step(({0}+6.3e-4)-x) )".format(bulk_thickness))
+
     Node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
-    Node.CreateNodeModel(device, region, "Donors",    "1.48e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 2.0e18*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+    Node.CreateNodeModel(device, region, "Donors",    "{0}*( step((1.3e-4)-x) -step((3e-5)-x) ) + {1}*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 2.0e18*( step((66.3e-4)-x) - step((56.3e-4)-x) )".format(gaindoping,bulkdoping))
 
     #Node.CreateNodeModel(device, region, "Acceptors", "1.63e19*step(3e-5-x)")      
     #Node.CreateNodeModel(device, region, "Donors",    "1.04e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 2.203e14*( step((54.3e-4)-x) - step((1.3e-4)-x) ) + 1.21e18*( step((59.3e-4)-x) - step((54.3e-4)-x) )+ 2.0e18*( step((69.3e-4)-x) - step((59.3e-4)-x) )")
@@ -72,8 +77,8 @@ def main():
 
     Create1DMesh(device=device, region=region)
     SetDoping(device=device, region=region)
-    Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_doping.png")
-
+    Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_gaindoping_{}_bulkdoping_{}.png".format(gaindoping,bulkdoping))
+    #Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_bulk_thickness_{0}.png".format(bulk_thickness))
 
 if __name__ == '__main__':
     main()
