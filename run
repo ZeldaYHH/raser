@@ -30,8 +30,10 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "4.1"       "SiC-3D"
 
     printf "\n\t%-9s  %-40s\n"  "5.1"       "TRACK-NGspice"
-
+    printf "\n\t%-9s  %-40s\n"  "5.2"       "T1-TEST"
+    
     printf "\n\t%-9s  %-40s\n"  "6.1"       "Telescope"
+    printf "\n\t%-9s  %-40s\n"  "6.2"       "PixelDetector Telescope "
 
     printf "\n\t%-9s  %-40s"    "7.1"       "Si strip"
 
@@ -172,8 +174,18 @@ usage_5_1() {
     printf "\n"
 }
 
+usage_5_2() {
+    printf "\n\t%-5s  %-40s\n"  "5.2.1"    "T1 noise test..." 
+    printf "\n"
+}
+
 usage_6_1() {
     printf "\n\t%-5s  %-40s\n"  "6.1.1"    " two pixel detector..create."  
+    printf "\n"
+}
+
+usage_6_2() {
+    printf "\n\t%-5s  %-40s\n"  "6.2.1"    " Simulation of PixelDetector, and Telescope reconstrution"  
     printf "\n"
 }
 
@@ -773,10 +785,27 @@ case $option in
 esac
 }
 
+sub_5_2(){
+case $option in 
+    5.2.1) echo "T1 noise test ..."
+        raser "./python/noise_histogram.py" 
+        echo "raw data file t1.raw has been saved in fig/t1.raw"
+        ;;
+esac
+}
+
 sub_6_1(){
 case $option in 
     6.1.1) echo "create two pixel detector..."
         raser "./raser/telescope.py"
+        ;;
+esac
+}
+
+sub_6_2(){
+case $option in 
+    6.2.1) echo "Simulation of PixelDetector, and Telescope reconstrution"
+        raser "./python/gsignal.py det_name=Taichu3 parfile=paras/setting.json geant4_model=PixelDetector geant4_parfile=paras/geant4_setting.json PixelDetector"
         ;;
 esac
 }
@@ -1010,7 +1039,15 @@ case $option in
     5.1.*) echo "NGspice simulation"
         sub_5_1 option
         ;;
-
+    5.2) echo "T1 noise test"
+        usage_5_2
+        echo "Please enter your option: " 
+        read option 
+        sub_5_2 option 
+        ;;
+    5.2.*) echo "T1 noise test"
+        sub_5_2 option
+        ;;
     6.1) echo "telescope"
         usage_6_1
         echo "Please enter your option: " 
@@ -1019,5 +1056,15 @@ case $option in
         ;;
     6.1.*) echo "telescope"
         sub_6_1 option
+        ;;
+
+    6.2) echo "PixelDetector telescope"
+        usage_6_2
+        echo "Please enter your option: " 
+        read option 
+        sub_6_2 option 
+        ;;
+    6.2.*) echo "PixelDetector telescope"
+        sub_6_2 option
         ;;
 esac		
