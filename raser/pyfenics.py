@@ -120,17 +120,17 @@ class FenicsCal:
             u_bc_l = []
             u_bc_l = self.boundary_definition_3D(my_d,my_d.voltage,0.0)
             u_w_bc_l = []
-            u_w_bc_l = self.boundary_definition_3D(my_d,0.0,1.0)     
+            u_w_bc_l = self.boundary_definition_3D(my_d,1.0,0.0)     
         elif "planar3D" in self.det_model or "lgad3D" in self.det_model:
             u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
-            u_w_bc_l = self.boundary_definition_planar(my_d,0.0,1.0)
+            u_w_bc_l = self.boundary_definition_planar(my_d,1.0,0.0)
         elif "planarRing" in self.det_model:
             u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
-            u_w_bc_l = self.boundary_definition_ring(my_d,0.0,1.0)
+            u_w_bc_l = self.boundary_definition_ring(my_d,1.0,0.0)
         elif "planarStrip" in self.det_model:
             #under construction
             #u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
-            #u_w_bc_l = self.boundary_definition_strip(my_d,0.0,1.0)
+            #u_w_bc_l = self.boundary_definition_strip(my_d,1.0,0.0)
             pass
         else:
             raise NameError(self.det_model)

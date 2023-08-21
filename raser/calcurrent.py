@@ -127,8 +127,8 @@ class Carrier:
 
     def get_signal(self,my_f,my_d):
         """Calculate signal from carrier path"""
-        # i = q*v*nabla(U_w) = q*dx*nabla(U_w)/dt = q*dU_w(x)/dt
-        # signal = i*dt = q*dU_w(x)
+        # i = -q*v*nabla(U_w) = -q*dx*nabla(U_w)/dt = -q*dU_w(x)/dt
+        # signal = i*dt = -q*dU_w(x)
         for j in range(my_f.read_ele_num):
             for i in range(len(self.path)-1): # differentiate of weighting potential
                 U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
@@ -140,7 +140,7 @@ class Carrier:
                     self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
                 q = self.charge * e0
                 dU_w = U_w_2 - U_w_1
-                self.signal[j].append(q*dU_w)
+                self.signal[j].append(-q*dU_w)
         
 
     def drift_end(self,my_f):
