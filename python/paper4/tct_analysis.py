@@ -159,7 +159,7 @@ def draw_graphs(array1,keys,key_name,name,path):
     graph=ROOT.TGraph(n,keys,array1)
     graph.SetMarkerStyle(3)
     graph.Draw('ap')
-  
+
     legend = ROOT.TLegend(0.6,0.7, 0.83, 0.89)
     legend.AddEntry(graph,"RASER Simulation", "p")
     legend.SetTextSize(18)
