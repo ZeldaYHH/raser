@@ -210,7 +210,7 @@ raser(){
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
@@ -313,7 +313,7 @@ case $option in
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-    gaindoping=7.96e16 bulkdoping=5.6e14
+        gaindoping=1.48e17 bulkdoping=1.0e14
         ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=400 g"
         ;;
 
@@ -399,23 +399,19 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
+
+    1.3.13) echo "simulate doping of SICAR1 using C-V of SICAR1-1"
+        gaindoping=7.96e16 bulkdoping=2.3e14
+        ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=320"
+        ;;
+        
     1.3.20) echo "simulate simple 2d PN juction with 2diffrent doping"
         raser "./python/device_2d.py PNjuction"
         ;; 
     1.3.21) echo "simulate simple 2d PN juction with Gain layer doping and bulk doping"
         raser "./python/device_2d.py PNwithGainlayer" 
         ;;
-    1.3.21) echo "simulate doping of SICAR1 using C-V of SICAR1-1"
-      gaindoping=(7.9e16 7.93e16 7.96e16 8.0e16)
-          for ((i=0;i<4;i++))
-          do
-          bulkdoping=(5e14 5.2e14 5.4e14 5.6e14)
-              for ((c=0;c<4;c++))
-              do
-                 ./python/run_batchjob.py devsim  "devsim_solve.py ${gaindoping[i]} ${bulkdoping[c]} device=1D_SICAR1_LGAD CV=True v_max=400"
-              done
-          done
-        ;;
+
             
 esac
 }
