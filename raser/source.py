@@ -118,7 +118,7 @@ class TCTTracks():
 
         self.track_position = temp_position
         self.ionized_pairs = temp_pairs
-        
+
         print(len(self.ionized_pairs),"pairs of carrier models to drift")
         print(sum(self.ionized_pairs),"total pairs of carriers")
 
