@@ -70,6 +70,9 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.10"   "Simulate 3D NJU-PIN I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.11"   "Simulate irradiated NJU-PIN"
     printf "\n\t%-5s  %-40s\n"  "1.3.12"   "plot improved 1D NJU-PIN I-V"
+    printf "\n\t%-5s  %-40s\n"  "1.3.20"   "simulate simple 2d PN juction with 2diffrent doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.21"   "simulate simple 2d PN juction with Gain layer doping and bulk doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.22"   "Simulate 2D Sicar C-V"
 }
 
 usage_1_4() { 
@@ -411,7 +414,9 @@ case $option in
     1.3.21) echo "simulate simple 2d PN juction with Gain layer doping and bulk doping"
         raser "./python/device_2d.py PNwithGainlayer" 
         ;;
-
+    1.3.22) echo "simulate Sicar Lgad CV"
+        ./python/run_batchjob.py devsim "scanCV.py"
+       
             
 esac
 }
