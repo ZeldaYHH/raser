@@ -14,11 +14,16 @@ Description:
 import geant4_pybind as g4b
 import sys
 import numpy as np
+import random
 
 # Geant4 main process
 class Particles:
     #model name for other class to use
     _model = None
+    #other pars may use in other class define here
+    #use in PixelDetector
+    _randx = None
+    _randy = None
     def __init__(self, my_d, my_f, dset):
         """
         Description:
@@ -41,6 +46,8 @@ class Particles:
         if(self.geant4_model=='PixelDetector'):
             my_g4d = PixelDetectorConstruction(g4_dic,g4_dic['maxstep'])
             Particles._model = self.geant4_model
+            Particles._randx = g4_dic['par_randx']*g4b.um
+            Particles._randy = g4_dic['par_randy']*g4b.um
             #there's some parameter only use by this model
             global s_devicenames,s_localposition
             s_devicenames,s_localposition=[],[]
@@ -98,8 +105,10 @@ class Particles:
             self.devicenames = s_devicenames
             self.localposition = s_localposition
             for i in range (0,len(s_devicenames)):
-                print("eventID:",i)
-                print("totalhits:",len(s_localposition[i]))
+                #print("eventID:",i)
+                #print("totalhits:",len(s_localposition[i]))
+                pass
+            del s_devicenames,s_localposition
                 
         if(self.geant4_model=="beam_monitor"):
             hittotal=0
@@ -169,7 +178,7 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
-                                        25000*g4b.um)
+                                        50*g4b.cm)
         self.logical['world'] = g4b.G4LogicalVolume(self.solid['world'], 
                                                     material, 
                                                     "world")
@@ -451,11 +460,25 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                         par_in[1]*g4b.um,
                                                         par_in[2]*g4b.um))  
             self.particleGun2 = beam2
+        if(self.geant4_model=="PixelDetector"):
+            self.directionx = par_direction[0]
+            self.directiony = par_direction[1]
+            self.directionz = par_direction[2]
 
     def GeneratePrimaries(self, event):
         self.particleGun.GeneratePrimaryVertex(event)
         if(self.geant4_model=="Time_resolution"):
             self.particleGun2.GeneratePrimaryVertex(event)
+            pass
+        if(self.geant4_model=="PixelDetector"):
+            randx = Particles._randx
+            randy = Particles._randy
+            direction_x = random.uniform(-randx,randx)
+            direction_y = random.uniform(-randy,randy)
+            direction = g4b.G4ThreeVector(direction_x,direction_y,self.directionz)
+            self.particleGun.SetParticleMomentumDirection(direction)
+            self.particleGun.GeneratePrimaryVertex(event)
+            #print("direction:",direction_x,direction_y,self.directionz)
             pass
 
 
