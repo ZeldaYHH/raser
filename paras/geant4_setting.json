@@ -55,6 +55,18 @@
             },
     
             "layer"  : {
+                "Layer_0":{
+                    "name": "Layer_0",
+                    "pixel_type": "Taichu",
+                    "row": 5,
+                    "column":5,
+                    "position_x" : 0,
+                    "position_y" : 0,
+                    "position_z" : -100000,
+                    "rotation_xyz": [0,0,0],
+                    "colour" : [0,1,0]
+                },
+
                 "Layer_1":{
                     "name": "Layer_1",
                     "pixel_type": "Taichu",
@@ -62,7 +74,7 @@
                     "column":5,
                     "position_x" : 0,
                     "position_y" : 0,
-                    "position_z" : 0,
+                    "position_z" : -60000,
                     "rotation_xyz": [0,0,0],
                     "colour" : [0,1,0]
                 },
@@ -74,7 +86,41 @@
                     "column":5,
                     "position_x" : 0,
                     "position_y" : 0,
-                    "position_z" : 5000,
+                    "position_z" : -20000,
+                    "rotation_xyz": [0,0,0],
+                    "colour" : [0,1,0]
+                },
+
+                "Layer_3":{
+                    "name": "Layer_3",
+                    "pixel_type": "Taichu",
+                    "row": 5,
+                    "column":5,
+                    "position_x" : 0,
+                    "position_y" : 0,
+                    "position_z" : 20000,
+                    "rotation_xyz": [0,0,0],
+                    "colour" : [0,1,0]
+                },
+                "Layer_4":{
+                    "name": "Layer_4",
+                    "pixel_type": "Taichu",
+                    "row": 5,
+                    "column":5,
+                    "position_x" : 0,
+                    "position_y" : 0,
+                    "position_z" : 60000,
+                    "rotation_xyz": [0,0,0],
+                    "colour" : [0,1,0]
+                },
+                "Layer_5":{
+                    "name": "Layer_5",
+                    "pixel_type": "Taichu",
+                    "row": 5,
+                    "column":5,
+                    "position_x" : 0,
+                    "position_y" : 0,
+                    "position_z" : 100000,
                     "rotation_xyz": [0,0,0],
                     "colour" : [0,1,0]
                 }
@@ -88,10 +134,12 @@
         "g4_vis" : 0,
         "par_inx" : 0,
         "par_iny" : 0,
-        "par_inz" : 17000,
+        "par_inz" : -600000,
         "par_outx" : 0,
         "par_outy" : 0,
-        "par_outz" : -17000
+        "par_outz" : 100000,
+        "par_randx": 62.5,
+        "par_randy": 62.5
     },
 
     {

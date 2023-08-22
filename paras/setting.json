@@ -1,14 +1,14 @@
 [
     {
-        "total_events" : 1,
+        "total_events" : 10,
         "det_name" : "Taichu3",
         "det_model" : "PixelDetector",
 
-        "lx" : 5000,
-        "ly" : 5000,
-        "lz" : 100,
+        "lx" : 25,
+        "ly" : 25,
+        "lz" : 20,
         "doping" : 52,
-        "voltage" : -500,
+        "voltage" : -1.8,
         "temp" : 300.0,
         "material" : "Si",
         "trapping_time" : 7.77e-10,
