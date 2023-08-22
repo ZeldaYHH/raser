@@ -50,7 +50,7 @@ class DevsimCal:
     
     def get_w_p(self, x, y, depth, i):
         if depth >= 1:
-            f_p = (1/(self.l_z-1)) * (depth-1)
+            f_p = 1 - (1/(self.l_z-1)) * (depth-1)
         else:
             f_p = 0
         return f_p
