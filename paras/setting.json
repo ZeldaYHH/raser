@@ -256,7 +256,7 @@
         "lx" : 8000,
         "ly" : 8000,
         "lz" : 305,
-        "doping" : "4.7e13",  
+        "doping" : "3.2e12",  
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",

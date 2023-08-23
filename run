@@ -752,11 +752,27 @@ case $option in
     7.2.3) echo "Simulate 1D itk I-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=800"
         ;;
+    
+    7.2.3test) echo "Simulate different donor_doping 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=400 diffddopingtest=9.0e14"
+        ;;
+    
+    7.2.3backtest) echo "Simulate different donor_doping 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=700 backdopingtest=1.0e16 backthickness=304"
+        ;;    
         
     7.2.4) echo "Simulate irradiated minisensor I-V C-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800"
-
         ;;
+
+    7.2.4test) echo "Simulate irradiated minisensor I-V C-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800 Rirr=1e19"
+        ;;
+
+    7.8.3) echo "Simulate 1D ITk MD8 C-V ..."
+        raser "./python/solve_itk_md8_cv.py"
+        ;;
+
         esac
 }
 

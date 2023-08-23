@@ -90,7 +90,7 @@ def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=Non
         else:
             CreateDriftDiffusionAtContact(device, region, i)
 
-def DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts=None):
+def DriftDiffusionInitialSolutionSiIrradiated(device, region, Rirr=None,circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
@@ -108,7 +108,7 @@ def DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts=N
     ###
     ### Set up equations
     ###
-    CreateSiDriftDiffusionIrradiated(device, region)
+    CreateSiDriftDiffusionIrradiated(device, region,Rirr)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateDriftDiffusionAtContact(device, region, i, True)
