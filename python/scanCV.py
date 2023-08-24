@@ -7,8 +7,7 @@ import diode_common
 import json
 device="MyDevice"
 region="MyRegion"
-if not (os.path.exists("./output/parainprogram")):
-    os.makedirs("./output/parainprogram")
+
 
 #分布计算
 ###
