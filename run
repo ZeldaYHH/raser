@@ -203,7 +203,7 @@ else
 fi
 
 
-imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.4.sif
+imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){

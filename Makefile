@@ -19,11 +19,14 @@ build-login:
 build-raser-sandbox: 
 	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
 
-run-raser-sandbox:
+shell-raser-sandbox:
 	apptainer shell --env-file cfg/env --fakeroot -w /tmp/raser-sandbox 
 
 build-raser-sif:
 	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
+
+shell-raser-sif:
+	apptainer shell --env-file cfg/env raser.sif 
 
 
 

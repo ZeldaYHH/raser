@@ -1,5 +1,6 @@
 # ROOT 
 ROOTSYS=/usr/local/share/root_install
+PATH=$ROOTSYS/bin:$PATH
 
 # Geant4 
 GEANT4_INSTALL=/usr/local/share/geant4/install
