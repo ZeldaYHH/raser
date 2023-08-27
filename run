@@ -10,6 +10,37 @@ raser(){
     apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $imagefile $1 
 }
 
+options_=(
+    'Electric Profile'
+    'Particle Injection'
+    'Current Induction'
+    'Electronics'
+    'Time Resolution'
+    'Space Resolution'
+    'Transient Current Technique'
+)
+
+options_1=(
+    'Field Calculation'
+    'IV Simulation'
+    'CV Simulation'
+)
+
+options_1_1=(
+    'Show Field'
+    'Gain Calculation'
+)
+
+1.1.1(){
+    echo 'Show Field...'
+    raser "python/field_calculation.py xxx yyy zzz"
+}
+
+1.1.2(){
+    echo 'Gain Calculation...'
+    raser "python/gain_calculation.py xxx yyy zzz"
+}
+
 usage(){ 
     printf "NAME\n"
     printf "\t%s\n" "run - Main driver to run RASER"
@@ -51,37 +82,6 @@ function_map(){
         return 1
     fi
     return 0
-}
-
-options_=(
-    'Electric Profile'
-    'Particle Injection'
-    'Current Induction'
-    'Electronics'
-    'Time Resolution'
-    'Space Resolution'
-    'Transient Current Technique'
-)
-
-options_1=(
-    'Field Calculation'
-    'IV Simulation'
-    'CV Simulation'
-)
-
-options_1_1=(
-    'Show Field'
-    'Gain Calculation'
-)
-
-1.1.1(){
-    echo 'Show Field...'
-    raser "python/field_calculation.py xxx yyy zzz"
-}
-
-1.1.2(){
-    echo 'Gain Calculation...'
-    raser "python/gain_calculation.py xxx yyy zzz"
 }
 
 if [[ $# -eq 0 ]]
