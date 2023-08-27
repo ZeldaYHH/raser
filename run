@@ -27,18 +27,51 @@ options_1=(
 )
 
 options_1_1=(
+    'Devsim Test'
     'Show Field'
     'Gain Calculation'
 )
 
 1.1.1(){
+    echo 'Devsim Test...'
+    raser "python/devsim_test.py xxx yyy zzz"
+}
+
+1.1.2(){
     echo 'Show Field...'
     raser "python/field_calculation.py xxx yyy zzz"
 }
 
-1.1.2(){
+1.1.3(){
     echo 'Gain Calculation...'
     raser "python/gain_calculation.py xxx yyy zzz"
+}
+
+options_2=(
+    'Particle Track'
+    'Energy Deposition'
+)
+
+options_2_1=(
+    'Geant4 Test'
+)
+
+2.1.1(){
+    echo 'Geant4 Test...'
+    raser "python/geant4_test.py xxx yyy zzz"
+}
+
+options_3=(
+    'Signal Collection'
+)
+
+options_3_1=(
+    'ROOT Test'
+)
+
+3.1.1(){
+    echo 'ROOT Test...'
+    raser "python/root_test.py xxx yyy zzz"
 }
 
 usage(){ 
