@@ -6,7 +6,7 @@ Description:  Simulate e-h pairs drifting and calculate induced current
 @version    : 2.0
 '''
 import random
-import numpy as np
+# import numpy as np
 import math
 import ROOT
 from raser.model import Material
@@ -137,7 +137,8 @@ class Carrier:
                 if i>0:
                     d_t=self.path[i][3]-self.path[i-1][3]
                     self.trapping_time=my_d.trapping_time
-                    self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
+                    # self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
+                    self.charge=self.charge
                 q = self.charge * e0
                 dU_w = U_w_2 - U_w_1
                 self.signal[j].append(-q*dU_w)
@@ -372,6 +373,7 @@ class CalCurrentGain(CalCurrent):
         self.get_current(my_d,my_f.read_ele_num)
 
     def gain_rate(self, my_d, my_f, cal_coefficient):
+        '''
 
         # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
         # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
@@ -417,6 +419,8 @@ class CalCurrentGain(CalCurrent):
         
         gain_rate = exp_list[n-2]/(1-det) -1
         return gain_rate, alpha_ratio
+        '''
+        pass
 
     def current_define(self,read_ele_num):
         """

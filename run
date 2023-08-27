@@ -90,6 +90,32 @@ operate_3_1_1(){
     raser "./python/root_test.py xxx yyy zzz"
 }
 
+options_4=(
+    'Waveform'
+)
+
+options_4_1=(
+    'Waveform Test'
+)
+
+operate_4_1_1(){
+    echo 'Waveform Test...'
+    raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
+}
+
+options_7=(
+    'Edge TCT'
+)
+
+options_7_1=(
+    'Extract Waveform'
+)
+
+operate_7_1_1(){
+    echo 'Extract Waveform...'
+    raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
+}
+
 usage(){ 
     printf "NAME\n"
     printf "\t%s\n" "run - Main driver to run RASER"
