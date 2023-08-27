@@ -10,7 +10,7 @@ raser(){
     apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $imagefile $1 
 }
 
-usage() { 
+usage(){ 
     printf "NAME\n"
     printf "\t%s\n" "run - Main driver to run RASER"
     printf "\n"
@@ -19,34 +19,88 @@ usage() {
     printf "\t%s\n" "./run [OPTION]"
     printf "\n"
 
-    printf "OPTIONS\n"    
-    printf "\t%-8s %-40s\n"    "1"       "Electric Profile"
-    printf "\t%-8s %-40s\n"    "2"       "Particle Injection"
-    printf "\t%-8s %-40s\n"    "3"       "Current Induction"
-    printf "\t%-8s %-40s\n"    "4"       "Electronics"
-    printf "\t%-8s %-40s\n"    "5"       "Time Resolution"
-    printf "\t%-8s %-40s\n"    "6"       "Space Resolution"
-    printf "\t%-8s %-40s\n"    "7"       "Transient Current Technique"
+    function_map
+
+    echo "Please enter your option: "
+    read option
     printf "\n"
 }
 
-if [[ $# -eq 0 ]]; then
+function_map(){
+    q=$1
+    r=${q//\./_}
+    # transfer 1.1 to 1_1
+    s="options_$r"
+    t="options"
+    if [ -n $"$s" ] 
+    then
+        eval $t=\(\"\${$s[@]}\"\)
+        # use string to match the wanted array
+        printf "OPTIONS\n"
+        for ((i=1; i<=${#options[@]};i++))
+        do
+            if [[ $# -eq 0 ]]
+            then
+                printf "\t%-8s %-40s\n" $i "${options[i-1]}"
+            else
+                printf "\t%-8s %-40s\n" $1"."$i "${options[i-1]}"
+            fi
+        done
+        printf "\n"
+        return 1
+    fi
+    return 0
+}
+
+options_=(
+    'Electric Profile'
+    'Particle Injection'
+    'Current Induction'
+    'Electronics'
+    'Time Resolution'
+    'Space Resolution'
+    'Transient Current Technique'
+)
+
+options_1=(
+    'Field Calculation'
+    'IV Simulation'
+    'CV Simulation'
+)
+
+options_1_1=(
+    'Show Field'
+    'Gain Calculation'
+)
+
+1.1.1(){
+    echo 'Show Field...'
+    raser "python/field_calculation.py xxx yyy zzz"
+}
+
+1.1.2(){
+    echo 'Gain Calculation...'
+    raser "python/gain_calculation.py xxx yyy zzz"
+}
+
+if [[ $# -eq 0 ]]
+then
     usage
-    echo "Please enter your option: "
-    read option
 else
-    option=$1 
-	input_para=$* 
+    option=$1
+    input_para=$*
 fi
 
-case $option in 
-    1.1) echo "RASER simulate NJU-PIN"
-        usage_1_1
-        echo "Please enter your option: " 
-        read option 
-        sub_1_1 option 
-        ;;
-    1.1.*) echo "RASER simulate NJU-PIN"
-        sub_1_1 option
-        ;;
-esac
+while [ "$(type -t $option)" != function ]
+do
+    function_map $option
+    if [ $? -eq 1 ]
+    then
+        echo "Please enter your option: "
+    else
+        echo "Please enter an existing option: "
+    fi
+    read option
+    printf "\n"
+done
+$option
