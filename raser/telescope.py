@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 from geant4_pybind import *
-import numpy as np
+#import numpy as np
 
 import math
 import sys

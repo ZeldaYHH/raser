@@ -8,12 +8,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from raser import Physics
 from raser import Node
 from raser import Initial
-from raser import Setting
+# from raser import Setting
 
 import nju_pin_5mm_5mm_mesh
 import hpk_pin_5mm_5mm_mesh
 import sicar1_lgad_mesh
-import itk_md8_mesh
+# import itk_md8_mesh
 
 import matplotlib
 #matplotlib.use('Agg') 
