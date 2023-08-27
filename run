@@ -27,13 +27,13 @@ options_1=(
 )
 
 options_1_1=(
-    'Devsim Test'
+    'Build Devsim Database'
     'Show Field'
     'Gain Calculation'
 )
 
 1.1.1(){
-    echo 'Devsim Test...'
+    echo 'Build Devsim Database...'
     raser "python/devsim_test.py xxx yyy zzz"
 }
 
