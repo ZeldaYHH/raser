@@ -9,7 +9,7 @@
 
 import os
 import csv
-from scipy.interpolate import interp1d
+# from scipy.interpolate import interp1d
 import math
 
 class DevsimCal:
