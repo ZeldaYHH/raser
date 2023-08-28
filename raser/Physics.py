@@ -463,8 +463,8 @@ def CreateIrradiatedGeneration(device, region):
 def CreateSiIrradiatedCharge(device, region):
 
     # imaginary defect: perugia model
-    flux = 1.6e15
-    #flux = 1e11
+    #flux = 1.6e15+1
+    flux = 1e11
     sigma_e_acc1=1e-15
     sigma_h_acc1=1e-14
     sigma_e_acc2=7e-15
@@ -550,7 +550,7 @@ def CreateSiIrradiatedCharge(device, region):
         CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
         #CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
 
-def CreateSiIrradiatedGeneration(device, region):
+def CreateSiIrradiatedGeneration(device, region,Rirr=None):
     
     k = 1.3806503e-23  # J/K
     T0 = 300.0         # K    
@@ -578,27 +578,26 @@ def CreateSiIrradiatedGeneration(device, region):
     R_donor_down2 = "(v_T_hole * sigma_h_donor *(Holes + n_i *{e_donor_nega}))".format(e_donor_nega=e_donor_nega)
     R_donor = "{R_donor_up}/({R_donor_down1}+{R_donor_down2})".format(R_donor_up=R_donor_up,R_donor_down1=R_donor_down1,R_donor_down2=R_donor_down2)
     #print("\n\n\n\n"+R_donor+"\n\n\n\n")
+    
+    R_irr="{R_donor}+{R_acc1}+{R_acc2}".format(R_donor=R_donor,R_acc1=R_acc1,R_acc2=R_acc2)
 
-    Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
-    Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
+    CreateNodeModel(device, region, "R_irr", R_irr)
+    for i in ("Electrons", "Holes", "Potential"):
+        CreateNodeModelDerivative(device, region, "R_irr", R_irr, i)
+    
+    #Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
+    #Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
+    if Rirr==None:
+        R_irr="0"
+    else:
+        R_irr=Rirr
+    Gd = "-q * (USRH+{R_irr})".format(R_irr=R_irr)  #donor -q
+    Ga = "+q * (USRH+{R_irr})".format(R_irr=R_irr)
 
     CreateNodeModel(device, region, "ElectronGeneration", Gd)
     CreateNodeModel(device, region, "HoleGeneration", Ga)
 
 
-def CreateSiIrradiatedGeneration_bak_notZhan(device, region):
-    c_n = "(v_T * sigma_n_irr)"
-    e_n = "(N_c * exp(-(E_g/2 - E_t)/k_T0))"
-    c_p = "(v_T * sigma_p_irr)"
-    e_p = "(N_v * exp(-(E_t - (-E_g/2))/k_T0))"
-    R_n_irr = "(N_t_irr-TrappedElectrons)*{c_n}*Electrons-TrappedElectrons*{e_n}".format(c_n=c_n,e_n=e_n)
-    R_p_irr = "(N_t_irr-TrappedHoles)*{c_p}*Holes-TrappedHoles*{e_p}".format(c_p=c_p,e_p=e_p)
-
-    Gn = "-q * (USRH+R_z+R_h6+{R_n_irr})".format(R_n_irr=R_n_irr)
-    Gp = "+q * (USRH+R_z+R_h6+{R_p_irr})".format(R_p_irr=R_p_irr)
-
-    CreateNodeModel(device, region, "ElectronGeneration", Gn)
-    CreateNodeModel(device, region, "HoleGeneration", Gp)
 
 '''
 def CreateMobility(device, region):
@@ -791,13 +790,13 @@ def CreateSiDriftDiffusionAtContact(device, region, contact, is_circuit=False):
 
 
 
-def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
+def CreateSiDriftDiffusionIrradiated(device, region, Rirr,mu_n="mu_n", mu_p="mu_p"):
     CreateSiIrradiatedCharge(device, region)
     CreatePEIrradiated(device, region)
     #CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
-    CreateSiIrradiatedGeneration(device, region)
+    CreateSiIrradiatedGeneration(device, region,Rirr)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)

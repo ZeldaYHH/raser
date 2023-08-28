@@ -1,5 +1,33 @@
 [
     {
+        "total_events" : 10,
+        "det_name" : "Taichu3",
+        "det_model" : "PixelDetector",
+
+        "lx" : 25,
+        "ly" : 25,
+        "lz" : 20,
+        "doping" : 52,
+        "voltage" : -1.8,
+        "temp" : 300.0,
+        "material" : "Si",
+        "trapping_time" : 7.77e-10,
+        "Irradiation" : 0,
+
+        "mesh" : 32,
+        "xyscale" : 10,
+
+        "t_rise" : 0.7,
+        "t_fall" : 1.1,
+        "trans_imp" : 38,
+        "CDet" : 30,
+        "BBW" : 0.66,
+        "BBGain" : 100,
+        "BB_imp" : 10,
+        "OscBW" : 2
+    },
+
+    {
         "total_events" : 1000,
         "det_name" : "NJU-PIN",
         "det_model" : "planar3D",
@@ -256,7 +284,7 @@
         "lx" : 8000,
         "ly" : 8000,
         "lz" : 305,
-        "doping" : "3.5e12",  
+        "doping" : "3.2e12",  
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",

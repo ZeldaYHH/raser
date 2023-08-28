@@ -30,8 +30,10 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "4.1"       "SiC-3D"
 
     printf "\n\t%-9s  %-40s\n"  "5.1"       "TRACK-NGspice"
-
+    printf "\n\t%-9s  %-40s\n"  "5.2"       "T1-TEST"
+    
     printf "\n\t%-9s  %-40s\n"  "6.1"       "Telescope"
+    printf "\n\t%-9s  %-40s\n"  "6.2"       "PixelDetector Telescope "
 
     printf "\n\t%-9s  %-40s"    "7.1"       "Si strip"
 
@@ -68,6 +70,9 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.10"   "Simulate 3D NJU-PIN I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.11"   "Simulate irradiated NJU-PIN"
     printf "\n\t%-5s  %-40s\n"  "1.3.12"   "plot improved 1D NJU-PIN I-V"
+    printf "\n\t%-5s  %-40s\n"  "1.3.20"   "simulate simple 2d PN juction with 2diffrent doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.21"   "simulate simple 2d PN juction with Gain layer doping and bulk doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.22"   "Simulate 2D Sicar C-V"
 }
 
 usage_1_4() { 
@@ -172,8 +177,18 @@ usage_5_1() {
     printf "\n"
 }
 
+usage_5_2() {
+    printf "\n\t%-5s  %-40s\n"  "5.2.1"    "T1 noise test..." 
+    printf "\n"
+}
+
 usage_6_1() {
     printf "\n\t%-5s  %-40s\n"  "6.1.1"    " two pixel detector..create."  
+    printf "\n"
+}
+
+usage_6_2() {
+    printf "\n\t%-5s  %-40s\n"  "6.2.1"    " Simulation of PixelDetector, and Telescope reconstrution"  
     printf "\n"
 }
 
@@ -301,7 +316,8 @@ case $option in
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD CV=True v_max=400"
+        gaindoping=1.48e17 bulkdoping=1.0e14
+        ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=400 g"
         ;;
 
     1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
@@ -386,12 +402,21 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
+
+    1.3.13) echo "simulate doping of SICAR1 using C-V of SICAR1-1"
+        gaindoping=7.96e16 bulkdoping=2.3e14
+        ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=320"
+        ;;
+        
     1.3.20) echo "simulate simple 2d PN juction with 2diffrent doping"
         raser "./python/device_2d.py PNjuction"
         ;; 
     1.3.21) echo "simulate simple 2d PN juction with Gain layer doping and bulk doping"
         raser "./python/device_2d.py PNwithGainlayer" 
         ;;
+    1.3.22) echo "simulate Sicar Lgad CV"
+        ./python/run_batchjob.py devsim "scanCV.py"
+       
             
 esac
 }
@@ -762,10 +787,27 @@ case $option in
 esac
 }
 
+sub_5_2(){
+case $option in 
+    5.2.1) echo "T1 noise test ..."
+        raser "./python/noise_histogram.py" 
+        echo "raw data file t1.raw has been saved in fig/t1.raw"
+        ;;
+esac
+}
+
 sub_6_1(){
 case $option in 
     6.1.1) echo "create two pixel detector..."
         raser "./raser/telescope.py"
+        ;;
+esac
+}
+
+sub_6_2(){
+case $option in 
+    6.2.1) echo "Simulation of PixelDetector, and Telescope reconstrution"
+        raser "./python/gsignal.py det_name=Taichu3 parfile=paras/setting.json geant4_model=PixelDetector geant4_parfile=paras/geant4_setting.json PixelDetector"
         ;;
 esac
 }
@@ -795,10 +837,21 @@ case $option in
     7.2.3) echo "Simulate 1D itk I-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=800"
         ;;
+    
+    7.2.3backtest) echo "Simulate different backside thickness and doping concentration of 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=700 backdopingtest=1.0e16 backthickness=304"
+        ;;    
         
     7.2.4) echo "Simulate irradiated minisensor I-V C-V ..."
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800"
+        ;;
 
+    7.2.4test) echo "Simulate irradiated minisensor I-V C-V with given R_irr..."
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800 Rirr=1e19"
+        ;;
+
+    7.2.5) echo "Simulate 1D ITk MD8 C-V ..."
+        raser "./python/solve_itk_md8_cv.py"
         ;;
         esac
 }
@@ -999,7 +1052,15 @@ case $option in
     5.1.*) echo "NGspice simulation"
         sub_5_1 option
         ;;
-
+    5.2) echo "T1 noise test"
+        usage_5_2
+        echo "Please enter your option: " 
+        read option 
+        sub_5_2 option 
+        ;;
+    5.2.*) echo "T1 noise test"
+        sub_5_2 option
+        ;;
     6.1) echo "telescope"
         usage_6_1
         echo "Please enter your option: " 
@@ -1008,5 +1069,15 @@ case $option in
         ;;
     6.1.*) echo "telescope"
         sub_6_1 option
+        ;;
+
+    6.2) echo "PixelDetector telescope"
+        usage_6_2
+        echo "Please enter your option: " 
+        read option 
+        sub_6_2 option 
+        ;;
+    6.2.*) echo "PixelDetector telescope"
+        sub_6_2 option
         ;;
 esac		
