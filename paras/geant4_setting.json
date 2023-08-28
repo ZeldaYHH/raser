@@ -1,6 +1,7 @@
 [
     {
         "geant4_model" : "PixelDetector",
+        "total_events" : 10,
 
         "object" : {
             "pixel"  : {
@@ -144,6 +145,7 @@
 
     {
         "geant4_model" : "Time_resolution",
+        "total_events" : 10000,
 
         "object" : {
                     "elemental" : {
@@ -244,6 +246,7 @@
 
     {
         "geant4_model" : "beam_monitor",
+        "total_events" : 1000,
         
         "object":{},
 
@@ -262,6 +265,7 @@
 
     {
         "geant4_model" : "reactor",
+        "total_events" : 30000,
         
         "object" : {
             "elemental" : {
@@ -294,6 +298,7 @@
 
     {
         "geant4_model" : "Si_strip",
+        "total_events" : 1000,
         
         "object":{},
 
@@ -312,6 +317,7 @@
 
     {
         "geant4_model" : "ITk-Si-strip",
+        "total_events" : 100000,
 
         "object":{},
 
