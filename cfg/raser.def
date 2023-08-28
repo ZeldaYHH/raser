@@ -54,7 +54,7 @@ From: raser-4.0.sif
     ## Geant4
     #apt -y install libgl1-mesa-dev 
     ## apt-cache search x11-dev xmu-dev 
-    #apt -y install libx11-dev libxmu-dev 
+    #apt -y install libx11-dev libxmu-dev libxerces-c-dev 
 
     #cd /usr/local/share
     #mkdir -p geant4/src
@@ -65,9 +65,27 @@ From: raser-4.0.sif
     #tar xzf geant4-v11.1.2.tar.gz -C ./geant4/src 
     cd ./geant4/build 
     #echo "----cmake----"
-    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/geant4/install  -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=ON -DGEANT4_INSTALL_DATADIR=/usr/local/share/geant4/data -DGEANT4_BUILD_MULTITHREADED=ON  -DGEANT4_BUILD_TLS_MODEL=global-dynamic  -DGEANT4_USE_PYTHON=ON ../src/geant4-v11.1.2  
+
+    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/geant4/install -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=ON -DGEANT4_INSTALL_DATADIR=/usr/local/share/geant4/data -DGEANT4_BUILD_MULTITHREADED=ON -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DGEANT4_USE_GDML=ON ../src/geant4-v11.1.2  
+
     #make -j 28
     #make install 
+
+    # Geant4Py is no longer distributed with the Geant4 toolkit.  It can be downloaded from:
+    # https://github.com/koichi-murakami/g4python 
+
+    # apt -y install pybind11-dev
+    # cd /usr/local/share/g4python
+    # mkdir install
+    # mkdir build
+    # cd build
+    ###
+    # Need to remove the G4Tasking in cmake, and G4gl2ps 
+    ###
+    # cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/g4python/install -DGEANT4_INSTALL=/usr/local/share/geant4/install  ..
+    # make -j28 
+    # 
+    
 
     ## Geant4-pybind    
     #pip install geant4-pybind --break-system-packages

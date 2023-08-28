@@ -17,6 +17,6 @@ G4RADIOACTIVEDATA=/usr/local/share/geant4/data/RadioactiveDecay5.6
 G4REALSURFACEDATA=/usr/local/share/geant4/data/RealSurface2.2
 
 # Python 
-PYTHONPATH=$HOME/raser:/usr/local/share/root_install/lib
-LD_LIBRARY_PATH=/usr/local/share/root_install/lib:/.singularity.d/libs
+PYTHONPATH=$HOME/raser:/usr/local/share/root_install/lib:/usr/local/share/g4python/install/site-packages
+LD_LIBRARY_PATH=/usr/local/share/root_install/lib:/usr/local/share/geant4/install/lib:/.singularity.d/libs
 
