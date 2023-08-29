@@ -203,8 +203,6 @@ def solve_iv(device,region,v_max,para_dict):
     v_max_field=v_max
 
     f_iv = open("./output/devsim/{}_reverse_iv_gaindoping_{}_bulkdoping_{}.csv".format(device+condition,gaindoping,bulkdoping), "w")
-<<<<<<< HEAD
-=======
     header_iv = ["Voltage","Current"]
     writer_iv = csv.writer(f_iv)
     writer_iv.writerow(header_iv)
@@ -401,7 +399,6 @@ def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
     v_max_field=v_max
 
     f_iv = open("./output/devsim/{}_reverse_iv.csv".format(device+condition), "w")
->>>>>>> raser/main
     header_iv = ["Voltage","Current"]
     writer_iv = csv.writer(f_iv)
     writer_iv.writerow(header_iv)
