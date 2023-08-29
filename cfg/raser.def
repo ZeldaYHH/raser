@@ -25,13 +25,22 @@ From: raser-4.0.sif
     #apt -y install build-essential libboost-all-dev 
 
 
-    ## SciPy, Pandas
+    ## SciPy, Pandas, Matplotlib 
     #ln -sf /usr/bin/python3 /usr/bin/python
-    #apt -y install python3-scipy python3-pandas
+    #apt -y install python3-scipy python3-pandas 
+    #apt -y remove python3-scipy python3-pandas 
+    #apt -y remove python3-numpy # must remove to avoid segfault 
+    #apt -y install python3-pip 
+    #
+    #pip install scipy --break-system-packages # will install numpy 
+    #pip install pandas --break-system-packages 
+    #pip install matplotlib --break-system-packages 
+
 
     ## ROOT 
     #apt -y install llvm libxpm-dev libxft-dev libxext-dev libgif-dev cmake
-
+    ## apt-cache search openblas 
+    # apt -y install libopenblas-dev
     #cd /usr/local/share
     #mkdir root_build root_install 
     #wget https://root.cern/download/root_v6.28.04.source.tar.gz

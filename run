@@ -7,6 +7,7 @@
 # apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
 
 imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
+#imagefile=/tmp/raser-sandbox
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){

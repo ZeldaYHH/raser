@@ -22,6 +22,9 @@ build-raser-sandbox:
 shell-raser-sandbox:
 	apptainer shell --env-file cfg/env --fakeroot -w /tmp/raser-sandbox 
 
+test-raser-sandbox:
+	apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /tmp/raser-sandbox 
+
 build-raser-sif:
 	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
 
