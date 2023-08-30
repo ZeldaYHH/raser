@@ -31,5 +31,8 @@ with open('setting/setting.json') as f:
 
 module_name = args_dict['option'][0]
 args_dict['option']=args_dict['option'][1:]
-module = importlib.import_module(module_name)
-module.main(args_dict)
+try:
+    module = importlib.import_module(module_name)
+    module.main(args_dict)
+except ModuleNotFoundError:
+    print("No subcommand found")
