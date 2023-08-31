@@ -4,13 +4,13 @@
 # Created [2023-04-09 Sun 16:13] 
 
 
-tmpdir=/scratchfs/bes/$USER 
+tmpdir=/scratchfs/atlas/$USER 
 cd $tmpdir 
-pwd
 
 echo "clone raser ..."
 git clone git@code.ihep.ac.cn:$USER/raser.git 
-git remote add raser git@code.ihep.ac.cn:raser/raser.git 
+cd raser
+git remote add upstream git@code.ihep.ac.cn:raser/raser.git 
 cd 
 ln -s $tmpdir/raser . 
 
