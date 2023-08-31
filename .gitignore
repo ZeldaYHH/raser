@@ -1,11 +1,10 @@
 .DS_Store
 note/.obsidian
-note/Draft
 .obsidian
 .vscode 
+output
+**/__pycache__
+
+python/test
 fig
 job
-output
-python/__pycache__
-raser/__pycache__
-python/test

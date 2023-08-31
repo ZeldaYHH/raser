@@ -1,21 +1,18 @@
 #Bootstrap: docker
-#From: library/debian:11.5   
+#From: library/debian:11.7    
 
 Bootstrap: localimage
-From: raser-1.4.sif  
+From: raser-2.0.sif  
 
 %post
     ## Use huaweicloud  
     #sed -i "s@http://deb.debian.org@http://repo.huaweicloud.com@g" /etc/apt/sources.list
     #apt update 
+    #apt upgrade
 
     ## Build 
     #apt -y install apt-utils git wget vim  
     #apt -y install build-essential libboost-all-dev 
-
-    ## FEniCS 
-    #apt -y install petsc-dev 
-    #apt -y install --no-install-recommends fenics 
 
     ## ROOT 
     #apt -y install llvm libxpm-dev libxft-dev libxext-dev libgif-dev 
@@ -37,6 +34,8 @@ From: raser-1.4.sif
 
     ## DevSim    
     #pip install mkl devsim 
+    #pip install mkl -U # 2023.2.0
+    #pip install devsim -U # 2.6.0
 
     ## NGSpice & KiCAD
     #apt -y install ngspice 
