@@ -3,6 +3,8 @@ note/.obsidian
 .obsidian
 .vscode 
 output
-python/__pycache__
-raser/__pycache__
+**/__pycache__
+
 python/test
+fig
+job

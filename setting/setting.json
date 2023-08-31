@@ -1,6 +1,6 @@
 {
     "detector": "NJU-PIN",
-    "geant4": "Sr90",
+    "absorber": "Sr90",
     "electronics": "T1",
     "laser": "SiC 355"
 }
