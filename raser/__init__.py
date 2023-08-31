@@ -12,3 +12,4 @@ from raser.source import TCTTracks
 from raser.g4SiITk import SiITk
 from raser.g4simulation import Particles
 from raser.devsim import DevsimCal
+from raser.PixelDetector_Telescope import PixelDetector_Telescope
