@@ -13,18 +13,23 @@ merge:
 clean: 
 	rm -rf dist raser.egg-info  
 
-# Build app container on lxslc701 
 build-login:
 	ssh -Y shixin@lxslc701
 
-build-raser: 
-	apptainer build --fakeroot raser.sif cfg/raser.def
+build-raser-sandbox: 
+	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
 
-build-raser-dev: 
-	apptainer build --force --fakeroot --sandbox /tmp/raser-dev cfg/raser.def
+shell-raser-sandbox:
+	apptainer shell --env-file cfg/env --fakeroot -w /tmp/raser-sandbox 
 
-sign-raser: 
-	apptainer sign raser.sif 
+test-raser-sandbox:
+	apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /tmp/raser-sandbox 
+
+build-raser-sif:
+	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
+
+shell-raser-sif:
+	apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 raser.sif 
 
 # Install Geant4 on lxslc7 
 geant4_install_1:
@@ -58,6 +63,8 @@ cvmfs-geant4-patch:
 
 cvmfs-publish:
 	cvmfs_server publish common.ihep.ac.cn 
+
+
 
 
 
