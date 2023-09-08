@@ -3,23 +3,28 @@ import importlib
 import subprocess
 import os
 import ROOT
+import sys
 def main(args_dict):
    # print(args_dict)
     if args_dict['option'][0] == 'sicar1.1.8-1':
-        input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/SICAR1.1.8-1'
-        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8-1'
+        input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
     else:
         raise NameError(args_dict)
     # print(input_dir)
     # print(output_dir)
-    input_file = os.path.join(input_dir ,'sicar1.1.8-1_iv.csv')
-    # output_file = output_dir + 'test.root'
-    # print(input_file)
+    com_name = 'sicar1.1.8-1_iv'
+    input_file = os.path.join(input_dir, com_name + '.csv')
+    # output_name = os.path.basename(input_file) + '.root'
+    output_file = os.path.join(output_dir, com_name + '.root')
+    # print(output_file)
     df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-    df.Snapshot("myTree", "test.root", {"Value","Reading"})
-    
+    df.Snapshot("myTree", output_file, {"Value","Reading"})
+    sys.stdout.write('Saved as {}\n%'.format(output_file))
+
+
 def plot():
-    file = ROOT.TFile("test.root", "READ")
+    file = ROOT.TFile("test.root" , "READ")
     tree = file.Get("myTree")
     print(tree)
     graph = ROOT.TGraph()
@@ -59,13 +64,13 @@ def plot():
     c.SetFrameLineWidth(5)
 
     legend.SetTextSize(0.04)
-    legend.AddEntry(graph,"SICAR1-8-6")
+    legend.AddEntry(graph,"SICAR1.1.8-1")
 
     c.cd()
     #c.SetLogy()
     graph.Draw()
     legend.Draw()
 
-    c.SaveAs("SICAR1.1.8-1_iv.pdf")
-    c.SaveAs("SICAR1.1.8-1_iv.root")
-plot()
+    c.SaveAs("/scratchfs/bes/wangkeqi/wangkeqi/SICAR1.1.8/SICAR1.1.8-1_iv.pdf")
+    c.SaveAs("/scratchfs/bes/wangkeqi/wangkeqi/SICAR1.1.8/SICAR1.1.8-1_iv.root")
+# plot()
