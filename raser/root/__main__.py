@@ -24,6 +24,6 @@ def main(args_dict):
 
         if name.endswith('cv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-            df.Snapshot("myTree", output_file, {"Bias Voltage", "Measured Capacitance", "Capacitance^-2"})
+            df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
         
         sys.stdout.write('Saved as {}\n'.format(output_file))
