@@ -1,44 +1,31 @@
 #!/usr/bin/env python3
-# Main driver to run RASER    
-# Author FU Chenxi <1256257282@qq.com>  
+# Main driver to run raser    
+# Author FU Chenxi <1256257282@qq.com>, SHI Xin <shixin@ihep.ac.cn>
 # Created [2023-08-29 Tue 11:48] 
 
-# Call mirror:
-# apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
-
+import sys 
 import argparse
-import json
 import importlib
-import subprocess
 
-parser = argparse.ArgumentParser()
 
-# define temperary custom settings
-parser.add_argument("option",nargs="+")
-parser.add_argument('-a',"--absorber")
-parser.add_argument('-d',"--detector")
-parser.add_argument('-e',"--electronics")
-parser.add_argument('-l',"--laser")
+if len(sys.argv) == 1:
+    sys.stdout.write('Please use -h for help.\n')
+    sys.exit(1)
+
+
+submodules = ['root']
+
+submodule = sys.argv[1] 
+if submodule not in submodules:
+    raise NameError(submodule)
+
+parser = argparse.ArgumentParser(prog='raser')
+subparsers = parser.add_subparsers(help='sub-command help')
+
+parser_root = subparsers.add_parser('root', help='root files conversion')
+parser_root.add_argument('label', help='LABEL to identify root files')
+
+
 args = parser.parse_args()
-
-args_dict = vars(args)
-
-with open('setting/setting.json') as f:
-    # define permanent custom settings in setting.json
-    json_settings = json.load(f)
-    for key in json_settings:
-        if args_dict[key] == None:
-            args_dict.update({key:json_settings[key]})
-
-module_name = args_dict['option'][0]
-args_dict['option']=args_dict['option'][1:]
-try:
-    module = importlib.import_module(module_name)
-    module.main(args_dict)
-except ModuleNotFoundError:
-    try:
-        subprocess.run('apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 \
-                    /afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif \
-                    \"./raser/'+module_name+'.py\"', shell=True)
-    except FileNotFoundError:
-        print("No subcommand found")
+submodule = importlib.import_module(submodule)
+submodule.main(args)
