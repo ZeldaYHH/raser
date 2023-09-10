@@ -10,4 +10,4 @@ from raser.source import TCTTracks
 from raser.g4SiITk import SiITk
 from raser.g4simulation import Particles
 from raser.pyfenics import FenicsCal
-from raser.devsim import DevsimCal
+from raser.devsim_field import DevsimCal
