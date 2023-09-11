@@ -1,7 +1,8 @@
 [
     {
         "det_name" : "Taichu3",
-        "det_model" : "PixelDetector",
+        "det_model" : "pixeldetector",
+        "total_events" : 10,
 
         "lx" : 25,
         "ly" : 25,
@@ -12,7 +13,8 @@
         "material" : "Si",
         "trapping_time" : 7.77e-10,
         "Irradiation" : 0,
-
+        "temp": 0,
+        
         "mesh" : 32,
         "xyscale" : 10
     },

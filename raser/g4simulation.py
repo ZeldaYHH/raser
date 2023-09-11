@@ -21,7 +21,7 @@ class Particles:
     #model name for other class to use
     _model = None
     #other pars may use in other class define here
-    #use in PixelDetector
+    #use in pixeldetector
     _randx = None
     _randy = None
     def __init__(self, my_d, my_f, dset):
@@ -43,8 +43,8 @@ class Particles:
         g4_dic = dset.pygeant4
         self.geant4_model = g4_dic['model']
         detector_material=dset.detector['material']
-        if(self.geant4_model=='PixelDetector'):
-            my_g4d = PixelDetectorConstruction(g4_dic,g4_dic['maxstep'])
+        if(self.geant4_model=='pixeldetector'):
+            my_g4d = pixeldetectorConstruction(g4_dic,g4_dic['maxstep'])
             Particles._model = self.geant4_model
             Particles._randx = g4_dic['par_randx']*g4b.um
             Particles._randy = g4_dic['par_randy']*g4b.um
@@ -100,7 +100,7 @@ class Particles:
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
 
-        if(self.geant4_model=='PixelDetector'):
+        if(self.geant4_model=='pixeldetector'):
             #record localpos in logicvolume
             self.devicenames = s_devicenames
             self.localposition = s_localposition
@@ -144,7 +144,7 @@ class Particles:
     def __del__(self):
         pass
 #Geant4 for pixeldetector
-class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):                
+class pixeldetectorConstruction(g4b.G4VUserDetectorConstruction):                
     "Pixel Detector Construction"
     def __init__(self,g4_dic,maxStep=0.5):
         g4b.G4VUserDetectorConstruction.__init__(self)
@@ -460,7 +460,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                         par_in[1]*g4b.um,
                                                         par_in[2]*g4b.um))  
             self.particleGun2 = beam2
-        if(self.geant4_model=="PixelDetector"):
+        if(self.geant4_model=="pixeldetector"):
             self.directionx = par_direction[0]
             self.directiony = par_direction[1]
             self.directionz = par_direction[2]
@@ -470,7 +470,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         if(self.geant4_model=="Time_resolution"):
             self.particleGun2.GeneratePrimaryVertex(event)
             pass
-        if(self.geant4_model=="PixelDetector"):
+        if(self.geant4_model=="pixeldetector"):
             randx = Particles._randx
             randy = Particles._randy
             direction_x = random.uniform(-randx,randx)
@@ -517,7 +517,7 @@ class MyEventAction(g4b.G4UserEventAction):
         self.event_angle = 0.
         self.p_step = []
         self.energy_step = []
-        #use in PixelDetector
+        #use in pixeldetector
         self.volume_name = []
         self.localposition = []
 
@@ -532,8 +532,8 @@ class MyEventAction(g4b.G4UserEventAction):
             self.event_angle = None
         save_geant4_events(eventID,self.edep_device,
                            self.p_step,self.energy_step,self.event_angle)
-        if(Particles._model == "PixelDetector"):
-            save_PixelDetector_events(self.volume_name,self.localposition)
+        if(Particles._model == "pixeldetector"):
+            save_pixeldetector_events(self.volume_name,self.localposition)
 
     def RecordDevice(self, edep,point_in,point_out):
         self.edep_device += edep
@@ -581,7 +581,7 @@ def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
         s_energy_steps.append([0])
         s_events_angle.append(event_angle)
         
-def save_PixelDetector_events(volume_name,localposition):
+def save_pixeldetector_events(volume_name,localposition):
         global s_devicenames,s_localposition
         s_devicenames.append(volume_name)
         s_localposition.append(localposition)

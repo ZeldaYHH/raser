@@ -52,11 +52,12 @@ def main():
             print("The electrode model is wrong.")
     my_d = raser.R3dDetector(dset)
     
-    if "PixelDetector" in args:
-        my_f = raser.FenicsCal(my_d,dset.fenics)
+    if "pixeldetector" in args:
+        #my_f = raser.FenicsCal(my_d,dset.fenics)
+        my_f = 0
         my_g4p = raser.Particles(my_d, my_f, dset)
-        my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
-        drawsave.draw_charge(my_charge)
+        #my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
+        #drawsave.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:

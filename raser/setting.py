@@ -43,6 +43,7 @@ class Setting:
             self.read_par_geant4(self._pardic['geant4_parfile'])
 
         p = self.paras
+        print(p)
         self.total_events = int(p['total_events'])
         #self.g4seed = 0 
         self.g4seed = random.randint(0,1e7)
@@ -234,7 +235,7 @@ class Setting:
                     "par_type":p['par_type'], "par_energy":p['par_energy'],
                     "world":p['world'], "object":p['object'],'model':p['geant4_model']
                     }
-        if(pygeant4['model'] == "PixelDetector"):
+        if(pygeant4['model'] == "pixeldetector"):
             pygeant4['par_randx']=p['par_randx']
             pygeant4['par_randy']=p['par_randy']
         return pygeant4
