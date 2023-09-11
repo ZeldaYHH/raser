@@ -15,6 +15,7 @@ from raser.model import Vector
 t_bin = 50e-12
 t_end = 60e-9
 t_start = 0
+pixel = 25 #um
 
 class Carrier:
     """
@@ -44,9 +45,14 @@ class Carrier:
         self.d_y = d_y_init
         self.d_z = d_z_init
         self.t = t_init
+        self.t_end = t_end
+        self.pixel = pixel
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
         self.signal = [[] for j in range(read_ele_num)]
         self.end_condition = 0
+        self.diffuse_end_condition = 0
+        self.row=0
+        self.column=0
 
         self.cal_mobility = Material(material).cal_mobility
         self.charge = charge
@@ -155,6 +161,81 @@ class Carrier:
         elif(len(self.path)>10000):
             self.end_condition = "reciprocate"'''
         return self.end_condition
+
+    def diffuse_single_step(self,my_d,my_f):
+        delta_t=t_bin
+        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+        intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
+
+        kboltz=8.617385e-5 #eV/K
+        mobility = Material(my_d.material)
+        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z), self.charge, intensity)
+        diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
+        #diffusion = 0.0
+        dif_x=random.gauss(0.0,diffusion)*1e4
+        dif_y=random.gauss(0.0,diffusion)*1e4
+        dif_z=0
+
+        if((self.d_x+dif_x)>=my_d.l_x): 
+            self.d_x = my_d.l_x
+        elif((self.d_x+dif_x)<0):
+            self.d_x = 0
+        else:
+            self.d_x = self.d_x+dif_x
+        # y axis
+        if((self.d_y+dif_y)>=my_d.l_y): 
+            self.d_y = my_d.l_y
+        elif((self.d_y+dif_y)<0):
+            self.d_y = 0
+        else:
+            self.d_y = self.d_y+dif_y
+        # z axis
+        if((self.d_z+dif_z)>=my_d.l_z): 
+            self.d_z = my_d.l_z
+        elif((self.d_z+dif_z)<0):
+            self.d_z = 0
+        else:
+            self.d_z = self.d_z+dif_z
+        #time
+        self.t = self.t+delta_t
+        #record
+        self.path.append([self.d_x,self.d_y,self.d_z,self.t])
+
+    def diffuse_end(self,my_f):
+        if (self.d_z<=0):
+        #    self.end_condition = "out of bound"
+            self.diffuse_end_condition = "collect"
+        return self.diffuse_end_condition
+
+    def diffuse_not_in_sensor(self,my_d):
+        if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
+            or (self.d_y<=0) or (self.d_y>=my_d.l_y)\
+            or (self.d_z>=my_d.l_z):
+            self.diffuse_end_condition = "out of bound"
+        mod_x = self.d_x % self.pixel
+        mod_y = self.d_y % self.pixel
+        if ((mod_x> 7.5) & (mod_x<17.5)) or ((mod_y> 7.5) & (mod_y<17.5)):
+            self.diffuse_end_condition = "collect"
+
+        return self.diffuse_end_condition
+        '''
+        elif (self.d_z<= 0) :
+        #or (self.t >= self.t_end):
+            self.diffuse_end_condition = "collect"
+        #print("diffuse end")
+        return self.diffuse_end_condition
+        '''
+
+    def pixel_position(self,my_f,my_d):
+        if self.diffuse_end_condition == "collect":
+            self.row = self.d_x // self.pixel
+            self.column = self.d_y // self.pixel
+        else:
+            self.row = -1
+            self.column = -1
+        return  self.row,self.column,abs(self.charge)
+
+        
 
 class CalCurrent:
     """
@@ -482,6 +563,71 @@ class CalCurrentG4P(CalCurrent):
         G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
         self.read_ele_num = my_f.read_ele_num
         super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
+
+
+class CalCurrentPixel:
+    """Calculation of diffusion electrons in pixel detector"""
+    def __init__(self, my_d, my_f, my_g4p, batch):
+        G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
+        self.read_ele_num = my_f.read_ele_num
+        self.electrons = []
+        self.charge,self.collected_charge=[],[]
+        self.row,self.column=[],[]
+        #print(len(G4P_carrier_list.ionized_pairs))
+        print("%f pairs of carriers are generated from G4" %sum(G4P_carrier_list.ionized_pairs))
+        #print(G4P_carrier_list.track_position)
+        for i in range(len(G4P_carrier_list.track_position)):
+            electron = Carrier(G4P_carrier_list.track_position[i][0],\
+                               G4P_carrier_list.track_position[i][1],\
+                               G4P_carrier_list.track_position[i][2],\
+                               G4P_carrier_list.track_position[i][3],\
+                               -1*G4P_carrier_list.ionized_pairs[i],\
+                               my_d.material,\
+                               my_f.read_ele_num)
+            if not electron.not_in_sensor(my_d):
+                self.electrons.append(electron)
+        self.diffuse_loop(my_d,my_f)
+        print("Draw Histgram")
+        Xbins=int(my_d.l_x // electron.pixel)
+        Ybins=int(my_d.l_y // electron.pixel)
+        Xup=my_d.l_x // electron.pixel
+        Yup=my_d.l_y // electron.pixel
+        test_charge = ROOT.TH2F("charge", "charge",Xbins, 0, Xup, Ybins, 0, Yup)
+        for i in range(len(self.row)):
+            #test_charge.SetBinContent(int(self.row[i]),int(self.column[i]),self.charge[i])
+            test_charge.Fill(self.row[i],self.column[i],self.charge[i])
+        self.sum_charge = ROOT.TH2F("charge", "Pixel Detector charge",Xbins, 0, Xup, Ybins, 0, Yup)
+        self.sum_charge.Add(test_charge)
+        test_charge.Reset
+        self.pixel_charge(my_d,Xbins,Ybins)
+        print(self.collected_charge)
+        print("%f electrons are collected " %sum(self.charge))
+
+
+    def find_duplicates(lst):
+        return [x for x in lst if lst.count(x) > 1]     
+
+    def diffuse_loop(self, my_d, my_f):
+        for electron in self.electrons:
+            while not electron.diffuse_not_in_sensor(my_d):
+                electron.diffuse_single_step(my_d, my_f)
+                electron.diffuse_end(my_f)
+            x,y,charge_quantity = electron.pixel_position(my_f,my_d)
+            if (x != -1)&(y != -1): 
+                self.row.append(x)
+                self.column.append(y)
+                self.charge.append(charge_quantity)
+
+    def pixel_charge(self,my_d,Xbins,Ybins):
+        for x in range(Xbins):
+            for y in range(Ybins):
+                charge =self.sum_charge.GetBinContent(x,y)
+                if (charge>0.2):
+                    self.collected_charge.append([x,y,charge])        
+        return self.collected_charge
+
+                    
+
 
 class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):

@@ -8,6 +8,7 @@ upload:
 
 merge: 
 	git remote update 
+	git merge origin/main
 	git merge upstream/main 
 
 clean: 

@@ -53,11 +53,10 @@ def main():
     my_d = raser.R3dDetector(dset)
     
     if "PixelDetector" in args:
-        #my_f = raser.FenicsCal(my_d,dset.fenics)
-        my_f = 0
+        my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.Particles(my_d, my_f, dset)
-        #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        #my_resolution = raser.PixelDetector_Telescope(my_c,my_g4p)
+        my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
+        drawsave.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:

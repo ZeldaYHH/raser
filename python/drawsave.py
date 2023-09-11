@@ -862,3 +862,26 @@ def save_current_geant4(my_d,dset,event,my_current,my_g4p,start_n,my_f):
     t_out.Fill()
     t_out.Write()
     fout.Close()
+
+def draw_charge(my_charge):
+    path = os.path.join("output", "pixel",)
+    create_path(path) 
+    c=ROOT.TCanvas("c","canvas1",1000,1000)
+    c.cd()
+    c.Update()
+    c.SetLeftMargin(0.12)
+    # c.SetTopMargin(0.12)
+    c.SetRightMargin(0.12)
+    c.SetBottomMargin(0.14)
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptStat(0)
+
+    my_charge.sum_charge.GetXaxis().SetNdivisions(510)
+    my_charge.sum_charge.GetYaxis().SetNdivisions(505)
+    my_charge.sum_charge.GetXaxis().SetTitle("X")
+    my_charge.sum_charge.GetYaxis().SetTitle("Y")
+
+    my_charge.sum_charge.Draw("lego")
+    c.Update()
+    c.SaveAs("Pixel_charge.pdf")
+    c.SaveAs("Pixel_charge.root")

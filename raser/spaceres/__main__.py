@@ -7,7 +7,7 @@ def main(args_dict):
         module_name = args_dict['option'][0]
         args_dict['option']=args_dict['option'][1:]
         try:
-            module = importlib.import_module(module_name)
+            module = importlib.import_module("spaceres."+module_name)
             module.main(args_dict)
         except ModuleNotFoundError:
             try:

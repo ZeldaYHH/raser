@@ -4,8 +4,9 @@
 
 echo "Setting up raser ..."
 
-export RASER_IMG=/afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif
+export IMGFILE=/afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 alias ls="ls -h --color"
-alias raser="python3 raser"
+alias raser="apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $IMGFILE python3 raser"
+alias raser-test="python3 -m unittest discover -v -s tests"

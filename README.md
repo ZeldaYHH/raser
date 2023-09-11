@@ -17,10 +17,9 @@ Setup
 
 > source cfg/setup.sh  # only once per login 
 
-Run
+Usage
 ====== 
-> raser field cal gen_devsim_db
-
+> raser -h 
 
 
 Web  

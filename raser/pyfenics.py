@@ -66,6 +66,10 @@ class FenicsCal:
                                          fenics.Point(self.fl_x, self.fl_y, self.fl_z), 
                                          5, 5, 1000)
         
+        elif "PixelDetector" in self.det_model: # under construction
+            self.mesh3D = fenics.BoxMesh(fenics.Point(0, 0, 0),
+                                         fenics.Point(self.fl_x, self.fl_y, self.fl_z), 
+                                         5, 5, 1000)
         else:
             raise(NameError)        
     
@@ -132,6 +136,9 @@ class FenicsCal:
             #u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
             #u_w_bc_l = self.boundary_definition_strip(my_d,1.0,0.0)
             pass
+        elif "PixelDetector" in self.det_model:
+            u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
+            u_w_bc_l = self.boundary_definition_planar(my_d,1.0,0.0)
         else:
             raise NameError(self.det_model)
 
@@ -434,7 +441,8 @@ class FenicsCal:
                 z_value = z_value* -1
             except RuntimeError:
                 x_value,y_value,z_value = 0,0,0
-        
+        if self.det_model == "PixelDetector" :
+            x_value,y_value,z_value = 0,0,0
         return x_value,y_value,z_value
 
     def threeD_out_column(self,px,py,pz):
@@ -453,7 +461,7 @@ class FenicsCal:
                 threeD_out_column=True
             else:
                 threeD_out_column=False
-        elif "planar3D" or "lgad3D" or "planarRing" in self.det_model:
+        elif "planar3D" or "lgad3D" or "planarRing" or "PixelDetector" in self.det_model:
             threeD_out_column=False
         return threeD_out_column
     

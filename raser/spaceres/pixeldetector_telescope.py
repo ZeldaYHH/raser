@@ -397,7 +397,7 @@ class Test:
         #print(t_list)
         return t_list
     
-def main():
+def main(args=0):
     my_c = Test()
     my_g4d = 0
     tel = PixelDetector_Telescope(my_c,my_g4d)

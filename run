@@ -816,6 +816,9 @@ case $option in
     6.2.1) echo "Simulation of PixelDetector, and Telescope reconstrution"
         raser "./python/gsignal.py det_name=Taichu3 parfile=paras/setting.json geant4_model=PixelDetector geant4_parfile=paras/geant4_setting.json PixelDetector"
         ;;
+    6.2.2) echo "Simulation of PixelDetector, and Telescope reconstrution"
+        raser "./python/gsignal.py det_name=PixelDetector parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json PixelDetector"
+        ;;  
 esac
 }
 
