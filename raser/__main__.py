@@ -25,11 +25,14 @@ parser_field.add_argument('label', help='LABEL to identify operation')
 parser_root = subparsers.add_parser('root', help='root files conversion')
 parser_root.add_argument('label', help='LABEL to identify root files')
 
+parser_spaceres = subparsers.add_parser('spaceres', help='spaceres calculation')
+parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
+
 args = parser.parse_args()
 
 
 
-submodules = ['draw', 'field', 'root']
+submodules = ['draw', 'field', 'root','spaceres']
 
 submodule = sys.argv[1] 
 if submodule not in submodules:
