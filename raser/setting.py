@@ -43,7 +43,6 @@ class Setting:
             self.read_par_geant4(self._pardic['geant4_parfile'])
 
         p = self.paras
-        print(p)
         self.total_events = int(p['total_events'])
         #self.g4seed = 0 
         self.g4seed = random.randint(0,1e7)

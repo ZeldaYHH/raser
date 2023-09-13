@@ -16,7 +16,7 @@ def main(args):
         
         
         my_f = 0
-        my_g4p = Particles(my_d, my_f, dset)
+        #my_g4p = Particles(my_d, my_f, dset)
         
         #my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
         #drawsave.draw_charge(my_charge)

@@ -59,7 +59,12 @@ class telescope:
         self.cluster(self.Hits,self.Clusters)
         #print(self.Clusters)
 
+        count = 0
         for evt in self.Clusters:
+            
+            if count % 1000 == 0:
+                print("Excuate process:",count,"/",len(self.Clusters))
+            count+=1
             #tracking
             #simple choose of track, only 1 cluster 6 layer evt considered
             if(len(evt)!=len(self.layer_z)):
@@ -204,8 +209,8 @@ class telescope:
             Name = "Layer_"+str(layer)
             Namex = Name+"_x"
             Namey = Name+"_y"
-            Namekx = Name+"_kx"
-            Nameky = Name+"_ky"
+            #Namekx = Name+"_kx"
+            #Nameky = Name+"_ky"
             
             meanx,sigmax = self._draw_res(residualx,Namex)
             meany,sigmay = self._draw_res(residualy,Namey)
@@ -245,7 +250,7 @@ class telescope:
                     t_Hits[layer].append([t_x,t_y])
             Hits.append(t_Hits)
     #draw gauss distribution of residual 
-    def _draw_res(self,data,Name,xmin=-50,xmax = 50):
+    def _draw_res(self,data,Name,xmin=-100,xmax = 100):
         hist = ROOT.TH1D(Name, Name, 50, xmin, xmax)  
         x = data  
         for value in x:
@@ -365,13 +370,13 @@ class Test:
     def __init__(self,):
         self.event = []
         self.layer_z = [20000,60000,100000,140000,180000,220000]
-        self.thickness = 20
+        self.thickness = 200
         self.pixelsizex = 25
         self.pixelsizey = 25
-        self.laserz = -5000000
+        self.laserz = 0
         self.laserx = 12.5
         self.lasery = 12.5
-        self.generate(10)
+        self.generate(1000)
         
     def generate(self,Num):
         bx,by = 512*25,512*25
