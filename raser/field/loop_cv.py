@@ -119,25 +119,7 @@ def loop(bias_v,voltage):
 
     canvas.Update()
     canvas.SaveAs("./output/2Dresult/Sicar1.1.6/SicarLgadTestCV_picture{0}to{1}.root".format(bias_v,voltage))
-    '''import numpy as np
-    output_file="./output/2Dresult/Sicar1.1.6/modelname.txt"
-    def check_for_inf(arr, var_name, output_file):
-        if np.any(np.isinf(arr)):
-            with open(output_file, "a") as file:
-                file.write(f"The variable {var_name} contains 'inf'.\n")
-    output_file="./output/2Dresult/Sicar1.1.6/modelname.txt"
-    for c in devsim.get_node_model_list(device,region):
-        arr1=devsim.get_node_model_values(device, region, c)
-        check_for_inf(arr1, "arr1")
-
-
-    # 示例使用
-    arr1 = [1, 2, 3, np.inf, 5]
-    arr2 = [10, 20, 30, 40, 50]
-
-    check_for_inf(arr1, "arr1")
-    check_for_inf(arr2, "arr2")
-'''
+   
     devsim.write_devices(file="./output/2Dresult/Sicar1.1.6/SicarLgad{0}to{1}.dd".format(bias_v,voltage), type="tecplot")
 
 
