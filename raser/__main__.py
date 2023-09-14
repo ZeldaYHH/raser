@@ -22,6 +22,8 @@ parser_draw.add_argument('label', help='LABEL to identify root files')
 parser_field = subparsers.add_parser('field', help='calculate field and iv/cv')
 parser_field.add_argument('label', help='LABEL to identify operation')
 
+parser_field.add_argument("-b","--batch", help="run in batch mode",action="store_true")
+
 parser_root = subparsers.add_parser('root', help='root files conversion')
 parser_root.add_argument('label', help='LABEL to identify root files')
 
