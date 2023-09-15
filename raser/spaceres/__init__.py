@@ -8,6 +8,7 @@ sys.path.append("..")
 from g4simulation import Particles
 from setting import Setting
 from geometry import R3dDetector
+from calcurrent import CalCurrentPixel
 
 def main(args):
     label = vars(args)['label']
@@ -22,8 +23,8 @@ def main(args):
         dset = Setting(paths)
         my_d = R3dDetector(dset)
         my_f = 0
-        #my_g4p = Particles(my_d, my_f, dset)
-        #my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
+        my_g4p = Particles(my_d, my_f, dset)
+        my_charge = CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
         #drawsave.draw_charge(my_charge)
         #my_telescope = telescope(my_d,my_charge,my_g4p,dset)
         

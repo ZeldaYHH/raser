@@ -164,8 +164,8 @@ class Carrier:
 
     def diffuse_single_step(self,my_d,my_f):
         delta_t=t_bin
-        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
+        #e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+        intensity = 0
 
         kboltz=8.617385e-5 #eV/K
         mobility = Material(my_d.material)
@@ -586,7 +586,7 @@ class CalCurrentPixel:
                                        0,\
                                        -1*G4P_carrier_list.ionized_pairs[k][j][i],\
                                        my_d.material,\
-                                       my_f.read_ele_num)
+                                       1)
                     if not electron.not_in_sensor(my_d):
                         self.electrons.append(electron)
                 self.diffuse_loop(my_d,my_f)
