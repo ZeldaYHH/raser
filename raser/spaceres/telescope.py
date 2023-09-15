@@ -12,7 +12,7 @@ import os
 import numpy as np
 
 class telescope:
-    def __init__(self,my_c,my_g4p):
+    def __init__(self,my_d,my_c):
         """
         Description:
             Telescope spatical resolution analysis, only consider vertical layer, ignore alignment
@@ -37,9 +37,10 @@ class telescope:
         #batch mode of root
         ROOT.gROOT.SetBatch(True)
         #gemotry information, default unit is um, better read from json file 
-        self.pixelsize_x = 25
-        self.pixelsize_y = 25
-        self.layer_z = [20000,60000,100000,140000,180000,220000]
+        
+        self.pixelsize_x = my_d.p_x
+        self.pixelsize_y = my_d.p_y
+        self.layer_z = my_d.lt_z
         self.seedcharge = 100
         
         self.Clusters = []
@@ -212,8 +213,9 @@ class telescope:
             #Namekx = Name+"_kx"
             #Nameky = Name+"_ky"
             
-            meanx,sigmax = self._draw_res(residualx,Namex)
-            meany,sigmay = self._draw_res(residualy,Namey)
+            xmin = self.pixelsize_x*4
+            meanx,sigmax = self._draw_res(residualx,Namex,-xmin,xmin)
+            meany,sigmay = self._draw_res(residualy,Namey,-xmin,xmin)
             #meankx,sigmakx = self._draw_res(kx,Namekx,-0.002,0.002)
             #meanky,sigmaky = self._draw_res(ky,Nameky,-0.002,0.002)
             
@@ -367,19 +369,29 @@ class island:
 
 #interface to generate simple examples for  debugging
 class Test:
-    def __init__(self,):
+    def __init__(self,my_d):
         self.event = []
-        self.layer_z = [20000,60000,100000,140000,180000,220000]
-        self.thickness = 200
-        self.pixelsizex = 25
-        self.pixelsizey = 25
+        
+        if my_d == 0:
+            
+            my_d.p_x = 25
+            my_d.p_y = 25
+            my_d.p_z = 20
+            my_d.lt_z = [20000.,60000.,100000.,140000.,180000.,220000.]
+            
+        self.layer_z = my_d.lt_z
+        self.pixelsizex = my_d.p_x
+        self.pixelsizey = my_d.p_y
+        self.thickness = my_d.p_z
+        
         self.laserz = 0
-        self.laserx = 12.5
-        self.lasery = 12.5
+        self.laserx = self.pixelsizex/2
+        self.lasery = self.pixelsizey/2
         self.generate(1000)
         
     def generate(self,Num):
-        bx,by = 512*25,512*25
+        #dont let bx,by change by pixelsize
+        bx,by = 512*25.,512*25.
         random_generator = ROOT.TRandom()
         min_value = -256.*25./(self.layer_z[5]-self.laserz)
         max_value = -min_value
@@ -405,7 +417,7 @@ class Test:
     
     def get_grid_cells_for_rectangle(self,x1, y1, x2, y2):
         grid_cells = set()
-        random_generator = ROOT.TRandom()
+        #random_generator = ROOT.TRandom()
 
         N = 5
         for i in range(N+1):
@@ -428,10 +440,10 @@ class Test:
         #print(t_list)
         return t_list
     
-def main(args=0):
-    my_c = Test()
-    my_g4d = 0
-    tel = telescope(my_c,my_g4d)
+def main(my_d):
+    my_c = Test(my_d)
+    tel = telescope(my_d,my_c)
+    return tel.Resolution_Tol[2][0]
     
 if __name__ == '__main__':
     start = time.time()
