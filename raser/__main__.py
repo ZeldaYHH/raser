@@ -6,18 +6,17 @@
 import sys 
 import argparse
 import importlib
+import subprocess
 
 VERSION = 4.0
-
-if len(sys.argv) == 1:
-    sys.stdout.write('Please use -h for help.\n')
-    sys.exit(1)
 
 parser = argparse.ArgumentParser(prog='raser')
 parser.add_argument('--version', action='version', 
                     version='%(prog)s {}'.format(VERSION))
+parser.add_argument('-b', '--batch', help='submit BATCH job to cluster', action="store_true")
+parser.add_argument('-t', '--test', help='TEST', action="store_true")
 
-subparsers = parser.add_subparsers(help='sub-command help')
+subparsers = parser.add_subparsers(help='sub-command help', dest="subparser_name")
 
 parser_draw = subparsers.add_parser('draw', help='draw figures')
 parser_draw.add_argument('label', help='LABEL to identify root files')
@@ -35,12 +34,25 @@ parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 
 args = parser.parse_args()
 
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 
-submodules = ['draw', 'field', 'root','spaceres']
+submodules = ['draw', 'field', 'root', 'spaceres']
 
-submodule = sys.argv[1] 
+submodule = vars(args)['subparser_name']
 if submodule not in submodules:
     raise NameError(submodule)
 
-submodule = importlib.import_module(submodule)
-submodule.main(args)
+if vars(args)['batch'] == True:
+    batchjob = importlib.import_module('run_batchjob')
+    destination = submodule
+    command = ' '.join(sys.argv[1:])
+    print(command)
+    command = command.replace('--batch ', '')
+    command = command.replace('-b ', '')
+    subprocess.run(['source export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH'],shell=True)
+    batchjob.main(destination, command)
+else:
+    submodule = importlib.import_module(submodule)
+    submodule.main(args)

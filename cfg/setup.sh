@@ -10,4 +10,4 @@ export BINDPATH=/cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2,/publicfs
 
 alias raser="apptainer exec --env-file cfg/env -B $BINDPATH $IMGFILE python3 raser"
 alias test-raser="apptainer exec --env-file cfg/env -B $BINDPATH $IMGFILE python3 -m unittest discover -v -s tests"
-
+alias raser-shell="apptainer shell --env-file cfg/env -B $BINDPATH $IMGFILE"
