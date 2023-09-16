@@ -2,16 +2,15 @@
     {
         "total_events" : 10,
         "det_name" : "Taichu3",
-        "det_model" : "PixelDetector",
+        "det_model" : "pixeldetector",
 
-        "lx" : 25,
-        "ly" : 25,
+        "lx" : 1500,
+        "ly" : 1500,
         "lz" : 20,
-        "doping" : 52,
+        "doping" : -1,
         "voltage" : -1.8,
         "temp" : 300.0,
         "material" : "Si",
-        "Irradiation" : 0,
 
         "mesh" : 32,
         "xyscale" : 10,
@@ -106,32 +105,6 @@
         "CDet" : 30,
         "BBW" : 0.66,
         "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
-    },
-
-    {
-        "total_events" : 1000,
-        "det_name" : "PixelDetector",
-        "det_model" : "PixelDetector",
-
-        "lx" : 1500,
-        "ly" : 1500,
-        "lz" : 20,
-        "doping" : -5,
-        "voltage" : 0,
-        "temp" : 300.0,
-        "material" : "Si",
-
-        "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
         "BB_imp" : 10,
         "OscBW" : 2
     },

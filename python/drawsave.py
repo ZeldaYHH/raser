@@ -883,5 +883,5 @@ def draw_charge(my_charge):
 
     my_charge.sum_charge.Draw("lego")
     c.Update()
-    c.SaveAs("Pixel_charge.pdf")
-    c.SaveAs("Pixel_charge.root")
+    c.SaveAs(path+"/Pixel_charge.pdf")
+    c.SaveAs(path+"/Pixel_charge.root")
