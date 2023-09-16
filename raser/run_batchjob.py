@@ -2,9 +2,9 @@
 # -*- encoding: utf-8 -*-
 '''
 Description:  Run batch model     
-@Date       : 2021/09/02 17:13:04
-@Author     : tanyuhang
-@version    : 1.0
+@Date       : 2023/09/16 23:43:07
+@Author     : tanyuhang, Tao Yang, Chenxi Fu
+@version    : 3.0
 '''
 
 import os
