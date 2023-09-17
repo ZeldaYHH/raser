@@ -22,21 +22,12 @@ def main(args):
         paths = ['det_name=Taichu3', 'parfile=setting/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=setting/absorber.json', 'pixeldetector']
         dset = Setting(paths)
         my_d = R3dDetector(dset)
-        my_f = 0
-        my_g4p = Particles(my_d, my_f, dset)
-        my_charge = CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
+        #my_f = 0
+        #my_g4p = Particles(my_d, my_f, dset)
+        #my_charge = CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
         #drawsave.draw_charge(my_charge)
-        #my_telescope = telescope(my_d,my_charge,my_g4p,dset)
-        
-        #virtual object
-        class MyObject:
-            pass
-        my_d = MyObject()
-        my_d.p_x = 25.
-        my_d.p_y = 25.
-        my_d.p_z = 200.
-        my_d.lt_z = [20000.,60000.,100000.,140000.,180000.,220000.]
-        telescope.main(my_d)       
+        #my_telescope = telescope(my_d,my_charge) 
+        telescope.main(my_d)  
     elif label.startswith("taichu_v2"):
         #virtual object
         class MyObject:

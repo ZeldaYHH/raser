@@ -40,6 +40,7 @@ class telescope:
         
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
+        self.pixelsize_z = my_d.p_z
         self.layer_z = my_d.lt_z
         self.seedcharge = 100
         
@@ -373,11 +374,7 @@ class Test:
         self.event = []
         
         if my_d == 0:
-            
-            my_d.p_x = 25
-            my_d.p_y = 25
-            my_d.p_z = 20
-            my_d.lt_z = [20000.,60000.,100000.,140000.,180000.,220000.]
+            raise TypeError(my_d)
             
         self.layer_z = my_d.lt_z
         self.pixelsizex = my_d.p_x
