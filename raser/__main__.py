@@ -45,14 +45,13 @@ if submodule not in submodules:
     raise NameError(submodule)
 
 if vars(args)['batch'] == True:
-    batchjob = importlib.import_module('run_batchjob')
+    batchjob = importlib.import_module('batchjob')
     destination = submodule
     command = ' '.join(sys.argv[1:])
-    print(command)
+    print('batch command: {}'.format(command))
     command = command.replace('--batch ', '')
     command = command.replace('-b ', '')
-    subprocess.run(['source export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH'],shell=True)
-    batchjob.main(destination, command)
+    batchjob.main(destination, command, args)
 else:
     submodule = importlib.import_module(submodule)
     submodule.main(args)
