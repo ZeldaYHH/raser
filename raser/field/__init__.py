@@ -1,6 +1,5 @@
 import logging
 from . import gen_devsim_db
-<<<<<<< HEAD
 
 
 def main(args):
@@ -14,15 +13,6 @@ def main(args):
 
     logging.info('This is INFO messaage')
     logging.debug('This is DEBUG messaage')
-=======
-from . import scan_cv
-def main(args):
-    label = vars(args)['label']
-    batch= vars(args)['batch']
-    print(batch)
-    exit()
-   
->>>>>>> 8f46078ed83d1dcc90f4a9a084cb939a4041a783
 
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
