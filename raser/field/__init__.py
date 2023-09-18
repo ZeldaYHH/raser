@@ -1,6 +1,6 @@
 import logging
 from . import gen_devsim_db
-
+import scan_cv
 
 def main(args):
     label = vars(args)['label']
