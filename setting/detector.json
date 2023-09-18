@@ -2,7 +2,7 @@
     {
         "det_name" : "Taichu3",
         "det_model" : "pixeldetector",
-        "total_events" : 10,
+        "total_events" : 1000,
 
         "lx" : 1500,
         "ly" : 1500,
@@ -16,9 +16,9 @@
         "mesh" : 32,
         "xyscale" : 10,
 
-        "px" : 25,
-        "py" : 25,
-        "pz" : 200,
+        "px" : 25.0,
+        "py" : 25.0,
+        "pz" : 20.0,
         "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0]
     },
 

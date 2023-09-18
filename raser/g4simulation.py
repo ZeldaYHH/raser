@@ -551,13 +551,14 @@ class MyEventAction(g4b.G4UserEventAction):
             return
         touchable = point_pre.GetTouchable()
         volume = touchable.GetVolume()
+            
         transform = touchable.GetHistory().GetTopTransform()
         localpos = transform.TransformPoint(point_in)
         
         self.edep_device += edep
         self.p_step.append([point_in.getX()*1000,
                            point_in.getY()*1000,point_in.getZ()*1000])
-        self.energy_step.append(edep)
+        self.energy_step.append(edep)   
         #save only in RecordPixel
         self.volume_name.append(volume.GetName())
         self.localposition.append([localpos.getX()/g4b.um,localpos.getY()/g4b.um,localpos.getZ()/g4b.um])
@@ -565,7 +566,7 @@ class MyEventAction(g4b.G4UserEventAction):
         #print("edep:", edep)
         #print("Volume Name:", volume.GetName())
         #print("Global Position in Worlds Volume:",point_in/g4b.um)
-        #print("Local Position in Logical Volume:", localpos/g4b.um)
+        #print("Local Position in Pixel:", localpos/g4b.um)
 
 def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
     if(len(p_step)>0):

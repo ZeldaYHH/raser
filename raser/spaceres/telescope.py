@@ -214,7 +214,7 @@ class telescope:
             #Namekx = Name+"_kx"
             #Nameky = Name+"_ky"
             
-            xmin = self.pixelsize_x*4
+            xmin = self.pixelsize_x*3
             meanx,sigmax = self._draw_res(residualx,Namex,-xmin,xmin)
             meany,sigmay = self._draw_res(residualy,Namey,-xmin,xmin)
             #meankx,sigmakx = self._draw_res(kx,Namekx,-0.002,0.002)
