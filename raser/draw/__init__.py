@@ -1,6 +1,7 @@
 import os
 import ROOT
-from . import compare_sicar
+from . import iv
+from . import cv
 
 
 def draw_figure(input_dir, output_dir, label):
@@ -111,7 +112,7 @@ def draw_figure(input_dir, output_dir, label):
             c = ROOT.TCanvas("c","c",500,500)
             c.SetLeftMargin(0.22)
             c.SetBottomMargin(0.16)
-            legend = ROOT.TLegend(0.52,0.27,0.85,0.40)
+            legend = ROOT.TLegend(0.52,0.70,0.85,0.83)
             c.SetGrid()
             c.SetFrameLineWidth(5)
 
@@ -136,10 +137,10 @@ def main(args):
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
         draw_figure(input_dir, output_dir, label)
-    elif label == 'compare_sicar1.1.8':
-        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
-        output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
-        compare_sicar.main()
+    elif label == 'compare_sicar1.1.8_iv':
+        iv.main(label)
+    elif label == 'compare_sicar1.1.8_cv':
+        cv.main(label)
     elif label == 'sicar1.1.8-1':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
@@ -148,9 +149,9 @@ def main(args):
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
         draw_figure(input_dir, output_dir, label)  
-    elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2':
-        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
-        output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
-        compare_sicar.main()  
+    elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_iv':
+        iv.main(label)  
+    elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_cv':
+        cv.main(label) 
     else: 
         raise NameError(label)

@@ -57,11 +57,18 @@ class R3dDetector:
         if "planarRing" in self.det_model:
             self.e_r_inner = det_dic['e_r_inner']
             self.e_r_outer = det_dic['e_r_outer']
+            
+        if "pixeldetector" in self.det_model:
+            self.p_x = det_dic['px']
+            self.p_y = det_dic['py']
+            self.p_z = det_dic['pz']
+            self.lt_z = det_dic['ltz']
         
         if 'trapping_time' in det_dic:
             self.trapping_time=det_dic['trapping_time']
         else:
             self.trapping_time=float('inf')
+            
 
         # if 'Irradiation' in det_dic:
         #     self.Irradiation=det_dic['Irradiation']

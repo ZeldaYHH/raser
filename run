@@ -188,7 +188,8 @@ usage_6_1() {
 }
 
 usage_6_2() {
-    printf "\n\t%-5s  %-40s\n"  "6.2.1"    " Simulation of pixeldetector, and Telescope reconstrution"  
+    printf "\n\t%-5s  %-40s\n"  "6.2.1"    " Simulation of PixelDetector, and Telescope reconstrution"  
+    printf "\n\t%-5s  %-40s\n"  "6.2.2"    " Simulation of PixelDetector"
     printf "\n"
 }
 
@@ -815,10 +816,7 @@ sub_6_2(){
 case $option in 
     6.2.1) echo "Simulation of pixeldetector, and Telescope reconstrution"
         raser "./python/gsignal.py det_name=Taichu3 parfile=setting/detector.json geant4_model=pixeldetector geant4_parfile=setting/absorber.json pixeldetector"
-        ;;
-    6.2.2) echo "Simulation of pixeldetector, and Telescope reconstrution"
-        raser "./python/gsignal.py det_name=pixeldetector parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json pixeldetector"
-        ;;  
+        ;;   
 esac
 }
 

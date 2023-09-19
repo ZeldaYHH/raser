@@ -53,10 +53,10 @@ def main():
     my_d = raser.R3dDetector(dset)
     
     if "pixeldetector" in args:
-        #my_f = raser.FenicsCal(my_d,dset.fenics)
-        my_f = 0
+        my_f = raser.FenicsCal(my_d,dset.fenics)
+        #my_f = 0
         my_g4p = raser.Particles(my_d, my_f, dset)
-        #my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, 0)
+        my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
         #drawsave.draw_charge(my_charge)
         return  
     

@@ -1,3 +1,6 @@
+# PATH 
+PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:/usr/bin:$PATH
+
 # ROOT 
 ROOTSYS=/usr/local/share/root_install
 
