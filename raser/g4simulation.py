@@ -467,11 +467,11 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
             self.directionz = par_direction[2]
 
     def GeneratePrimaries(self, event):
-        self.particleGun.GeneratePrimaryVertex(event)
         if(self.geant4_model=="Time_resolution"):
+            self.particleGun.GeneratePrimaryVertex(event)
             self.particleGun2.GeneratePrimaryVertex(event)
             pass
-        if(self.geant4_model=="pixeldetector"):
+        elif(self.geant4_model=="pixeldetector"):
             randx = Particles._randx
             randy = Particles._randy
             rdo_x = random.uniform(-randx,randx)
@@ -486,6 +486,10 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
             self.particleGun.GeneratePrimaryVertex(event)
             #print("direction:",rdo_x-rdi_x,rdo_y-rdi_y,self.directionz)
             #print(rdi_x,rdi_y,self.position[2])
+        else:
+            self.particleGun.GeneratePrimaryVertex(event)
+            
+        
 
 
 class MyRunAction(g4b.G4UserRunAction):

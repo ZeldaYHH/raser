@@ -25,11 +25,11 @@ def main(args):
         dset = Setting(paths)
         my_d = R3dDetector(dset)
         my_f = 0
-        my_g4p = Particles(my_d, my_f, dset)
-        my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
+        #my_g4p = Particles(my_d, my_f, dset)
+        #my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
         #drawsave.draw_charge(my_charge)
         #my_telescope = tlcp.telescope(my_d,my_charge) 
-        #tlcp.main(my_d)  
+        tlcp.main(my_d)  
     elif label.startswith("taichu_v2"):
         #virtual object
         class MyObject:

@@ -59,7 +59,6 @@ class telescope:
         
         self.readdata(my_c)
         self.cluster(self.Hits,self.Clusters)
-        print(self.Hits)
 
         count = 0
         multi_cluster = 0
