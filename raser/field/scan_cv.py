@@ -3,7 +3,6 @@
 import sys
 import subprocess
 import os
-from . import run_batchjob
 import json
 
 
