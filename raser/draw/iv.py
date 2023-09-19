@@ -18,9 +18,9 @@ def draw_iv(input_dir, output_dir, label):
 
     for i in range(len(com_name)):
         name = com_name[i]
-        if label == 'compare_sicar1.1.8' and not name.startswith('sicar1.1.8'):
+        if label == 'sicar1.1.8' and not name.startswith('sicar1.1.8'):
             continue
-        elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2' and not (name.startswith('sicar1.1.8-1_')) and not (name.startswith('sicar1.1.8-2_')):
+        elif label == 'sicar1.1.8-1,sicar1.1.8-2_iv' and not (name.startswith('sicar1.1.8-1_')) and not (name.startswith('sicar1.1.8-2_')):
             continue
 
         name = name.split('.root')[0]
