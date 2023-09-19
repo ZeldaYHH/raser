@@ -5,7 +5,6 @@ check:
 	
 upload: 
 	twine upload dist/* 
-
 merge: 
 	git remote update 
 	git merge origin/main

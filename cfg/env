@@ -19,5 +19,5 @@ G4LEVELGAMMADATA=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data/PhotonEv
 G4RADIOACTIVEDATA=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data/RadioactiveDecay5.6
 
 # Python 
-PYTHONPATH=$HOME/raser:/usr/local/share/root_install/lib:/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install/lib64/python3.6/site-packages
+PYTHONPATH=$HOME/raser:/usr/local/share/root_install/lib:/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
 LD_LIBRARY_PATH=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install/lib64:/usr/local/share/root_install/lib:/.singularity.d/libs
