@@ -59,17 +59,18 @@ class telescope:
         
         self.readdata(my_c)
         self.cluster(self.Hits,self.Clusters)
-        #print(self.Clusters)
+        print(self.Hits)
 
         count = 0
-        for evt in self.Clusters:
-            
+        multi_cluster = 0
+        for evt in self.Clusters:       
             if count % 1000 == 0:
                 print("Excuate process:",count,"/",len(self.Clusters))
             count+=1
             #tracking
-            #simple choose of track, only 1 cluster 6 layer evt considered
+            #simple choose of track, only 1 cluster all layer evt considered
             if(len(evt)!=len(self.layer_z)):
+                multi_cluster+=1
                 continue
             else:
                 flag = 0
@@ -100,8 +101,8 @@ class telescope:
                     pos_z.append(self.layer_z[layer])
                 kx,bx,ky,by = self.fit(pos_x,pos_y,pos_z)
                 
-                residualx = kx*self.layer_z[DUT]+bx-cluster_dict[DUT][0][0]
-                residualy = ky*self.layer_z[DUT]+by-cluster_dict[DUT][0][1]
+                residualx = kx*(self.layer_z[DUT]+self.pixelsize_z/2)+bx-cluster_dict[DUT][0][0]
+                residualy = ky*(self.layer_z[DUT]+self.pixelsize_z/2)+by-cluster_dict[DUT][0][1]
                 if DUT not in self.Residual:
                     self.Residual[DUT] = []
                     self.kvalue[DUT] = []
@@ -124,6 +125,7 @@ class telescope:
         self.resolution()
         self.swap_res()
         
+        print("multi_clusters_evts",multi_cluster)
         print("Tol_evts:",len(self.Clusters))
         print("Tol_Resulution of each DUT",self.Resolution_Tol)
         print("DUT_Resulution of each DUT",self.Resolution_DUT)
@@ -264,11 +266,12 @@ class telescope:
         
         mean = fitFunc.GetParameter(1)
         sigma = fitFunc.GetParameter(2)
-        
+        entries = int(len(x))
         canvas = ROOT.TCanvas("canvas", "Histogram and Fit", 800, 600)
         hist.SetStats(False)
         hist.Draw()
         label = ROOT.TPaveText(0.6, 0.7, 0.9, 0.9, "NDC")
+        label.AddText("Entries: {}".format(entries))
         label.AddText("Mean: {:.3f}".format(mean))
         label.AddText("Sigma: {:.3f}".format(sigma))
         label.SetFillStyle(0)

@@ -2,7 +2,7 @@
     {
         "det_name" : "Taichu3",
         "det_model" : "pixeldetector",
-        "total_events" : 1000,
+        "total_events" : 2,
 
         "lx" : 1500,
         "ly" : 1500,

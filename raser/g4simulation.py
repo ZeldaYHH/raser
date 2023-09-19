@@ -46,8 +46,8 @@ class Particles:
         if(self.geant4_model=='pixeldetector'):
             my_g4d = pixeldetectorConstruction(g4_dic,g4_dic['maxstep'])
             Particles._model = self.geant4_model
-            Particles._randx = g4_dic['par_randx']*g4b.um
-            Particles._randy = g4_dic['par_randy']*g4b.um
+            Particles._randx = g4_dic['par_randx']
+            Particles._randy = g4_dic['par_randy']
             #there's some parameter only use by this model
             global s_devicenames,s_localposition
             s_devicenames,s_localposition=[],[]
@@ -449,6 +449,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                    par_in[1]*g4b.um,
                                                    par_in[2]*g4b.um))  
         self.particleGun = beam
+        self.position = par_in
         if(self.geant4_model=="Time_resolution"):
             beam2 = g4b.G4ParticleGun(1)
             beam2.SetParticleEnergy(0.546*g4b.MeV)
@@ -473,13 +474,18 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         if(self.geant4_model=="pixeldetector"):
             randx = Particles._randx
             randy = Particles._randy
-            direction_x = random.uniform(-randx,randx)
-            direction_y = random.uniform(-randy,randy)
-            direction = g4b.G4ThreeVector(direction_x,direction_y,self.directionz)
+            rdo_x = random.uniform(-randx,randx)
+            rdo_y = random.uniform(-randy,randy)
+            rdi_x = random.uniform(-randx,randx)
+            rdi_y = random.uniform(-randy,randy)
+            direction = g4b.G4ThreeVector(rdo_x,rdo_y,self.directionz)
             self.particleGun.SetParticleMomentumDirection(direction)
+            self.particleGun.SetParticlePosition(g4b.G4ThreeVector(self.position[0]*g4b.um,
+                                                   self.position[1]*g4b.um,
+                                                   self.position[2]*g4b.um))  
             self.particleGun.GeneratePrimaryVertex(event)
-            #print("direction:",direction_x,direction_y,self.directionz)
-            pass
+            #print("direction:",rdo_x-rdi_x,rdo_y-rdi_y,self.directionz)
+            #print(rdi_x,rdi_y,self.position[2])
 
 
 class MyRunAction(g4b.G4UserRunAction):
