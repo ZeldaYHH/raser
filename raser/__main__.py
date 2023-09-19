@@ -26,6 +26,11 @@ parser_field.add_argument('label', help='LABEL to identify operation')
 parser_field.add_argument('-v', '--verbose', help='VERBOSE level', 
                           action='count', default=0)
 
+<<<<<<< HEAD
+=======
+parser_field.add_argument("-b","--batch", help="run in batch mode",action="store_true")
+
+>>>>>>> raser/main
 parser_root = subparsers.add_parser('root', help='root files conversion')
 parser_root.add_argument('label', help='LABEL to identify root files')
 

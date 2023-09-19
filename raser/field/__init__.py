@@ -1,6 +1,10 @@
 import logging
 from . import gen_devsim_db
+<<<<<<< HEAD
 
+=======
+from . import scan_cv
+>>>>>>> raser/main
 
 def main(args):
     label = vars(args)['label']
@@ -16,5 +20,10 @@ def main(args):
 
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
+<<<<<<< HEAD
+=======
+    if label == 'sicar1.1.6_cv_0-1v':
+        scan_cv.main()
+>>>>>>> raser/main
     else:
         raise NameError(label)
