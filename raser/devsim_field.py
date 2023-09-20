@@ -11,6 +11,7 @@ import os
 import csv
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
+from scipy.interpolate import griddata
 import math
 import pickle
 
@@ -22,7 +23,7 @@ class DevsimCal:
         self.read_ele_num = dev_dic['read_ele_num']        
         self.lz = []
         self.elefield = []
-        self.gradu = []
+        self.xypotential = []
         self.flag_2d = False
         print("init\n")
         if(det_name=="NJU-PIN"):
@@ -34,7 +35,8 @@ class DevsimCal:
         elif(det_name=="SICAR-1"):
             self.flag_2d = True
             potential_path = './output/devsim/2D_SICAR/' + str(-int(det_dic['voltage'])) + 'V_potential.pkl'
-            self.read_pickle(potential_path)
+            elefield_path = './output/devsim/2D_SICAR/' + str(-int(det_dic['voltage'])) + 'V_elefield.pkl'
+            self.read_pickle(potential_path, elefield_path)
         
 
     def readfile(self, e_field_filepath):
@@ -48,23 +50,19 @@ class DevsimCal:
                     self.elefield.append(fargs[1]/1e4) #V/cm -> V/um         
                 except Exception as e:
                     pass
-        self.gradu.append([])
-        self.gradu.append([])
-        self.gradu.append([])
-        self.gradu[2].append(0)
+        self.gradu.append(0)
         grad = self.voltage
         for i in range(len(self.elefield)-1):
             grad = grad - (self.elefield[i]+self.elefield[i+1]) * \
                             (self.lz[i+1]-self.lz[i]) / 2
-            self.gradu[2].append(grad)
+            self.gradu.append(grad)
+
 
     def get_e_field(self, x, y, depth):    
         if self.flag_2d:    
-            f_efx = interp1d(self.elefield[0], self.elefield[2], 
-                            kind='linear', fill_value="extrapolate")
-            f_efz = interp1d(self.elefield[1], self.elefield[3], 
-                            kind='linear', fill_value="extrapolate")
-            return f_efx(x), 0, f_efz(depth) 
+            f_efx = griddata(self.elefield[0], self.elefield[1][0], [x, depth])
+            f_efz = griddata(self.elefield[0], self.elefield[2][0], [x, depth])
+            return f_efx, 0, f_efz
         else:
             f_efz = interp1d(self.lz, self.elefield, 
                             kind='linear', fill_value="extrapolate")
@@ -78,36 +76,21 @@ class DevsimCal:
         return f_p
     
     def get_potential(self, x, y, depth):
-        f_u = interp2d(self.gradu[0], self.gradu[1], self.gradu[2], 
-                       kind = 'linear', fill_value="extrapolate")
-        return f_u(x, depth)
-    
-    def read_pickle(self, potential_path):
-        with open(potential_path, 'rb') as f:
-            self.gradu = pickle.load(f)
-        self.gradu = sorted(self.gradu, key=(lambda x:[x[1], x[0]]))
-        lz = self.gradu[1][0]
-        lx = self.gradu[0][0]
-        for i in range(len(self.gradu[0])-2):
-            if self.gradu[1][i+1] > lz:
-                self.elefield.append(self.elefield[i-1])
-                lz = self.gradu[1][i+1]
-            else:
-                potential_x = (self.gradu[2][i+1]-self.gradu[2][i]) / (self.gradu[0][i+1]-self.gradu[0][i])
-                self.elefield.append([self.gradu[0][i], self.gradu[1][i], potential_x, 0])
+        if self.flag_2d:
+            f_u = griddata(self.xypotential[0], self.xypotential[1], [x, depth])
+            return f_u
+        else:
+            f_u = interp1d(self.lz, self.gradu, 
+                            kind = 'linear', fill_value="extrapolate")
+            return f_u(depth)
 
-        sorted(self.gradu, key=(lambda x:[x[0], x[1]]))
-        lz = self.gradu[0][1]
-        lx = self.gradu[0][0]
-        for i in range(len(self.gradu[0])-1):
-            if self.gradu[1][i+1] > lx:
-                self.elefield[i] = self.elefield[i-1]
-                lx = self.gradu[0][i+1]
-            else:
-                potential_z = (self.gradu[2][i+1]-self.gradu[2][i]) / (self.gradu[1][i+1]-self.gradu[1][i])
-                try:
-                    self.elefield[i][3] = potential_z
-                except:
-                    print("error")
+    
+    def read_pickle(self, potential_path, elefield_path):
+        with open(potential_path, 'rb') as f:
+            self.xypotential = pickle.load(f)
+        f.close
+        with open(elefield_path, 'rb') as f:
+            self.elefield = pickle.load(f)
+        f.close
 
         
