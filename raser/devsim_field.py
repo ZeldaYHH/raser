@@ -22,14 +22,12 @@ class DevsimCal:
         self.l_z = my_d.l_z
         self.read_ele_num = dev_dic['read_ele_num']        
         self.lz = []
+        self.gradu = []
         self.elefield = []
         self.xypotential = []
         self.flag_2d = False
         print("init\n")
         if(det_name=="NJU-PIN"):
-            e_field_filepath = './output/devsim/1D_NJU_PIN/'+ str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
-            self.readfile(e_field_filepath)
-        elif(det_name==""):
             e_field_filepath = './output/devsim/1D_NJU_PIN/'+ str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
             self.readfile(e_field_filepath)
         elif(det_name=="SICAR-1"):
