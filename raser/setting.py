@@ -159,7 +159,8 @@ class Setting:
             detector.update({'px':p['px'],
                              'py':p['py'],
                              'pz':p['pz'],
-                             'ltz':p['ltz']})
+                             'ltz':p['ltz'],
+                             'seedcharge':p['seedcharge']})
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
         
