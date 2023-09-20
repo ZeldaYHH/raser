@@ -38,13 +38,12 @@ class telescope:
         #batch mode of root
         ROOT.gROOT.SetBatch(True)
         #gemotry information, default unit is um, better read from json file 
-        
         #paras
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
         self.pixelsize_z = my_d.p_z
         self.layer_z = my_d.lt_z
-        self.seedcharge = 100
+        self.seedcharge = my_d.seedcharge
         
         #IO and mid paras
         self.Clusters = []
@@ -59,9 +58,11 @@ class telescope:
         self.Resolution_DUT = {}
         
         self.readdata(my_c)
-        self.cluster(self.Hits,self.Clusters)
+        self.cluster(self.Hits,self.Clusters,self.Clustersize)
+        #
         self._res_loop(self.Clusters,self.Residual,self.Chisquare)
         self._ave_cluster(self.Clustersize,self.AveClustersize)
+        #
         self.resolution(self.Residual,self.Resolution_Tol)
         self.swap_res(self.Resolution_Tol,self.Resolution_DUT)
         
@@ -89,7 +90,7 @@ class telescope:
         #print(self.Hits)
         
     #find the cluster from planes hit
-    def cluster(self,Hits,Clusters):
+    def cluster(self,Hits,Clusters,Clustersize):
         for t_Hit in Hits:
             t_Clusters = {}
             t_Clustersize = {}
@@ -98,7 +99,7 @@ class telescope:
                 t_Clusters[layer] = t_island.getcluster()
                 t_Clustersize[layer] = t_island.getclustersize()
             Clusters.append(t_Clusters)
-            self.Clustersize.append(t_Clustersize)        
+            Clustersize.append(t_Clustersize)        
     
     #fit the track , get the residual of DUTs
     def fit(self,pos_x,pos_y,pos_z):

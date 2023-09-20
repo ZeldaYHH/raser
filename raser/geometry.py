@@ -63,6 +63,7 @@ class R3dDetector:
             self.p_y = det_dic['py']
             self.p_z = det_dic['pz']
             self.lt_z = det_dic['ltz']
+            self.seedcharge = det_dic['seedcharge']
         
         if 'trapping_time' in det_dic:
             self.trapping_time=det_dic['trapping_time']
