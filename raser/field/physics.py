@@ -6,8 +6,8 @@ Description:  Physics.py
 '''
 
 import devsim
-from raser.Node import *
-from raser.DriftDiffusion import *
+from field.node import *
+from field.drift_diffusion import *
 import math
 
 

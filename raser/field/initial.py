@@ -6,9 +6,9 @@ Description:  Initial.py
 '''
 
 import devsim
-from raser.Node import *
-from raser.Physics import *
-from raser.Node import *
+from field.node import *
+from field.physics import *
+from field.node import *
 
 def InitialSolution(device, region, circuit_contacts=None):
     # Create Potential, Potential@n0, Potential@n1

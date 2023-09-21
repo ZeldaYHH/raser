@@ -4,7 +4,7 @@
 import devsim
 import os
 import sys
-from raser import Node
+from field import node
 import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot
