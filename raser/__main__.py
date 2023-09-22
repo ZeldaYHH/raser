@@ -55,8 +55,9 @@ if vars(args)['batch'] == True:
     batchjob.main(destination, command, args)
 elif vars(args)['shell'] == False: # not in shell
     command = ' '.join(['-sh']+sys.argv[1:])
-    IMGFILE = "/afs/ihep.ac.cn/users/s/shixin/raser/raser-2.1.sif"
-    BINDPATH = "/cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2,/publicfs"
+    import os
+    IMGFILE = os.environ.get('IMGFILE')
+    BINDPATH = os.environ.get('BINDPATH')
     raser_shell = "/usr/bin/apptainer exec --env-file cfg/env -B" + " " \
                 + BINDPATH + " " \
                 + IMGFILE + " " \
