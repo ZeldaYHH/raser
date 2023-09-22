@@ -11,7 +11,10 @@ import os
 import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
-import drawsave
+
+# Need to be rewritten!
+
+import draw.drawsave
 import math
 
 def main():

@@ -9,8 +9,8 @@ import random
 import numpy as np
 import math
 import ROOT
-from raser.model import Material
-from raser.model import Vector
+from .model import Material
+from .model import Vector
 
 t_bin = 50e-12
 t_end = 60e-9

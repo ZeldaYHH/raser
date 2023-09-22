@@ -162,7 +162,7 @@ def initial_solution_Rirr(device,region,para_dict,Rirr=None):
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
             field.initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, Rirr,circuit_contacts="top")
-            #devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0)
+            #devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0)
             GGGddd=devsim.get_node_model_values(device=device, region=region, name="ElectronGeneration")
             GGGaaa=devsim.get_node_model_values(device=device, region=region, name="HoleGeneration")
             # print("Gd="+str(GGGddd)+"\n")

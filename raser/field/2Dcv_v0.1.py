@@ -8,8 +8,8 @@ sys.path.append("..")
 
 import sys
 import csv
-from raser import Node
-from raser import Physics
+from field import node
+from field import physics
 sys.path.append("..")
 import matplotlib.pyplot
 import physics2dcv
@@ -142,12 +142,12 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    Physics.CreateSiliconDriftDiffusion(device, region)
+    physics.CreateSiliconDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            Physics.CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+            physics.CreateSiliconDriftDiffusionAtContact(device, region, i, True)
         else:
-            Physics.CreateSiliconDriftDiffusionAtContact(device, region, i)
+            physics.CreateSiliconDriftDiffusionAtContact(device, region, i)
 
 
 

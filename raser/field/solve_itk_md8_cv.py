@@ -5,9 +5,9 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from raser import Physics
-from raser import Node
-from raser import Initial
+from field import physics
+from field import node
+from field import initial
 
 import itk_md8_mesh
 
@@ -40,14 +40,14 @@ devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
-devsim.circuit_element(name="V1", n1=Physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
+devsim.circuit_element(name="V1", n1=physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 
 # Initial DC solution
-Initial.InitialSolution(device, region, circuit_contacts="top")
+initial.InitialSolution(device, region, circuit_contacts="top")
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=30)
 
 ### Drift diffusion simulation at equilibrium
-Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
+initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
 
 #### Ramp the bias to Reverse
@@ -64,7 +64,7 @@ while reverse_v < 400.0:
     devsim.circuit_alter(name="V1", value=reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
     #TODO: get out circuit information
-    Physics.PrintCurrents(device, "bot")
+    physics.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=1.0)
     cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi)
     print("capacitance {0} {1}".format(reverse_v, cap))
