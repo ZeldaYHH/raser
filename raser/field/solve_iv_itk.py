@@ -6,10 +6,10 @@ import os
 import sys
 import math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from raser import Physics
-from raser import Node
-from raser import Initial
-from raser import Setting
+from field import physics
+from field import node
+from field import initial
+from readjson import Setting
 
 
 import matplotlib
@@ -63,7 +63,7 @@ header_md8iv = ["Voltage","Current"]
 writer_md8iv = csv.writer(f_md8iv)
 writer_md8iv.writerow(header_md8iv)
 
-Initial.InitialSolution(device, region)
+initial.InitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
 ### Drift diffusion simulation at equilibrium
@@ -72,7 +72,7 @@ if sign1=="plus":
 if sign1=="minus":
     constant="-"+constant1
 
-Initial.DriftDiffusionInitialSolution(device, region,constant)
+initial.DriftDiffusionInitialSolution(device, region,constant)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
 
 #### Ramp the bias to Reverse
@@ -97,15 +97,15 @@ ax1 = fig1.add_subplot(111)
 
 while reverse_v < 700.0:
 
-    devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=reverse_v)
-    #devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=reverse_v)
+    #devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
     try:
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
     except devsim.error as msg:
         if msg=="Convergence failure!":
             raise
-    Physics.PrintCurrents(device, "top")
-    Physics.PrintCurrents(device, "bot")
+    physics.PrintCurrents(device, "top")
+    physics.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       

@@ -8,13 +8,13 @@ sys.path.append("..")
 
 import sys
 import csv
-from raser import Node
-from raser import Physics
+from field import node
+from field import physics
 sys.path.append("..")
 import matplotlib.pyplot
 import physics2dcv
 import math
-import Sicar11
+import field.sicar11 as sicar11
 
 if not (os.path.exists("./output")):
     os.mkdir("./output")
@@ -36,8 +36,8 @@ pn_2D.SetDoping(device=device, region=region)
 
 '''
 
-Sicar11.Create2DMesh(device=device, region=region)
-Sicar11.SetDoping(device=device, region=region)
+sicar11.Create2DMesh(device=device, region=region)
+sicar11.SetDoping(device=device, region=region)
 #Sicar11.Draw_Doping(device=device, region=region, path="./output/2d_pn_doping.png")
 
 physics2dcv.SetMaterialParameters(device,region)
@@ -142,12 +142,12 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    Physics.CreateSiliconDriftDiffusion(device, region)
+    physics.CreateSiliconDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            Physics.CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+            physics.CreateSiliconDriftDiffusionAtContact(device, region, i, True)
         else:
-            Physics.CreateSiliconDriftDiffusionAtContact(device, region, i)
+            physics.CreateSiliconDriftDiffusionAtContact(device, region, i)
 
 
 

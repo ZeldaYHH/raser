@@ -4,8 +4,8 @@
 
 import sys
 import csv
-from raser import Node
-from raser import Physics
+from field import node
+from field import physics
 sys.path.append("..")
 import matplotlib
 import os
@@ -49,9 +49,9 @@ def Create2DMesh(device,region):
 
 
 def SetDoping(device,region):
-    Node.CreateNodeModel(device,region, "Acceptors", "2.0e19*step(0.3e-4-x)")
-    Node.CreateNodeModel(device, region, "Donors",    "1.40e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 2.0e18*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
-    Node.CreateNodeModel(device, region, "NetDoping","Donors-Acceptors")
+    node.CreateNodeModel(device,region, "Acceptors", "2.0e19*step(0.3e-4-x)")
+    node.CreateNodeModel(device, region, "Donors",    "1.40e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 2.0e18*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+    node.CreateNodeModel(device, region, "NetDoping","Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
     devsim.edge_from_node_model(device=device,region=region,node_model="Donors")

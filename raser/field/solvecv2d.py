@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 #### Small Signal simulation
 import devsim
-from physics2D import *
+from physics2d import *
 import diode_common
 import math
 import sys
