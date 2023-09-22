@@ -50,43 +50,13 @@ def main():
     #     v_max = float(para_dict["v_max"])
     # else:
     #     raise ValueError
-    '''
-    if "Rirr" in para_dict:
-        device = "1D_ITK_MD8"
-         region = "1D_ITK_MD8"
-        itk_md8_mesh.Create1DMesh(device=device, region=region)
-        Rirrad=para_dict["Rirr"]
-        itk_md8_mesh.SetDoping(device=device, region=region)
-        extend_set()
-        initial_solution_Rirr(device,region,para_dict,Rirr=Rirrad)
-        solve_iv_Rirr(device,region,Rirrad,v_max,para_dict)
-        return 0
-   
-    if "backdopingtest" in para_dict:
-        device = "1D_ITK_MD8"
-        region = "1D_ITK_MD8"
-        itk_md8_mesh.Create1DMesh(device=device, region=region)
-        backthickness=para_dict["backthickness"]
-        back_doping=para_dict["backdopingtest"]
-        itk_md8_mesh.SetDoping(device=device, region=region,backthickness=backthickness, back_doping=back_doping)
-        extend_set()
-        initial_solution(device,region,para_dict)
-        solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping)
-        return 0
-        '''
-
-
     
     set_mesh(device,region)
     extend_set()
     initial_solution(device,region,para_dict)
 
     if "defect" in para_dict:
-        set_defect(para_dict)
-
-
-
-            
+        set_defect(para_dict)           
     # if "IV" in para_dict:
     #     solve_iv(device,region,v_max,para_dict)
     # if "CV" in para_dict:
@@ -215,23 +185,6 @@ def solve_iv(device,region,v_max,para_dict):
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
     
-#     if device == "1D_ITK_MD8":
-        
-#         args111 = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
-#         dset111 = Setting(args111)
-#         det_dic111 = dset111.detector    
-#         doping1=det_dic111['doping']
-#         ITK_MD8_doping=doping1
-#         area_factor = 1.0/(0.8*0.8)
-# #        f_md8iv = open("./output/devsim/"+device+"_"+"irr_new"+"/"+device+condition+"1e11neq_reverse_iv.csv", "w")
-#         f_md8iv = open("./output/devsim/withback"+device+"_"+"3.2e12"+"/test0.1um1e17"+device+condition+"3.2e12_reverse_iv.csv", "w")
-#         header_md8iv = ["Voltage","Current"]
-#         writer_md8iv = csv.writer(f_md8iv)
-#         writer_md8iv.writerow(header_md8iv)
-#         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
-#         devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
-
-
 
     positions_mid = []
     intensities = []
@@ -313,23 +266,6 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
     
-#     if device == "1D_ITK_MD8":
-        
-#         args111 = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
-#         dset111 = Setting(args111)
-#         det_dic111 = dset111.detector    
-#         doping1=det_dic111['doping']
-#         ITK_MD8_doping=doping1
-#         area_factor = 1.0/(0.8*0.8)
-# #        f_md8iv = open("./output/devsim/"+device+"_"+"irr_new"+"/"+device+condition+"1e11neq_reverse_iv.csv", "w")
-#         f_md8iv = open("./output/devsim/withback"+device+"_"+"3.2e12"+"/"+backthickness+"umstop"+back_doping+device+condition+"3.2e12_reverse_iv.csv", "w")
-#         header_md8iv = ["Voltage","Current"]
-#         writer_md8iv = csv.writer(f_md8iv)
-#         writer_md8iv.writerow(header_md8iv)
-#         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
-#         devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
-
-
 
     positions_mid = []
     intensities = []
@@ -344,9 +280,6 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
         reverse_top_current.append(abs(reverse_top_total_current))
 
         writer_iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
-        # if device == "1D_ITK_MD8":
-        #     writer_md8iv.writerow([reverse_v,abs(reverse_top_total_current/area_factor)])        
-
 
         voltage_step = 100
         if(reverse_v%voltage_step==0.0 and reverse_v<=v_max_field):
@@ -376,8 +309,6 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
 
 
     f_iv.close()
-    # if device == "1D_ITK_MD8":
-    #     f_md8iv.close()
     devsim.close_db()
 
     draw_iv(reverse_voltage, reverse_top_current, device, condition)
@@ -411,20 +342,6 @@ def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     #devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
     
-    # if device == "1D_ITK_MD8":
-        
-    #     args111 = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
-    #     dset111 = Setting(args111)
-    #     det_dic111 = dset111.detector    
-    #     doping1=det_dic111['doping']
-    #     ITK_MD8_doping=doping1
-    #     area_factor = 1.0/(0.8*0.8)
-    #     f_md8iv = open("./output/devsim/"+device+"_"+"irr_new"+"/"+device+condition+"_reverse_iv_"+Rirr+".csv", "w")
-    #     header_md8iv = ["Voltage","Current"]
-    #     writer_md8iv = csv.writer(f_md8iv)
-    #     writer_md8iv.writerow(header_md8iv)
-
-
     positions_mid = []
     intensities = []
     bias_voltages = []
@@ -438,9 +355,6 @@ def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
         reverse_top_current.append(abs(reverse_top_total_current))
 
         writer_iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
-        # if device == "1D_ITK_MD8":
-        #     writer_md8iv.writerow([reverse_v,abs(reverse_top_total_current/area_factor)])        
-
 
         voltage_step = 100
         if(reverse_v%voltage_step==0.0 and reverse_v<=v_max_field):
@@ -470,8 +384,6 @@ def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
 
 
     f_iv.close()
-    # if device == "1D_ITK_MD8":
-    #     f_md8iv.close()
     devsim.close_db()
 
     draw_iv(reverse_voltage, reverse_top_current, device, condition)
@@ -544,9 +456,6 @@ def draw_iv(V,I,device,condition):
     matplotlib.pyplot.semilogy(V,I)
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('Current (A)')
-    #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-    #if device == "1D_ITK_MD8":
-    #    fig2.savefig("./output/devsim/{device}_{ITK_MD8_doping}/{device}_{condition}_reverse_iv.png".format(device=device,ITK_MD8_doping=ITK_MD8_doping,condition=condition))
     fig2.savefig("./output/devsim/{}_reverse_iv.png".format(device+condition))
     fig2.clear()
 
