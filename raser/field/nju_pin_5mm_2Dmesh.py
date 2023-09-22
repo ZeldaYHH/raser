@@ -3,7 +3,7 @@
 import devsim
 import os
 import sys
-from raser import Node
+from field import node
 import matplotlib
 import matplotlib.pyplot
 
@@ -36,8 +36,8 @@ def Create2DMesh(device,region):
 
 def SetDoping(device,region):
     #Doping
-    Node.CreateNodeModel(device,region,"Acceptors","1.0e19*step(1e-4-x)")
-    Node.CreateNodeModel(device,region,"Donors","5.2e13*step(x-1e-4)")
-    Node.CreateNodeModel(device,region,"NetDoping","Donors-Acceptors")
+    node.CreateNodeModel(device,region,"Acceptors","1.0e19*step(1e-4-x)")
+    node.CreateNodeModel(device,region,"Donors","5.2e13*step(x-1e-4)")
+    node.CreateNodeModel(device,region,"NetDoping","Donors-Acceptors")
     
 main()

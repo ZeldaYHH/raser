@@ -4,7 +4,7 @@
 
 import sys
 sys.path.append("..")
-from raser import Node
+from field import node
 import matplotlib
 import os
 import devsim
@@ -20,10 +20,10 @@ def Create3DSICARFromGmesh(device, region):
 
 #此处定义掺杂
 def SetDoping(device, region):
-    Node.CreateNodeModel(device, region, "bulk",   "5.2e13")
-    Node.CreateNodeModel(device, region, "top", "5.2e13")
-    Node.CreateNodeModel(device, region, "bot",   "5.2e13")
-    Node.CreateNodeModel(device, region, "NetDoping", "top-bot-bulk")
+    node.CreateNodeModel(device, region, "bulk",   "5.2e13")
+    node.CreateNodeModel(device, region, "top", "5.2e13")
+    node.CreateNodeModel(device, region, "bot",   "5.2e13")
+    node.CreateNodeModel(device, region, "NetDoping", "top-bot-bulk")
 
 #此处可视化
 def Draw_Doping(device, region, path):

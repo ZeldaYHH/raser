@@ -9,9 +9,9 @@ sys.path.append("..")
 import math
 from array import array
 
-from raser import Physics
-from raser import Node
-from raser import Initial
+from field import physics
+from field import node
+from field import initial
 
 
 import csv
@@ -48,8 +48,8 @@ devsim.set_parameter(name = "n_i", value=6.7e10)
 
 
 ### Drift diffusion simulation at equilibrium
-Initial.InitialSolution(device, region)
-Initial.DriftDiffusionInitialSolution(device, region)
+initial.InitialSolution(device, region)
+initial.DriftDiffusionInitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
 
 #### Ramp the bias to Reverse
@@ -73,10 +73,10 @@ writer.writerow(header)
 while reverse_v < 2000:
     
     
-    devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
-    Physics.PrintCurrents(device, "top")
-    Physics.PrintCurrents(device, "bot")
+    physics.PrintCurrents(device, "top")
+    physics.PrintCurrents(device, "bot")
     reverse_bulk_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_bulk_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_bulk_total_current   = reverse_bulk_electron_current + reverse_bulk_hole_current       

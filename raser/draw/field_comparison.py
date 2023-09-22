@@ -11,6 +11,8 @@ source ./run raser
 raser 'python/paper4/field_comparison.py'
 '''
 
+# Need to be rewritten or deleted!
+
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

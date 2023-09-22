@@ -5,8 +5,11 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
+
+# Need to be rewritten!
+
 import time
-import drawsave
+import draw.drawsave
 
 args = sys.argv[1:]
 start = time.time()

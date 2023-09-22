@@ -6,8 +6,8 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from raser import Setting
-from raser import Node
+from readjson import Setting
+from field import node
 import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot
@@ -52,11 +52,11 @@ def SetDoping_old(device, region, bulk_doping=doping):#default doping 4.7e12
     '''
       Doping
     '''
-    #Node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
-    Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
-    #Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(0.5e-4-x)")
-    Node.CreateNodeModel(device, region, "Acceptors",    "%s*step(x-1e-4)"%bulk_doping)
-    Node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
+    #node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
+    node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
+    #node.CreateNodeModel(device, region, "Donors", "1.0e19*step(0.5e-4-x)")
+    node.CreateNodeModel(device, region, "Acceptors",    "%s*step(x-1e-4)"%bulk_doping)
+    node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
     devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
@@ -66,11 +66,11 @@ def SetDoping(device, region, bulk_doping=doping, backthickness="304.9", back_do
     '''
       Doping
     '''
-    #Node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
-    Node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
-    Node.CreateNodeModel(device, region, "Acceptors",    "step(%s*1e-4-x)*%s*step(x-1e-4)+%s*step(x-%s*1e-4)"%(backthickness,bulk_doping,back_doping,backthickness))
-    #Node.CreateNodeModel(device, region, "Acceptors",    "step(303*1e-4-x)*%s*step(x-1e-4)+1e16*step(x-303*1e-4)"%bulk_doping)
-    Node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
+    #node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
+    node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
+    node.CreateNodeModel(device, region, "Acceptors",    "step(%s*1e-4-x)*%s*step(x-1e-4)+%s*step(x-%s*1e-4)"%(backthickness,bulk_doping,back_doping,backthickness))
+    #node.CreateNodeModel(device, region, "Acceptors",    "step(303*1e-4-x)*%s*step(x-1e-4)+1e16*step(x-303*1e-4)"%bulk_doping)
+    node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
     devsim.edge_from_node_model(device=device,region=region,node_model="Donors")

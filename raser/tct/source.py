@@ -1,7 +1,7 @@
 import math
 import ROOT
 import numpy as np
-from raser.geometry import R3dDetector
+from particle.geometry import R3dDetector
 
 class TCTTracks():
     """
