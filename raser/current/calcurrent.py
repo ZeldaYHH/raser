@@ -804,5 +804,5 @@ class PixelCarrierListFromG4P:
         self.ionized_pairs.append(s_energy)
         
     def split_name(self,volume_name):
-        parts = volume_name.split('_') 
-        return int(parts[1]),int(parts[2]),int(parts[4]) 
+        parts = volume_name.split('_')
+        return int(parts[1]),int(parts[2]),int(parts[4])
