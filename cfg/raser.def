@@ -2,7 +2,7 @@
 #From: library/debian:11.7    
 
 Bootstrap: localimage
-From: raser-2.0.sif  
+From: raser-2.1.sif  
 
 %post
     ## Use huaweicloud  
@@ -35,7 +35,7 @@ From: raser-2.0.sif
     ## DevSim    
     #pip install mkl devsim 
     #pip install mkl -U # 2023.2.0
-    #pip install devsim -U # 2.6.0
+    #pip install devsim -U # 2.6.2
 
     ## NGSpice & KiCAD
     #apt -y install ngspice 
@@ -43,3 +43,22 @@ From: raser-2.0.sif
 
     ## ALiBaVa 
     #pip install pylandau tqdm numba h5py PyYAML joblib 
+
+    ## ACTC
+    #cd /usr/local/share
+    #git clone https://gitlab.com/raser-team/external/acts acts_src
+    #cd acts_src 
+    #git checkout v29.2.0
+    #cd .. 
+    #mkdir acts_build
+    #apt install cmake libeigen3-dev libtbb-dev
+    # apt list libtbb-dev
+    #cmake -B acts_build -S acts_src 
+    #cmake --build acts_build -j28 
+
+    #vim acts_src/thirdparty/dfelibs/CMakeLists.txt # replace github to gitlab 
+    #cmake --trace -B acts_build -S acts_src -DACTS_BUILD_EXAMPLES_PYTHON_BINDINGS=ON
+    #cmake --build acts_build -j28 # -v for verbose 
+    #Note: need to do a clean to avoid stuck 
+
+

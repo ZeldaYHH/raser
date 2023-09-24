@@ -9,6 +9,7 @@ Description:
 import ROOT
 import time
 import os
+import acts
 import numpy as np
 
 class telescope:
@@ -37,95 +38,35 @@ class telescope:
         #batch mode of root
         ROOT.gROOT.SetBatch(True)
         #gemotry information, default unit is um, better read from json file 
-        
+        #paras
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
         self.pixelsize_z = my_d.p_z
         self.layer_z = my_d.lt_z
-        self.seedcharge = 100
+        self.seedcharge = my_d.seedcharge
         
+        #IO and mid paras
         self.Clusters = []
         self.Clustersize = []
         self.HitsID = []    # [ {0:[[i,j],[i2,j2]], ...}, ...]
         self.Hits = []      
-        
         self.Chisquare = []
-        
         self.Residual = {}
-        self.kvalue= {}
+        #self.kvalue= {}
         self.AveClustersize = {}
         self.Resolution_Tol = {}
         self.Resolution_DUT = {}
         
         self.readdata(my_c)
-        self.cluster(self.Hits,self.Clusters)
-        print(self.Hits)
-
-        count = 0
-        multi_cluster = 0
-        for evt in self.Clusters:       
-            if count % 1000 == 0:
-                print("Excuate process:",count,"/",len(self.Clusters))
-            count+=1
-            #tracking
-            #simple choose of track, only 1 cluster all layer evt considered
-            if(len(evt)!=len(self.layer_z)):
-                multi_cluster+=1
-                continue
-            else:
-                flag = 0
-                for layer in evt:
-                    if(len(evt[layer])!=1):
-                        flag = 1
-                        break
-                if(flag == 1):
-                    continue
-            #fill the cluster_dict,after tracking, cluster_dict[layer]'s len must == 1
-            cluster_dict = evt
-            for layer in cluster_dict:
-                if len(cluster_dict[layer]) != 1 :
-                    print("Erro:layer's len isn't 1 after tracking")
-                    raise
-            #fit the evt
-            chisquare = 0 
-            for DUT in cluster_dict:
-                pos_x = []
-                pos_y = []
-                pos_z = []
-                for layer in cluster_dict:
-                    if layer == DUT:
-                        continue
-                    for point in cluster_dict[layer]:
-                        pos_x.append(point[0])
-                        pos_y.append(point[1])
-                    pos_z.append(self.layer_z[layer])
-                kx,bx,ky,by = self.fit(pos_x,pos_y,pos_z)
-                
-                residualx = kx*(self.layer_z[DUT]+self.pixelsize_z/2)+bx-cluster_dict[DUT][0][0]
-                residualy = ky*(self.layer_z[DUT]+self.pixelsize_z/2)+by-cluster_dict[DUT][0][1]
-                if DUT not in self.Residual:
-                    self.Residual[DUT] = []
-                    self.kvalue[DUT] = []
-                self.Residual[DUT].append([residualx,residualy])
-                self.kvalue[DUT].append([kx,ky])
-                
-                chisquare += (residualx**2/(self.pixelsize_x**2/12))+(residualy**2/(self.pixelsize_y**2/12))
-                
-            self.Chisquare.append(chisquare)
-
-        t_size = [[] for i in range(6)]
-        for evt in self.Clustersize:
-            for layer in evt:
-                for n in evt[layer]:
-                    t_size[layer].append(n)
+        self.cluster(self.Hits,self.Clusters,self.Clustersize)
+        #
+        self._res_loop(self.Clusters,self.Residual,self.Chisquare)
+        self._ave_cluster(self.Clustersize,self.AveClustersize)
+        #
+        self.resolution(self.Residual,self.Resolution_Tol)
+        self.swap_res(self.Resolution_Tol,self.Resolution_DUT)
         
-        for layer in range(len(t_size)):
-            self.AveClustersize[layer] = float(sum(t_size[layer]))/len(t_size[layer])
-        
-        self.resolution()
-        self.swap_res()
-        
-        print("multi_clusters_evts",multi_cluster)
+        #print("multi_clusters_evts",self.multi_cluster)
         print("Tol_evts:",len(self.Clusters))
         print("Tol_Resulution of each DUT",self.Resolution_Tol)
         print("DUT_Resulution of each DUT",self.Resolution_DUT)
@@ -149,7 +90,7 @@ class telescope:
         #print(self.Hits)
         
     #find the cluster from planes hit
-    def cluster(self,Hits,Clusters):
+    def cluster(self,Hits,Clusters,Clustersize):
         for t_Hit in Hits:
             t_Clusters = {}
             t_Clustersize = {}
@@ -158,7 +99,7 @@ class telescope:
                 t_Clusters[layer] = t_island.getcluster()
                 t_Clustersize[layer] = t_island.getclustersize()
             Clusters.append(t_Clusters)
-            self.Clustersize.append(t_Clustersize)        
+            Clustersize.append(t_Clustersize)        
     
     #fit the track , get the residual of DUTs
     def fit(self,pos_x,pos_y,pos_z):
@@ -187,7 +128,7 @@ class telescope:
         
         Name = "fit"+str(DUT)
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("fig", str(now),'' )
+        path = os.path.join("output/fig", str(now),'' )
         #print(path)
         
         """ If the path does not exit, create the path"""
@@ -203,12 +144,12 @@ class telescope:
         pass
     
     #calculate total resolution, total resolution of each DUT made up by Telescope res& DUT res
-    def resolution(self):
-        for layer in self.Residual:
+    def resolution(self,Residual,Resolution_Tol):
+        for layer in Residual:
             residualx = [point[0] for point in self.Residual[layer]]
             residualy = [point[1] for point in self.Residual[layer]]
-            kx = [point[0] for point in self.kvalue[layer]]
-            ky = [point[1] for point in self.kvalue[layer]]
+            #kx = [point[0] for point in self.kvalue[layer]]
+            #ky = [point[1] for point in self.kvalue[layer]]
             
             Name = "Layer_"+str(layer)
             Namex = Name+"_x"
@@ -222,10 +163,10 @@ class telescope:
             #meankx,sigmakx = self._draw_res(kx,Namekx,-0.002,0.002)
             #meanky,sigmaky = self._draw_res(ky,Nameky,-0.002,0.002)
             
-            self.Resolution_Tol[layer]=[sigmax,sigmay]
+            Resolution_Tol[layer]=[sigmax,sigmay]
     
     #swap total resolution to DUT's  res
-    def swap_res(self):
+    def swap_res(self,Resolution_Tol,Resolution_DUT):
         N = len(self.layer_z)
         for i in range(N):
             k1,k2,kt = 0.0,0.0,0
@@ -235,7 +176,7 @@ class telescope:
                 k2 += t1**2
             k1 = k1**2
             kt = 1/(N-float(k1/k2))
-            self.Resolution_DUT[i] = [self.Resolution_Tol[i][0]/(kt+1),self.Resolution_Tol[i][1]/(kt+1)]
+            Resolution_DUT[i] = [Resolution_Tol[i][0]/(kt+1),Resolution_Tol[i][1]/(kt+1)]
         
     #final data to be saved
     def save(self):
@@ -279,7 +220,7 @@ class telescope:
         label.Draw()
         
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("fig", str(now),'' )
+        path = os.path.join("output/fig", str(now),'' )
         #print(path)
         
         """ If the path does not exit, create the path"""
@@ -288,7 +229,70 @@ class telescope:
         
         canvas.SaveAs(path+Name+".png")
         return mean,sigma
-    
+    #get ave clustersize
+    def _ave_cluster(self,Clustersize,AveClustersize):
+        t_size = [[] for i in range(6)]
+        for evt in Clustersize:
+            for layer in evt:
+                for n in evt[layer]:
+                    t_size[layer].append(n)
+        
+        for layer in range(len(t_size)):
+            AveClustersize[layer] = float(sum(t_size[layer]))/len(t_size[layer])
+    #reconstruction loop over each event
+    def _res_loop(self,Clusters,Residual,Chisquare):
+        self.count = 0
+        self.multi_cluster = 0
+        for evt in Clusters:       
+            if self.count % 1000 == 0:
+                print("Excuate process:",self.count,"/",len(Clusters))
+            self.count+=1
+            #tracking
+            #simple choose of track, only 1 cluster all layer evt considered
+            if(len(evt)!=len(self.layer_z)):
+                self.multi_cluster+=1
+                continue
+            else:
+                flag = 0
+                for layer in evt:
+                    if(len(evt[layer])!=1):
+                        flag = 1
+                        break
+                if(flag == 1):
+                    continue
+            #fill the cluster_dict,after tracking, cluster_dict[layer]'s len must == 1
+            cluster_dict = evt
+            for layer in cluster_dict:
+                if len(cluster_dict[layer]) != 1 :
+                    print("Erro:layer's len isn't 1 after tracking")
+                    raise
+            #fit the evt
+            chisquare = 0 
+            for DUT in cluster_dict:
+                pos_x = []
+                pos_y = []
+                pos_z = []
+                for layer in cluster_dict:
+                    if layer == DUT:
+                        continue
+                    for point in cluster_dict[layer]:
+                        pos_x.append(point[0])
+                        pos_y.append(point[1])
+                    pos_z.append(self.layer_z[layer])
+                kx,bx,ky,by = self.fit(pos_x,pos_y,pos_z)
+                
+                residualx = kx*(self.layer_z[DUT]+self.pixelsize_z/2)+bx-cluster_dict[DUT][0][0]
+                residualy = ky*(self.layer_z[DUT]+self.pixelsize_z/2)+by-cluster_dict[DUT][0][1]
+                if DUT not in Residual:
+                    Residual[DUT] = []
+                    #self.kvalue[DUT] = []
+                Residual[DUT].append([residualx,residualy])
+                #self.kvalue[DUT].append([kx,ky])
+                
+                chisquare += (residualx**2/(self.pixelsize_x**2/12))+(residualy**2/(self.pixelsize_y**2/12))
+                
+            Chisquare.append(chisquare)
+
 #find the clusters from hit list, named by the classic dfs sample
 class island:
     def __init__(self,hitlist,pixelsize_x,pixelsize_y):

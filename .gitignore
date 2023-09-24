@@ -4,7 +4,3 @@ note/.obsidian
 .vscode 
 output
 **/__pycache__
-
-python/test
-fig
-job

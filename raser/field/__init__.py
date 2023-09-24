@@ -1,6 +1,7 @@
 import logging
 from . import gen_devsim_db
 from . import scan_cv
+from . import devsim_solve
 
 def main(args):
     label = vars(args)['label']
@@ -16,7 +17,9 @@ def main(args):
 
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
-    if label == 'sicar1.1.6_cv_0-1v':
+    elif label == 'sicar1.1.6_cv_0-1v':
         scan_cv.main()
+    elif label == 'sicar1.1.8_cv_0-1v':
+        devsim_solve.main()
     else:
         raise NameError(label)

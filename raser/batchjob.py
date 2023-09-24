@@ -24,12 +24,11 @@ def main(destination_subfolder, command, args):
     create_path("./output/{}/jobs".format(destination_subfolder))
     command_name = command.replace(" ","_").replace("/","_")
     jobfile_name = "./output/{}/jobs/".format(destination_subfolder)+command_name+".job"
-    gen_job(jobfile_name,run_code="raser"+' '+command)
+    gen_job(jobfile_name,run_code='python3 raser'+' '+command)
     submit_job(jobfile_name,destination_subfolder,group,test=test)
 
 def gen_job(jobfile_name,run_code):
     jobfile = open(jobfile_name,"w")
-    jobfile.write("source cfg/setup.sh \n")
     jobfile.write(run_code)
     jobfile.close()
     print("Generate job file: ", jobfile_name)

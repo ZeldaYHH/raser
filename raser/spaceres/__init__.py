@@ -6,11 +6,11 @@ import ROOT
 import time
 
 from . import telescope as tlcp
-
-from g4simulation import Particles
-from setting import Setting
-from geometry import R3dDetector
-from calcurrent import CalCurrentPixel
+#from . import test
+from particle.g4simulation import Particles
+from readjson import Setting
+from particle.geometry import R3dDetector
+from current.calcurrent import CalCurrentPixel
 
 def main(args):
     label = vars(args)['label']
@@ -21,14 +21,14 @@ def main(args):
         print("taichu_v1:   ","first version of telescope simulation")
         print("taichu_v2:   ","second version of telescope simulation")
     elif label.startswith("taichu_v1"):
-        paths = ['det_name=Taichu3', 'parfile=setting/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=setting/absorber.json', 'pixeldetector']
+        paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=readjson/absorber.json', 'pixeldetector']
         dset = Setting(paths)
         my_d = R3dDetector(dset)
         my_f = 0
         my_g4p = Particles(my_d, my_f, dset)
         my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
         #drawsave.draw_charge(my_charge)
-        #my_telescope = tlcp.telescope(my_d,my_charge) 
+        my_telescope = tlcp.telescope(my_d,my_charge) 
         #tlcp.main(my_d)  
     elif label.startswith("taichu_v2"):
         #virtual object
@@ -71,12 +71,13 @@ def main(args):
         canvas.Draw()
         Name = "Res vs size"
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("fig", str(now),'' )
+        path = os.path.join("output/fig", str(now),'' )
         """ If the path does not exit, create the path"""
         if not os.access(path, os.F_OK):
             os.makedirs(path) 
         canvas.SaveAs(path+Name+".png")
-        
+    elif label.startswith("taichu_v3"):
+        pass    
     else:
         raise NameError(label)
     
