@@ -149,9 +149,15 @@ def main(args):
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
         draw_figure(input_dir, output_dir, label)  
+<<<<<<< HEAD
     elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_iv':
         iv.main(label)  
     elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_cv':
+=======
+    elif label == 'sicar1.1.8-1,sicar1.1.8-2_iv':
+        iv.main(label)  
+    elif label == 'sicar1.1.8-1,sicar1.1.8-2_cv':
+>>>>>>> raser/main
         cv.main(label) 
     else: 
         raise NameError(label)

@@ -14,13 +14,23 @@ def draw_cv(input_dir, output_dir, label):
     c_c.SetBottomMargin(0.16)
     c_c.SetGrid()
     c_c.SetFrameLineWidth(5)
+<<<<<<< HEAD
+=======
+    c_c.SetLogy()
+>>>>>>> raser/main
     multigraphs_c = ROOT.TMultiGraph()
 
     for i in range(len(com_name)):
         name = com_name[i]
+<<<<<<< HEAD
         if label == 'compare_sicar1.1.8' and not name.startswith('sicar1.1.8'):
             continue
         elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2' and not (name.startswith('sicar1.1.8-1_')) and not (name.startswith('sicar1.1.8-2_')):
+=======
+        if label == 'sicar1.1.8_cv' and not name.startswith('sicar1.1.8'):
+            continue
+        elif label == 'sicar1.1.8-1,sicar1.1.8-2_cv' and not (name.startswith('sicar1.1.8-1_')) and not (name.startswith('sicar1.1.8-2_')):
+>>>>>>> raser/main
             continue
 
         name = name.split('.root')[0]
@@ -53,8 +63,13 @@ def draw_cv(input_dir, output_dir, label):
     multigraphs_c.GetXaxis().SetTitleSize(0.05)
     multigraphs_c.GetXaxis().SetLabelSize(0.05)
     multigraphs_c.GetXaxis().SetNdivisions(505)
+<<<<<<< HEAD
     multigraphs_c.GetYaxis().SetLimits(0,1e2)
     multigraphs_c.GetYaxis().SetRangeUser(0, 1e2)
+=======
+    multigraphs_c.GetYaxis().SetLimits(4,5e2)
+    multigraphs_c.GetYaxis().SetRangeUser(4, 5e2)
+>>>>>>> raser/main
     multigraphs_c.GetYaxis().SetTitle("Capacitance [pF]")
     multigraphs_c.GetYaxis().CenterTitle()
     multigraphs_c.GetYaxis().SetTitleOffset(1.8)
@@ -71,11 +86,19 @@ def draw_cv(input_dir, output_dir, label):
 
     legend_c.Draw()
 
+<<<<<<< HEAD
     file_name_c = label + "_cv.root"
     c_c.SaveAs(os.path.join(output_dir, file_name_c))
     file_name_c = label + "_cv.pdf"
     c_c.SaveAs(os.path.join(output_dir, file_name_c))
     file_name_c = label + "_cv.png"
+=======
+    file_name_c = label + ".root"
+    c_c.SaveAs(os.path.join(output_dir, file_name_c))
+    file_name_c = label + ".pdf"
+    c_c.SaveAs(os.path.join(output_dir, file_name_c))
+    file_name_c = label + ".png"
+>>>>>>> raser/main
     c_c.SaveAs(os.path.join(output_dir, file_name_c))
 
 
