@@ -805,5 +805,4 @@ class PixelCarrierListFromG4P:
         
     def split_name(self,volume_name):
         parts = volume_name.split('_')
-        return int(parts[1]),int(parts[2]),int(parts[4])
-         
+        return int(parts[1]),int(parts[2]),int(parts[4]) 
