@@ -2,7 +2,7 @@ import logging
 from . import gen_devsim_db
 from . import scan_cv
 from . import devsim_solve
-
+from . import diode_element_2d
 def main(args):
     label = vars(args)['label']
     verbose = vars(args)['verbose'] 
@@ -21,5 +21,7 @@ def main(args):
         scan_cv.main()
     elif label == 'sicar1.1.8_cv_0-1v':
         devsim_solve.main()
+    elif label == 'simple_2d_pnjunction_simulate':
+        diode_element_2d.main()
     else:
         raise NameError(label)
