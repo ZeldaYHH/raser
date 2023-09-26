@@ -7,9 +7,10 @@
 from devsim import *
 from .si_simple_physics import *
 from . import si_diode_common
-import matplotlib.pyplot as plt
+
 import numpy as np
 import os
+import ROOT
 #####
 # dio1
 #
@@ -43,7 +44,6 @@ def main():
     ####
     #### Ramp the bias to 0.5 Volts
     ####
-    reverse_bot_current=[]
     v = 0.0
     delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -52,10 +52,6 @@ def main():
         solve(type="dc", absolute_error=1e10, relative_error=1e-3, maximum_iterations=1500)
         PrintCurrents(device, "top")
         PrintCurrents(device, "bot")
-        reverse_top_electron_current= get_contact_current(device=device, contact="bot", equation="ElectronContinuityEquation")
-        reverse_top_hole_current    = get_contact_current(device=device, contact="bot", equation="HoleContinuityEquation")
-        reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current
-        reverse_bot_current.append(abs(reverse_top_total_current))
         v += 1
 
 
@@ -65,58 +61,36 @@ def main():
     PotentialNodeCharge = np.array(get_node_model_values(device=device, region=region, name="PotentialNodeCharge"))
     Electrons = np.array(get_node_model_values(device=device, region=region, name="Electrons"))
     Holes = np.array(get_node_model_values(device=device, region=region, name="Holes"))
+    edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
+    x_mid = get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
+    ElectricField = get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
 
     if not os.access('output/testdiode', os.F_OK):
             os.makedirs('output/testdiode', exist_ok=True)
 
-    plt.plot(x,potential)
-    plt.xlabel('X')
-    plt.ylabel('potential')
-    plt.title('potential')
-    plt.savefig('output/testdiode/potential_1d.png')
-    plt.close()
-
-    plt.plot(x,NetDoping)
-    plt.xlabel('X')
-    plt.ylabel('NetDoping')
-    plt.title('NetDoping')
-    plt.savefig('output/testdiode/NetDoping_1d.png')
-    plt.close()
-
-    plt.plot(x,PotentialNodeCharge)
-    plt.xlabel('X')
-    plt.ylabel('PotentialNodeCharge')
-    plt.title('PotentialNodeCharge')
-    plt.savefig('output/testdiode/PotentialNodeCharge_1d.png')
-    plt.close()
-
-    plt.plot(x,Electrons)
-    plt.xlabel('X')
-    plt.ylabel('Electrons')
-    plt.title('Electrons')
-    plt.savefig('output/testdiode/Electrons_1d.png')
-    plt.close()
-
-    plt.plot(x,Holes)
-    plt.xlabel('X')
-    plt.ylabel('Holes')
-    plt.title('Holes')
-    plt.savefig('output/testdiode/Holes_1d.png')
-    plt.close()
-    edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
-    x_mid = get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
-    ElectricField = get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
-    plt.plot(x_mid,ElectricField)
-    plt.xlabel('X')
-    plt.ylabel('ElectricField')
-    plt.title('ElectricField')
-    plt.savefig('output/testdiode/ElectricField_1d.png')
-    plt.close()
+    draw(x,potential,"Potential","Depth[cm]","Potential[V]",'output/testdiode/Potential_1d')
+    draw(x,NetDoping,"NetDoping","Depth[cm]","NetDoping[cm^{-3}]",'output/testdiode/NetDoping_1d')
+    draw(x,PotentialNodeCharge,"PotentialNodeCharge","Depth[cm]","PotentialNodeCharge[cm^{-3}]",'output/testdiode/PotentialNodeCharge_1d')
+    draw(x,Electrons,"Electrons","Depth[cm]","Electrons[cm^{-3}]",'output/testdiode/Electrons_1d')
+    draw(x,Holes,"Holes","Depth[cm]","Holes[cm^{-3}]",'output/testdiode/Holes_1d')
+    draw(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]",'output/testdiode/ElectricField_1d')
 
     delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
     delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")
-    write_devices(file="./output/testdiode/si_ir_1d", type="tecplot")
+    write_devices(file="./output/testdiode/si_diode_1d", type="tecplot")
 
-    
+
+def draw(x,y,title,xtitle,ytitle,path):
+    graph = ROOT.TGraph()
+    for i in range(len(x)):
+        graph.SetPoint(i, x[i],y[i])
+    graph.SetTitle(title)
+    canvas = ROOT.TCanvas("canvas", title, 1300, 600)
+    graph.Draw("AL") 
+    graph.GetXaxis().SetTitle(xtitle)
+    graph.GetYaxis().SetTitle(ytitle)
+    canvas.Draw()
+    canvas.SaveAs(path+".png")
+
 if __name__ == "__main__":
     main()    

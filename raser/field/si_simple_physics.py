@@ -178,8 +178,8 @@ def CreateHCE(device, region, mu_p):
              edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
 
 def CreatePE(device, region):
-    pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
-    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
+    pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
@@ -190,7 +190,7 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
-    CreateSiIrradiatedCharge(device, region)
+    #CreateSiIrradiatedCharge(device, region)
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)

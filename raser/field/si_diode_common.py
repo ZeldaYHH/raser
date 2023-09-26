@@ -97,7 +97,7 @@ def SetNetDoping(device, region):
     #CreateNodeModel(device, region, "Acceptors", "-(2.0e14*step(0.1*5e-3-x)+2.0e14*step(0.2*5e-3-x)+2.0e14*step(0.3*5e-3-x)+2.0e14*step(0.4*5e-3-x)+2.0e14*step(0.5*5e-3-x))")
     #CreateNodeModel(device, region, "Donors",    "-(2.0e14*step(x-0.9*5e-3)+2.0e14*step(x-0.8*5e-3)+2.0e14*step(x-0.7*5e-3)+2.0e14*step(x-0.6*5e-3)+2.0e14*step(x-0.5*5e-3))")
     
-    CreateNodeModel(device, region, "Acceptors", "1.0e19*step(0.25*5e-3-x)")
+    CreateNodeModel(device, region, "Acceptors", "1.0e14*step(0.25*5e-3-x)")
     CreateNodeModel(device, region, "Donors",    "1.0e13*step(x-0.25*5e-3)+1.0e16*step(x-0.99*5e-3)")
 
     CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
