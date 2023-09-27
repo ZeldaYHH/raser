@@ -16,23 +16,32 @@ import math
 
 #  MD8
 # 0.8cm*0.8cm
-args = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
-dset = Setting(args)
-det_dic = dset.detector    
+#args = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
+#dset = Setting(args)
+#det_dic = dset.detector    
 #doping=str(det_dic['doping'])+"e12"
-doping=str(det_dic['doping'])
-
+#doping=str(det_dic['doping'])
+doping="3.2e12"
 # 1d
+#Because this device is n+ in p, the top and bottom are opposite to those of SiC.
+#Here we exchange top and bottom, to reduce the ifelse in the main program.
+#If we do so, we do not need to edit the 0-reverse_v when solving iv and cv. 
 def Create1DMesh(device, region):
     '''
       Meshing
     '''
     devsim.create_1d_mesh(mesh="dio")
-    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="top")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
+    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_down")
     devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-5, tag="mid")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_up")
+    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="top")
+
+    # devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="top")
+    # devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
+    # devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-5, tag="mid")
+    # devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
+    # devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
 
     # devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-5, tag="top")
     # devsim.add_1d_mesh_line(mesh="dio", pos=(0.5e-4)-(0.25e-4), ps=1e-5, tag="jun_up")

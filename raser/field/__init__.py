@@ -21,5 +21,7 @@ def main(args):
         scan_cv.main()
     elif label == 'sicar1.1.8_cv_0-1v':
         devsim_solve.main()
+    elif label == 'itkmd8_cv_v1':
+        devsim_solve.main(label)
     else:
         raise NameError(label)

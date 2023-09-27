@@ -13,7 +13,7 @@ import field.initial
 import field.nju_pin_5mm_5mm_mesh
 import field.hpk_pin_5mm_5mm_mesh
 import field.sicar1_lgad_mesh
-# import field.itk_md8_mesh
+import field.itk_md8_mesh
 
 import matplotlib
 #matplotlib.use('Agg') 
@@ -32,34 +32,42 @@ if not (os.path.exists("./output/devsim")):
 area_factor = 4.0
 ITK_MD8_doping="eee"
 
-def main():
+def main(label=None, v_max = 400):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
-    para_dict = set_para(sys.argv[1:])
-    '''
-    if "device" in para_dict:
-        device=para_dict["device"]
-        region=para_dict["device"]
+    #para_dict = set_para(sys.argv[1:])
+    if label==None:
+        device = "1D_SICAR1_LGAD"
+        region = "1D_SICAR1_LGAD"
+    elif label=='itkmd8_cv_v1':
+        area_factor=1.0/(0.76*0.76)
+        device = "1D_ITK_MD8"
+        region = "1D_ITK_MD8"
+        para_dict=[]  
+        #v_max=10
+        #para_dict=["irradiation","defect"]
+        set_mesh(device,region)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)
+        return 0
+    elif label=='itkmd8_iv_v1':
+        device = "1D_ITK_MD8"
+        region = "1D_ITK_MD8"
+        para_dict=[]  
+        #para_dict=["irradiation","defect"]
+        set_mesh(device,region)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_iv(device,region,v_max,para_dict)
     else:
-        raise KeyError
-        '''
-    device = "1D_SICAR1_LGAD"
-    region = "1D_SICAR1_LGAD"
-    v_max = 400
-    
-    # if "v_max" in para_dict:
-    #     v_max = float(para_dict["v_max"])
-    # else:
-    #     raise ValueError
-    
+        raise NameError(label)
+          
     set_mesh(device,region)
     extend_set()
     initial_solution(device,region,para_dict)
 
-    if "defect" in para_dict:
-        set_defect(para_dict)           
-    # if "IV" in para_dict:
-    #     solve_iv(device,region,v_max,para_dict)
-    # if "CV" in para_dict:
+          
+
     solve_cv(device,region,v_max,para_dict,frequency=1e3)
 
 
@@ -83,7 +91,10 @@ def set_mesh(device,region):
     #     device_mesh = hpk_pin_5mm_5mm_mesh
     # elif device == "1D_ITK_MD8":
     #     device_mesh = itk_md8_mesh
-    device_mesh = field.sicar1_lgad_mesh
+    if device == "1D_SICAR1_LGAD":
+        device_mesh = field.sicar1_lgad_mesh
+    elif device == "1D_ITK_MD8":
+        device_mesh = field.itk_md8_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
@@ -120,7 +131,9 @@ def initial_solution(device,region,para_dict):
                 devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
             devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
             print("Neutron_eq="+str(Neutron_eq))"""
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400,maximum_divergence=300)
+    #devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400,maximum_divergence=300)
+
+         
         
 def initial_solution_Rirr(device,region,para_dict,Rirr=None):
     # Initial DC solution
@@ -162,7 +175,6 @@ def set_defect(paras):
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=float(paras["N_t_HS6"]),   unit="cm^(-3)",     description="N_t_HS6")
 
 def solve_iv(device,region,v_max,para_dict):
-    global area_factor
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -198,10 +210,7 @@ def solve_iv(device,region,v_max,para_dict):
         reverse_top_total_current = solve_iv_single_point(device,region,reverse_v)
         reverse_top_current.append(abs(reverse_top_total_current))
 
-        writer_iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
-        # if device == "1D_ITK_MD8":
-        #     writer_md8iv.writerow([reverse_v,abs(reverse_top_total_current/area_factor)])        
-
+        writer_iv.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])       
 
         voltage_step = 100
         if(reverse_v%voltage_step==0.0 and reverse_v<=v_max_field):
@@ -222,11 +231,7 @@ def solve_iv(device,region,v_max,para_dict):
             electrons.append(n)
             holes.append(p)
 
-
-        if device == "1D_ITK_MD8":
-            reverse_voltage.append(reverse_v)
-        else:
-            reverse_voltage.append(0-reverse_v)
+        reverse_voltage.append(0-reverse_v)
         reverse_v += 1
 
 
@@ -240,7 +245,7 @@ def solve_iv(device,region,v_max,para_dict):
     draw_electrons(device, positions, electrons, bias_voltages, condition)
     draw_holes(device, positions, holes, bias_voltages, condition)
     save_ele_field(device, positions, intensities, bias_voltages, condition)
-
+    
 
 def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
     global area_factor
@@ -394,7 +399,7 @@ def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
 
 
 
-def solve_cv(device,region,v_max,para_dict,frequency):
+def solve_cv(device,region,v_max,para_dict,area_factor, frequency):
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -412,7 +417,7 @@ def solve_cv(device,region,v_max,para_dict,frequency):
     writer_cv.writerow(header_cv)
 
     while reverse_v < v_max:
-        capacitance = solve_cv_single_point(device,region,reverse_v,frequency)
+        capacitance = solve_cv_single_point(device,region,reverse_v,area_factor,frequency)
         ssac_top_cap.append(capacitance*(1e12)/area_factor)
 
         writer_cv.writerow([0-reverse_v,capacitance*(1e12)/area_factor])
@@ -424,10 +429,7 @@ def solve_cv(device,region,v_max,para_dict,frequency):
     draw_cv(reverse_voltage, ssac_top_cap, device,condition)
 
 def solve_iv_single_point(device,region,reverse_v):
-    if device == "1D_ITK_MD8":
-        devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=reverse_v)
-    else:
-        devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=100,maximum_divergence=50)
     # try:
     #     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200,maximum_divergence=50)
@@ -442,7 +444,7 @@ def solve_iv_single_point(device,region,reverse_v):
 
     return reverse_top_total_current
 
-def solve_cv_single_point(device,region,reverse_v,frequency):
+def solve_cv_single_point(device,region,reverse_v,area_factor,frequency):
     devsim.circuit_alter(name="V1", value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
     physics.PrintCurrents(device, "bot")
