@@ -32,7 +32,7 @@ class R3dDetector:
         self.l_z = det_dic['lz'] 
         
         self.voltage = det_dic['voltage'] 
-        self.temperature = det_dic['temp']
+        self.temperature = det_dic['temperature']
         self.material = det_dic['material']
         self.det_model = det_dic['det_model']
 

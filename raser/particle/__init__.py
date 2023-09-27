@@ -1,4 +1,4 @@
-from . import foo
+from . import *
 def main(args):
     label = vars(args)['label']
 

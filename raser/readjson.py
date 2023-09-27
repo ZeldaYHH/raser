@@ -11,7 +11,7 @@ import random
 
 # Define all input parameters used in raser main process
 class Setting:
-    def __init__(self,parameters):
+    def __init__(self):
         """
         Description:
             1.Different functions detector(), fenics(), pygeant4() define 
@@ -29,37 +29,32 @@ class Setting:
         ---------
             2021/09/02
         """
-        self._pardic = {}
-        self.input2dic(parameters)
-        self.det_name = self._pardic['det_name']
-        self.read_par(self._pardic['parfile'])
+        with open('setting/setting.json') as f:
+            self._pardic = json.load(f)
 
-        if "laser_model" in self._pardic:
-            self.laser_model = self._pardic['laser_model']
-            self.read_par_laser(self._pardic['laser_parfile'])
+        self.detector_name = self._pardic['detector']
+        self.read_par_detector('setting/detector.json')
+        self.det_model = self.paras['det_model']
+    
+        self.absorber_name = self._pardic['absorber']
+        self.read_par_geant4('setting/absorber.json')
 
-        if "geant4_model" in self._pardic:
-            self.geant4_model = self._pardic['geant4_model']
-            self.read_par_geant4(self._pardic['geant4_parfile'])
+        self.laser_name = self._pardic['laser']
+        self.read_par_laser('setting/laser.json')
 
-        p = self.paras
-        self.total_events = int(p['total_events'])
+        self.electronics_name = self._pardic['electronics']
+        self.read_par_elec('setting/electronics.json')
+
+        self.total_events = int(self.geant4_paras['total_events'])
         #self.g4seed = 0 
         self.g4seed = random.randint(0,1e7)
 
-    def input2dic(self,parameters):
-        " Transfer input list to dictinary"
-        for par in parameters:
-            name,_,value=par.rpartition('=')
-            self._pardic[name]=value
-
-    def read_par(self,jsonfile):
+    def read_par_detector(self,jsonfile):
         "Read the setting.json file and save the input parameters in paras"
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if self.det_name == dic_par['det_name']:
-                self.det_model = dic_par['det_model']
+            if dic_par['det_name'] in self.detector_name:
                 paras = dic_par
         for x in paras: 
             if self.is_number(paras[x]):          
@@ -68,12 +63,26 @@ class Setting:
                 paras[x] = paras[x]
         self.paras = paras
 
+    def read_par_elec(self,jsonfile):
+        "Read the laser_setting.json file and save the input parameters in paras"
+        with open(jsonfile) as f:
+            dic_pars = json.load(f)
+        for dic_par in dic_pars:
+            if dic_par['ele_name'] in self.electronics_name:
+                elec_paras = dic_par
+        for x in elec_paras: 
+            if self.is_number(elec_paras[x]):          
+                elec_paras[x] = float(elec_paras[x])
+            else:
+                elec_paras[x] = elec_paras[x]
+        self.elec_paras = elec_paras
+
     def read_par_laser(self,jsonfile):
         "Read the laser_setting.json file and save the input parameters in paras"
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['laser_model'] in self.laser_model:
+            if dic_par['laser_model'] in self.laser_name:
                 laser_paras = dic_par
         for x in laser_paras: 
             if self.is_number(laser_paras[x]):          
@@ -86,7 +95,7 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['geant4_model'] in self.geant4_model:
+            if dic_par['geant4_model'] in self.absorber_name:
                 geant4_paras = dic_par
         for x in geant4_paras: 
             if self.is_number(geant4_paras[x]):          
@@ -132,7 +141,7 @@ class Setting:
         """
         p = self.paras
         detector = {'det_model':self.det_model, 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
-                        'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
+                        'material':p['material'], 'voltage':p['voltage'], 'temperature':p['temperature'],
                         'doping':p['doping']}
         
         if "planar3D" in self.det_model:
@@ -202,7 +211,7 @@ class Setting:
                   "elelenth":p['lx'], 
                   "read_ele_num":1}
         
-        if "Si_Strip" in self.det_name:
+        if "Si_Strip" in self.detector_name:
             fenics["striplenth"] = p['striplenth']
             fenics["elelenth"] = p['elelenth']
             fenics["read_ele_num"] = p['read_ele_num']
@@ -287,20 +296,19 @@ class Setting:
         ---------
             2021/09/08
         """
-        if hasattr(self,"laser_model"):
-            p = self.laser_paras
-            laser = {'tech':p['tech'],'direction':p['direction'],
-                    'refractionIndex':p['refractionIndex'],
-                    "wavelength":p["wavelength"],"temporal_FWHM":p["temporal_FWHM"],"pulse_energy":p["pulse_energy"],"spacial_FWHM":p["spacial_FWHM"],
-                    'r_step':p['r_step'],'h_step':p['h_step'], 'central_time':p["central_time"],
-                    'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
-                    }
-            if p['tech'] == "SPA":
-                laser.update({'alpha':p['alpha']})
-            if p['tech'] == "TPA":
-                laser.update({'beta_2':p['beta_2']})
-            if 'l_Rayleigh' in p:
-                laser.update({'l_Rayleigh':p['l_Rayleigh']})
+        p = self.laser_paras
+        laser = {'tech':p['tech'],'direction':p['direction'],
+                'refractionIndex':p['refractionIndex'],
+                "wavelength":p["wavelength"],"temporal_FWHM":p["temporal_FWHM"],"pulse_energy":p["pulse_energy"],"spacial_FWHM":p["spacial_FWHM"],
+                'r_step':p['r_step'],'h_step':p['h_step'], 'central_time':p["central_time"],
+                'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
+                }
+        if p['tech'] == "SPA":
+            laser.update({'alpha':p['alpha']})
+        if p['tech'] == "TPA":
+            laser.update({'beta_2':p['beta_2']})
+        if 'l_Rayleigh' in p:
+            laser.update({'l_Rayleigh':p['l_Rayleigh']})
         return laser
         
     @property
@@ -328,7 +336,7 @@ class Setting:
         ---------
             2021/09/02
         """
-        p = self.paras
+        p = self.elec_paras
         CSA_par = {'name':'CSA_ampl', 't_rise':p['t_rise'], 
                    't_fall':p['t_fall'], 'trans_imp':p['trans_imp'], 
                    'CDet':p['CDet']
