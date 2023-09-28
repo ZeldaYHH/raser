@@ -23,5 +23,7 @@ def main(args):
         devsim_solve.main()
     elif label == 'simple_2d_pnjunction_simulate':
         diode_element_2d.main()
+    elif label == 'itkmd8_cv_v1':
+        devsim_solve.main(label)
     else:
         raise NameError(label)

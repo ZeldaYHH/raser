@@ -10,6 +10,8 @@ Description:
 import math
 import ROOT
 
+# Need to be TOTALLY rewritten
+
 # CSA and BB amplifier simulation
 class Amplifier:
     def __init__(self,my_current,ampl_par,mintstep="50e-12"):

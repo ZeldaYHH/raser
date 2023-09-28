@@ -9,15 +9,19 @@
 import sys
 import os
 import time
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import raser
 
-# Need to be rewritten!
+from particle import geometry as geo
+from particle import g4simulation as g4s
+from field import pyfenics as pyf
+from field import devsim_field as devfield
+from current import calcurrent as ccrt
+from elec import elereadout as rdout
 
-import draw.drawsave
+from readjson import Setting
+from draw import drawsave
 import math
 
-def main():
+def main(args):
     """
     Description:
         The main program of Raser induced current simulation      
@@ -31,16 +35,15 @@ def main():
         Particles -- Electron and hole paris distibution
         CalCurrent -- Drift of e-h pais and induced current
         Amplifier -- Readout electronics simulation
-        draw_plots -- Draw electric field ,drift path and energy deposition        
+        draw_plots -- Draw electric field, drift path and energy deposition        
     Modify:
     ---------
         2021/09/02
     """
-    args = sys.argv[1:]
-    dset = raser.Setting(args)
-    if "scan=True" in args:
+    dset = Setting()
+    if "scan" in args:
         dset.scan_variation()
-    if "parameter_alter=True" in args:
+    if "parameter_alter" in args:
         # need to put the changed value at the end of the parameter list
         key,_,value=args[-1].rpartition('=')
         value=float(value)
@@ -53,27 +56,27 @@ def main():
             set_electrodes(det_dic,dset)
         else:
             print("The electrode model is wrong.")
-    my_d = raser.R3dDetector(dset)
+    my_d = geo.R3dDetector(dset)
     
     if "pixeldetector" in args:
-        my_f = raser.FenicsCal(my_d,dset.fenics)
+        my_f = pyf.FenicsCal(my_d,dset.fenics)
         #my_f = 0
-        my_g4p = raser.Particles(my_d, my_f, dset)
-        my_charge = raser.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
         #drawsave.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:
-        my_f = raser.FenicsCal(my_d,dset.fenics)
-        my_g4p = raser.Particles(my_d, my_f, dset)
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        my_f = pyf.FenicsCal(my_d,dset.fenics)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = rdout.Amplifier(my_current, dset.amplifier)
         drawsave.get_beam_number(my_g4p,ele_current)
         return  
 
     if "proton-irrad" in args:
-        my_f = raser.FenicsCal2D(my_d,dset.fenics)
-        my_g4p = raser.SiITk(my_d, my_f, dset)
+        my_f = pyf.FenicsCal2D(my_d,dset.fenics)
+        my_g4p = g4s.SiITk(my_d, my_f, dset)
         #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.get1_beam_number(my_g4p)
@@ -81,26 +84,26 @@ def main():
         return
 
     if "Carrier" in args:
-        my_f = raser.FenicsCal1D(my_d,dset.fenics)
-        my_g4p = raser.Particles(my_d, my_f, dset)
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        my_f = pyf.FenicsCal1D(my_d,dset.fenics)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = rdout.Amplifier(my_current, dset.amplifier)
         drawsave.get_beam_number(my_g4p,ele_current)
         return  
 
     if "reactor" in args:
-        my_f = raser.FenicsCal(my_d,dset.fenics)
-        my_g4p = raser.Particles(my_d, my_f, dset)
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        my_f = pyf.FenicsCal(my_d,dset.fenics)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = rdout.Amplifier(my_current, dset.amplifier)
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
     if "Si_Strip" in args:
-        my_f = raser.FenicsCal2D(my_d,dset.fenics)
-        my_g4p = raser.Particles(my_d, my_f, dset)
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        my_f = pyf.FenicsCal2D(my_d,dset.fenics)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = rdout.Amplifier(my_current, dset.amplifier)
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         drawsave.cce(my_d,my_f,my_current)
         return
@@ -108,20 +111,20 @@ def main():
     if('devsim' in args):
         print("using devsim to build the field")
         try:
-            my_f = raser.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+            my_f = devfield.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
         except:
             print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
             exit(0)
     else:
         print("using fenics to build the field")
-        my_f = raser.FenicsCal(my_d,dset.fenics)
+        my_f = pyf.FenicsCal(my_d,dset.fenics)
         
-    my_g4p = raser.Particles(my_d, my_f, dset)
+    my_g4p = g4s.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
-        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #if "lgad" in dset.det_model:
         #   print("gain_efficiency="+str(my_current.gain_efficiency))
-        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        ele_current = rdout.Amplifier(my_current, dset.amplifier)
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
@@ -178,8 +181,8 @@ def batch_loop(dset, my_d, my_f, my_g4p):
         print("run events number:%s"%(event))
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
-            my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = raser.Amplifier(my_current, dset.amplifier)
+            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
+            ele_current = rdout.Amplifier(my_current, dset.amplifier)
             drawsave.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
@@ -188,7 +191,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
 
 if __name__ == '__main__':
     start = time.time()
-    main()
+    main(sys.argv[1:])
     print("drift_total1:%s"%(time.time()-start))
     print("RUN END")
     os._exit(0) 
