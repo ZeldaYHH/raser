@@ -2,9 +2,9 @@ import math
 
 def main():
     eV = 1.6e-19
-    num = 2e15*5*1e-3*5*1e-3
+    proton_fluence = 2e15*5*1e-3*5*1e-3
     single_energy = 0.04311*1e6*eV
-    total_energy = single_energy*num
+    total_energy = single_energy*proton_fluence
 
     print('thermal energy per second = '+str(total_energy)+' J')
 
