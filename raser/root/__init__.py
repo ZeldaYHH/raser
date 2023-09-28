@@ -25,7 +25,11 @@ def convert_csv_to_root(input_dir, output_dir, label):
 
         if name.endswith('cv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-            df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
+            if label=="itk_md8_sim":
+                df.Snapshot("myTree", output_file, {"Voltage", "Capacitance"})
+            else:
+                df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
+
         
         sys.stdout.write('Saved as {}\n'.format(output_file))
 
@@ -43,8 +47,11 @@ def main(args):
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
     elif label == 'itk_md8_data':
-        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/itkmd8data'
-        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan'
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/itkmd8/itkmd8data'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8data'
+    elif label == 'itk_md8_sim':
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/itkmd8/itkmd8sim'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8sim'
     else:
         raise NameError(label)
 
