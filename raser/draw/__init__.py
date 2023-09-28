@@ -4,7 +4,7 @@ from . import iv
 from . import cv
 
 
-def draw_figure(input_dir, output_dir, label):
+def draw_figure(input_dir, output_dir, label,xlimit=510,ylimit=1e-5):
 
     com_name = []
     for file in os.listdir(input_dir):
@@ -42,7 +42,7 @@ def draw_figure(input_dir, output_dir, label):
             graph.SetMarkerSize(1)
 
             graph.GetXaxis().SetTitle("Reverse Bias Voltage [V]")
-            graph.GetXaxis().SetLimits(0,510)
+            graph.GetXaxis().SetLimits(0,xlimit)
             graph.GetXaxis().CenterTitle()
             graph.GetXaxis().SetTitleOffset(1.4)
             graph.GetXaxis().SetTitleSize(0.05)
@@ -149,6 +149,10 @@ def main(args):
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
         draw_figure(input_dir, output_dir, label)  
+    elif label == 'itk_md8_data':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itk_md8_data'
+        output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
+        draw_figure(input_dir, output_dir, label,xlimit=700)  
     elif label == 'sicar1.1.8-1,sicar1.1.8-2_iv':
         iv.main(label)  
     elif label == 'sicar1.1.8-1,sicar1.1.8-2_cv':
