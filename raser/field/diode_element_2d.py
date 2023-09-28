@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
-# Copyright 2013 DEVSIM LLC
-#
-# SPDX-License-Identifier: Apache-2.0
 
 import devsim
 from . import diode_element_physics
@@ -16,14 +13,6 @@ import os
 
 import matplotlib.pyplot
 
-#####
-# dio1
-#
-# Make doping a step function
-# print dat to text file for viewing in grace
-# verify currents analytically
-# in dio2 add recombination
-#
 
 ####
 #### Meshing
@@ -102,12 +91,7 @@ def main():
 
     devsim.set_parameter(device=device, region=region, name="topbias", value=0.0)
 
-    #
-    # This is to test the solution backup
-    #
-    #set_parameter -device device -region region -name "topbias" -value 10
-    #catch {solve -type dc -absolute_error 1e10 -relative_error 1e-10 -maximum_iterations 30} x
-    #puts x
+
 
     v=0
     while v < 0.51:
