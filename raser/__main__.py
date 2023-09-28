@@ -36,13 +36,16 @@ parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 parser_gsignal = subparsers.add_parser('gsignal', help='generate signal')
 parser_gsignal.add_argument('label', nargs='*', help='LABEL to identify spaceres files')
 
+parser_gsignal = subparsers.add_parser('particle', help='calculate particle')
+parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
+
 args = parser.parse_args()
 
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
-submodules = ['draw', 'field', 'root', 'spaceres', 'gsignal']
+submodules = ['draw', 'field', 'root', 'spaceres', 'gsignal','particle']
 
 submodule = vars(args)['subparser_name']
 if submodule not in submodules:
