@@ -214,7 +214,8 @@ class Carrier:
             self.diffuse_end_condition = "out of bound"
         mod_x = self.d_x % self.pixel
         mod_y = self.d_y % self.pixel
-        if ((mod_x> 7.5) & (mod_x<17.5)) or ((mod_y> 7.5) & (mod_y<17.5)):
+        if ((mod_x> 7.5) & (mod_x<17.5)) & ((mod_y> 7.5) & (mod_y<17.5)) \
+           & (self.t <= self.t_end):
             self.diffuse_end_condition = "collect"
         return self.diffuse_end_condition
 
@@ -791,8 +792,8 @@ class PixelCarrierListFromG4P:
                 px,py,pz = self.split_name(my_g4p.devicenames[j][k])
                 if name in my_g4p.devicenames[j][k]:
                     tp = [0 for i in range(3)]
-                    tp[0] = my_g4p.localposition[j][k][0]+px*self.pixelsize_x
-                    tp[1] = my_g4p.localposition[j][k][1]+py*self.pixelsize_y
+                    tp[0] = my_g4p.localposition[j][k][0]+(px-0.5)*self.pixelsize_x
+                    tp[1] = my_g4p.localposition[j][k][1]+(py-0.5)*self.pixelsize_y
                     tp[2] = my_g4p.localposition[j][k][2]+self.pixelsize_z/2
                     position.append(tp) 
                     energy.append(my_g4p.energy_steps[j][k])
