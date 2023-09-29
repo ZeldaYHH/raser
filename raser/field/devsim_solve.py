@@ -45,13 +45,15 @@ def main(label=None, v_max = 400):
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)
         return
     elif label=='itkmd8_iv_v1':
+        area_factor=1.0/(0.76*0.76)
+        v_max=700
         device = "1D_ITK_MD8"
         region = "1D_ITK_MD8"
         para_dict=[]
         set_mesh(device,region)
         extend_set()
         initial_solution(device,region,para_dict)
-        solve_iv(device,region,v_max,para_dict)
+        solve_iv(device,region,v_max,para_dict,area_factor)
     else:
         raise NameError(label)
           
@@ -113,7 +115,7 @@ def set_defect(paras):
     devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=float(paras["sigma_p_HS6"]),   unit="s/cm^2",     description="sigma_p_HS6")
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=float(paras["N_t_HS6"]),   unit="cm^(-3)",     description="N_t_HS6")
 
-def solve_iv(device,region,v_max,area_factor,para_dict):
+def solve_iv(device,region,v_max,para_dict,area_factor):
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -251,7 +253,7 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
     save_ele_field(device, positions, intensities, bias_voltages, condition)
 
 
-def solve_iv_Rirr(device,region,Rirr,v_max,para_dict):
+def solve_iv_Rirr(device,region,Rirr,v_max,area_factor,para_dict):
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"

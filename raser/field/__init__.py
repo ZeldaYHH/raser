@@ -25,5 +25,7 @@ def main(args):
         diode_element_2d.main()
     elif label == 'itkmd8_cv_v1':
         devsim_solve.main(label)
+    elif label == 'itkmd8_iv_v1':
+        devsim_solve.main(label)
     else:
         raise NameError(label)

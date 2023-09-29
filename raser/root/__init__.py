@@ -21,7 +21,10 @@ def convert_csv_to_root(input_dir, output_dir, label):
 
         if name.endswith('iv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-            df.Snapshot("myTree", output_file, {"Value","Reading"})
+            if label=="itk_md8_data":
+                df.Snapshot("myTree", output_file, {"Voltage_V", "Current_nA"})
+            else:
+                df.Snapshot("myTree", output_file, {"Value","Reading"})
 
         if name.endswith('cv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
