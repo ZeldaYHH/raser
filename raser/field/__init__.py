@@ -27,5 +27,7 @@ def main(args):
         devsim_solve.main(label)
     elif label == 'itkmd8_iv_v1':
         devsim_solve.main(label)
+    elif label == 'itkatlas18_iv_v1':
+        devsim_solve.main(label)
     else:
         raise NameError(label)
