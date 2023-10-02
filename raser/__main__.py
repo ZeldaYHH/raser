@@ -8,7 +8,7 @@ import argparse
 import importlib
 import subprocess
 
-VERSION = 4.0
+VERSION = 4.1
 
 parser = argparse.ArgumentParser(prog='raser')
 parser.add_argument('--version', action='version', 
@@ -72,7 +72,7 @@ elif vars(args)['shell'] == False: # not in shell
     subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
 else: # in shell
     submodule = importlib.import_module(submodule)
-    if submodule.__name__ == "gsignal":
+    if submodule.__name__ == "gen_signal":
         submodule.main(vars(args)['label'])
     else:
         submodule.main(args)

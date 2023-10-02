@@ -45,7 +45,6 @@ class Stage():
                 if position_flag:
                     break
 
-
     def MoveRE(self,motor,movement):
         UpperLimit = 100000     
         LowerLimit = -100000    
@@ -122,21 +121,3 @@ class Stage():
                         #self.timer.timeout.connect(self.UpdateDesiredPos)
                         #self.timer.start(100)
                         #self.UpdateDesiredPos() 
-                        
-            '''
-            for self.PZ in range(self.z0, self.z0 + ((self.Nz + 1) * self.dz) , self.dz):
-                if self.flag == 0:
-                    break
-                for self.PX in range(self.x0, self.x0 + ((self.Nx + 1) * self.dx) , self.dx):
-                    if self.flag == 0:
-                        print('####break######')
-                        break
-                    for self.PY in range(self.y0, self.y0 + ((self.Ny + 1) * self.dy) , self.dy):
-                        if self.flag == 0:
-                            break
-                        self.MoveAB(self.PX, self.PY, self.PZ)
-                        print(self.Xaxis.get_status_position(),self.Yaxis.get_status_position(),self.Zaxis.get_status_position())
-                        #self.timer.timeout.connect(self.UpdateDesiredPos)
-                        #self.timer.start(100)
-                        #time.sleep(0.1)
-            '''

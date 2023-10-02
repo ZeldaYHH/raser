@@ -1,6 +1,0 @@
-/run/verbose 2
-/run/initialize
-/control/execute ./cfg/vistelescope.mac
-/vis/open OGL 600x600-0+0
-/vis/sceneHandler/create OGL
-/vis/viewer/create ! ! 600x600-0+0
