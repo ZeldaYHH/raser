@@ -6,7 +6,6 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from readjson import Setting
 from field import node
 import matplotlib
 import matplotlib.pyplot
@@ -96,7 +95,7 @@ def main():
 
     Create1DMesh(device=device, region=region)
     SetDoping(device=device, region=region, bulk_doping=doping) 
-    Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_"+doping+".png")
+    Draw_Doping(device=device, region=region, path="./output/devsim/"+device+"_"+doping+".png")
 
 if __name__ == '__main__':
     main()

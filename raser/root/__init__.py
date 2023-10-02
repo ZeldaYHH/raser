@@ -59,3 +59,11 @@ def main(args):
         raise NameError(label)
 
     convert_csv_to_root(input_dir, output_dir, label)
+
+def itkpdb_dat_to_csv(input,output,label):
+    com_name = []
+    for file in os.listdir(input_dir):
+        if file.endswith('.dat'):
+            com_name.append(file)
+        
+    return
