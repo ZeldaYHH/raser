@@ -24,25 +24,39 @@ def main(args):
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
         draw_figure(input_dir, output_dir, label)  
-    elif label == 'itk_md8_data':
+    elif label == 'itk_md8_data_v1':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8data'
         output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
         draw_figure(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]",ytitle_iv="Current [nA]",
                 xtitle_cv="Reverse Bias Voltage [V]",ytitle_cv="Capacitance [pF]",
                     xlowerlimit_iv=0,xupperlimit_iv=700,ylowerlimit_iv=1e-11,yupperlimit_iv=1e-5,ylogscale_iv=0,
                     xlowerlimit_cv=0,xupperlimit_cv=400,ylowerlimit_cv=0,yupperlimit_cv=1e2,ylogscale_cv=0)  
-    elif label == 'itk_md8_sim':
+    elif label == 'itk_md8_sim_v1':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8sim'
         output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
         draw_figure(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]",ytitle_iv="Current [nA]",
                 xtitle_cv="Reverse Bias Voltage [V]",ytitle_cv="Capacitance [pF]",
                     xlowerlimit_iv=0,xupperlimit_iv=700,ylowerlimit_iv=1e-11,yupperlimit_iv=1e-5,ylogscale_iv=0,
                     xlowerlimit_cv=0,xupperlimit_cv=400,ylowerlimit_cv=0,yupperlimit_cv=1e2,ylogscale_cv=0)  
-    elif label == 'itk_md8_compare_dataandsim':
+    elif label == 'itk_md8_compare_dataandsim_v1':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/comparison'
         output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
         cv.main(label)
         iv.main(label)
+    elif label == 'itk_atlas18_sim_v1':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/atlas18/sim'
+        output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
+        draw_figure(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]",ytitle_iv="Current [A]",
+            xtitle_cv="Reverse Bias Voltage [V]",ytitle_cv="Capacitance [pF]",
+                xlowerlimit_iv=0,xupperlimit_iv=700,ylowerlimit_iv=1e-11,yupperlimit_iv=1e-5,ylogscale_iv=0,
+                xlowerlimit_cv=0,xupperlimit_cv=400,ylowerlimit_cv=0,yupperlimit_cv=1e2,ylogscale_cv=0)
+    elif label == 'itk_atlas18_data_v1':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/atlas18/data'
+        output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
+        draw_figure(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]",ytitle_iv="Current [nA]",
+                xtitle_cv="Reverse Bias Voltage [V]",ytitle_cv="Capacitance [pF]",
+                    xlowerlimit_iv=0,xupperlimit_iv=700,ylowerlimit_iv=1e-11,yupperlimit_iv=1e-5,ylogscale_iv=0,
+                    xlowerlimit_cv=0,xupperlimit_cv=400,ylowerlimit_cv=0,yupperlimit_cv=1e2,ylogscale_cv=0) 
     elif label == 'sicar1.1.8-1,sicar1.1.8-2_iv':
         iv.main(label)  
     elif label == 'sicar1.1.8-1,sicar1.1.8-2_cv':
@@ -79,10 +93,15 @@ def draw_figure(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]
             graph = ROOT.TGraph()
             
             for i, event in enumerate(tree):
-                if name=='W185_iv':
+                if label in ['itk_md8_data','itk_atlas18_data']:
                     x = event.Voltage_V
                     x = abs(x)
                     y = event.Current_nA
+                    y = abs(y)*1e-9
+                elif label == 'itk_atlas18_sim':
+                    x = event.Voltage
+                    x = abs(x)
+                    y = event.Current
                     y = abs(y)*1e-9
                 else:
                     x = event.Value

@@ -1,6 +1,7 @@
 import sys
 import os
 import ROOT
+import csv
 
 def convert_csv_to_root(input_dir, output_dir, label):
     com_name = []
@@ -20,15 +21,20 @@ def convert_csv_to_root(input_dir, output_dir, label):
         output_file = os.path.join(output_dir, name + '.root')
 
         if name.endswith('iv'):
-            df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-            if label=="itk_md8_data":
+            if label=="itk_atlas18_data_v1":
+                df = ROOT.RDF.MakeCsvDataFrame(input_file, True, '\t')
+            else:
+                df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
+            if label in ["itk_md8_data_v1","itk_atlas18_data_v1"]:
                 df.Snapshot("myTree", output_file, {"Voltage_V", "Current_nA"})
+            elif label in ['itk_atlas18_sim_v1','itk_md8_sim_v1']:
+                df.Snapshot("myTree", output_file, {"Voltage", "Current"})
             else:
                 df.Snapshot("myTree", output_file, {"Value","Reading"})
 
         if name.endswith('cv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
-            if label=="itk_md8_sim":
+            if label=="itk_md8_sim_v1":
                 df.Snapshot("myTree", output_file, {"Voltage", "Capacitance"})
             else:
                 df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
@@ -49,21 +55,20 @@ def main(args):
     elif label == 'sicar1.1.8-2':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
-    elif label == 'itk_md8_data':
-        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/itkmd8/itkmd8data'
+    elif label == 'itk_md8_data_v1':
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkmd8/itkmd8data'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8data'
-    elif label == 'itk_md8_sim':
-        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/itkmd8/itkmd8sim'
+    elif label == 'itk_md8_sim_v1':
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkmd8/itkmd8sim'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8sim'
+    elif label == 'itk_atlas18_sim_v1':
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkatlas18/sim'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/atlas18/sim'
+    elif label == 'itk_atlas18_data_v1':
+        input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkatlas18/data'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/atlas18/data'
     else:
         raise NameError(label)
 
     convert_csv_to_root(input_dir, output_dir, label)
 
-def itkpdb_dat_to_csv(input,output,label):
-    com_name = []
-    for file in os.listdir(input_dir):
-        if file.endswith('.dat'):
-            com_name.append(file)
-        
-    return
