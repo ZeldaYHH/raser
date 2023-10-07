@@ -17,7 +17,7 @@ def main(args):
 
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
-    elif label == 'sicar1.1.6_cv_0-1v':
+    elif label == 'sicar1.1.6_cv_0-500v':
         scan_cv.main()
     elif label == 'sicar1.1.8_cv_0-1v':
         devsim_solve.main()

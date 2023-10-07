@@ -50,7 +50,7 @@ build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=[
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
-if voltage>2:
+if voltage>600:
     build_2d_device.set_values(device,region)
     
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
@@ -68,7 +68,7 @@ def loop(bias_v,voltage):
         cap = devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag") / (-2 * math.pi*areafactor)
         print("capacitance {0} {1}".format(bias_v, cap))
         data.append((bias_v, cap * 1e12))
-        bias_v += 0.1
+        bias_v += 1
       
 
     build_2d_device.save_values(device=device,region=region)
@@ -111,7 +111,11 @@ def loop(bias_v,voltage):
         graph.SetPoint(i, x, y)
 
     canvas = ROOT.TCanvas("canvas", "Graph", 800, 600)
-    graph.Draw("AL")
+    graph.SetMarkerStyle(ROOT.kFullCircle)
+    graph.SetMarkerSize(0.5)
+    graph.SetMarkerColor(ROOT.kBlue)
+    graph.SetLineColor(ROOT.kWhite)
+    graph.Draw("AP")
 
     graph.SetTitle("CAP vs Voltage")
     graph.GetXaxis().SetTitle("Voltage")
@@ -120,7 +124,6 @@ def loop(bias_v,voltage):
     canvas.Update()
     canvas.SaveAs("./output/2Dresult/Sicar1.1.6/SicarLgadTestCV_picture{0}to{1}.root".format(bias_v,voltage))
    
-    devsim.write_devices(file="./output/2Dresult/Sicar1.1.6/SicarLgad{0}to{1}.dd".format(bias_v,voltage), type="tecplot")
-
+   
 
 loop(bias_v,voltage)
