@@ -30,10 +30,10 @@ def main():
 
     # 检查文件是否存在
     if not (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
-        print("do 0-1")
+        print("do 0-500")
         params = {
         'bias_v': "0",
-        'voltage': "1"
+        'voltage': "500"
     }
         with open('./output/parainprogram/config_loop.json', 'w') as f:
             json.dump(params, f)
@@ -51,10 +51,10 @@ def main():
         print("Please run again to get higher voltage")
     elif (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
         print("do 2-500")
-        voltage = 1.1
+        voltage = 2
         while voltage < 200:
             params = {
-            'bias_v': str(voltage-0.1),
+            'bias_v': str(voltage-1),
             'voltage': str(voltage)
                     }
             with open('./output/parainprogram/config_loop.json', 'w') as f:
@@ -70,7 +70,7 @@ def main():
                     break
             process2.wait()   
             
-            voltage += 0.1
+            voltage += 1
                 
             
 if __name__ == "__main__":

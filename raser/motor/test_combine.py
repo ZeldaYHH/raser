@@ -33,7 +33,6 @@ class MainWidget(QtWidgets.QWidget):
         
         #Declaring Device
         self.SetMotor()
-            
 
         #Move
         self.ui.MoveButton.clicked.connect(lambda:self.MoveAB(int(self.ui.SetPosX.text()), int(self.ui.SetPosY.text()), int(self.ui.SetPosZ.text())))
@@ -70,8 +69,6 @@ class MainWidget(QtWidgets.QWidget):
         # Initializing Widget
         self.UpdateDesiredPos()
         self.ui.setWindowTitle(self.Title)
-
-       
         self.ui.show()
 
     def InitEmum(self):
@@ -88,13 +85,10 @@ class MainWidget(QtWidgets.QWidget):
                 print('str_device:'+self.str_device)
                 self.device[self.i] = vitual_dev.VitualDevice(self.device_name[self.i])
                 print('device[]' + str(self.device[self.i]))
-                #self.testmotor = pymotor.Motor(vitual_dev.VitualDevice(self.str_device).open_name)
-                #self.testmotor.move(10)
                 self.i = self.i + 1
         else:
             for self.dev_ind in range(0,self.dev_count):
                 self.device[self.dev_count] =pymotor.Motor(pymotor.Motor.get_name(self,self.devenum,self.dev_ind))
-        
 
     def Home(self,motor):
         ret = QtWidgets.QMessageBox.warning(self, "Homming",
@@ -154,23 +148,6 @@ class MainWidget(QtWidgets.QWidget):
         #delay 1 second for motor moving to (x0,y0.z0)
         time.sleep(2)
     
-        # # scan step by step
-        # self.flag1 = self.flag2 = -1
-        # for self.i in range(0, self.Nz):
-        #     self.MoveRE(self.Zaxis, self.dz)
-        #     self.flag1 = self.flag1 * (-1)
-        #     for self.j in range(0, self.Nx):
-        #         self.MoveRE(self.Xaxis, self.flag1 * self.dx)
-        #         self.flag2 = self.flag2 * (-1)
-        #         for self.k in range(0, self.Ny):
-        #             self.MoveRE(self.Yaxis, self.flag2 * self.dy)
-        #             #print(self.Xaxis.get_status_position(),self.Yaxis.get_status_position(),self.Zaxis.get_status_position())
-        #             print(self.ui.CurrentPosX_2.value(),self.ui.CurrentPosY_2.value(),self.ui.CurrentPosZ_2.value())
-        #             self.timer.timeout.connect(self.UpdateDesiredPos)
-        #             self.timer.start(100)
-        #             #self.UpdateDesiredPos() 
-                    
-
         for self.PZ in range(self.z0, self.z0 + ((self.Nz + 1) * self.dz) , self.dz):
             for self.PX in range(self.x0, self.x0 + ((self.Nx + 1) * self.dx) , self.dx):
                 for self.PY in range(self.y0, self.y0 + ((self.Ny + 1) * self.dy) , self.dy):
@@ -185,8 +162,6 @@ class MainWidget(QtWidgets.QWidget):
         self.Yaxis = self.device[self.ui.Y_Motor_Num.value()-1]
         self.Zaxis = self.device[self.ui.Z_Motor_Num.value()-1]
             
-        
-    
     def CurrentPosition(self):
         if tctEnable:
             self.currentPosX = self.Xaxis.get_status_position()
@@ -203,11 +178,7 @@ class MainWidget(QtWidgets.QWidget):
             self.ui.CurrentPosZ_2.display(self.currentPosZ)
             self.timer.start(100)
 
-
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-
     win = MainWidget()
-
     sys.exit(app.exec_())

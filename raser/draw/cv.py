@@ -81,8 +81,12 @@ def draw_cv(input_dir, output_dir, label):
 
 
 def main(label):
-    input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
-    output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
+    if label=='itk_md8_compare_dataandsim':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/comparison'
+        output_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/raser/output/fig'
+    else:
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
 
     draw_cv(input_dir, output_dir, label)
 

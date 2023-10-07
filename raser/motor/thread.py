@@ -1,5 +1,5 @@
 import pymotor,stage,VitualDevice
-import MDO3034Control as MD
+import raser.motor.mdo_3034_control as MD
 import time
 from datetime import datetime
 import numpy as np
@@ -90,21 +90,13 @@ class DataCapture(QtCore.QThread):
         self.timer = QtCore.QTimer()
         if self.stepmode_flag:
             time.sleep(0.1)
-            # time.sleep(0.5)
-            # time.sleep(1)
-            #self.info = self.scope.testIO()
             self.capture()
         else:
             self.timer.start(int(1000/self.frequency))
-            #self.scope = MD.MDO3034C(self.resource)
             self.info = self.scope.testIO()
             self.timer.timeout.connect(self.capture)
             self.stop_signal.connect(self.timer.stop)
             self.exec()
-
-
-    
-   
 
 
 class ReadyThread(QtCore.QThread):
@@ -127,10 +119,6 @@ class ReadyThread(QtCore.QThread):
         self.ymult,self.yzero,self.yoff,self.xincr,self.xzero = self.scope.readOffset()
         self.message = "read offset complete!"
         self.sinOut.emit('offset')
-        # self.scope.readWave()
-        # self.message = "read wave complete!"
-        # self.sinOut.emit('send')
-
 
 class ScanThread(QtCore.QThread):
     CaptureSignal = QtCore.pyqtSignal(str)
@@ -180,8 +168,6 @@ class ScanThread(QtCore.QThread):
                 if self.dz != 0:
                     self.CaptureSignal.emit('capture')      #one step move complete,emit capture signal
                     time.sleep(0.1)
-                    # time.sleep(0.5)
-                    # time.sleep(1)
                     while True:
                         if self.continue_flag:
                             break
@@ -191,14 +177,11 @@ class ScanThread(QtCore.QThread):
                     if self.flag == False:
                         print("break\n")
                         break
-                    # self.laser_stage.MoveRE(self.laser_stage.Xaxis, self.flag1 * self.dx)
                     if self.dz == 0: self.laser_stage.MoveAB(self.laser_stage.Xaxis.get_status_position(), self.y0, self.laser_stage.Zaxis.get_status_position()) # x-y scan
                     self.laser_stage.MoveRE(self.laser_stage.Xaxis, self.dx)
                     if self.dx != 0:
                         self.CaptureSignal.emit('capture')
                         time.sleep(0.1)
-                        # time.sleep(0.5)
-                        # time.sleep(1)
                         while True:
                             if self.continue_flag:
                                 break
@@ -209,13 +192,10 @@ class ScanThread(QtCore.QThread):
                         if self.flag == False:
                             print("break\n")
                             break
-                        # self.laser_stage.MoveRE(self.laser_stage.Yaxis, self.flag2 * self.dy)
                         self.laser_stage.MoveRE(self.laser_stage.Yaxis, self.dy)
                         if self.dy != 0:
                             self.CaptureSignal.emit('capture')
                             time.sleep(0.1)
-                            # time.sleep(0.5)
-                            # time.sleep(1)
                             while True:
                                 if self.continue_flag:
                                     break
@@ -223,3 +203,4 @@ class ScanThread(QtCore.QThread):
 
     def run(self):
         self.scan()
+        

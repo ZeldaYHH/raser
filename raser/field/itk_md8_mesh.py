@@ -6,39 +6,30 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from readjson import Setting
 from field import node
 import matplotlib
-#matplotlib.use('Agg')
 import matplotlib.pyplot
 import math
 
 
 #  MD8
 # 0.8cm*0.8cm
-args = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
-dset = Setting(args)
-det_dic = dset.detector    
-#doping=str(det_dic['doping'])+"e12"
-doping=str(det_dic['doping'])
 
+doping="3.2e12"
 # 1d
+#Because this device is n+ in p, the top and bottom are opposite to those of SiC.
+#Here we exchange top and bottom, to reduce the ifelse in the main program.
+#If we do so, we do not need to edit the 0-reverse_v when solving iv and cv. 
 def Create1DMesh(device, region):
     '''
       Meshing
     '''
     devsim.create_1d_mesh(mesh="dio")
-    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="top")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_up")
+    devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)-(0.5e-4), ps=1e-5, tag="jun_down")
     devsim.add_1d_mesh_line(mesh="dio", pos=1e-4, ps=1e-5, tag="mid")
-    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
-
-    # devsim.add_1d_mesh_line(mesh="dio", pos=0, ps=1e-5, tag="top")
-    # devsim.add_1d_mesh_line(mesh="dio", pos=(0.5e-4)-(0.25e-4), ps=1e-5, tag="jun_up")
-    # devsim.add_1d_mesh_line(mesh="dio", pos=0.5e-4, ps=1e-5, tag="mid")
-    # devsim.add_1d_mesh_line(mesh="dio", pos=(0.5e-4)+(3e-4), ps=1e-5, tag="jun_down")
-    # devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="dio", pos=(1e-4)+(3e-4), ps=1e-5, tag="jun_up")
+    devsim.add_1d_mesh_line(mesh="dio", pos=305*1e-4, ps=1e-4, tag="top")
     
     devsim.add_1d_contact  (mesh="dio", name="top", tag="top", material="metal")
     devsim.add_1d_contact  (mesh="dio", name="bot", tag="bot", material="metal")
@@ -62,14 +53,13 @@ def SetDoping_old(device, region, bulk_doping=doping):#default doping 4.7e12
     devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
 
 
-def SetDoping(device, region, bulk_doping=doping, backthickness="304.9", back_doping="1e17"):#default doping 4.7e12
+def SetDoping(device, region, bulk_doping=doping, backthickness="295", back_doping="1e15"):#default doping 4.7e12
     '''
       Doping
     '''
-    #node.CreateNodeModel(device, region, "Donors", "5.0e15*step(1e-4-x)")
+
     node.CreateNodeModel(device, region, "Donors", "1.0e19*step(1e-4-x)")
     node.CreateNodeModel(device, region, "Acceptors",    "step(%s*1e-4-x)*%s*step(x-1e-4)+%s*step(x-%s*1e-4)"%(backthickness,bulk_doping,back_doping,backthickness))
-    #node.CreateNodeModel(device, region, "Acceptors",    "step(303*1e-4-x)*%s*step(x-1e-4)+1e16*step(x-303*1e-4)"%bulk_doping)
     node.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
     devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
@@ -92,7 +82,6 @@ def Draw_Doping(device, region, path):
     matplotlib.pyplot.legend(fields)
     matplotlib.pyplot.savefig(path)
 
-
 def main():
     if not (os.path.exists("./output/devsim")):
         os.makedirs("./output/devsim")
@@ -106,7 +95,7 @@ def main():
 
     Create1DMesh(device=device, region=region)
     SetDoping(device=device, region=region, bulk_doping=doping) 
-    Draw_Doping(device=device, region=region, path="./output/devsim/1D_ITK_MD8_"+doping+".png")
+    Draw_Doping(device=device, region=region, path="./output/devsim/"+device+"_"+doping+".png")
 
 if __name__ == '__main__':
     main()

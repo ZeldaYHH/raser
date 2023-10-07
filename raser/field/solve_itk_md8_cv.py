@@ -12,7 +12,6 @@ from field import initial
 import itk_md8_mesh
 
 import matplotlib
-#matplotlib.use('Agg') 
 import matplotlib.pyplot
 import csv
 import math
@@ -27,7 +26,6 @@ region="1D_ITK_MD8"
 # 1D 1cm*1cm
 # DUT 0.8cm* 0.8cm
 area_factor = 1.0/(0.76*0.76)
-
 
 
 itk_md8_mesh.Create1DMesh(device=device, region=region)
@@ -63,7 +61,6 @@ writer.writerow(header)
 while reverse_v < 400.0: 
     devsim.circuit_alter(name="V1", value=reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
-    #TODO: get out circuit information
     physics.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=1.0)
     cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi)

@@ -11,18 +11,18 @@ import node_in_2d
 def Create2DMesh(device,region):
     devsim.create_2d_mesh  (mesh="Sicar")
     
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0     , ps=5e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=66.3e-4  , ps=5e-6)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0     , ps=2.5e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=66.3e-4  , ps=2.5e-5)
 
     
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=0     , ps=5e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=1e-4 , ps=5e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0.3e-4     , ps=1e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=1.3e-4  , ps=1e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=51.3e-4  , ps=1e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=56.3e-4  , ps=1e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=-1e-4   , ps=5e-6)
-    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=67.3e-4, ps=5e-6)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=0     , ps=2.5e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=1e-4 , ps=2.5e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0.3e-4     , ps=1e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=1.3e-4  , ps=1e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=51.3e-4  , ps=1e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=56.3e-4  , ps=1e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=-1e-4   , ps=2.5e-5)
+    devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=67.3e-4, ps=2.5e-5)
     devsim.add_2d_region   (mesh="Sicar", material="SiliconCarbide", region=region)
     devsim.add_2d_region   (mesh="Sicar", material="air", region="air1", xl=-1e-4,  xh=0)
     devsim.add_2d_region   (mesh="Sicar", material="air", region="air2", xl=67.3e-4, xh=66.3e-4)

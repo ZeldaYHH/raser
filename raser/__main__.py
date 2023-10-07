@@ -8,7 +8,7 @@ import argparse
 import importlib
 import subprocess
 
-VERSION = 4.0
+VERSION = 4.1
 
 parser = argparse.ArgumentParser(prog='raser')
 parser.add_argument('--version', action='version', 
@@ -36,13 +36,16 @@ parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 parser_gsignal = subparsers.add_parser('gsignal', help='generate signal')
 parser_gsignal.add_argument('label', nargs='*', help='LABEL to identify spaceres files')
 
+parser_gsignal = subparsers.add_parser('particle', help='calculate particle')
+parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
+
 args = parser.parse_args()
 
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
-submodules = ['draw', 'field', 'root', 'spaceres', 'gsignal']
+submodules = ['draw', 'field', 'root', 'spaceres', 'gsignal','particle']
 
 submodule = vars(args)['subparser_name']
 if submodule not in submodules:
@@ -69,7 +72,7 @@ elif vars(args)['shell'] == False: # not in shell
     subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
 else: # in shell
     submodule = importlib.import_module(submodule)
-    if submodule.__name__ == "gsignal":
+    if submodule.__name__ == "gen_signal":
         submodule.main(vars(args)['label'])
     else:
         submodule.main(args)

@@ -13,7 +13,7 @@ tctEnable = True
 if tctEnable:
     import pymotor
     import thread
-    import MDO3034Control
+    import raser.motor.mdo_3034_control as mdo_3034_control
     import VitualDevice as vitual_dev
 
 testpass = False
@@ -49,7 +49,7 @@ class MainWidget(QtWidgets.QWidget):
         self.timer.start(500)
         self.SetMotor()
         self.SpeedMode()
-        self.ui.Interface.addItems(MDO3034Control.ReadInterface())
+        self.ui.Interface.addItems(mdo_3034_control.ReadInterface())
             
 
         #Move
@@ -214,13 +214,7 @@ class MainWidget(QtWidgets.QWidget):
         if self.ui.default_speed.isChecked():
             self.ui.Set_Speed.setEnabled(False)
             self.SetSpeed(True)
-            
-            #self.new_thread = thread.ControlThread(self.setdevice)
-            #self.new_thread.operation_num = 6
-            #self.new_thread.step = [0,0,0]
-            #self.new_thread.speed = [1000,1000,1000]
-            #self.new_thread.start()
-            
+
 
     def Stop(self):
         self.new_thread = thread.ControlThread(self.setdevice)
@@ -282,8 +276,6 @@ class MainWidget(QtWidgets.QWidget):
             filenames = dlg.selectedFiles()
             print(repr(filenames))
             self.ui.FolderText.setText(filenames[0])
-
-
 
     def SaveData(self):
         if self.ui.Frequency_mode.isChecked() == True:
@@ -350,15 +342,7 @@ class MainWidget(QtWidgets.QWidget):
         else:
             self.ui.InfoText.append(self.readythread.message)
 
-
-
-
-
-
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-
     win = MainWidget()
-
     sys.exit(app.exec_())
