@@ -8,7 +8,7 @@ from field import node
 import matplotlib
 import matplotlib.pyplot
 import math
-# gaindoping = sys.argv[1]
+# gaindoping = [8.5e16,8.6e16,8.7e16,8.8e16]
 # bulkdoping = sys.argv[2]
 #bulk_thickness = sys.argv[1]
 # 1D SICAR1 LGAD
@@ -22,19 +22,19 @@ def Create1DMesh(device, region):
     devsim.add_1d_mesh_line(mesh="lgad", pos=(3e-5)-(1e-5), ps=1e-6, tag="jun_up")
     devsim.add_1d_mesh_line(mesh="lgad", pos=3e-5, ps=1e-6, tag="mid")
     devsim.add_1d_mesh_line(mesh="lgad", pos=(3e-5)+(2e-4), ps=5e-6, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="lgad", pos=66.3e-4, ps=0.5e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="lgad", pos=32.3e-4, ps=0.5e-4, tag="bot")
     devsim.add_1d_contact  (mesh="lgad", name="top", tag="top", material="metal")
     devsim.add_1d_contact  (mesh="lgad", name="bot", tag="bot", material="metal")
     devsim.add_1d_region   (mesh="lgad", material="SiliconCarbide", region=region, tag1="top", tag2="bot")
     devsim.finalize_mesh(mesh="lgad")
     devsim.create_device(mesh="lgad", device=device)
 
-def SetDoping(device, region):
+def SetDoping(device, region, gaindoping,bulkdoping):
     '''
       Doping
     # '''
     node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
-    node.CreateNodeModel(device, region, "Donors",    "7.96e16*( step((1.3e-4)-x) -step((3e-5)-x) ) + 2.3e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+    node.CreateNodeModel(device, region, "Donors",    "{}*( step((1.3e-4)-x) -step((3e-5)-x) ) + {}*( step((17.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((22.3e-4)-x) - step((17.3e-4)-x) )+ 1.0e19*( step((32.3e-4)-x) - step((22.3e-4)-x) )".format(gaindoping, bulkdoping))
 
     #Node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
     #Node.CreateNodeModel(device, region, "Donors",    "8.0e16*(step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e14*( step(({0}+1.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step(({0}+6.3e-4)-x) - step(({0}+1.3e-4)-x) )+ 2.0e18*( step(({0}+16.3e-4)-x) - step(({0}+6.3e-4)-x) )".format(bulk_thickness))
