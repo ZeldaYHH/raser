@@ -724,16 +724,21 @@ class CarrierListFromG4P:
             self.energy_loss = 3.6 #ev
 
         if batch == 0:
-            h1 = ROOT.TH1F("Edep_device", "Energy deposition in Detector", 100, 0, max(my_g4p.edep_devices)*1.3)
+            h1 = ROOT.TH1F("Edep_device", "Energy deposition in Detector", 100, 0, max(my_g4p.edep_devices)*1.1)
             for i in range (len(my_g4p.edep_devices)):
                 h1.Fill(my_g4p.edep_devices[i])
             max_event_bin=h1.GetMaximumBin()
             bin_wide=max(my_g4p.edep_devices)*1.1/100
             for j in range (len(my_g4p.edep_devices)):
-                if (my_g4p.edep_devices[j]<(max_event_bin+1)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin)*bin_wide):
-                    self.batch_def(my_g4p,j)
-                    batch = 1
-                    break
+                if (my_g4p.edep_devices[j]<(max_event_bin+1)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin-1)*bin_wide):
+                    try_p=1
+                    for single_step in my_g4p.p_steps_current[j]:
+                        if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>10:
+                            try_p=0
+                    if try_p==1:
+                        self.batch_def(my_g4p,j)
+                        batch = 1
+                        break
 
             if batch == 0:
                 print("the sensor didn't have particles hitted")
