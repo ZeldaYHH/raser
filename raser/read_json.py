@@ -29,7 +29,7 @@ class Setting:
         ---------
             2021/09/02
         """
-        with open('setting/setting.json') as f:
+        with open('setting/labels.json') as f:
             self._pardic = json.load(f)
 
         self.detector_name = self._pardic['detector']
