@@ -1,6 +1,6 @@
 {
-    "detector": "SICAR-1",
-    "absorber": "Time_resolution",
+    "detector": "Si_Strip",
+    "absorber": "Si_strip",
     "electronics": "CSA",
     "laser": "top_TCT"
 }

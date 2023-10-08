@@ -226,19 +226,19 @@
         "det_name" : "Si_Strip",
         "det_model" : "planar3D",
 
-        "lx" : 770,
+        "lx" : 225,
         "ly" : 5000,
-        "lz" : 100,
+        "lz" : 300,
         "doping" : -1,
-        "voltage" : 200,
+        "voltage" : 500,
         "temperature" : 300.0,
         "material" : "Si",
 
         "mesh" : 600,
         "xyscale" : 10,
 
-        "striplenth" : 110,
-        "elelenth" : 60,
-        "read_ele_num" : 8
+        "striplenth" : 75,
+        "elelenth" : 25,
+        "read_ele_num" : 3
     }
 ]

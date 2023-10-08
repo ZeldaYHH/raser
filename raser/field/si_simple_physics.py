@@ -284,7 +284,7 @@ def CreateSiIrradiatedCharge(device, region):
     set_parameter(device=device, region=region, name="eta_donor",   value=eta_donor)
     
     set_parameter(device=device, region=region, name="N_t_acc1",   value=N_t_acc1)
-    set_parameter(device=device, region=region, name="N_t_acc2",   value=N_t_acc1)
+    set_parameter(device=device, region=region, name="N_t_acc2",   value=N_t_acc2)
     set_parameter(device=device, region=region, name="N_t_donor",   value=N_t_donor)
     set_parameter(device=device, region=region, name="E_acc1",   value=E_acc1)
     set_parameter(device=device, region=region, name="E_acc2",   value=E_acc2)

@@ -12,13 +12,14 @@ import time
 
 from particle import geometry as geo
 from particle import g4simulation as g4s
-from field import pyfenics as pyf
+#from field import pyfenics as pyf
 from field import devsim_field as devfield
-from current import calcurrent as ccrt
-from elec import elereadout as rdout
+from field import solve_field as stripfield
+from current import cal_current as ccrt
+from elec import ele_readout as rdout
 
-from readjson import Setting
-from draw import drawsave
+from read_json import Setting
+from draw import draw_save
 import math
 
 def main(args):
@@ -99,13 +100,13 @@ def main(args):
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
-    if "Si_Strip" in args:
-        my_f = pyf.FenicsCal2D(my_d,dset.fenics)
+    if "Si_Strip"==dset.detector_name:
+        my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
         my_g4p = g4s.Particles(my_d, my_f, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        drawsave.cce(my_d,my_f,my_current)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        draw_save.cce(my_d,my_f,my_current)
         return
    
     if('devsim' in args):

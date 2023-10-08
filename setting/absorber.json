@@ -298,7 +298,7 @@
 
     {
         "geant4_model" : "Si_strip",
-        "total_events" : 1000,
+        "total_events" : 10000,
         
         "object":{},
 
@@ -307,10 +307,10 @@
         "par_energy" : 2.28,
         "maxstep" : 2,
         "g4_vis" : 0,
-        "par_inx" : 0,
+        "par_inx" : -25,
         "par_iny" : 0,
         "par_inz" : 1000,
-        "par_outx" : 0,
+        "par_outx" : -25,
         "par_outy" : 0,
         "par_outz" : 0
     },

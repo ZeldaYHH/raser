@@ -47,7 +47,7 @@ class Setting:
 
         self.total_events = int(self.geant4_paras['total_events'])
         #self.g4seed = 0 
-        self.g4seed = random.randint(0,1e7)
+        self.g4seed = 1
 
     def read_par_detector(self,jsonfile):
         "Read the setting.json file and save the input parameters in paras"

@@ -13,7 +13,7 @@ from .model import Material
 from .model import Vector
 
 t_bin = 50e-12
-t_end = 60e-9
+t_end = 10e-9
 t_start = 0
 pixel = 25 #um
 
@@ -48,7 +48,7 @@ class Carrier:
         self.t_end = t_end
         self.pixel = pixel
         self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
-        self.signal = [[] for j in range(read_ele_num)]
+        self.signal = [[] for j in range(int(read_ele_num))]
         self.end_condition = 0
         self.diffuse_end_condition = 0
         self.row=0
@@ -151,15 +151,17 @@ class Carrier:
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (e_field[2] < 1 and self.d_z < 2):
+        #wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (e_field[2] < 0.2 ):
             self.end_condition = "zero drift force"
-        '''elif wpot>(1-1e-5):
+        elif(len(self.path)>8000):
+            self.end_condition = "reciprocate"
+        """
+        elif wpot>(1-1e-5):
             self.end_condition = "reached cathode"
         elif wpot<1e-5:
             self.end_condition = "reached anode"
-        elif(len(self.path)>10000):
-            self.end_condition = "reciprocate"'''
+        """
         return self.end_condition
 
     def diffuse_single_step(self,my_d,my_f):
@@ -299,13 +301,13 @@ class CalCurrent:
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
             while not electron.not_in_sensor(my_d):
-                electron.drift_single_step(my_d, my_f)
-                electron.drift_end(my_f)
+                while not electron.drift_end(my_f):
+                    electron.drift_single_step(my_d, my_f)
             electron.get_signal(my_f,my_d)
         for hole in self.holes:
             while not hole.not_in_sensor(my_d):
-                hole.drift_single_step(my_d, my_f)
-                hole.drift_end(my_f)
+                while not hole.drift_end(my_f):
+                    hole.drift_single_step(my_d, my_f)
             hole.get_signal(my_f,my_d)
 
     def current_define(self,read_ele_num):
@@ -722,20 +724,22 @@ class CarrierListFromG4P:
             self.energy_loss = 3.6 #ev
 
         if batch == 0:
-            total_step=0
-            particle_number=0
-            for p_step in my_g4p.p_steps_current:   # selecting particle with long enough track
-                if len(p_step)>1:
-                    particle_number=1+particle_number
-                    total_step=len(p_step)+total_step
-            for j in range(len(my_g4p.p_steps_current)):
-                if(len(my_g4p.p_steps_current[j])>((total_step/particle_number)*0.5)):
-                    self.batch_def(my_g4p,j)
-                    break
+            h1 = ROOT.TH1F("Edep_device", "Energy deposition in Detector", 100, 0, max(my_g4p.edep_devices)*1.1)
+            for i in range (len(my_g4p.edep_devices)):
+                h1.Fill(my_g4p.edep_devices[i])
+            max_event_bin=h1.GetMaximumBin()
+            bin_wide=max(my_g4p.edep_devices)*1.1/100
+            for j in range (len(my_g4p.edep_devices)):
+                if (my_g4p.edep_devices[j]<(max_event_bin+1)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin-1)*bin_wide):
+                    try_p=1
+                    for single_step in my_g4p.p_steps_current[j]:
+                        if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>10:
+                            try_p=0
+                    if try_p==1:
+                        self.batch_def(my_g4p,j)
+                        batch = 1
+                        break
 
-            if particle_number > 0:
-                batch=1
-                         
             if batch == 0:
                 print("the sensor didn't have particles hitted")
                 raise ValueError

@@ -49,7 +49,7 @@ def main():
     delete_node_model(device=device, region=region, name="IntrinsicHoles")
     while v < 300:
         set_parameter(device=device, name=GetContactBiasName("bot"), value=v)
-        solve(type="dc", absolute_error=1e10, relative_error=1e-3, maximum_iterations=1500)
+        solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=1500)
         PrintCurrents(device, "top")
         PrintCurrents(device, "bot")
         v += 1
@@ -68,19 +68,19 @@ def main():
     if not os.access('output/testdiode', os.F_OK):
             os.makedirs('output/testdiode', exist_ok=True)
 
-    draw(x,potential,"Potential","Depth[cm]","Potential[V]",'output/testdiode/Potential_1d')
-    draw(x,NetDoping,"NetDoping","Depth[cm]","NetDoping[cm^{-3}]",'output/testdiode/NetDoping_1d')
-    draw(x,PotentialNodeCharge,"PotentialNodeCharge","Depth[cm]","PotentialNodeCharge[cm^{-3}]",'output/testdiode/PotentialNodeCharge_1d')
-    draw(x,Electrons,"Electrons","Depth[cm]","Electrons[cm^{-3}]",'output/testdiode/Electrons_1d')
-    draw(x,Holes,"Holes","Depth[cm]","Holes[cm^{-3}]",'output/testdiode/Holes_1d')
-    draw(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]",'output/testdiode/ElectricField_1d')
+    draw(x,potential,"Potential","Depth[cm]","Potential[V]")
+    draw(x,NetDoping,"NetDoping","Depth[cm]","NetDoping[cm^{-3}]")
+    draw(x,PotentialNodeCharge,"PotentialNodeCharge","Depth[cm]","PotentialNodeCharge[cm^{-3}]")
+    draw(x,Electrons,"Electrons","Depth[cm]","Electrons[cm^{-3}]")
+    draw(x,Holes,"Holes","Depth[cm]","Holes[cm^{-3}]")
+    draw(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]")
 
     delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
     delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")
     write_devices(file="./output/testdiode/si_diode_1d", type="tecplot")
 
 
-def draw(x,y,title,xtitle,ytitle,path):
+def draw(x,y,title,xtitle,ytitle):
     graph = ROOT.TGraph()
     for i in range(len(x)):
         graph.SetPoint(i, x[i],y[i])
@@ -90,7 +90,7 @@ def draw(x,y,title,xtitle,ytitle,path):
     graph.GetXaxis().SetTitle(xtitle)
     graph.GetYaxis().SetTitle(ytitle)
     canvas.Draw()
-    canvas.SaveAs(path+".png")
+    canvas.SaveAs("output/testdiode"+title+".png")
 
 if __name__ == "__main__":
     main()    
