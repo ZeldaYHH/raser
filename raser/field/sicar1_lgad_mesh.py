@@ -29,7 +29,13 @@ def Create1DMesh(device, region):
     devsim.finalize_mesh(mesh="lgad")
     devsim.create_device(mesh="lgad", device=device)
 
-def SetDoping(device, region, gaindoping,bulkdoping):
+def SetDoping(device, region):
+    # min
+    gaindoping = 4.45e16 
+    bulkdoping = 2.74e14
+    # max
+    # gaindoping = 6.56e16 
+    # bulkdoping = 3.70e14
     '''
       Doping
     # '''

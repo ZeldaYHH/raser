@@ -24,17 +24,31 @@ import math
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-# Area factor
-# 1D 1cm*1cm
-# DUT 5mm* 5mm
-
-
-def main(label=None,v_max = 400, gaindoping=None, bulkdoping=None):
+# def main(gaindoping, bulkdoping, label=None,v_max = 400):
+# def main(label=None,v_max = 400, gaindoping=None, bulkdoping=None):
+def main(label=None,v_max = 400):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
-    if label==None:
+    if label=='sicar1.1.8_cv_v1':
         device = "1D_SICAR1_LGAD"
         region = "1D_SICAR1_LGAD"
         area_factor = 100.0
+        set_mesh(device,region)
+        extend_set()
+        para_dict = []
+        initial_solution(device,region,para_dict)  
+        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
+    elif label=='sicar1.1.8_iv':
+        device = "1D_SICAR1_LGAD"
+        region = "1D_SICAR1_LGAD"
+        area_factor=100.0
+        v_max=510
+        para_dict=[]
+        devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
+        devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
+        set_mesh(device,region)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_iv(device,region,v_max,para_dict,area_factor)
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
         device = "1D_ITK_MD8"
@@ -72,12 +86,6 @@ def main(label=None,v_max = 400, gaindoping=None, bulkdoping=None):
     else:
         raise KeyError
         
-    set_mesh(device,region,gaindoping,bulkdoping)
-    extend_set()
-    para_dict = []
-    initial_solution(device,region,para_dict)  
-
-    solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3,gaindoping=gaindoping,bulkdoping=bulkdoping)
 
 def set_para(para_list):
     para_dict={}
@@ -86,7 +94,7 @@ def set_para(para_list):
         para_dict[key]=value
     return para_dict
 
-def set_mesh(device,region,gaindoping,bulkdoping):
+def set_mesh(device,region):
     if device == "1D_SICAR1_LGAD":
         device_mesh = field.sicar1_lgad_mesh
     elif device == "1D_ITK_MD8" or device == "1D_ITK_ATLAS18":
@@ -94,7 +102,7 @@ def set_mesh(device,region,gaindoping,bulkdoping):
     else: 
         raise NameError
     device_mesh.Create1DMesh(device=device, region=region)
-    device_mesh.SetDoping(device=device, region=region, gaindoping=gaindoping, bulkdoping=bulkdoping)
+    device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
 
 def extend_set():
@@ -342,7 +350,8 @@ def solve_iv_Rirr(device,region,Rirr,v_max,area_factor,para_dict):
 
 
 
-def solve_cv(device,region,v_max,para_dict,area_factor, frequency,gaindoping,bulkdoping):
+# def solve_cv(device,region,v_max,para_dict,area_factor, frequency,gaindoping,bulkdoping):
+def solve_cv(device,region,v_max,para_dict,area_factor, frequency):
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -354,7 +363,7 @@ def solve_cv(device,region,v_max,para_dict,area_factor, frequency,gaindoping,bul
     reverse_voltage = []
     ssac_top_cap = []
 
-    f_cv = open("./output/devsim/{0}_reverse_cv_gaindoping_{1}_bulkdoping_{2}.csv".format(device+condition,gaindoping,bulkdoping), "w")
+    f_cv = open("./output/devsim/{0}_reverse_cv.csv".format(device+condition), "w")
     header_cv = ["Voltage","Capacitance"]
     writer_cv = csv.writer(f_cv)
     writer_cv.writerow(header_cv)
@@ -369,7 +378,7 @@ def solve_cv(device,region,v_max,para_dict,area_factor, frequency,gaindoping,bul
 
     f_cv.close()
     devsim.close_db()
-    draw_cv(reverse_voltage, ssac_top_cap, device,condition,gaindoping,bulkdoping)
+    draw_cv(reverse_voltage, ssac_top_cap, device,condition)
 
 def solve_iv_single_point(device,region,reverse_v):
     devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
@@ -399,13 +408,13 @@ def draw_iv(V,I,device,condition):
     fig2.savefig("./output/devsim/{}_reverse_iv.png".format(device+condition))
     fig2.clear()
 
-def draw_cv(V,C,device,condition,gaindoping,bulkdoping):
+def draw_cv(V,C,device,condition):
     fig3=matplotlib.pyplot.figure(num=4,figsize=(4,4))
     matplotlib.pyplot.plot(V, C)
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('Capacitance (pF)')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
-    fig3.savefig("./output/devsim/{0}_reverse_cv_gaindoping_{1}_bulkdoping_{2}.png".format(device+condition,gaindoping,bulkdoping))
+    fig3.savefig("./output/devsim/{0}_reverse_cv.png".format(device+condition))
     fig3.clear()
 
     fig4=matplotlib.pyplot.figure(num=4,figsize=(4,4))
@@ -416,7 +425,7 @@ def draw_cv(V,C,device,condition,gaindoping,bulkdoping):
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('1/C^2 (pF^{-2})')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
-    fig4.savefig("./output/devsim/{0}_reverse_c^-2v_gaindoping_{1}_bulkdoping_{2}.png".format(device+condition,gaindoping,bulkdoping))
+    fig4.savefig("./output/devsim/{0}_reverse_c^-2v.png".format(device+condition))
     fig4.clear()
 
 def draw_ele_field(device, positions,intensities, bias_voltages,condition):

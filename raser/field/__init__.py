@@ -23,13 +23,18 @@ def main(args):
     elif label == 'sicar1.1.6_cv_0-500v':
         scan_cv.main()
     elif label == 'sicar1.1.8_cv_v1':
-        gaindoping = 4.45e16 
-        bulkdoping = 2.74e14
-        devsim_solve.main(gaindoping,bulkdoping)
+        # gaindoping = 4.45e16 
+        # bulkdoping = 2.74e14
+        # devsim_solve.main(gaindoping,bulkdoping)
+        devsim_solve.main(label)
     elif label == 'sicar1.1.8_cv_v2':
         gaindoping = 6.56e16 
         bulkdoping = 3.70e14
         devsim_solve.main(gaindoping,bulkdoping)
+    elif label == 'sicar1.1.8_iv':
+        gaindoping = 6.56e16 
+        bulkdoping = 3.70e14
+        devsim_solve.main(label,gaindoping,bulkdoping)
     elif label == 'si_ir_1d':
         si_diode_1d.main()
     elif label == 'si_ir_2d':
