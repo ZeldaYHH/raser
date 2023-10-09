@@ -24,8 +24,6 @@ import math
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-# def main(gaindoping, bulkdoping, label=None,v_max = 400):
-# def main(label=None,v_max = 400, gaindoping=None, bulkdoping=None):
 def main(label=None,v_max = 400):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
     if label=='sicar1.1.8_cv_v1':
@@ -336,9 +334,6 @@ def solve_iv_Rirr(device,region,Rirr,v_max,area_factor,para_dict):
     draw_holes(device, positions, holes, bias_voltages, condition)
     save_ele_field(device, positions, intensities, bias_voltages, condition)
 
-
-
-# def solve_cv(device,region,v_max,para_dict,area_factor, frequency,gaindoping,bulkdoping):
 def solve_cv(device,region,v_max,para_dict,area_factor, frequency):
     condition = ""
     if "irradiation" in para_dict:
