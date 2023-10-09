@@ -29,15 +29,16 @@ def main(simname):
     # 使用参数值
 
     # 检查文件是否存在
+    #改变voltage之后可以实现不同的电压上限
     if not (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
-        print("do 0-500")
+        print("do 0-2000")
         params = {
         'bias_v': "0",
-        'voltage': "500"
+        'voltage': "800"
     }
-        with open('./output/parainprogram/config_loop.json', 'w') as f:
+        with open('./output/parainprogram/config_loopiv.json', 'w') as f:
             json.dump(params, f)
-        command = [sys.executable, './raser/field/loop_cv.py',simname]
+        command = [sys.executable, './raser/field/loop_iv.py',simname]
         process1 = subprocess.Popen(command, stdout=subprocess.PIPE)
         # 实时读取输出
         while True:
@@ -51,9 +52,7 @@ def main(simname):
         print("Please run again to get higher voltage")
 
 
-
-
-        
+        #DONOT CHANGE THIS PLS
     elif (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
         print("do 2-500")
         voltage = 2
@@ -62,9 +61,9 @@ def main(simname):
             'bias_v': str(voltage-1),
             'voltage': str(voltage)
                     }
-            with open('./output/parainprogram/config_loop.json', 'w') as f:
+            with open('./output/parainprogram/config_loopiv.json', 'w') as f:
                 json.dump(params, f)
-            command = [sys.executable, './raser/field/loop_cv.py']
+            command = [sys.executable, './raser/field/loop_iv.py']
             process2 = subprocess.Popen(command, stdout=subprocess.PIPE)
             
             while True:

@@ -26,6 +26,21 @@ p_a    =  2.96e7
 n_b    = 1.7e7
 p_b    =  1.6e7
 gamma  =  1
+k_T0  =4.1419509e-21
+
+sigma_n=3e-16
+sigma_p=2e-12
+N_t=0
+v_T=1e7
+
+
+sigma_n_HS6=2e-17
+sigma_p_HS6=3e-17
+N_t_HS6=0
+
+N_c=3250000000000000.0
+N_v=4800000000000000.0
+E_g=5.216e-19
 def GetContactBiasName(contact):
     return "{0}".format(contact)
 
@@ -89,7 +104,7 @@ def SetSiliconParameters(device, region, T):
     devsim.set_parameter(device=device, region=region, name="mu_p",           value=mu_p)
     devsim.set_parameter(device=device, region=region, name="q",           value=q)
     devsim.set_parameter(device=device, region=region, name="gamma",           value=gamma)
-    
+    devsim.set_parameter(device=device, region=region, name="k_T0",           value=k_T0)
     #default SRH parameters
     devsim.set_parameter(device=device, region=region, name="n1", value=n_i)
     devsim.set_parameter(device=device, region=region, name="p1", value=n_i)
@@ -99,6 +114,29 @@ def SetSiliconParameters(device, region, T):
     devsim.set_parameter(device=device, region=region, name="p_a", value=p_a)
     devsim.set_parameter(device=device, region=region, name="n_b", value=n_b)
     devsim.set_parameter(device=device, region=region, name="p_b", value=p_b)
+
+    
+    #default SRH1 parameters
+    devsim.set_parameter(device=device, region=region, name="sigma_n", value=sigma_n)
+    devsim.set_parameter(device=device, region=region, name="sigma_p", value=sigma_p)
+    devsim.set_parameter(device=device, region=region, name="N_t", value=N_t)
+    devsim.set_parameter(device=device, region=region, name="v_T", value=v_T)
+
+
+    #default SRH2 parameters
+    devsim.set_parameter(device=device, region=region, name="sigma_n_HS6", value=sigma_n_HS6)
+    devsim.set_parameter(device=device, region=region, name="sigma_p_HS6", value=sigma_p_HS6)
+    devsim.set_parameter(device=device, region=region, name="N_t_HS6", value=N_t_HS6)
+
+
+
+    devsim.set_parameter(device=device, region=region, name="N_v", value=N_v)
+    devsim.set_parameter(device=device, region=region, name="E_g", value=E_g)
+    devsim.set_parameter(device=device, region=region, name="N_c", value=N_c)
+
+
+
+
 
 def CreateSiliconPotentialOnly(device, region):
     '''
@@ -178,12 +216,41 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
                          #node_charge_model="contactcharge_node", edge_charge_model="contactcharge_edge",
                          node_current_model="", edge_current_model="")
 
+#add srh1&2
+def CreateSRH1(device, region):
+    '''
+    Add defect Z 1 / 2
+    '''
+    R_z="(sigma_n*sigma_p*v_T*N_t*(Electrons*Holes - n_i^2))/(sigma_n*(Electrons - n1*exp(1.6e-19/(k_T0))) + sigma_p*(Holes + p1*exp(1.6e-19/(k_T0))))"
+    node_in_2d.CreateNodeModel(device, region, "R_z", R_z)
+    for i in ("Electrons", "Holes"):
+        node_in_2d.CreateNodeModelDerivative(device, region, "R_z", R_z, i)
+
+def CreateSRH2(device, region):
+    '''
+    Add defect EH 6 / 7
+    '''
+   
+    R_h6="(sigma_n_HS6*sigma_p_HS6*v_T*N_t_HS6*(Electrons*Holes - n_i^2))/(sigma_n_HS6*(Electrons - n1*exp(4.8e-22/(k_T0))) + sigma_p_HS6*(Holes + p1*exp(4.8e-22/(k_T0))))"
+    node_in_2d.CreateNodeModel(device, region, "R_h6", R_h6)
+    for i in ("Electrons", "Holes"):
+        node_in_2d.CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
+          
+
+
+
+
+
 def CreateSRH(device, region):
+    #CreateSRH1(device,region)
+    #CreateSRH2(device,region)
     USRH="-q*(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
     #半导体器件仿真内的shr模型是n乘n，p乘p
     #USRH="-q*(Electrons*Holes - n_i^2)/(taun*(Electrons + n1) + taup*(Holes + p1))"
-    Gn = "-ElectronCharge * USRH"
-    Gp = "+ElectronCharge * USRH"
+    #Gn = "-ElectronCharge * USRH"
+    #Gp = "+ElectronCharge * USRH"
+    Gn = "-q * (USRH -1e16) "
+    Gp = "+q * (USRH -1e16)"
     node_in_2d.CreateNodeModel(device, region, "USRH", USRH)
     node_in_2d.CreateNodeModel(device, region, "ElectronGeneration", Gn)
     node_in_2d.CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -191,7 +258,6 @@ def CreateSRH(device, region):
         node_in_2d.CreateNodeModelDerivative(device, region, "USRH", USRH, i)
         node_in_2d.CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         node_in_2d.CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
-
 
 
 
@@ -223,6 +289,28 @@ def CreateImpactGeneration(device, region):
     node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
     node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
+'''
+#Netgeneration
+def CreateNetGeneration(device, region):
+
+    Gn = "-q * (USRH - 1e12)"
+    Gp = "+q * (USRH - 1e12)"
+
+    #Gn = "-q * (USRH - 1e18*x*x)"
+    #Gp = "+q * (USRH - 1e18*x*x)"
+
+    #Gn = "-q * (USRH)"
+    #Gp = "+q * (USRH)"
+
+    node_in_2d.CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    node_in_2d.CreateNodeModel(device, region, "HoleGeneration", Gp)
+
+    for i in ("Electrons", "Holes"):
+        node_in_2d.CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
+        node_in_2d.CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
+
+'''
+
 
 def CreateECE(device, region, mu_n):
     driftdiffusion_2d.CreateElectronCurrent(device, region, mu_n)
@@ -230,23 +318,99 @@ def CreateECE(device, region, mu_n):
     NCharge = "-ElectronCharge * Electrons"
     node_in_2d.CreateNodeModel(device, region, "NCharge", NCharge)
     node_in_2d.CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
-
+    #addimpact
+    CreateImpactGeneration(device, region)
+    '''
     devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration")
+    '''
+    devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
+             time_node_model = "NCharge",
+             edge_model="ElectronCurrent", variable_update="positive", 
+             node_model="ElectronGeneration", 
+             edge_volume_model="ImpactGen_n"
+             )
+
+'''
+#addirrdefect
+
+def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
+
+    #Add Deep Levels from Irradiated Defect 
+    #able to Catch Carriers Directly and Keep Them Trapped
+  
+    
+    names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
+    E_ts_ev      = [0.56-0.1 , 0.56-0.458, 0.56-0.545, -0.56+0.48, -0.56+0.36]
+    g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ] # cm^-1
+    sigma_n_irrs = [2.300e-14, 2.551e-14 , 4.478e-15 , 4.166e-15 , 3.230e-17 ]
+    sigma_p_irrs = [2.920e-16, 1.551e-13 , 6.709e-15 , 1.965e-16 , 2.036e-14 ]
+
+    n_t_irr_n = "0"
+    n_t_irr_p = "0"
+    R_t_irr = "0"
+    
+    for nametype, E_t_ev, g_int, sigma_n_irr, sigma_p_irr in zip(names, E_ts_ev, g_ints, sigma_n_irrs, sigma_p_irrs):
+        E_t = E_t_ev * q
+        N_t_irr = g_int*Neutron_eq
+        
+
+        devsim.set_parameter(device=device, region=region, name="sigma_n_irr_{nametype}".format(nametype=nametype), value=sigma_n_irr)
+        devsim.set_parameter(device=device, region=region, name="sigma_p_irr_{nametype}".format(nametype=nametype), value=sigma_p_irr)
+        devsim.set_parameter(device=device, region=region, name="N_t_irr_{nametype}".format(nametype=nametype), value=N_t_irr)
+        devsim.set_parameter(device=device, region=region, name="E_t_{nametype}".format(nametype=nametype), value=E_t)
+       
+        r_n = "(v_T * sigma_n_irr_{name})".format(name=nametype)#c_n
+        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=nametype)#e_n
+        r_p = "(v_T * sigma_p_irr_{name})".format(name=nametype)#c_p
+        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=nametype)#e_p
+
+        #n_t_irr_n += "+(N_t_irr_{name}".format(name=name)
+        n_t_irr_n += "+(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=nametype,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        n_t_irr_p += "+(N_t_irr_{name} - {n_t_irr_n})".format(name=nametype,n_t_irr_n=n_t_irr_n)
+        #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
+        R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=nametype)
+
+    node_in_2d.CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
+    node_in_2d.CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
+    node_in_2d.CreateNodeModel(device, region, "R_t_irr", R_t_irr)
+    for i in ("Electrons", "Holes", "Potential"):
+        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
+        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
+        node_in_2d.CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
+
+
+'''
+
+
+
+
 
 def CreateHCE(device, region, mu_p):
     driftdiffusion_2d.CreateHoleCurrent(device, region, mu_p)
     PCharge = "ElectronCharge * Holes"
     node_in_2d.CreateNodeModel(device, region, "PCharge", PCharge)
     node_in_2d.CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
-
+    #addimpact
+    CreateImpactGeneration(device, region)
+    '''
     devsim.equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
+    '''
+    devsim.equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
+             time_node_model = "PCharge",
+             edge_model="HoleCurrent", variable_update="positive", 
+             node_model="HoleGeneration", 
+             edge_volume_model="ImpactGen_p"
+             )
+
 
 def CreatePE(device, region):
+    #CreateIrradiatedCharge(device,region)
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+    #pne = "-q*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
     node_in_2d.CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     node_in_2d.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     node_in_2d.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
@@ -258,13 +422,15 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+    #CreateIrradiatedCharge(device,region)
     CreatePE(device, region)
     driftdiffusion_2d.CreateBernoulli(device, region)
     CreateSRH(device, region)
+    #CreateNetGeneration(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
-    CreateImpactGeneration(device, region)
+    #CreateImpactGeneration(device, region)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
@@ -303,45 +469,4 @@ def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=Fal
         devsim.contact_equation(device=device, contact=contact, name="HoleContinuityEquation",
                          node_model=contact_holes_name,
                          edge_current_model="HoleCurrent")
-
-
-def CreateOxidePotentialOnly(device, region, update_type="default"):
-    '''
-      Create electric field model in oxide
-      Creates Potential solution variable if not available
-    '''
-    if not node_in_2d.InNodeModelList(device, region, "Potential"):
-        print("Creating Node Solution Potential")
-        node_in_2d.CreateSolution(device, region, "Potential")
-
-    efield="(Potential@n0 - Potential@n1)*EdgeInverseLength"
-    # this needs to remove derivatives w.r.t. independents
-    node_in_2d.CreateEdgeModel(device, region, "ElectricField", efield)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ElectricField", efield, "Potential")
-    dfield="Permittivity*ElectricField"
-    node_in_2d.CreateEdgeModel(device, region, "PotentialEdgeFlux", dfield)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "PotentialEdgeFlux", dfield, "Potential")
-    devsim.equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
-             edge_model="PotentialEdgeFlux", variable_update=update_type)
-
-
-def CreateSiliconOxideInterface(device, interface):
-    '''
-      continuous potential at interface
-    '''
-    model_name = devsim.CreateContinuousInterfaceModel(device, interface, "Potential")
-    devsim.interface_equation(device=device, interface=interface, name="PotentialEquation", interface_model=model_name, type="continuous")
-
-#
-##TODO: similar model for silicon/silicon interface
-## should use quasi-fermi potential
-def CreateSiliconSiliconInterface(device, interface):
-    '''
-      Enforces potential, electron, and hole continuity across the interface
-    '''
-    CreateSiliconOxideInterface(device, interface)
-    ename = devsim.CreateContinuousInterfaceModel(device, interface, "Electrons")
-    devsim.interface_equation(device=device, interface=interface, name="ElectronContinuityEquation", interface_model=ename, type="continuous")
-    hname = devsim.CreateContinuousInterfaceModel(device, interface, "Holes")
-    devsim.interface_equation(device=device, interface=interface, name="HoleContinuityEquation", interface_model=hname, type="continuous")
 

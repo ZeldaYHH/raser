@@ -12,14 +12,13 @@ import numpy as np
 import pickle
 import json
 import os
-
+simname=sys.argv[1]
 device="MyDevice"
 region="MyRegion"
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 areafactor=1.6e4
 
-type1="PNjuction"
 with open('./output/parainprogram/config_loop.json', 'r') as f:
     params = json.load(f)
 bias_v=float(params["bias_v"])
@@ -30,11 +29,11 @@ devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 
-build_2d_device.Create2DMesh(device, region)
+build_2d_device.Create2DMesh(device, region,simname)
 
 build_2d_device.SetParameters(device=device, region=region)
 
-build_2d_device.SetNetDoping(device=device, region=region,type1=type1)
+build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
 
 
 
@@ -50,9 +49,7 @@ build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=[
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
-if voltage>600:
-    build_2d_device.set_values(device,region)
-    
+
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 data = []
 def loop(bias_v,voltage):
@@ -73,7 +70,7 @@ def loop(bias_v,voltage):
 
     build_2d_device.save_values(device=device,region=region)
     # 指定文件夹路径
-    folder_path = "./output/2Dresult/Sicar1.1.6"
+    folder_path = "./output/2Dresult/sim{0}".format(simname)
 
     # 检查文件夹是否存在，如果不存在则创建
     if not os.path.exists(folder_path):
@@ -84,7 +81,7 @@ def loop(bias_v,voltage):
 
 
     #存数据的代码
-    file = ROOT.TFile("./output/2Dresult/Sicar1.1.6/SicarLgadTestCV{0}to{1}.root".format(bias_v,voltage), "RECREATE")
+    file = ROOT.TFile("./output/2Dresult/sim{0}/simCV{1}to{2}.root".format(simname,bias_v,voltage), "RECREATE")
     tree = ROOT.TTree("SicarTestCV", "SicarTest with impactgen")
 
 
@@ -101,7 +98,7 @@ def loop(bias_v,voltage):
     file.Write()
     file.Close()
 
-    file = ROOT.TFile("./output/2Dresult/Sicar1.1.6/SicarLgadTestCV{0}to{1}.root".format(bias_v,voltage), "READ")
+    file = ROOT.TFile("./output/2Dresult/sim{0}/simCV{1}to{2}.root".format(simname,bias_v,voltage), "READ")
     tree = file.Get("SicarTestCV")
 
     graph = ROOT.TGraph(tree.GetEntries())
@@ -122,7 +119,7 @@ def loop(bias_v,voltage):
     graph.GetYaxis().SetTitle("CAP(pF)")
 
     canvas.Update()
-    canvas.SaveAs("./output/2Dresult/Sicar1.1.6/SicarLgadTestCV_picture{0}to{1}.root".format(bias_v,voltage))
+    canvas.SaveAs("./output/2Dresult/sim{0}/simCV{1}to{2}_picture.root".format(simname,bias_v,voltage), )
    
    
 
