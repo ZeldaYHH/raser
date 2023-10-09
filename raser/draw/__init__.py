@@ -2,8 +2,7 @@ import os
 import ROOT
 from . import iv
 from . import cv
-
-
+from . import compare_iv
 
 def main(args):
     label = vars(args)['label']
@@ -61,6 +60,10 @@ def main(args):
         iv.main(label)  
     elif label == 'sicar1.1.8-1,sicar1.1.8-2_cv':
         cv.main(label) 
+    elif label == "compare_nju_iv":
+        path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_iv/nju_pin_iv.root"
+        path2="./output/2Dresult/simNJUPIN/simIV800.0to800.0.root"
+        compare_iv.main(label,path1,path2)
     else: 
         raise NameError(label)
     

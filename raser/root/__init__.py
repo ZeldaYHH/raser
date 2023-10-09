@@ -23,12 +23,16 @@ def convert_csv_to_root(input_dir, output_dir, label):
         if name.endswith('iv'):
             if label=="itk_atlas18_data_v1":
                 df = ROOT.RDF.MakeCsvDataFrame(input_file, True, '\t')
+            elif label =="njupin_iv_v1":
+                df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
             else:
                 df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
             if label in ["itk_md8_data_v1","itk_atlas18_data_v1"]:
                 df.Snapshot("myTree", output_file, {"Voltage_V", "Current_nA"})
             elif label in ['itk_atlas18_sim_v1','itk_md8_sim_v1']:
                 df.Snapshot("myTree", output_file, {"Voltage", "Current"})
+            elif label =="njupin_iv_v1":
+                df.Snapshot("myTree", output_file, {"Current","Voltage"})
             else:
                 df.Snapshot("myTree", output_file, {"Value","Reading"})
 
@@ -67,6 +71,9 @@ def main(args):
     elif label == 'itk_atlas18_data_v1':
         input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkatlas18/data'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/atlas18/data'
+    elif label == 'njupin_iv_v1':
+        input_dir = "/afs/ihep.ac.cn/users/s/senzhao/njupin"
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_iv'
     else:
         raise NameError(label)
 
