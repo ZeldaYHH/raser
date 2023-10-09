@@ -27,16 +27,14 @@ if not (os.path.exists("./output/devsim")):
 # Area factor
 # 1D 1cm*1cm
 # DUT 5mm* 5mm
-area_factor = 100.0
-ITK_MD8_doping="eee"
 
 
-
-def main(gaindoping, bulkdoping, label=None,v_max = 400):
+def main(label=None,v_max = 400, gaindoping=None, bulkdoping=None):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
     if label==None:
         device = "1D_SICAR1_LGAD"
         region = "1D_SICAR1_LGAD"
+        area_factor = 100.0
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
         device = "1D_ITK_MD8"
@@ -74,13 +72,12 @@ def main(gaindoping, bulkdoping, label=None,v_max = 400):
     else:
         raise KeyError
         
-    set_mesh(device,region)
+    set_mesh(device,region,gaindoping,bulkdoping)
     extend_set()
-    initial_solution(device,region,para_dict)      
+    para_dict = []
+    initial_solution(device,region,para_dict)  
 
-    solve_cv(device,region,v_max,para_dict,frequency=1e3,gaindoping=gaindoping,bulkdoping=bulkdoping)
-    solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
-
+    solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3,gaindoping=gaindoping,bulkdoping=bulkdoping)
 
 def set_para(para_list):
     para_dict={}

@@ -22,7 +22,7 @@ def Create1DMesh(device, region):
     devsim.add_1d_mesh_line(mesh="lgad", pos=(3e-5)-(1e-5), ps=1e-6, tag="jun_up")
     devsim.add_1d_mesh_line(mesh="lgad", pos=3e-5, ps=1e-6, tag="mid")
     devsim.add_1d_mesh_line(mesh="lgad", pos=(3e-5)+(2e-4), ps=5e-6, tag="jun_down")
-    devsim.add_1d_mesh_line(mesh="lgad", pos=32.3e-4, ps=0.5e-4, tag="bot")
+    devsim.add_1d_mesh_line(mesh="lgad", pos=32.5e-4, ps=0.5e-4, tag="bot")
     devsim.add_1d_contact  (mesh="lgad", name="top", tag="top", material="metal")
     devsim.add_1d_contact  (mesh="lgad", name="bot", tag="bot", material="metal")
     devsim.add_1d_region   (mesh="lgad", material="SiliconCarbide", region=region, tag1="top", tag2="bot")
@@ -34,7 +34,7 @@ def SetDoping(device, region, gaindoping,bulkdoping):
       Doping
     # '''
     node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
-    node.CreateNodeModel(device, region, "Donors",    "{}*( step((1.3e-4)-x) -step((3e-5)-x) ) + {}*( step((17.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((22.3e-4)-x) - step((17.3e-4)-x) )+ 1.0e19*( step((32.3e-4)-x) - step((22.3e-4)-x) )".format(gaindoping, bulkdoping))
+    node.CreateNodeModel(device, region, "Donors",    "{}*( step((1.5e-4)-x) -step((3e-5)-x) ) + {}*( step((17.5e-4)-x) - step((1.5e-4)-x) ) + 1.0e18*( step((22.5e-4)-x) - step((17.5e-4)-x) )+ 1.0e19*( step((32.5e-4)-x) - step((22.5e-4)-x) )".format(gaindoping, bulkdoping))
 
     #Node.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")      
     #Node.CreateNodeModel(device, region, "Donors",    "8.0e16*(step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e14*( step(({0}+1.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step(({0}+6.3e-4)-x) - step(({0}+1.3e-4)-x) )+ 2.0e18*( step(({0}+16.3e-4)-x) - step(({0}+6.3e-4)-x) )".format(bulk_thickness))
