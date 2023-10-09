@@ -37,18 +37,6 @@ def main(label=None,v_max = 400):
         para_dict = []
         initial_solution(device,region,para_dict)  
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
-    elif label=='sicar1.1.8_iv':
-        device = "1D_SICAR1_LGAD"
-        region = "1D_SICAR1_LGAD"
-        area_factor=100.0
-        v_max=510
-        para_dict=[]
-        devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
-        devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
-        set_mesh(device,region)
-        extend_set()
-        initial_solution(device,region,para_dict)
-        solve_iv(device,region,v_max,para_dict,area_factor)
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
         device = "1D_ITK_MD8"
