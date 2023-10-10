@@ -80,7 +80,7 @@ def main(args):
         my_g4p = g4s.SiITk(my_d, my_f, dset)
         #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.get1_beam_number(my_g4p)
+        draw_save.get1_beam_number(my_g4p)
         #drawsave.cce(my_d,my_f,my_current)
         return
 
@@ -89,7 +89,7 @@ def main(args):
         my_g4p = g4s.Particles(my_d, my_f, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.get_beam_number(my_g4p,ele_current)
+        draw_save.get_beam_number(my_g4p,ele_current)
         return  
 
     if "reactor" in args:
@@ -97,13 +97,13 @@ def main(args):
         my_g4p = g4s.Particles(my_d, my_f, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
         my_g4p = g4s.Particles(my_d, my_f, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         draw_save.cce(my_d,my_f,my_current)
@@ -126,7 +126,7 @@ def main(args):
         #if "lgad" in dset.det_model:
         #   print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
