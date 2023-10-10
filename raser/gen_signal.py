@@ -102,8 +102,8 @@ def main(args):
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         draw_save.cce(my_d,my_f,my_current)
