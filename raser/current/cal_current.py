@@ -151,17 +151,10 @@ class Carrier:
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        #wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
         if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (abs(e_field[2]) < 0.2):
             self.end_condition = "zero drift force"
         elif(len(self.path)>8000):
             self.end_condition = "reciprocate"
-        """
-        elif wpot>(1-1e-5):
-            self.end_condition = "reached cathode"
-        elif wpot<1e-5:
-            self.end_condition = "reached anode"
-        """
         return self.end_condition
 
     def diffuse_single_step(self,my_d,my_f):
@@ -300,14 +293,12 @@ class CalCurrent:
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
-            while not electron.not_in_sensor(my_d):
-                while not electron.drift_end(my_f):
-                    electron.drift_single_step(my_d, my_f)
+            while not electron.not_in_sensor(my_d) and not electron.drift_end(my_f):
+                electron.drift_single_step(my_d, my_f)
             electron.get_signal(my_f,my_d)
         for hole in self.holes:
-            while not hole.not_in_sensor(my_d):
-                while not hole.drift_end(my_f):
-                    hole.drift_single_step(my_d, my_f)
+            while not hole.not_in_sensor(my_d) and not hole.drift_end(my_f):
+                hole.drift_single_step(my_d, my_f)
             hole.get_signal(my_f,my_d)
 
     def current_define(self,read_ele_num):

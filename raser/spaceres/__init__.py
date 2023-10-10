@@ -25,7 +25,8 @@ def main(args):
         my_f = 0
         my_g4p = Particles(my_d, my_f, dset)
         my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
-        #draw_save.draw_charge(my_charge)
+        if label.endswith("draw_charge"):
+            draw_save.draw_charge(my_charge)
         my_telescope = tlcp.telescope(my_d,my_charge) 
         #tlcp.main(my_d)  
     elif label.startswith("taichu_v2"):

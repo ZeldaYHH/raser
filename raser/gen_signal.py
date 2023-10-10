@@ -64,7 +64,8 @@ def main(args):
         #my_f = 0
         my_g4p = g4s.Particles(my_d, dset)
         my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-        #draw_save.draw_charge(my_charge)
+        if "draw_charge" in args:
+            draw_save.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:
@@ -123,8 +124,6 @@ def main(args):
     my_g4p = g4s.Particles(my_d, dset)
     if "scan=True" not in args:
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        #if "lgad" in dset.det_model:
-        #   print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:

@@ -61,10 +61,12 @@ if "scan=True" in args: #assume parameter alter
         raise NameError
 else:
     draw_save.draw_plots(my_d,ele_current,my_f,None,my_current,my_l)
-# now = time.strftime("%Y_%m%d_%H%M")
-# path = "output/fig/" + now + "/"
-# draw_save.create_path(path)
-# draw_save.draw_nocarrier3D(path,my_l)
-# draw_save.draw_nocarrier2D(path,my_l)
+
+if "draw_carrier" in label:
+    now = time.strftime("%Y_%m%d_%H%M")
+    path = "output/fig/" + now + "/"
+    draw_save.create_path(path)
+    draw_save.draw_nocarrier3D(path,my_l)
+    draw_save.draw_nocarrier2D(path,my_l)
 
 print("total time used:%s"%(time.time()-start))
