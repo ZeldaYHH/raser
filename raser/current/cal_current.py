@@ -152,7 +152,7 @@ class Carrier:
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         #wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (abs(e_field[2]) < 0.2 ):
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (abs(e_field[2]) < 0.2):
             self.end_condition = "zero drift force"
         elif(len(self.path)>8000):
             self.end_condition = "reciprocate"
