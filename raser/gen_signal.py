@@ -62,17 +62,18 @@ def main(args):
     if "pixeldetector" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
         #my_f = 0
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-        #drawsave.draw_charge(my_charge)
+        if "draw_charge" in args:
+            draw_save.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.get_beam_number(my_g4p,ele_current)
+        draw_save.get_beam_number(my_g4p,ele_current)
         return  
 
     if "proton-irrad" in args:
@@ -80,30 +81,30 @@ def main(args):
         my_g4p = g4s.SiITk(my_d, my_f, dset)
         #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #ele_current = raser.Amplifier(my_current, dset.amplifier)
-        drawsave.get1_beam_number(my_g4p)
-        #drawsave.cce(my_d,my_f,my_current)
+        draw_save.get1_beam_number(my_g4p)
+        #draw_save.cce(my_d,my_f,my_current)
         return
 
     if "Carrier" in args:
         my_f = pyf.FenicsCal1D(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.get_beam_number(my_g4p,ele_current)
+        draw_save.get_beam_number(my_g4p,ele_current)
         return  
 
     if "reactor" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         return
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        my_g4p = g4s.Particles(my_d, dset)
+        my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         draw_save.cce(my_d,my_f,my_current)
@@ -120,13 +121,11 @@ def main(args):
         print("using fenics to build the field")
         my_f = pyf.FenicsCal(my_d,dset.fenics)
         
-    my_g4p = g4s.Particles(my_d, my_f, dset)
+    my_g4p = g4s.Particles(my_d, dset)
     if "scan=True" not in args:
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        #if "lgad" in dset.det_model:
-        #   print("gain_efficiency="+str(my_current.gain_efficiency))
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
@@ -171,10 +170,10 @@ def batch_loop(dset, my_d, my_f, my_g4p):
         2021/09/07
     """
     if "plugin" in dset.det_model:
-        drawsave.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,dset.output)
+        draw_save.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,dset.output)
     else:
-        drawsave.draw_ele_field_1D(my_d,my_f,dset.output)
-        drawsave.draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,dset.output)
+        draw_save.draw_ele_field_1D(my_d,my_f,dset.output)
+        draw_save.draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,dset.output)
     start_n = dset.instance_number * dset.total_events
     end_n = (dset.instance_number + 1) * dset.total_events
     effective_number = 0
@@ -184,7 +183,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
             effective_number += 1
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
             ele_current = rdout.Amplifier(my_current, dset.amplifier)
-            drawsave.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
+            draw_save.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)

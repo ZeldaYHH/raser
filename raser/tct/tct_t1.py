@@ -9,7 +9,7 @@ import raser
 # Need to be rewritten or deleted!
 
 import time
-import draw.drawsave
+import draw.draw_save
 from array import array
 import ROOT
 
@@ -27,8 +27,8 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
-drawsave.save_signal_TTree(dset,my_d,my_l.fx_rel,ele_current,my_f)
-drawsave.save_current(dset,my_d,my_l,my_current,my_f,"fx_rel")
+draw_save.save_signal_TTree(dset,my_d,my_l.fx_rel,ele_current,my_f)
+draw_save.save_current(dset,my_d,my_l,my_current,my_f,"fx_rel")
 
 current_SiC = array("d")
 T_SiC = array("d")

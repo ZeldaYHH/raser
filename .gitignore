@@ -4,3 +4,4 @@ note/.obsidian
 .vscode 
 output
 **/__pycache__
+raser/motor/GUI/*.py

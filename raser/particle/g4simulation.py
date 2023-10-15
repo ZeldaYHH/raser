@@ -24,7 +24,7 @@ class Particles:
     #use in pixeldetector
     _randx = None
     _randy = None
-    def __init__(self, my_d, my_f, dset):
+    def __init__(self, my_d, dset):
         """
         Description:
             Geant4 main process
