@@ -15,7 +15,7 @@ import os
 
 
 
-areafactor=1.6e4
+areafactor=2e2
 
 simname=sys.argv[1]
 
@@ -38,14 +38,14 @@ build_2d_device.SetParameters(device=device, region=region)
 build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
 
 
-build_2d_device.InitialSolution(device, region, circuit_contacts=False)
+physics_2d.InitialSolution(device, region, circuit_contacts=False)
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 
-build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
+physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
@@ -117,7 +117,7 @@ def loop(bias_v,voltage):
 
     graph.SetTitle("Current vs Voltage")
     graph.GetXaxis().SetTitle("Voltage(V)")
-    graph.GetYaxis().SetTitle("Current(uA)")
+    graph.GetYaxis().SetTitle("Current(A)")
 
     canvas.Update()
     canvas.SaveAs("./output/2Dresult/sim{0}/simIV{1}to{2}_picture.root".format(simname,bias_v,voltage))

@@ -17,7 +17,7 @@ device="MyDevice"
 region="MyRegion"
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
-areafactor=1.6e4
+areafactor=2e2
 
 with open('./output/parainprogram/config_loop.json', 'r') as f:
     params = json.load(f)
@@ -38,14 +38,14 @@ build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
 
 
     
-build_2d_device.InitialSolution(device, region, circuit_contacts="top")
+physics_2d.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 
 
-build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
+physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -64,11 +64,11 @@ def loop(bias_v,voltage):
         devsim.solve(type="ac", frequency=1e6)
         cap = devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag") / (-2 * math.pi*areafactor)
         print("capacitance {0} {1}".format(bias_v, cap))
-        data.append((bias_v, cap * 1e12))
+        data.append((bias_v, cap * 1e12 /areafactor ))
         bias_v += 1
       
 
-    build_2d_device.save_values(device=device,region=region)
+    physics_2d.save_values(device=device,region=region)
     # 指定文件夹路径
     folder_path = "./output/2Dresult/sim{0}".format(simname)
 
@@ -119,8 +119,8 @@ def loop(bias_v,voltage):
     graph.GetYaxis().SetTitle("CAP(pF)")
 
     canvas.Update()
-    canvas.SaveAs("./output/2Dresult/sim{0}/simCV{1}to{2}_picture.root".format(simname,bias_v,voltage), )
-   
+    canvas.SaveAs("./output/2Dresult/sim{0}/simCV{1}to{2}_picture.root".format(simname,bias_v,voltage) )
+    canvas.SaveAs("./output/2Dresult/sim{0}/simCV{1}to{2}_picture.pdf".format(simname,bias_v,voltage))
    
 
 loop(bias_v,voltage)
