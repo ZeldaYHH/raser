@@ -5,8 +5,8 @@ def main(args):
         from . import cal_temp
         cal_temp.main()
 
-    if label == 'FLM_v1':
-        from . import FLM
-        FLM.main()
+    if label == 'cflm_v1':
+        from . import cflm
+        cflm.main()
     else:
         raise NameError(label)
