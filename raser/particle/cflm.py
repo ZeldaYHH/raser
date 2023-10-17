@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
-from geant4_pybind import *
-
+#!/usr/bin/env python3 
+import geant4_pybind as g4b
 import sys
 import os
 
 # Choose specific analysis manager
-G4AnalysisManager = G4RootAnalysisManager
+G4AnalysisManager = g4b.G4RootAnalysisManager
 
 
-class B4DetectorConstruction(G4VUserDetectorConstruction):
+class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
 
     def __init__(self):
         super().__init__()
@@ -16,24 +15,24 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
 
     def DefineMaterials(self):
         # Lead material defined using NIST Manager
-        nistManager = G4NistManager.Instance()
+        nistManager = g4b.G4NistManager.Instance()
         nistManager.FindOrBuildMaterial("G4_Cu")
 
-        G4Material("silicon", z=14, a=28.08*g/mole, density=2.330*g/cm3)
+        g4b.G4Material("silicon", z=14, a=28.08*g4b.g/g4b.mole, density=2.330*g4b.g/g4b.cm3)
 
         # Vacuum
-        G4Material("Galactic", z=1, a=1.01*g/mole, density=universe_mean_density,
-                   state=kStateGas, temp=2.73*kelvin, pressure=3e-18*pascal)
+        g4b.G4Material("Galactic", z=1, a=1.01*g4b.g/g4b.mole, density=g4b.universe_mean_density,
+                   state=g4b.kStateGas, temp=2.73*g4b.kelvin, pressure=3e-18*g4b.pascal)
 
         # Print materials
-        print(G4Material.GetMaterialTable())
+        print(g4b.G4Material.GetMaterialTable())
 
     def DefineVolumes(self):
         # Geometry parameters
         nofLayers = 1
-        pipeThickness = 2*mm
-        detectorThickness = 0.5*mm
-        calorSizeXY = 1000*mm
+        pipeThickness = 2*g4b.mm
+        detectorThickness = 0.5*g4b.mm
+        calorSizeXY = 1000*g4b.mm
 
         layerThickness = pipeThickness + detectorThickness
         calorThickness = nofLayers * layerThickness
@@ -41,25 +40,25 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
         worldSizeZ = 1.2 * calorThickness
 
         # Get materials
-        defaultMaterial = G4Material.GetMaterial("Galactic")
-        pipeMaterial = G4Material.GetMaterial("G4_Cu")
-        detectorMaterial = G4Material.GetMaterial("silicon")
+        defaultMaterial = g4b.G4Material.GetMaterial("Galactic")
+        pipeMaterial = g4b.G4Material.GetMaterial("G4_Cu")
+        detectorMaterial = g4b.G4Material.GetMaterial("silicon")
 
         if defaultMaterial == None or pipeMaterial == None or detectorMaterial == None:
             msg = "Cannot retrieve materials already defined."
-            G4Exception("B4DetectorConstruction::DefineVolumes()",
+            g4b.G4Exception("B4DetectorConstruction::DefineVolumes()",
                         "MyCode0001", FatalException, msg)
 
         # World
-        worldS = G4Box("World",                                     # its name
+        worldS = g4b.G4Box("World",                                     # its name
                        worldSizeXY/2, worldSizeXY/2, worldSizeZ/2)  # its size
 
-        worldLV = G4LogicalVolume(worldS,           # its solid
+        worldLV = g4b.G4LogicalVolume(worldS,           # its solid
                                   defaultMaterial,  # its material
                                   "World")          # its name
 
-        worldPV = G4PVPlacement(None,                 # no rotation
-                                G4ThreeVector(),      # at (0,0,0)
+        worldPV = g4b.G4PVPlacement(None,                 # no rotation
+                                g4b.G4ThreeVector(),      # at (0,0,0)
                                 worldLV,              # its logical volume
                                 "World",              # its name
                                 None,                 # its mother  volume
@@ -68,15 +67,15 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
                                 self.fCheckOverlaps)  # checking overlaps
 
         # Calorimeter
-        calorimeterS = G4Box("Calorimeter",                                   # its name
+        calorimeterS = g4b.G4Box("Calorimeter",                                   # its name
                              calorSizeXY/2, calorSizeXY/2, calorThickness/2)  # its size
 
-        calorLV = G4LogicalVolume(calorimeterS,     # its solid
+        calorLV = g4b.G4LogicalVolume(calorimeterS,     # its solid
                                   defaultMaterial,  # its material
                                   "Calorimeter")    # its name
 
-        G4PVPlacement(None,                 # no rotation
-                      G4ThreeVector(),      # at (0,0,0)
+        g4b.G4PVPlacement(None,                 # no rotation
+                      g4b.G4ThreeVector(),      # at (0,0,0)
                       calorLV,              # its logical volume
                       "Calorimeter",        # its name
                       worldLV,              # its mother  volume
@@ -85,30 +84,30 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
                       self.fCheckOverlaps)  # checking overlaps
 
         # Layer
-        layerS = G4Box("Layer",                                         # its name
+        layerS = g4b.G4Box("Layer",                                         # its name
                        calorSizeXY/2, calorSizeXY/2, layerThickness/2)  # its size
 
-        layerLV = G4LogicalVolume(layerS,           # its solid
+        layerLV = g4b.G4LogicalVolume(layerS,           # its solid
                                   defaultMaterial,  # its material
                                   "Layer")          # its name
 
-        G4PVReplica("Layer",         # its name
+        g4b.G4PVReplica("Layer",         # its name
                     layerLV,         # its logical volume
                     calorLV,         # its mother
-                    kZAxis,          # axis of replication
+                    g4b.kZAxis,          # axis of replication
                     nofLayers,       # number of replica
                     layerThickness)  # width of replica
 
         # Pipe
-        pipeS = G4Box("Pipe",                                         # its name
+        pipeS = g4b.G4Box("Pipe",                                         # its name
                           calorSizeXY/2, calorSizeXY/2, pipeThickness/2)  # its size
 
-        pipeLV = G4LogicalVolume(pipeS,         # its solid
+        pipeLV = g4b.G4LogicalVolume(pipeS,         # its solid
                                      pipeMaterial,  # its material
                                      "Pipe")            # its name
 
-        self.fpipePV = G4PVPlacement(None,                                  # no rotation
-                                         G4ThreeVector(0, 0, -detectorThickness/2),  # its position
+        self.fpipePV = g4b.G4PVPlacement(None,                                  # no rotation
+                                         g4b.G4ThreeVector(0, 0, -detectorThickness/2),  # its position
                                          pipeLV,                            # its logical volume
                                          "Pipe",                                # its name
                                          layerLV,                               # its mother  volume
@@ -117,15 +116,15 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
                                          self.fCheckOverlaps)                   # checking overlaps
 
         # detector
-        detectorS = G4Box("Detector",                                         # its name
-                     10*cm, 2.5*cm, detectorThickness/2)  # its size
+        detectorS = g4b.G4Box("Detector",                                         # its name
+                     10*g4b.cm, 2.5*g4b.cm, detectorThickness/2)  # its size
 
-        detectorLV = G4LogicalVolume(detectorS,         # its solid
+        detectorLV = g4b.G4LogicalVolume(detectorS,         # its solid
                                 detectorMaterial,  # its material
                                 "Detector")        # its name
 
-        self.fdetectorPV = G4PVPlacement(None,                                  # no rotation
-                                    G4ThreeVector(0, 0, pipeThickness/2),  # its position
+        self.fdetectorPV = g4b.G4PVPlacement(None,                                  # no rotation
+                                    g4b.G4ThreeVector(0, 0, pipeThickness/2),  # its position
                                     detectorLV,                                 # its logical volume
                                     "Detector",                                 # its name
                                     layerLV,                               # its mother volume
@@ -137,14 +136,14 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
         print("")
         print("------------------------------------------------------------")
         print("---> The calorimeter is", nofLayers, "layers of: [", end="")
-        print(pipeThickness/mm, "mm of",  pipeMaterial.GetName(), "+", end="")
-        print(detectorThickness/mm, "mm of", detectorMaterial.GetName(), "]")
+        print(pipeThickness/g4b.mm, "mm of",  pipeMaterial.GetName(), "+", end="")
+        print(detectorThickness/g4b.mm, "mm of", detectorMaterial.GetName(), "]")
         print("------------------------------------------------------------")
 
         # Visualization attributes
-        worldLV.SetVisAttributes(G4VisAttributes.GetInvisible())
+        worldLV.SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
-        simpleBoxVisAtt = G4VisAttributes(G4Colour(1, 1, 1))
+        simpleBoxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
         simpleBoxVisAtt.SetVisibility(True)
         calorLV.SetVisAttributes(simpleBoxVisAtt)
 
@@ -159,23 +158,23 @@ class B4DetectorConstruction(G4VUserDetectorConstruction):
         # Create global magnetic field messenger.
         # Uniform magnetic field is then created automatically if
         # the field value is not zero.
-        fieldValue = G4ThreeVector()
-        self.fMagFieldMessenger = G4GlobalMagFieldMessenger(fieldValue)
+        fieldValue = g4b.G4ThreeVector()
+        self.fMagFieldMessenger = g4b.G4GlobalMagFieldMessenger(fieldValue)
         self.fMagFieldMessenger.SetVerboseLevel(1)
 
 
-class B4PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
+class B4PrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
 
     def __init__(self):
         super().__init__()
         nofParticles = 1
-        self.fParticleGun = G4ParticleGun(nofParticles)
+        self.fParticleGun = g4b.G4ParticleGun(nofParticles)
 
         # default particle kinematic
-        particleDefinition = G4ParticleTable.GetParticleTable().FindParticle("e-")
+        particleDefinition = g4b.G4ParticleTable.GetParticleTable().FindParticle("e-")
         self.fParticleGun.SetParticleDefinition(particleDefinition)
-        self.fParticleGun.SetParticleMomentumDirection(G4ThreeVector(0, 10, 1))
-        self.fParticleGun.SetParticleEnergy(24*GeV)
+        self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 10, 1))
+        self.fParticleGun.SetParticleEnergy(24*g4b.GeV)
 
     def GeneratePrimaries(self, anEvent):
         # This function is called at the begining of an event
@@ -184,7 +183,7 @@ class B4PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
         # on DetectorConstruction class we get world volume
         # from G4LogicalVolumeStore
         worldZHalfLength = 0
-        worldLV = G4LogicalVolumeStore.GetInstance().GetVolume("World")
+        worldLV = g4b.G4LogicalVolumeStore.GetInstance().GetVolume("World")
 
         # Check that the world volume has box shape
         worldBox = None
@@ -197,15 +196,15 @@ class B4PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
             msg = "World volume of box shape not found."
             msg += "Perhaps you have changed geometry."
             msg += "The gun will be place in the center."
-            G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
+            g4b.G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
                         "MyCode0002", JustWarning, msg)
 
         # Set gun position
-        self.fParticleGun.SetParticlePosition(G4ThreeVector(0, 0, -worldZHalfLength))
+        self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 0, -worldZHalfLength))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
 
 
-class B4aEventAction(G4UserEventAction):
+class B4aEventAction(g4b.G4UserEventAction):
 
     def BeginOfEventAction(self, event):
         # initialisation per event
@@ -218,7 +217,7 @@ class B4aEventAction(G4UserEventAction):
         # Accumulate statistics
 
         # get analysis manager
-        analysisManager = G4AnalysisManager.Instance()
+        analysisManager = g4b.G4AnalysisManager.Instance()
 
         # fill histograms
         analysisManager.FillH1(0, self.fEnergyPipe)
@@ -235,13 +234,13 @@ class B4aEventAction(G4UserEventAction):
 
         # Print per event (modulo n)
         eventID = event.GetEventID()
-        printModulo = G4RunManager.GetRunManager().GetPrintProgress()
+        printModulo = g4b.G4RunManager.GetRunManager().GetPrintProgress()
         if printModulo > 0 and eventID % printModulo == 0:
             print("---> End of event:", eventID)
-            print("Pipe: total energy:", G4BestUnit(self.fEnergyPipe, "Energy"), end="")
-            print("total track length:", G4BestUnit(self.fTrackLPipe, "Length"))
-            print("Detector: total energy:", G4BestUnit(self.fEnergyDetector, "Energy"), end="")
-            print("total track length:", G4BestUnit(self.fTrackLDetector, "Length"))
+            print("Pipe: total energy:", g4b.G4BestUnit(self.fEnergyPipe, "Energy"), end="")
+            print("total track length:", g4b.G4BestUnit(self.fTrackLPipe, "Length"))
+            print("Detector: total energy:", g4b.G4BestUnit(self.fEnergyDetector, "Energy"), end="")
+            print("total track length:", g4b.G4BestUnit(self.fTrackLDetector, "Length"))
 
     def AddPipe(self, de,  dl):
         self.fEnergyPipe += de
@@ -252,7 +251,7 @@ class B4aEventAction(G4UserEventAction):
         self.fTrackLDetector += dl
 
 
-class B4aSteppingAction(G4UserSteppingAction):
+class B4aSteppingAction(g4b.G4UserSteppingAction):
 
     def __init__(self, detectorConstruction, eventAction):
         super().__init__()
@@ -280,16 +279,16 @@ class B4aSteppingAction(G4UserSteppingAction):
             self.fEventAction.AddDetector(edep, stepLength)
 
 
-class B4RunAction(G4UserRunAction):
+class B4RunAction(g4b.G4UserRunAction):
 
     def __init__(self):
         super().__init__()
 
         # set printing event number per each event
-        G4RunManager.GetRunManager().SetPrintProgress(1)
+        g4b.G4RunManager.GetRunManager().SetPrintProgress(1)
 
         # Create analysis manager
-        analysisManager = G4AnalysisManager.Instance()
+        analysisManager = g4b.G4AnalysisManager.Instance()
         print("Using", analysisManager.GetType())
 
         # Create directories
@@ -301,8 +300,8 @@ class B4RunAction(G4UserRunAction):
 
         # Book histograms, ntuple
         # Creating histograms
-        analysisManager.CreateH1("Epipe", "Edep in pipe", 100, 0, 1000*MeV)
-        analysisManager.CreateH1("Edetector", "Edep in detector", 100, 0, 100*MeV)
+        analysisManager.CreateH1("Epipe", "Edep in pipe", 100, 0, 1000*g4b.MeV)
+        analysisManager.CreateH1("Edetector", "Edep in detector", 100, 0, 100*g4b.MeV)
 
         # Creating ntuple
         analysisManager.CreateNtuple("FLM", "Edep")
@@ -315,7 +314,7 @@ class B4RunAction(G4UserRunAction):
         # G4RunManager.GetRunManager().SetRandomNumberStore(True)
 
         # Get analysis manager
-        analysisManager = G4AnalysisManager.Instance()
+        analysisManager = g4b.G4AnalysisManager.Instance()
 
         # Open an output file
         try:
@@ -323,13 +322,13 @@ class B4RunAction(G4UserRunAction):
         except:
             print('path already exist')
 
-        fileName = "output/FLM/energy_deposition"
+        fileName = "output/FLM/energy_deposition.root"
         analysisManager.OpenFile(fileName)
 
     def EndOfRunAction(self, run):
 
         # print histogram statistics
-        analysisManager = G4AnalysisManager.Instance()
+        analysisManager = g4b.G4AnalysisManager.Instance()
         if analysisManager.GetH1(1) != None:
             print("\n ----> print histograms statistic ", end="")
 
@@ -338,18 +337,18 @@ class B4RunAction(G4UserRunAction):
             else:
                 print("for the local thread \n")
 
-            print(" EPipe : mean =", G4BestUnit(analysisManager.GetH1(0).mean(), "Energy"), end="")
-            print(" rms =", G4BestUnit(analysisManager.GetH1(0).rms(),  "Energy"))
+            print(" EPipe : mean =", g4b.G4BestUnit(analysisManager.GetH1(0).mean(), "Energy"), end="")
+            print(" rms =", g4b.G4BestUnit(analysisManager.GetH1(0).rms(),  "Energy"))
 
-            print(" EDetector : mean =", G4BestUnit(analysisManager.GetH1(1).mean(), "Energy"), end="")
-            print(" rms =", G4BestUnit(analysisManager.GetH1(1).rms(),  "Energy"))
+            print(" EDetector : mean =", g4b.G4BestUnit(analysisManager.GetH1(1).mean(), "Energy"), end="")
+            print(" rms =", g4b.G4BestUnit(analysisManager.GetH1(1).rms(),  "Energy"))
 
 
         # save histograms & ntuple
         analysisManager.Write()
 
 
-class B4aActionInitialization(G4VUserActionInitialization):
+class B4aActionInitialization(g4b.G4VUserActionInitialization):
 
     def __init__(self, detConstruction):
         super().__init__()
@@ -374,26 +373,26 @@ def PrintUsage():
 def main():
 
     # Construct the default run manager
-    runManager = G4RunManagerFactory.CreateRunManager(G4RunManagerType.Serial)
+    runManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Serial)
 
     # Set mandatory initialization classes
     detConstruction = B4DetectorConstruction()
     runManager.SetUserInitialization(detConstruction)
 
-    physicsList = FTFP_BERT()
+    physicsList = g4b.FTFP_BERT()
     runManager.SetUserInitialization(physicsList)
 
     actionInitialization = B4aActionInitialization(detConstruction)
     runManager.SetUserInitialization(actionInitialization)
 
     # Initialize visualization
-    visManager = G4VisExecutive()
+    visManager = g4b.G4VisExecutive()
     # G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
     # visManager = G4VisExecutive("Quiet")
     visManager.Initialize()
 
     # Get the User Interface manager
-    UImanager = G4UImanager.GetUIpointer()
+    UImanager = g4b.G4UImanager.GetUIpointer()
 
     UImanager.ApplyCommand("/control/execute cfg/init_vis.mac")
 
