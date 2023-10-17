@@ -1,5 +1,5 @@
 # Macro file for the visualization setting for the initialization phase 
-# of the FLM when running in interactive mode
+# of the cflm when running in interactive mode
 #
 
 # Use these open statements to open selected visualization
