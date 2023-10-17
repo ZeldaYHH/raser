@@ -3,9 +3,10 @@
 
 
 import devsim
-import python.diode_element_physics as diode_element_physics
+from . import diode_element_physics
 import sys
 import math
+import pixel_3d_mesh
 sys.path.append("..")
 import matplotlib
 import os

@@ -15,7 +15,7 @@ import os
 
 
 
-areafactor=2e2
+areafactor=250
 
 simname=sys.argv[1]
 
@@ -67,7 +67,7 @@ def loop(bias_v,voltage):
         reverse_total_current =   reverse_top_total_current 
         # TODO: 获取电路信息
         
-        data.append((bias_v,  abs(reverse_total_current) ))
+        data.append((bias_v,  abs(reverse_total_current)*25))
         bias_v += 1
 
     # 指定文件夹路径

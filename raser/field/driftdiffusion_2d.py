@@ -43,6 +43,7 @@ def CreateHoleCurrent(device, region, mu_p):
     Hole current
     '''
     node_in_2d.EnsureEdgeFromNodeModelExists(device, region, "Potential")
+    node_in_2d.EnsureEdgeFromNodeModelExists(device, region, "Electrons")
     node_in_2d.EnsureEdgeFromNodeModelExists(device, region, "Holes")
     # Make sure the bernoulli functions exist
     if not node_in_2d.InEdgeModelList(device, region, "Bern01"):
@@ -55,3 +56,17 @@ def CreateHoleCurrent(device, region, mu_p):
     for i in ("Holes", "Potential", "Electrons"):
         node_in_2d.CreateEdgeModelDerivatives(device, region, "HoleCurrent", Jp, i)
 
+def CreateTrappingEffect(device,region):
+    #calculate electrons accumulated in traps
+    #coefficient of Z1/2 and EH6/7
+    A_1="N_t1/(r_n1*(Donors@n1+n_11)+r_p1*(Acceptors@n1+p_11))^2"
+    A_2="N_t2/(r_n2*(Donors@n1+n_12)+r_p2*(Acceptors@n1+p_12))^2"
+    node_in_2d.CreateEdgeModel(device,region,"A_1",A_1)
+    node_in_2d.CreateEdgeModel(device,region,"A_2",A_2)
+    Dn_t1="A_1*(r_n1*(r_n1*n_11+r_p1*Acceptors@n1)*Electrons@n1-r_p1*(r_n1*Donors@n1+r_p1*p_11)*Holes@n1)"
+    Dn_t2="A_2*(r_n2*(r_n2*n_12+r_p2*Acceptors@n1)*Electrons@n1-r_p2*(r_n2*Donors@n1+r_p2*p_12)*Holes@n1)"
+    node_in_2d.CreateEdgeModel(device,region,"Dn_t1",Dn_t1)
+    node_in_2d.CreateEdgeModel(device,region,"Dn_t2",Dn_t2)
+    Dn_t="Dn_t1+Dn_t2"
+    node_in_2d.CreateEdgeModel(device,region,"Dn_t",Dn_t)
+      

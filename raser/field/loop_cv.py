@@ -45,7 +45,7 @@ physics_2d.InitialSolution(device, region, circuit_contacts="top")
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 
 
-physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
+physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -68,7 +68,7 @@ def loop(bias_v,voltage):
         bias_v += 1
       
 
-    physics_2d.save_values(device=device,region=region)
+    
     # 指定文件夹路径
     folder_path = "./output/2Dresult/sim{0}".format(simname)
 
