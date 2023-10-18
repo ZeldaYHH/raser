@@ -141,7 +141,7 @@ class Carrier:
                 U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
                 U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
                 e0 = 1.60217733e-19
-                if (my_f.read_ele_num)>1:
+                if i>0:
                     d_t=self.path[i][3]-self.path[i-1][3]
                     if self.charge>=0:
                         self.trapping_time=my_f.get_trap_h(self.path[i][0],self.path[i][1],self.path[i][2])
