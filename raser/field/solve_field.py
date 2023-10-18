@@ -19,7 +19,7 @@ class FieldCal:
             x=pickle.load(file)
         with open("./output/strip/y.pkl",'rb') as file:
             y=pickle.load(file)
-        with open("./output/strip/potential_{}_.pkl".format(self.voltage),'rb') as file:
+        with open("./output/strip/potential_{}_1.6e15_.pkl".format(self.voltage),'rb') as file:
             potential=pickle.load(file)
         self.x_efield,self.y_efield,self.potential=get_field(x,y,potential)
 
