@@ -107,7 +107,7 @@ def main(args):
         my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        draw_save.cce(my_d,my_f,my_current,dset)
+        draw_save.cce(my_d,my_f,my_current)
         return
    
     if('devsim' in args):
