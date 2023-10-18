@@ -142,12 +142,13 @@ class Carrier:
                 U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
                 e0 = 1.60217733e-19
                 if i>0:
-                    d_t=self.path[i][3]-self.path[i-1][3]
-                    if self.charge>=0:
-                        self.trapping_time=my_f.get_trap_h(self.path[i][0],self.path[i][1],self.path[i][2])
-                    else:
-                        self.trapping_time=my_f.get_trap_e(self.path[i][0],self.path[i][1],self.path[i][2])
-                    charge=charge*np.exp(-d_t*self.trapping_time)
+                    if (my_f.read_ele_num)>1:
+                        d_t=self.path[i][3]-self.path[i-1][3]
+                        if self.charge>=0:
+                            self.trapping_time=my_f.get_trap_h(self.path[i][0],self.path[i][1],self.path[i][2])
+                        else:
+                            self.trapping_time=my_f.get_trap_e(self.path[i][0],self.path[i][1],self.path[i][2])
+                        charge=charge*np.exp(-d_t*self.trapping_time)
                 q = charge * e0
                 dU_w = U_w_2 - U_w_1
                 self.signal[j].append(q*dU_w)
