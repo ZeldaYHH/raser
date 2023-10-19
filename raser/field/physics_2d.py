@@ -427,7 +427,7 @@ def CreateImpactGenerationSiliconCarbide(device, region):
     node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
     node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
     #defect_R="1.7*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e5)"
-    defect_R="1.7*abs(ElectricField)^2.5*exp(abs(ElectricField)/2.4e5)"
+    defect_R="1.7*abs(ElectricField)^2.5*exp(abs(ElectricField)/1.5e5)"
     node_in_2d.CreateEdgeModel(device, region, "defect_R", defect_R)
     node_in_2d.CreateEdgeModelDerivatives(device,region,"defect_R",defect_R,"Potential")
  
