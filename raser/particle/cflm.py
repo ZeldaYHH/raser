@@ -24,13 +24,11 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
     def DefineVolumes(self):
 
-        pipeThickness = 2*g4b.mm
-        detectorThickness = 0.5*g4b.mm
         pipeRmin = 28*g4b.mm
         pipeRmax = 30*g4b.mm
         pipeDz = 100*g4b.mm
         pipeSphi = 0*g4b.deg
-        pipeDphi = 360*g4b.deg
+        pipeDphi = 180*g4b.deg
         detectorSizeX = 50*g4b.mm
         detectorSizeY = 0.5*g4b.mm
         detectorSizeZ = 100*g4b.mm
@@ -116,8 +114,13 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
         worldLV.SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
-        simpleBoxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
-        simpleBoxVisAtt.SetVisibility(True)
+        boxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
+        pipeVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 0))
+        detectorVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 0, 0))
+
+        worldLV.SetVisAttributes(boxVisAtt)
+        pipeLV.SetVisAttributes(pipeVisAtt)
+        detectorLV.SetVisAttributes(detectorVisAtt)
 
         return worldPV
 
