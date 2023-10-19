@@ -68,6 +68,14 @@ def main(args):
         path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_cv/4H-SiC-PIN-cv.root"
         path2="./output/2Dresult/simNJUPIN/simCV500.0to500.0.root"
         compare_cv.main(label,path1,path2)
+    elif label == "compare_sim_sicar1.1.8_cv":
+        path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/sicar1.1.8-11_cv.root"
+        path2="./output/2Dresult/simsicar1.1.6/simCV500.0to500.0.root"
+        compare_cv.main(label,path1,path2)
+    elif label == "compare_sim_sicar1.1.8_iv":
+        path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/sicar1.1.8-11_iv.root"
+        path2="./output/2Dresult/simsicar1.1.6/simIV650.0to650.0.root"
+        compare_iv.main(label,path1,path2)
     else: 
         raise NameError(label)
     

@@ -17,7 +17,7 @@ device="MyDevice"
 region="MyRegion"
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
-areafactor=2e2
+areafactor=20000/3
 
 with open('./output/parainprogram/config_loop.json', 'r') as f:
     params = json.load(f)
@@ -44,8 +44,8 @@ physics_2d.InitialSolution(device, region, circuit_contacts="top")
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 
-
-physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+#physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+physics_2d.SiDriftDiffusionInitialSolution(device, region, circuit_contacts="top")
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -62,7 +62,7 @@ def loop(bias_v,voltage):
         # TODO: 获取电路信息
 
         devsim.solve(type="ac", frequency=1e6)
-        cap = devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag") / (-2 * math.pi*areafactor)
+        cap = devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag") / (-2 * math.pi)
         print("capacitance {0} {1}".format(bias_v, cap))
         data.append((bias_v, cap * 1e12 /areafactor ))
         bias_v += 1

@@ -34,7 +34,7 @@ def main(simname):
         print("do 0-2000")
         params = {
         'bias_v': "0",
-        'voltage': "800"
+        'voltage': "650"
     }
         with open('./output/parainprogram/config_loopiv.json', 'w') as f:
             json.dump(params, f)

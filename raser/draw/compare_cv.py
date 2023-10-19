@@ -1,6 +1,7 @@
+
 import ROOT
 import os
-def compare_cv(path1,path2):    
+def compare_cv(label,path1,path2):    
     folder_path="./output/draw"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -9,7 +10,7 @@ def compare_cv(path1,path2):
     tree1 = file1.Get("myTree")
 
     # 创建第一个图形
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+    canvas = ROOT.TCanvas("canvas", "Canvas", 1600, 1200)
 
     # 创建一个TGraph对象来存储第一个ROOT文件中的数据
     graph1 = ROOT.TGraph(tree1.GetEntries())
@@ -43,8 +44,8 @@ def compare_cv(path1,path2):
     graph2.GetXaxis().SetTitle("Voltage/v")
     graph2.GetYaxis().SetTitle("CAP/pF")
     
-    canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-    graph1.SetTitle("NJUPIN_SimulateVSexperiment")
+    canvas = ROOT.TCanvas("canvas", "Canvas", 1600, 1200)
+    graph1.SetTitle("{}_SimulateVSexperiment".format(label))
     graph1.Draw("AP")
     graph2.Draw("P")
 
@@ -57,9 +58,9 @@ def compare_cv(path1,path2):
     # 显示图形
     
     canvas.Update()
-    canvas.SaveAs("./output/draw/compare_cv_sim_ex.root")
+    canvas.SaveAs("./output/draw/compare_{}_ex.root".format(label))
 def main(label,path1,path2):
-    compare_cv(path1,path2)
+    compare_cv(label,path1,path2)
 
 if __name__ == "__main__":
     main(label,path1,path2)

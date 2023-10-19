@@ -50,5 +50,7 @@ def main(args):
         devsim_solve.main(label)
     elif label == "3d_pixel_field":
         scan_elefield.main("3d_pixel")
+    elif label == "3d_lgad_cv_v1":
+        scan_cv.main("3d_lgad")
     else:
         raise NameError(label)

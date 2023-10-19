@@ -1,6 +1,6 @@
 import ROOT
 import os
-def compare_iv(path1,path2):    
+def compare_iv(label,path1,path2):    
     folder_path="./output/draw"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -13,7 +13,7 @@ def compare_iv(path1,path2):
 
     # 从树中获取变量数据并添加到TGraph对象中
     for i, event in enumerate(tree1):
-        graph1.SetPoint(i, event.Voltage, event.Current)
+        graph1.SetPoint(i, abs(event.Value), abs(event.Reading))
 
     # 设置第一个数据点的标记样式和颜色
     graph1.SetMarkerStyle(20)
@@ -41,7 +41,7 @@ def compare_iv(path1,path2):
     graph2.GetYaxis().SetTitle("Current/A")
     
     canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-    graph1.SetTitle("NJUPIN_SimulateVSexperiment")
+    graph1.SetTitle("{}_SimulateVSexperiment".format(label))
     graph1.Draw("AP")
     graph2.Draw("P")
 
@@ -54,9 +54,9 @@ def compare_iv(path1,path2):
     # 显示图形
     
     canvas.Update()
-    canvas.SaveAs("./output/draw/compare_iv_sim_ex.root")
+    canvas.SaveAs("./output/draw/compare_{}_ex.root".format(label))
 def main(label,path1,path2):
-    compare_iv(path1,path2)
+    compare_iv(label,path1,path2)
 
 if __name__ == "__main__":
     main(label,path1,path2)
