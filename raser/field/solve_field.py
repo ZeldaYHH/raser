@@ -5,33 +5,71 @@
 import pickle
 import numpy as np
 import ROOT
+import os
 
 class FieldCal:
     def __init__(self, my_d,det_name,det_dic,dev_dic):
         self.voltage = my_d.voltage
         self.l_z = my_d.l_z
-        self.read_ele_num = int(dev_dic['read_ele_num'])       
-        if(det_name=="Si_Strip"):
-            with open("./output/testdiode/x.pkl",'rb') as file:
-                x=pickle.load(file)
-            with open("./output/testdiode/y.pkl",'rb') as file:
-                y=pickle.load(file)
-            with open("./output/testdiode/potential_{}.pkl".format(self.voltage),'rb') as file:
-                potential=pickle.load(file)
+        self.read_ele_num = int(dev_dic['read_ele_num'])     
+        if not os.access("./output/strip", os.F_OK):  
+            print("please run field first")
+            return
+        with open("./output/strip/x.pkl",'rb') as file:
+            x=pickle.load(file)
+        with open("./output/strip/y.pkl",'rb') as file:
+            y=pickle.load(file)
+        with open("./output/strip/potential_{}_1.6e15_.pkl".format(self.voltage),'rb') as file:
+            potential=pickle.load(file)
         self.x_efield,self.y_efield,self.potential=get_field(x,y,potential)
 
-        self.w_p=[]
-        for i in range(int(self.read_ele_num)):
-            self.w_p.append(w_p(i))
+        with open("./output/strip/Trappingtime_p_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
+            Trappingtime_p=pickle.load(file)
+        with open("./output/strip/Trappingtime_n_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
+            Trappingtime_n=pickle.load(file)
+        self.Trappingtime_p=get_trapping_time(x,y,Trappingtime_p)
+        self.Trappingtime_n=get_trapping_time(x,y,Trappingtime_n)
+        if not os.access("./output/strip/weighting_field/", os.F_OK):
+            os.makedirs("./output/strip/weighting_field/", exist_ok=True) 
+            total_w_p=[]
+            for i in range(self.read_ele_num):
+                total_x,total_z,t_w_p=new_w_p(i)
+                total_w_p.append(t_w_p)
+            with open("./output/strip/weighting_field/weighting_potential.pkl",'wb') as file:
+                pickle.dump(total_w_p, file)
+            with open("./output/strip/weighting_field/weighting_potential_x.pkl",'wb') as file:
+                pickle.dump(total_x, file)
+            with open("./output/strip/weighting_field/weighting_potential_z.pkl",'wb') as file:
+                pickle.dump(total_z, file)
 
+        with open("./output/strip/weighting_field/weighting_potential.pkl",'rb') as file:
+            weighting_potential=pickle.load(file)
+        with open("./output/strip/weighting_field/weighting_potential_x.pkl",'rb') as file:
+            weighting_potential_x=pickle.load(file)
+        with open("./output/strip/weighting_field/weighting_potential_z.pkl",'rb') as file:
+            weighting_potential_z=pickle.load(file)
+        self.w_p=[]  
+        for i in range(self.read_ele_num):
+            self.w_p.append(w_p(weighting_potential_x,weighting_potential_z,weighting_potential[i]))
+        
 
+    def get_trap_e(self,x,y,depth):
+        t_e=self.Trappingtime_n.Interpolate(depth,x)
+        return t_e
+    
+    def get_trap_h(self,x,y,depth):
+        t_h=self.Trappingtime_p.Interpolate(depth,x)
+        return t_h
+    
     def get_e_field(self, x, y, depth):    
         f_efx = self.x_efield.Interpolate(depth,x)
         f_efz = self.y_efield.Interpolate(depth,x)
         return f_efz, 0, f_efx
     
     def get_w_p(self, x, y, depth, i):
-        f_p = self.w_p[i].Interpolate(depth,x)
+        f_p = self.w_p[i].Interpolate(x,depth)
+        if(f_p<1e-2):
+            f_p=1e-2
         return f_p
     
     def get_potential(self, x, y, depth):
@@ -68,11 +106,26 @@ def get_field(x,y,potential):
     return x_field,y_field,re_potential
 
 
-def w_p(ele_number):
+def w_p(x,z,w_p):
+    weighting_potential=ROOT.TGraph2D()
+    for i in range(len(z)):
+        for j in range(len(x)):
+            weighting_potential.SetPoint(int(i*len(x)+j),z[i],x[j]*6,w_p[i][j])
+    return weighting_potential
+    
+
+def get_trapping_time(x,y,trapping_time):
+    trap_time=ROOT.TGraph2D()
+    for i in range(len(y)):
+        trap_time.SetPoint(i,x[i]*1e4,y[i]*1e4,trapping_time[i])
+    return trap_time
+
+
+def new_w_p(ele_number):
     nx = 51  
-    ny = 226  
+    ny = 301  
     xmin, xmax = 0.0, 50.0  
-    ymin, ymax = 0.0, 225.0 
+    ymin, ymax = 0.0, 300.0 
     dx = (xmax - xmin) / (nx - 1)  
     dy = (ymax - ymin) / (ny - 1) 
 
@@ -91,12 +144,12 @@ def w_p(ele_number):
         diff = np.abs(u - u_old).max()
         if diff < tolerance:
             break
-
+    
     x = np.linspace(xmin, xmax, nx)
     y = np.linspace(ymin, ymax, ny)
+    
     w_potential=ROOT.TGraph2D()
     for i in range(len(y)):
         for j in range(len(x)):
             w_potential.SetPoint(int(i*len(x)+j),x[j]*6,y[i],u[i][j])
-    return w_potential
-
+    return x ,y ,u

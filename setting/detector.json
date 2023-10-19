@@ -137,7 +137,7 @@
         "doping" : "1e6 if (z < 1) else (-5 if (z < 2) else (-1.917e4 if (z < 3) else -5 if (z < 49) else -1e6))",
         "doping_cpp" : "z < 1 - tol? 1e6 : (z < 2 - tol ? -5 : (z < 3 + tol ? -1.917e4 : (z < 49 + tol ? -5 : -1e6)))",
         "avalanche_bond" : 2.0,
-        "voltage" : 200,
+        "voltage" : 600,
         "temperature" : 300.0,
         "material" : "Si",
         "avalanche_model" : "vanOverstraeten",
@@ -226,19 +226,19 @@
         "det_name" : "Si_Strip",
         "det_model" : "planar3D",
 
-        "lx" : 225,
+        "lx" : 300,
         "ly" : 5000,
         "lz" : 300,
         "doping" : -1,
-        "voltage" : 500,
-        "temperature" : 300.0,
+        "voltage" : 600,
+        "temperature" : 263.0,
         "material" : "Si",
 
         "mesh" : 600,
         "xyscale" : 10,
 
         "striplenth" : 75,
-        "elelenth" : 25,
-        "read_ele_num" : 3
+        "elelenth" : 20,
+        "read_ele_num" : 4
     }
 ]

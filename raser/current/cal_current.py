@@ -136,17 +136,22 @@ class Carrier:
         # i = -q*v*nabla(U_w) = -q*dx*nabla(U_w)/dt = -q*dU_w(x)/dt
         # signal = i*dt = -q*dU_w(x)
         for j in range(my_f.read_ele_num):
+            charge=self.charge
             for i in range(len(self.path)-1): # differentiate of weighting potential
                 U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
                 U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
                 e0 = 1.60217733e-19
                 if i>0:
-                    d_t=self.path[i][3]-self.path[i-1][3]
-                    self.trapping_time=my_d.trapping_time
-                    self.charge=self.charge*np.exp(np.true_divide(-d_t,self.trapping_time))
-                q = self.charge * e0
+                    if (my_f.read_ele_num)>1:
+                        d_t=self.path[i][3]-self.path[i-1][3]
+                        if self.charge>=0:
+                            self.trapping_time=my_f.get_trap_h(self.path[i][0],self.path[i][1],self.path[i][2])
+                        else:
+                            self.trapping_time=my_f.get_trap_e(self.path[i][0],self.path[i][1],self.path[i][2])
+                        charge=charge*np.exp(-d_t*self.trapping_time)
+                q = charge * e0
                 dU_w = U_w_2 - U_w_1
-                self.signal[j].append(-q*dU_w)
+                self.signal[j].append(q*dU_w)
         
 
     def drift_end(self,my_f):
@@ -821,12 +826,13 @@ class StripCarrierListFromG4P:
             max_event_bin=h1.GetMaximumBin()
             bin_wide=max(my_g4p.edep_devices)*1.1/100
             for j in range (len(my_g4p.edep_devices)):
-                if (my_g4p.edep_devices[j]<(max_event_bin+1)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin-1)*bin_wide):
+                if (my_g4p.edep_devices[j]<(max_event_bin)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin-1)*bin_wide):
                     try_p=1
                     for single_step in my_g4p.p_steps_current[j]:
-                        if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>10:
+                        if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>5:
                             try_p=0
                     if try_p==1:
+                        print(my_g4p.edep_devices[j])
                         self.batch_def(my_g4p,j)
                         batch = 1
                         break
