@@ -2,10 +2,11 @@
 #From: library/debian:11.7    
 
 Bootstrap: localimage
-From: raser-2.1.sif  
+From: raser-2.2.sif  
 
 %post
     ## Use huaweicloud  
+    ## May need to do $ srouce /etc/profile 
     #sed -i "s@http://deb.debian.org@http://repo.huaweicloud.com@g" /etc/apt/sources.list
     #apt update 
     #apt upgrade
@@ -35,7 +36,7 @@ From: raser-2.1.sif
     ## DevSim    
     #pip install mkl devsim 
     #pip install mkl -U # 2023.2.0
-    #pip install devsim -U # 2.6.2
+    #pip install devsim -U # 2.6.3
 
     ## NGSpice & KiCAD
     #apt -y install ngspice 
@@ -61,4 +62,18 @@ From: raser-2.1.sif
     #cmake --build acts_build -j28 # -v for verbose 
     #Note: need to do a clean to avoid stuck 
 
+    ## pyMTL3 
+    # apt install python-dev libffi-dev ##no need
+    # pip install pymtl3 
+
+    ## Build and install Verilator
+    # apt install flex g++ libfl-dev bison help2man
+    # cd /usr/local/share 
+    # git clone https://git.veripool.org/git/verilator
+    # cd verilator 
+    # git checkout stable 
+    # autoconf
+    # ./configure 
+    # make -j24 
+    # make install
 
