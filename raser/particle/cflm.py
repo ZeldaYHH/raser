@@ -16,33 +16,33 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
         nistManager = g4b.G4NistManager.Instance()
         nistManager.FindOrBuildMaterial("G4_Cu")
 
-        g4b.G4Material("silicon", z=14, a=28.08*g4b.g/g4b.mole, density=2.330*g4b.g/g4b.cm3)
-
         g4b.G4Material("Galactic", z=1, a=1.01*g4b.g/g4b.mole, density=g4b.universe_mean_density,
                    state=g4b.kStateGas, temp=2.73*g4b.kelvin, pressure=3e-18*g4b.pascal)
+
 
         print(g4b.G4Material.GetMaterialTable())
 
     def DefineVolumes(self):
 
-        nofLayers = 1
-        pipeThickness = 2*g4b.mm
-        detectorThickness = 0.5*g4b.mm
-        calorSizeXY = 1000*g4b.mm
+        pipeRmin = 28*g4b.mm
+        pipeRmax = 30*g4b.mm
+        pipeDz = 100*g4b.mm
+        pipeSphi = 0*g4b.deg
+        pipeDphi = 180*g4b.deg
+        detectorSizeX = 50*g4b.mm
+        detectorSizeY = 0.5*g4b.mm
+        detectorSizeZ = 100*g4b.mm
 
-        layerThickness = pipeThickness + detectorThickness
-        calorThickness = nofLayers * layerThickness
-        worldSizeXY = 1.2 * calorSizeXY
-        worldSizeZ = 1.2 * calorThickness
+        worldSizeXY = 200 * g4b.mm
+        worldSizeZ = 200 * g4b.mm
 
         defaultMaterial = g4b.G4Material.GetMaterial("Galactic")
         pipeMaterial = g4b.G4Material.GetMaterial("G4_Cu")
-        detectorMaterial = g4b.G4Material.GetMaterial("silicon")
 
-        if defaultMaterial == None or pipeMaterial == None or detectorMaterial == None:
+        if defaultMaterial == None or pipeMaterial == None:
             msg = "Cannot retrieve materials already defined."
             g4b.G4Exception("cflmDetectorConstruction::DefineVolumes()",
-                        "MyCode0001", FatalException, msg)
+                        "MyCode0001", g4b.FatalException, msg)
 
         # World
         worldS = g4b.G4Box("World",                                     # its name
@@ -61,84 +61,64 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 0,                    # copy number
                                 self.fCheckOverlaps)  # checking overlaps
 
-        # Calorimeter
-        calorimeterS = g4b.G4Box("Calorimeter",                                   # its name
-                             calorSizeXY/2, calorSizeXY/2, calorThickness/2)  # its size
-
-        calorLV = g4b.G4LogicalVolume(calorimeterS,     # its solid
-                                  defaultMaterial,  # its material
-                                  "Calorimeter")    # its name
-
-        g4b.G4PVPlacement(None,                 # no rotation
-                      g4b.G4ThreeVector(),      # at (0,0,0)
-                      calorLV,              # its logical volume
-                      "Calorimeter",        # its name
-                      worldLV,              # its mother  volume
-                      False,                # no boolean operation
-                      0,                    # copy number
-                      self.fCheckOverlaps)  # checking overlaps
-
-        # Layer
-        layerS = g4b.G4Box("Layer",                                         # its name
-                       calorSizeXY/2, calorSizeXY/2, layerThickness/2)  # its size
-
-        layerLV = g4b.G4LogicalVolume(layerS,           # its solid
-                                  defaultMaterial,  # its material
-                                  "Layer")          # its name
-
-        g4b.G4PVReplica("Layer",         # its name
-                    layerLV,         # its logical volume
-                    calorLV,         # its mother
-                    g4b.kZAxis,          # axis of replication
-                    nofLayers,       # number of replica
-                    layerThickness)  # width of replica
 
         # Pipe
-        pipeS = g4b.G4Box("Pipe",                                         # its name
-                          calorSizeXY/2, calorSizeXY/2, pipeThickness/2)  # its size
+        pipeS = g4b.G4Tubs("Pipe",                                         # its name
+                          pipeRmin, pipeRmax, pipeDz/2,pipeSphi,pipeDphi)  # its size
 
         pipeLV = g4b.G4LogicalVolume(pipeS,         # its solid
                                      pipeMaterial,  # its material
                                      "Pipe")            # its name
 
         self.fpipePV = g4b.G4PVPlacement(None,                                  # no rotation
-                                         g4b.G4ThreeVector(0, 0, -detectorThickness/2),  # its position
+                                         g4b.G4ThreeVector(0, 0, 0),  # its position
                                          pipeLV,                            # its logical volume
                                          "Pipe",                                # its name
-                                         layerLV,                               # its mother  volume
+                                         worldLV,                               # its mother  volume
                                          False,                                 # no boolean operation
                                          0,                                     # copy number
                                          self.fCheckOverlaps)                   # checking overlaps
 
         # detector
+        self.nist = g4b.G4NistManager.Instance()
+        silicon_carbide={
+                "material_1" : "Si",
+                "material_2" : "C",
+                "compound_name" :"SiC",
+                "density" : 3.2,
+                "natoms_1" : 50,
+                "natoms_2" : 50,
+                }
+        material_1 = self.nist.FindOrBuildElement(silicon_carbide['material_1'],False)
+        material_2 = self.nist.FindOrBuildElement(silicon_carbide['material_2'],False)
+        material_density = silicon_carbide['density']*g4b.g/g4b.cm3
+        detectorMaterial = g4b.G4Material(silicon_carbide['compound_name'],material_density,2) 
+        detectorMaterial.AddElement(material_1,silicon_carbide['natoms_1']*g4b.perCent)
+        detectorMaterial.AddElement(material_2,silicon_carbide['natoms_2']*g4b.perCent)
+
         detectorS = g4b.G4Box("Detector",                                         # its name
-                     10*g4b.cm, 2.5*g4b.cm, detectorThickness/2)  # its size
+                     detectorSizeX/2, detectorSizeY/2, detectorSizeZ/2)  # its size
 
         detectorLV = g4b.G4LogicalVolume(detectorS,         # its solid
                                 detectorMaterial,  # its material
                                 "Detector")        # its name
 
         self.fdetectorPV = g4b.G4PVPlacement(None,                                  # no rotation
-                                    g4b.G4ThreeVector(0, 0, pipeThickness/2),  # its position
+                                    g4b.G4ThreeVector(0, 30*g4b.mm, 0),  # its position
                                     detectorLV,                                 # its logical volume
                                     "Detector",                                 # its name
-                                    layerLV,                               # its mother volume
+                                    worldLV,                               # its mother volume
                                     False,                                 # no boolean operation
                                     0,                                     # copy number
                                     self.fCheckOverlaps)                   # checking overlaps
 
-        print("")
-        print("------------------------------------------------------------")
-        print("---> The calorimeter is", nofLayers, "layers of: [", end="")
-        print(pipeThickness/g4b.mm, "mm of",  pipeMaterial.GetName(), "+", end="")
-        print(detectorThickness/g4b.mm, "mm of", detectorMaterial.GetName(), "]")
-        print("------------------------------------------------------------")
-
         worldLV.SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
-        simpleBoxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
-        simpleBoxVisAtt.SetVisibility(True)
-        calorLV.SetVisAttributes(simpleBoxVisAtt)
+        pipeVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 0))
+        detectorVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
+
+        pipeLV.SetVisAttributes(pipeVisAtt)
+        detectorLV.SetVisAttributes(detectorVisAtt)
 
         return worldPV
 
@@ -152,7 +132,6 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.fMagFieldMessenger = g4b.G4GlobalMagFieldMessenger(fieldValue)
         self.fMagFieldMessenger.SetVerboseLevel(1)
 
-
 class cflmPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
 
     def __init__(self):
@@ -162,30 +141,13 @@ class cflmPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
 
         particleDefinition = g4b.G4ParticleTable.GetParticleTable().FindParticle("e-")
         self.fParticleGun.SetParticleDefinition(particleDefinition)
-        self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 10, 1))
+        self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 0.01, 1))
         self.fParticleGun.SetParticleEnergy(24*g4b.GeV)
 
     def GeneratePrimaries(self, anEvent):
 
-        worldZHalfLength = 0
-        worldLV = g4b.G4LogicalVolumeStore.GetInstance().GetVolume("World")
-
-        worldBox = None
-        if worldLV != None:
-            worldBox = worldLV.GetSolid()
-
-        if worldBox != None:
-            worldZHalfLength = worldBox.GetZHalfLength()
-        else:
-            msg = "World volume of box shape not found."
-            msg += "Perhaps you have changed geometry."
-            msg += "The gun will be place in the center."
-            g4b.G4Exception("cflmPrimaryGeneratorAction::GeneratePrimaries()",
-                        "MyCode0002", JustWarning, msg)
-
-        self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 0, -worldZHalfLength))
+        self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 26.9*g4b.mm, -100*g4b.mm))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
-
 
 class cflmaEventAction(g4b.G4UserEventAction):
 
@@ -228,7 +190,6 @@ class cflmaEventAction(g4b.G4UserEventAction):
         self.fEnergyDetector += de
         self.fTrackLDetector += dl
 
-
 class cflmaSteppingAction(g4b.G4UserSteppingAction):
 
     def __init__(self, detectorConstruction, eventAction):
@@ -251,7 +212,6 @@ class cflmaSteppingAction(g4b.G4UserSteppingAction):
 
         if volume == self.fDetConstruction.fdetectorPV:
             self.fEventAction.AddDetector(edep, stepLength)
-
 
 class cflmRunAction(g4b.G4UserRunAction):
 
@@ -302,10 +262,8 @@ class cflmRunAction(g4b.G4UserRunAction):
             print(" EDetector : mean =", g4b.G4BestUnit(analysisManager.GetH1(1).mean(), "Energy"), end="")
             print(" rms =", g4b.G4BestUnit(analysisManager.GetH1(1).rms(),  "Energy"))
 
-
         # save histograms & ntuple
         analysisManager.Write()
-
 
 class cflmaActionInitialization(g4b.G4VUserActionInitialization):
 
@@ -346,9 +304,10 @@ def main():
     UImanager.ApplyCommand('/run/initialize')
     UImanager.ApplyCommand('/tracking/verbose 2')
     UImanager.ApplyCommand('/run/beamOn 1')
+    UImanager.ApplyCommand('/vis/ogl/set/printMode vectored')
     UImanager.ApplyCommand('/vis/ogl/set/printSize 2000 2000')
-
-    UImanager.ApplyCommand('/vis/ogl/export output/cflm/image.pdf')
+    UImanager.ApplyCommand('/vis/ogl/set/printFilename output/cflm/image.pdf')
+    UImanager.ApplyCommand('/vis/ogl/export')
 
 if __name__ == '__main__':
     main()
