@@ -14,7 +14,7 @@ if tctEnable:
     import pymotor
     import thread
     import raser.motor.mdo_3034_control as mdo_3034_control
-    import VitualDevice as vitual_dev
+    import raser.motor.vitual_device as vitual_dev
 
 testpass = False
 """

@@ -1,5 +1,5 @@
-import Kei2026BiasControl as kei2026
-import TekTDS5054BControl as tds5054b
+import raser.control.kei_2026_bias_control as kei2026
+import raser.control.tek_tds5054b_control as tds5054b
 import visa
 import time
 import pylab

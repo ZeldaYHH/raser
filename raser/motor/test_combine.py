@@ -12,7 +12,7 @@ from PyQt5 import QtGui, QtCore, uic, QtWidgets
 tctEnable = True
 if tctEnable:
     import pymotor
-    import VitualDevice as vitual_dev
+    import raser.motor.vitual_device as vitual_dev
 
 testpass = False
 
