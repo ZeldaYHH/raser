@@ -1,4 +1,4 @@
-import Kei2400CControl as kei2400
+import raser.control.Kei2400c_control as kei2400
 import visa
 import time
 import pylab

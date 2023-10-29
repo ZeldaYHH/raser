@@ -42,13 +42,16 @@ parser_gen_signal.add_argument('label', nargs='*', help='LABEL to identify space
 parser_gsignal = subparsers.add_parser('particle', help='calculate particle')
 parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
 
+parser_gsignal = subparsers.add_parser('elec', help='electronic readout')
+parser_gsignal.add_argument('label', help='LABEL to identify electronics files')
+
 args = parser.parse_args()
 
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
-submodules = ['asic', 'draw', 'field', 'root', 'spaceres', 'gen_signal','particle']
+submodules = ['asic', 'draw', 'field', 'root', 'spaceres', 'gen_signal','particle','elec']
 
 submodule = vars(args)['subparser_name']
 if submodule not in submodules:
