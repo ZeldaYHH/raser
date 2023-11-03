@@ -11,7 +11,7 @@ source ./run raser
 raser 'python/paper4/field_comparison.py'
 '''
 
-# Need to be rewritten or deleted!
+# TODO: Need to be rewritten or deleted!
 
 import sys
 import os

@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
 
-# Need to be rewritten!
+# TODO: Need to be rewritten!
 
 import time
 import draw.draw_save
