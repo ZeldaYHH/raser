@@ -1,7 +1,7 @@
 .DS_Store
 note/.obsidian
 .obsidian
-.vscode 
+.vscode
 output
 **/__pycache__
 raser/motor/GUI/*.py
