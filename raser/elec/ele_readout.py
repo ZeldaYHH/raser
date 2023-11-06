@@ -10,7 +10,7 @@ Description:
 import math
 import ROOT
 
-# Need to be TOTALLY rewritten
+# TODO: Need to be TOTALLY rewritten
 
 # CSA and BB amplifier simulation
 class Amplifier:

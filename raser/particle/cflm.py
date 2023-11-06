@@ -226,8 +226,8 @@ class cflmRunAction(g4b.G4UserRunAction):
         analysisManager.SetVerboseLevel(1)
         analysisManager.SetNtupleMerging(True)
 
-        analysisManager.CreateH1("Epipe", "Edep in pipe", 100, 0, 1000*g4b.MeV)
-        analysisManager.CreateH1("Edetector", "Edep in detector", 100, 0, 100*g4b.MeV)
+        analysisManager.CreateH1("Epipe", "Energy deposition in pipe", 100, 0, 1000*g4b.MeV)
+        analysisManager.CreateH1("Edetector", "Energy deposition in detector", 100, 0, 100*g4b.MeV)
 
         analysisManager.CreateNtuple("cflm", "Edep")
         analysisManager.CreateNtupleDColumn("Epipe")

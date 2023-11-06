@@ -1,0 +1,6 @@
+{
+    "detector": "Si_Strip",
+    "absorber": "Si_strip",
+    "electronics": "CSA",
+    "laser": "top_TCT"
+}

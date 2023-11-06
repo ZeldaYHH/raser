@@ -59,6 +59,7 @@ def main(args):
             print("The electrode model is wrong.")
     my_d = geo.R3dDetector(dset)
     
+<<<<<<< HEAD
     #if "pixeldetector" in args:
     #    my_f = pyf.FenicsCal(my_d,dset.fenics)
     #    #my_f = 0
@@ -67,39 +68,33 @@ def main(args):
     #    if "draw_charge" in args:
     #        draw_save.draw_charge(my_charge)
     #    return  
+=======
+    # if "pixeldetector" in args:
+    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
+    #     #my_f = 0
+    #     my_g4p = g4s.Particles(my_d, dset)
+    #     my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
+    #     if "draw_charge" in args:
+    #         draw_save.draw_charge(my_charge)
+    #     return  
+>>>>>>> e17950b30f1298f999966f76b11f449e2ad924e0
     
-    if "beammonitor" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.get_beam_number(my_g4p,ele_current)
-        return  
+    # if "beammonitor" in args:
+    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
+    #     my_g4p = g4s.Particles(my_d, dset)
+    #     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+    #     ele_current = rdout.Amplifier(my_current, dset.amplifier)
+    #     draw_save.get_beam_number(my_g4p,ele_current)
+    #     return  
 
-    if "proton-irrad" in args:
-        my_f = pyf.FenicsCal2D(my_d,dset.fenics)
-        my_g4p = g4s.SiITk(my_d, my_f, dset)
-        #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        #ele_current = raser.Amplifier(my_current, dset.amplifier)
-        draw_save.get1_beam_number(my_g4p)
-        #draw_save.cce(my_d,my_f,my_current)
-        return
-
-    if "Carrier" in args:
-        my_f = pyf.FenicsCal1D(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.get_beam_number(my_g4p,ele_current)
-        return  
-
-    if "reactor" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        return
+    # if "proton-irrad" in args:
+    #     my_f = pyf.FenicsCal2D(my_d,dset.fenics)
+    #     my_g4p = g4s.SiITk(my_d, my_f, dset)
+    #     #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+    #     #ele_current = raser.Amplifier(my_current, dset.amplifier)
+    #     draw_save.get1_beam_number(my_g4p)
+    #     #draw_save.cce(my_d,my_f,my_current)
+    #     return
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
