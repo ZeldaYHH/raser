@@ -19,6 +19,9 @@ parser.add_argument('-sh', '--shell', help='flag of run raser in SHELL', action=
 
 subparsers = parser.add_subparsers(help='sub-command help', dest="subparser_name")
 
+parser_asic = subparsers.add_parser('asic', help='ASIC design')
+parser_asic.add_argument('label', help='LABEL to identify ASIC design')
+
 parser_draw = subparsers.add_parser('draw', help='draw figures')
 parser_draw.add_argument('label', help='LABEL to identify root files')
 
@@ -39,13 +42,16 @@ parser_gen_signal.add_argument('label', nargs='*', help='LABEL to identify space
 parser_gsignal = subparsers.add_parser('particle', help='calculate particle')
 parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
 
+parser_gsignal = subparsers.add_parser('elec', help='electronic readout')
+parser_gsignal.add_argument('label', help='LABEL to identify electronics files')
+
 args = parser.parse_args()
 
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
-submodules = ['draw', 'field', 'root', 'spaceres', 'gen_signal','particle']
+submodules = ['asic', 'draw', 'field', 'root', 'spaceres', 'gen_signal','particle','elec']
 
 submodule = vars(args)['subparser_name']
 if submodule not in submodules:

@@ -20,9 +20,9 @@ def CreateMesh(device, region):
       Meshing
     '''
     create_1d_mesh(mesh="dio")
-    add_1d_mesh_line(mesh="dio", pos=0, ps=1e-5, tag="top")
+    add_1d_mesh_line(mesh="dio", pos=0, ps=2e-5, tag="top")
     #add_1d_mesh_line(mesh="dio", pos=0.5e-5, ps=1e-9, tag="mid")
-    add_1d_mesh_line(mesh="dio", pos=5e-3, ps=1e-5, tag="bot")
+    add_1d_mesh_line(mesh="dio", pos=30e-3, ps=2e-5, tag="bot")
     add_1d_contact  (mesh="dio", name="top", tag="top", material="metal")
     add_1d_contact  (mesh="dio", name="bot", tag="bot", material="metal")
     add_1d_region   (mesh="dio", material="Si", region=region, tag1="top", tag2="bot")
@@ -48,7 +48,7 @@ def Create2DMesh(device, region):
     #add_2d_mesh_line(mesh="dio", dir="x", pos=0.5e-5, ps=1e-8)
     add_2d_mesh_line(mesh="dio", dir="x", pos=3e-2,   ps=3e-4)
     add_2d_mesh_line(mesh="dio", dir="y", pos=0,      ps=3e-4)
-    add_2d_mesh_line(mesh="dio", dir="y", pos=2.25e-2,   ps=3e-4)
+    add_2d_mesh_line(mesh="dio", dir="y", pos=3.3e-2,   ps=3e-4)
 
     add_2d_mesh_line(mesh="dio", dir="x", pos=-1e-8,    ps=1e-8)
     add_2d_mesh_line(mesh="dio", dir="x", pos=3000.001e-5, ps=1e-8)
@@ -60,6 +60,8 @@ def Create2DMesh(device, region):
     add_2d_contact(mesh="dio", name="top1", material="metal", region=region,yl=0.75e-2, yh=0.95e-2, xl=0, xh=0, bloat=1e-10)
     add_2d_contact(mesh="dio", name="top2", material="metal", region=region,yl=0, yh=0.2e-2, xl=0, xh=0, bloat=1e-10)
     add_2d_contact(mesh="dio", name="top3", material="metal", region=region,yl=1.5e-2, yh=1.7e-2, xl=0, xh=0, bloat=1e-10)
+    add_2d_contact(mesh="dio", name="top4", material="metal", region=region,yl=2.25e-2, yh=2.45e-2, xl=0, xh=0, bloat=1e-10)
+    add_2d_contact(mesh="dio", name="top5", material="metal", region=region,yl=3e-2, yh=3.2e-2, xl=0, xh=0, bloat=1e-10)
     add_2d_contact(mesh="dio", name="bot", material="metal", region=region, xl=30e-3,   xh=30e-3, bloat=1e-10)
 
     finalize_mesh(mesh="dio")
@@ -86,21 +88,15 @@ def Create3DGmshMesh(device, region):
 
 def SetParameters(device, region):
     '''
-      Set parameters for 300 K
+      Set parameters
     '''
-    SetSiliconParameters(device, region, 300)
+    SetSiliconParameters(device, region, 254)
 
 
 def SetNetDoping(device, region):
-    '''
-      NetDoping
-    '''
-    #CreateNodeModel(device, region, "Acceptors", "-(2.0e14*step(0.1*5e-3-x)+2.0e14*step(0.2*5e-3-x)+2.0e14*step(0.3*5e-3-x)+2.0e14*step(0.4*5e-3-x)+2.0e14*step(0.5*5e-3-x))")
-    #CreateNodeModel(device, region, "Donors",    "-(2.0e14*step(x-0.9*5e-3)+2.0e14*step(x-0.8*5e-3)+2.0e14*step(x-0.7*5e-3)+2.0e14*step(x-0.6*5e-3)+2.0e14*step(x-0.5*5e-3))")
     
-    CreateNodeModel(device, region, "Acceptors","3.2e12*step(30e-3-1e-4-x)" )
-    CreateNodeModel(device, region, "Donors", "1e19*step(x-30e-3+1e-4)" )
-
+    CreateNodeModel(device, region, "Acceptors","3.2e12*step(x-1e-4)" )
+    CreateNodeModel(device, region, "Donors", "1e19*step(1e-4-x)" )
     CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
 
 def InitialSolution(device, region, circuit_contacts=None):

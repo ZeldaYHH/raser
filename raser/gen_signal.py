@@ -59,14 +59,14 @@ def main(args):
             print("The electrode model is wrong.")
     my_d = geo.R3dDetector(dset)
     
-    if "pixeldetector" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        #my_f = 0
-        my_g4p = g4s.Particles(my_d, dset)
-        my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-        if "draw_charge" in args:
-            draw_save.draw_charge(my_charge)
-        return  
+    #if "pixeldetector" in args:
+    #    my_f = pyf.FenicsCal(my_d,dset.fenics)
+    #    #my_f = 0
+    #    my_g4p = g4s.Particles(my_d, dset)
+    #    my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
+    #    if "draw_charge" in args:
+    #        draw_save.draw_charge(my_charge)
+    #    return  
     
     if "beammonitor" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
@@ -110,18 +110,38 @@ def main(args):
         draw_save.cce(my_d,my_f,my_current)
         return
    
-    if('devsim' in args):
-        print("using devsim to build the field")
-        try:
-            my_f = devfield.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
-        except:
-            print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
-            exit(0)
-    else:
-        print("using fenics to build the field")
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
+    if "SICAR-1" == dset.detector_name:
+        my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)
+        my_g4p = g4s.Particles(my_d, dset)   
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        draw_save.save_current(dset, my_d, my_current, my_f, "fz_abs")
+        input_p=draw_save.set_input(dset, my_current, my_d, "fz_abs")
+        input_c=','.join(input_p)
+        ngspice(input_c, input_p)
         
-    my_g4p = g4s.Particles(my_d, dset)
+    elif "NJU-PIN" == dset.detector_name:
+        my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)  
+        my_g4p = g4s.Particles(my_d, dset)   
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)        
+        draw_save.save_current(dset, my_d, my_current, my_f, "fz_abs")
+        input_p=draw_save.set_input(dset, my_current, my_d, "fz_abs")
+        input_c=','.join(input_p)
+        ngspice(input_c, input_p)
+        
+    else:
+        if('devsim' in args):
+            print("using devsim to build the field")
+            try:
+                my_f = devfield.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+            except:
+                print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
+                exit(0)
+        else:
+            print("using fenics to build the field")
+            my_f = pyf.FenicsCal(my_d,dset.fenics)
+            
+        my_g4p = g4s.Particles(my_d, dset)
+
     if "scan=True" not in args:
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
@@ -129,6 +149,18 @@ def main(args):
     else:
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
+
+def ngspice(input_c, input_p):
+    with open('./paras/T1.cir', 'r') as f:
+        print("abaaba\n")
+        lines = f.readlines()
+        lines[113] = 'I1 2 0 PWL('+str(input_c)+') \n'
+        lines[140] = 'tran 0.1p ' + str((input_p[len(input_p) - 2])) + '\n'
+        lines[141] = 'wrdata output/t1.raw v(out)\n'
+        f.close()
+    with open('./output/T1_tmp.cir', 'w') as f:
+        f.writelines(lines)
+        f.close()
 
 def set_electrodes(det_dic,dset):
     

@@ -146,8 +146,10 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
 
 def CreateSRH(device, region):
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    Gn = "-ElectronCharge * USRH"
-    Gp = "+ElectronCharge * USRH"
+    Gn = "-ElectronCharge * (USRH+U_r)"
+    Gp = "+ElectronCharge * (USRH+U_r)"
+    #Gn = "-ElectronCharge * USRH"
+    #Gp = "+ElectronCharge * USRH"
     CreateNodeModel(device, region, "USRH", USRH)
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -178,8 +180,8 @@ def CreateHCE(device, region, mu_p):
              edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
 
 def CreatePE(device, region):
-    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
-    pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+    pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3( NetDoping, TrappedHoles, -TrappedElectrons))"
+    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
@@ -190,7 +192,7 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
-    #CreateSiIrradiatedCharge(device, region)
+    CreateSiIrradiated(device, region)
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
@@ -235,101 +237,63 @@ def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=Fal
                          node_model=contact_holes_name,
                          edge_current_model="HoleCurrent")
 
-def CreateSiIrradiatedCharge(device, region):
-
-    # imaginary defect: perugia model
-    #flux = 1.6e15+1
-    flux = 1.6e14
-    sigma_e_acc1=1e-15
-    sigma_h_acc1=1e-14
-    sigma_e_acc2=7e-15
-    sigma_h_acc2=7e-14
-    eta_acc1=1.613
-    eta_acc2=0.9
-    sigma_e_donor=3.23e-13
-    sigma_h_donor=3.23e-14
-    eta_donor=0.9
-    
-    E_acc1=0.42*1.6e-19
-    E_acc2=0.46*1.6e-19
-    E_donor=0.36*1.6e-19
-    
-    N_t_acc1 = flux*eta_acc1
-    N_t_acc2 = flux*eta_acc2
-    N_t_donor = flux*eta_donor
-    
-    Ec=4.05*1.6e-19
-    Ev=5.17*1.6e-19
-    E_ts_acc1=Ec-0.42*1.6e-19
-    E_ts_acc2=Ec-0.46*1.6e-19
-    E_ts_donor=Ev+0.36*1.6e-19
-
+def CreateSiIrradiated(device, region):
+    flux = 1e15
+    v_T = 1e7
+    E_g=1.12*1.6e-19
     N_c=2.8e19
     N_v=1.1e19
     k = 1.3806503e-23  # J/K
-    T0 = 300.0         # K
+    T0 = 254.0         # K
+    
+    set_parameter(device=device, region=region, name="v_T",   value=v_T)
     set_parameter(device=device, region=region, name="k_T0",   value=k*T0)
+    set_parameter(device=device, region=region, name="E_g",   value=E_g)
     set_parameter(device=device, region=region, name="N_c",   value=N_c)
     set_parameter(device=device, region=region, name="N_v",   value=N_v)
 
-    set_parameter(device=device, region=region, name="sigma_e_acc1",   value=sigma_e_acc1)
-    set_parameter(device=device, region=region, name="sigma_h_acc1",   value=sigma_h_acc1)
-    set_parameter(device=device, region=region, name="sigma_e_acc2",   value=sigma_e_acc2)
-    set_parameter(device=device, region=region, name="sigma_h_acc2",   value=sigma_h_acc2)
-    set_parameter(device=device, region=region, name="sigma_e_donor",   value=sigma_e_donor)
-    set_parameter(device=device, region=region, name="sigma_h_donor",   value=sigma_h_donor)
 
-    set_parameter(device=device, region=region, name="eta_acc1",   value=eta_acc1)
-    set_parameter(device=device, region=region, name="eta_acc2",   value=eta_acc2)
-    set_parameter(device=device, region=region, name="eta_donor",   value=eta_donor)
     
-    set_parameter(device=device, region=region, name="N_t_acc1",   value=N_t_acc1)
-    set_parameter(device=device, region=region, name="N_t_acc2",   value=N_t_acc2)
-    set_parameter(device=device, region=region, name="N_t_donor",   value=N_t_donor)
-    set_parameter(device=device, region=region, name="E_acc1",   value=E_acc1)
-    set_parameter(device=device, region=region, name="E_acc2",   value=E_acc2)
-    set_parameter(device=device, region=region, name="E_donor",   value=E_donor)
-    set_parameter(device=device, region=region, name="E_g",   value=1.12*1.6e-19)
-    set_parameter(device=device, region=region, name="E_ts_acc1",   value=E_ts_acc1)
-    set_parameter(device=device, region=region, name="E_ts_acc2",   value=E_ts_acc2)
-    set_parameter(device=device, region=region, name="E_ts_donor",   value=E_ts_donor)
-    v_T=1e7
-    set_parameter(device=device, region=region, name="v_T",   value=v_T)
-    set_parameter(device=device, region=region, name="v_T_elec",   value=v_T)
-    set_parameter(device=device, region=region, name="v_T_hole",   value=v_T)
+    names        = ["DA1"     , "DA2"          , "DD1"       , "DD2"    ]
+    E_ts_ev      = [0.56-0.42 , 0.56-0.46      , -0.56+0.36  ,-0.56+0.48]
+    g_ints       = [ 0.239*2 ,    0.09*2       ,  0.025*2     ,0.321*2  ] # cm^-1
+    sigma_n_irrs = [1e-15      ,    7e-15      ,   3.23e-13  ,4.166e-15 ]
+    sigma_p_irrs = [1e-14      ,     7e-14     ,   3.23e-14  ,1.965e-16 ]
     
-    r_n_donor = "(v_T * sigma_e_donor)"
-    r_p_donor = "(v_T * sigma_h_donor)"
-    r_n_acc1= "(v_T * sigma_e_acc1)"
-    r_p_acc1= "(v_T * sigma_h_acc1)"
-    r_n_acc2= "(v_T * sigma_e_acc2)"
-    r_p_acc2= "(v_T * sigma_h_acc2)"
-    n_1_donor = "(N_c * exp(-(E_g/2 - E_ts_donor)/k_T0))"
-    p_1_donor = "(N_v * exp(-(E_ts_donor - (-E_g/2))/k_T0))"
-    n_1_acc1 = "(N_c * exp(-(E_g/2 - E_ts_acc1)/k_T0))"
-    p_1_acc1 = "(N_v * exp(-(E_ts_acc1 - (-E_g/2))/k_T0))"
-    n_1_acc2 = "(N_c * exp(-(E_g/2 - E_ts_acc2)/k_T0))"
-    p_1_acc2 = "(N_v * exp(-(E_ts_acc2- (-E_g/2))/k_T0))"
-
-    n_t_donor_n = "+(N_t_donor*(Electrons*{r_n_donor}+{p_1_donor}*{r_p_donor})/({r_n_donor}*(Electrons+{n_1_donor})+{r_p_donor}*(Holes+{p_1_donor})))".format(r_n_donor=r_n_donor,n_1_donor=n_1_donor,r_p_donor=r_p_donor,p_1_donor=p_1_donor)
-    n_t_donor_p = "+(N_t_donor - {n_t_donor_n})".format(n_t_donor_n=n_t_donor_n)
-    
-    n_t_acc1_n = "+(N_t_acc1*(Electrons*{r_n_acc1}+{p_1_acc1}*{r_p_acc1})/({r_n_acc1}*(Electrons+{n_1_acc1})+{r_p_acc1}*(Holes+{p_1_acc1})))".format(r_n_acc1=r_n_acc1,n_1_acc1=n_1_acc1,r_p_acc1=r_p_acc1,p_1_acc1=p_1_acc1)
-    n_t_acc1_p = "+(N_t_acc1 - {n_t_acc1_n})".format(n_t_acc1_n=n_t_acc1_n)
-    
-    n_t_acc2_n = "+(N_t_acc2*(Electrons*{r_n_acc2}+{p_1_acc2}*{r_p_acc2})/({r_n_acc2}*(Electrons+{n_1_acc2})+{r_p_acc2}*(Holes+{p_1_acc2})))".format(r_n_acc2=r_n_acc2,n_1_acc2=n_1_acc2,r_p_acc2=r_p_acc2,p_1_acc2=p_1_acc2)
-    n_t_acc2_p = "+(N_t_acc2 - {n_t_acc2_n})".format(n_t_acc2_n=n_t_acc2_n)
-    
-    n_t_irr_n = n_t_donor_n + n_t_acc1_n + n_t_acc2_n
-    n_t_irr_p = n_t_donor_p + n_t_acc1_p + n_t_acc2_p
-    # #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
-    # R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=name)
-
-
-    CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
-    CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
-    #CreateNodeModel(device, region, "R_t_irr", R_t_irr)
+    TrappedElectrons=""
+    TrappedHoles=""
+    Trappingtime_n=""
+    Trappingtime_p=""
+    for name, E_t_ev, g_int, sigma_n_irr, sigma_p_irr in zip(names, E_ts_ev, g_ints, sigma_n_irrs, sigma_p_irrs):
+        e = 1.6*1e-19
+        E_t = E_t_ev * e
+        N_t_irr = g_int*flux
+        set_parameter(device=device, region=region, name="sigma_n_irr_"+name,   value=sigma_n_irr)
+        set_parameter(device=device, region=region, name="sigma_p_irr_"+name,   value=sigma_p_irr)
+        set_parameter(device=device, region=region, name="N_t_irr_"+name,   value=N_t_irr)
+        set_parameter(device=device, region=region, name="E_t_"+name,   value=E_t)
+        r_n = "(v_T * sigma_n_irr_{name})".format(name=name)#c_n
+        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=name)#e_n
+        r_p = "(v_T * sigma_p_irr_{name})".format(name=name)#c_p
+        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=name)#e_p
+        n_t_irr_n = "+(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        n_t_irr_p = "+(N_t_irr_{name}*(Holes*{r_p}+{n_1}*{r_n})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        trap_n = "+(v_T * sigma_n_irr_{name})*(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        trap_p = "+(v_T * sigma_p_irr_{name})*(N_t_irr_{name}*(Holes*{r_p}+{n_1}*{r_n})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        U_r="+(N_t_irr_{name}*{r_n}*{r_p}*(Electrons*Holes-n_i^2)/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        TrappedElectrons=TrappedElectrons+n_t_irr_n
+        TrappedHoles=TrappedHoles+n_t_irr_p
+        Trappingtime_n=Trappingtime_n+trap_n
+        Trappingtime_p=Trappingtime_p+trap_p
+    CreateNodeModel(device, region, "TrappedElectrons", TrappedElectrons)
+    CreateNodeModel(device, region, "TrappedHoles", TrappedHoles)
     for i in ("Electrons", "Holes", "Potential"):
-        CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
-        CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
-        #CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
+        CreateNodeModelDerivative(device, region, "TrappedElectrons", TrappedElectrons, i)
+        CreateNodeModelDerivative(device, region, "TrappedHoles", TrappedHoles, i)
+    
+    CreateNodeModel(device, region, "U_r", U_r)
+    for i in ("Electrons", "Holes"):
+        CreateNodeModelDerivative(device, region, "U_r", U_r, i)
+
+    CreateNodeModel(device, region, "Trappingtime_n", Trappingtime_n)
+    CreateNodeModel(device, region, "Trappingtime_p", Trappingtime_p)

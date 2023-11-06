@@ -33,12 +33,15 @@ def convert_csv_to_root(input_dir, output_dir, label):
                 df.Snapshot("myTree", output_file, {"Voltage", "Current"})
             elif label =="njupin_iv_v1":
                 df.Snapshot("myTree", output_file, {"Current","Voltage"})
+            
             else:
                 df.Snapshot("myTree", output_file, {"Value","Reading"})
 
         if name.endswith('cv'):
             df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
             if label=="itk_md8_sim_v1":
+                df.Snapshot("myTree", output_file, {"Voltage", "Capacitance"})
+            elif label =="njupin_cv_v1":
                 df.Snapshot("myTree", output_file, {"Voltage", "Capacitance"})
             else:
                 df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
@@ -74,6 +77,9 @@ def main(args):
     elif label == 'njupin_iv_v1':
         input_dir = "/afs/ihep.ac.cn/users/s/senzhao/njupin"
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_iv'
+    elif label == 'njupin_cv_v1':
+        input_dir = "/afs/ihep.ac.cn/users/s/senzhao/njupin/cv"
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_cv'
     else:
         raise NameError(label)
 

@@ -1,4 +1,4 @@
-import pymotor,stage,VitualDevice
+import pymotor,stage,raser.motor.vitual_device as vitual_device
 import raser.motor.mdo_3034_control as MD
 import time
 from datetime import datetime
@@ -203,4 +203,3 @@ class ScanThread(QtCore.QThread):
 
     def run(self):
         self.scan()
-        

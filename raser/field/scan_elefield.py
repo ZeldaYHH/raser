@@ -4,7 +4,10 @@ import sys
 import subprocess
 import os
 import json
-
+import pickle
+import numpy as np
+import matplotlib.pyplot as plt
+import csv
 
 def main(simname):
     
@@ -31,14 +34,14 @@ def main(simname):
     # 检查文件是否存在
     #改变voltage之后可以实现不同的电压上限
     if not (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
-        print("do 0-2000")
+        print("do 0-600")
         params = {
         'bias_v': "0",
-        'voltage': "650"
+        'voltage': "502"
     }
-        with open('./output/parainprogram/config_loopiv.json', 'w') as f:
+        with open('./output/parainprogram/config_loop_elefield.json', 'w') as f:
             json.dump(params, f)
-        command = [sys.executable, './raser/field/loop_iv.py',simname]
+        command = [sys.executable, './raser/field/loop_elefield.py',simname]
         process1 = subprocess.Popen(command, stdout=subprocess.PIPE)
         # 实时读取输出
         while True:
