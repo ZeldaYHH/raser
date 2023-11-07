@@ -6,9 +6,9 @@ import os
 import sys
 import math
 
-from field import physics
-from field import node
-from field import initial
+import physics
+import node
+import initial
 
 
 import matplotlib

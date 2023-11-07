@@ -6,9 +6,9 @@ import os
 import sys
 import math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from field import physics
-from field import node
-from field import initial
+import physics
+import node
+import initial
 from raser.read_json import Setting
 
 
