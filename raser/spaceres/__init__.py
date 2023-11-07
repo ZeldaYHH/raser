@@ -8,10 +8,11 @@ import subprocess
 
 from . import telescope as tlcp
 #from . import test
-#from particle.g4simulation import Particles
-#from readjson import Setting
-#from particle.geometry import R3dDetector
-#from current.calcurrent import CalCurrentPixel
+from particle.g4simulation import Particles
+from read_json import Setting
+from particle.geometry import R3dDetector
+from current.cal_current import CalCurrentPixel
+from draw import draw_save
 
 def main(args):
     label = vars(args)['label']
@@ -19,11 +20,11 @@ def main(args):
         print("taichu_v1:   ","first version of telescope simulation")
         print("taichu_v2:   ","second version of telescope simulation")
     elif label.startswith("taichu_v1"):
-        paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=readjson/absorber.json', 'pixeldetector']
-        dset = Setting(paths)
-        my_d = R3dDetector(dset)
+        #paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=readjson/absorber.json', 'pixeldetector']
+        dset = Setting() #read label.json instead of inputting path
+        my_d = R3dDetector(dset) #remain the same
         my_f = 0
-        my_g4p = Particles(my_d, my_f, dset)
+        my_g4p = Particles(my_d, dset) #remove my_f
         my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
         if label.endswith("draw_charge"):
             draw_save.draw_charge(my_charge)

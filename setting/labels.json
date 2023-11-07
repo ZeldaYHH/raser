@@ -1,6 +1,6 @@
 {
-    "detector": "Si_Strip",
-    "absorber": "Si_strip",
+    "detector": "Taichu3",
+    "absorber": "pixeldetector",
     "electronics": "CSA",
     "laser": "top_TCT"
 }
