@@ -4,8 +4,8 @@
 
 import sys
 import csv
-import node
-import physics
+from field import node
+from field import physics
 sys.path.append("..")
 import matplotlib
 import os
@@ -84,5 +84,13 @@ def main():
     SetDoping(device=device, region=region)
     Draw_Doping(device=device, region=region, path="./output/devsim/2DSicar1_1.png")
 
-if __name__ == '__main__':
-    main()
+
+
+
+
+
+
+
+
+
+

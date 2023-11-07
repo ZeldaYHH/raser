@@ -3,7 +3,7 @@
 import devsim
 import os
 import sys
-import node
+from field import node
 import matplotlib
 import matplotlib.pyplot
 

@@ -7,9 +7,9 @@ import math
 import sys
 sys.path.append("..")
 
-import physics
-import node
-import initial
+from field import physics
+from field import node
+from field import initial
 
 import matplotlib
 import matplotlib.pyplot

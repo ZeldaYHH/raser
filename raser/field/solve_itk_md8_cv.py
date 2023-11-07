@@ -5,9 +5,9 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import physics
-import node
-import initial
+from field import physics
+from field import node
+from field import initial
 
 import itk_md8_mesh
 
