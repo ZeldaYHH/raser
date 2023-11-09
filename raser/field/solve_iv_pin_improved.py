@@ -6,9 +6,9 @@ import os
 import sys
 import math
 
-import physics
-import node
-import initial
+from . import physics
+from . import node
+from . import initial
 
 
 import matplotlib

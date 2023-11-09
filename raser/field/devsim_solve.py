@@ -5,15 +5,15 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import physics
-import node
-import initial
+from . import physics
+from . import node
+from . import initial
 # import Setting
 
-import nju_pin_5mm_5mm_mesh
-import hpk_pin_5mm_5mm_mesh
-import sicar1_lgad_mesh
-import itk_md8_mesh
+from . import nju_pin_5mm_5mm_mesh
+from . import hpk_pin_5mm_5mm_mesh
+from . import sicar1_lgad_mesh
+from . import itk_md8_mesh
 
 
 import matplotlib 
