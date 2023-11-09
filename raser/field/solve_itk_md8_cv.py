@@ -5,11 +5,11 @@ import devsim
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import physics
-import node
-import initial
+from . import physics
+from . import node
+from . import initial
 
-import itk_md8_mesh
+from . import itk_md8_mesh
 
 import matplotlib
 import matplotlib.pyplot

@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-import physics_2d
-import build_2d_device
+from . import physics_2d
+from . import build_2d_device
 import math
 import sys
 from array import array

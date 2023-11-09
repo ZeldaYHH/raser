@@ -6,9 +6,8 @@ Description:  Initial.py
 '''
 
 import devsim
-from node import *
-from physics import *
-from node import *
+from .node import *
+from .physics import *
 
 def InitialSolution(device, region, circuit_contacts=None):
     # Create Potential, Potential@n0, Potential@n1

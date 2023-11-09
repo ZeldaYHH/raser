@@ -4,8 +4,8 @@ import numpy as np
 import pickle
 import ROOT
 import devsim
-import  physics_2d
-import node_in_2d
+from . import physics_2d
+from . import node_in_2d
 
 
 def Create2DMesh(device,region,simname):

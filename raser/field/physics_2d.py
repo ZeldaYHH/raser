@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-import driftdiffusion_2d 
-import node_in_2d
+from . import driftdiffusion_2d 
+from . import node_in_2d
 import devsim
 import math
 import pickle
