@@ -131,12 +131,12 @@ def main(args):
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
     else:
+        print('run batch_loop')
         batch_loop(dset,my_d, my_f, my_g4p)
     del my_f
 
 def ngspice(input_c, input_p):
     with open('./paras/T1.cir', 'r') as f:
-        print("abaaba\n")
         lines = f.readlines()
         lines[113] = 'I1 2 0 PWL('+str(input_c)+') \n'
         lines[140] = 'tran 0.1p ' + str((input_p[len(input_p) - 2])) + '\n'

@@ -14,15 +14,20 @@ import pickle
 import ROOT
 import numpy as np
 
+import ROOT
+import numpy as np
+
 
 class Devsim_field:
     def __init__(self, my_d,det_name,det_dic,dev_dic,dimension):
+class Devsim_field:
+    def __init__(self, my_d,det_name,det_dic,dev_dic):
         self.voltage = my_d.voltage
         self.l_z = my_d.l_z
         self.read_ele_num = int(dev_dic['read_ele_num']) 
         self.w_p=[]
         self.name = det_name
-        self.dimension = dimension
+
         if(det_name=="Si_Strip"):
             with open("./output/testdiode/x.pkl",'rb') as file:
                 x=pickle.load(file)
@@ -35,26 +40,36 @@ class Devsim_field:
                 self.w_p.append(strip_w_p(i))
 
         if(det_name=="SICAR-1"):
-            if dimension == 2:
-                with open("output/devsim/2D_SICAR/80V_potential.pkl",'rb') as file:
-                    xypotension=pickle.load(file)
-                    x=xypotension[0]
-                    y=xypotension[1]
-                    potential=xypotension[2]
-                    self.x_efield,self.y_efield,self.potential=get_field_2d(x,y,potential)
-            elif dimension == 1:
-                pass
+            with open("output/devsim/2D_SICAR/80V_potential.pkl",'rb') as file:
+                data = pickle.load(file)
+                self.dimension = data['metadata']['dimension']
+            if self.dimension == 2:
+                xypotension = data['efield']
+                x=xypotension[0]
+                y=xypotension[1]
+                potential=xypotension[2]
+                self.x_efield,self.y_efield,self.potential=get_field_2d(x,y,potential)
+            elif self.dimension == 1:
+                efield = data['efield']
+                z = efield[0][0]
+                field = efield[1][0]
+                field = np.array([x for x in field if x != 0])
+                self.potential = get_potential_1d(z, field)
+                self.efield=get_field_1d(z, field)
+
             else:
                 raise ValueError('unexpect dimension')
             
         if(det_name=='NJU-PIN'):
-            if dimension == 2:
+            with open("output/devsim/field/NJU-PIN/") as file:
+                data = pickle.load(file)
+                self.dimension = data['metadata']['dimension']
+            if self.dimension == 2:
                 pass
-            elif dimension ==1:
-                with open("output/devsim/field/NJU-PIN/") as file:
-                    z = pickle.load(file)[0]
-                    field = pickle.load(file)[1]
-                    self.efield=get_field_1d(z, field)
+            elif self.dimension ==1:                
+                z = data['efield'][0]
+                field = data['efield'][1]
+                self.efield=get_field_1d(z, field)
             else:
                 raise ValueError('unexpect dimension')
             
@@ -62,30 +77,33 @@ class Devsim_field:
         if self.dimension == 2:
             f_efx = self.x_efield.Interpolate(depth,x)
             f_efz = self.y_efield.Interpolate(depth,x)
-            return f_efz, 0, f_efx            
+            return f_efz, 0, f_efx
         else:
             f_e = self.efield.Eval(depth)
-            return f_e, 0, f_e
+            return 0, 0, f_e
     
     def get_w_p(self, x, y, depth, i):
         if self.name == 'Si_Strip':
             return self.w_p[i].Interpolate(x,depth)
+        if self.name == 'Si_Strip':
+            return self.w_p[i].Interpolate(x,depth)
         else:
-            return linearity_w_p(depth)
+            return linearity_w_p(self.l_z, depth)
     
     def get_potential(self, x, y, depth):
-        f_u = self.potential.Interpolate(depth,x)
+        if self.dimension == 2:
+            f_u = self.potential.Interpolate(depth,x)
+        else:
+            f_u = self.potential.Eval(depth)
         return f_u
 
 def get_field_1d(z, field):
     efield = ROOT.TGraph()
     for i in range(len(z)):
         efield.SetPoint(len(z), z[i], field[i])
-    z = ROOT.TGraph()
-
-    graph=ROOT.TF1("linearFit", "pol1", np.min(z), np.max(z))
-    z.Fit(graph, 'Q')
-    return z
+    zgraph=ROOT.TF1("linearFit", "pol1", np.min(z), np.max(z))
+    efield.Fit(zgraph, 'Q')
+    return zgraph
 
 def get_field_2d(x,y,potential):
     x_efield=[]
@@ -150,10 +168,23 @@ def strip_w_p(ele_number):
             w_potential.SetPoint(int(i*len(x)+j),x[j]*6,y[i],u[i][j])
     return w_potential
 
-def linearity_w_p(self, depth):
+def linearity_w_p(l_z, depth):
     if depth >= 1:
-        w_potential = 1 - (1/(self.l_z-1)) * (depth-1)
+        w_potential = 1 - (1/(l_z-1)) * (depth-1)
     else:
         w_potential = 0
     return w_potential
+
+def get_potential_1d(z, field):
+    potential = []
+    temp = 0
+    for index in range(len(z)-1):
+        temp = temp + (z[index+1]-z[index])*field[index]
+        potential.append(temp)
+    potentialgraph = ROOT.TGraph()
+    for i in range(len(z)-1):
+        potentialgraph.SetPoint(len(z), z[i], potential[i])
+    graph=ROOT.TF1("linearFit", "pol1", np.min(z), np.max(z))
+    potentialgraph.Fit(graph, 'Q')
+    return graph
     

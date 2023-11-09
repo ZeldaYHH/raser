@@ -64,5 +64,7 @@ def main(args):
     elif label == "sicar11":
         from . import sicar11
         sicar11.main()
+    elif label == 'nju_pin_get_efield':
+        scan_iv.main(simname="NJUPIN", field_flag=True)
     else:
         raise NameError(label)
