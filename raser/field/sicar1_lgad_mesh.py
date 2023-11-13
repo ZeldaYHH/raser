@@ -4,7 +4,7 @@
 import devsim
 import os
 import sys
-from field import node
+from . import node
 import matplotlib
 import matplotlib.pyplot
 import math

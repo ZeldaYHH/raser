@@ -1,7 +1,7 @@
 import devsim
 import sys
 sys.path.append("..")
-import node_in_2d
+from . import node_in_2d
 import matplotlib
 import os
 

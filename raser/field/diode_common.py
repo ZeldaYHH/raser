@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import ROOT
 import devsim
-import  physics2d
+from . import physics2d
 #####
 # dio1
 #

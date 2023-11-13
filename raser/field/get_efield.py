@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import physics_2d
-from . import build_2d_device
+import physics_2d
+import build_2d_device
 import math
 import sys
 from array import array
@@ -15,9 +15,11 @@ import os
 
 
 
-areafactor=250
-
-simname=sys.argv[1]
+areafactor=1.6e4
+if len(sys.argv)>1:
+    simname=sys.argv[1]
+else:
+    simname='NJUPIN'
 
 
 device="MyDevice"
@@ -38,20 +40,22 @@ build_2d_device.SetParameters(device=device, region=region)
 build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
 
 
-physics_2d.InitialSolution(device, region, circuit_contacts=False)
+build_2d_device.InitialSolution(device, region, circuit_contacts=False)
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 
-physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
+build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 
 
 data = []
+intensities=[]
+positions=[]
 def loop(bias_v,voltage):   
     while bias_v < voltage:
         devsim.set_parameter(device=device, name=physics_2d.GetContactBiasName("top"), value=0-bias_v)
@@ -66,60 +70,31 @@ def loop(bias_v,voltage):
         #reverse_bot_total_current   = reverse_bot_electron_current + reverse_bot_hole_current
         reverse_total_current =   reverse_top_total_current 
         # TODO: 获取电路信息
-        
-        data.append((bias_v,  abs(reverse_total_current)*25))
+
+        if bias_v % 100 == 0:
+            devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
+            x_mid = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
+            E = devsim.get_edge_model_values(device=device, region=region, name="ElectricField")
+            x = devsim.get_node_model_values(device=device, region=region, name="x")
+
+            positions.append(x)
+            intensities.append(E)
+            efield = zip(positions, intensities)
+            path = "./output/field/sicar1d/efield"+str(bias_v)+"200.pkl"
+            metadata=[]
+            metadata['voltage'] = bias_v
+            metadata['dimension'] = 1
+            data = {}
+            data['efield'] = zip(*efield)
+            data['metadata'] = metadata
+            with open(path,'wb') as file:
+                pickle.dump(data, file)
+            file.close        
+       
+
+        data.append((bias_v,  abs(reverse_total_current) ))
         bias_v += 1
 
-    # 指定文件夹路径
-    folder_path = "./output/2Dresult/sim{0}".format(simname)
-
-    # 检查文件夹是否存在，如果不存在则创建
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
 
 
-
-
-
-    #存数据的代码
-    file = ROOT.TFile("./output/2Dresult/sim{0}/simIV{1}to{2}.root".format(simname,bias_v,voltage), "RECREATE")
-    tree = ROOT.TTree("SicarTestIV", "SicarTest with impactgen")
-
-
-    x = array('d', [0])
-    y = array('d', [0])
-
-    tree.Branch("voltage", x, "x/D")
-    tree.Branch("Current", y, "y/D")
-
-    for point in data:
-        x[0], y[0] = point
-        tree.Fill()
-
-    file.Write()
-    file.Close()
-
-    file = ROOT.TFile("./output/2Dresult/sim{0}/simIV{1}to{2}.root".format(simname,bias_v,voltage), "READ")
-    tree = file.Get("SicarTestIV")
-
-    graph = ROOT.TGraph(tree.GetEntries())
-    for i, entry in enumerate(tree):
-        x = entry.x
-        y = entry.y
-        graph.SetPoint(i, x, y)
-
-    canvas = ROOT.TCanvas("canvas", "Graph", 800, 600)
-    graph.SetMarkerStyle(ROOT.kFullCircle)
-    graph.SetMarkerSize(0.5)
-    graph.SetMarkerColor(ROOT.kBlue)
-    graph.SetLineColor(ROOT.kWhite)
-    graph.Draw("AP")
-
-    graph.SetTitle("Current vs Voltage")
-    graph.GetXaxis().SetTitle("Voltage(V)")
-    graph.GetYaxis().SetTitle("Current(A)")
-
-    canvas.Update()
-    canvas.SaveAs("./output/2Dresult/sim{0}/simIV{1}to{2}_picture.root".format(simname,bias_v,voltage))
-   
 loop(bias_v,voltage)

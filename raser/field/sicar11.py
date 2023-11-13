@@ -4,8 +4,8 @@
 
 import sys
 import csv
-from field import node
-from field import physics
+from . import node
+from . import physics
 sys.path.append("..")
 import matplotlib
 import os

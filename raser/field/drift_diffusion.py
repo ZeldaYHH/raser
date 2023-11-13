@@ -6,7 +6,7 @@ Description:  DriftDiffusion.py
 '''
 
 import devsim
-from field.node import *
+from .node import *
 import math
 
 

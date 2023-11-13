@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-import node_in_2d 
+from . import node_in_2d 
 def CreateBernoulli (device, region):
     '''
     Creates the Bernoulli function for Scharfetter Gummel

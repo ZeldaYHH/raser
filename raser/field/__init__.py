@@ -61,5 +61,10 @@ def main(args):
         test4hsic.main("2dfield_4HSiC")
     elif label == "3d_ringcontact_ELefield":
         test4hsic.main("3d_ringcontact")
+    elif label == "sicar11":
+        from . import sicar11
+        sicar11.main()
+    elif label == 'nju_pin_get_efield':
+        scan_iv.main(simname="NJUPIN", field_flag=True)
     else:
         raise NameError(label)

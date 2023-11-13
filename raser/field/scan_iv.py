@@ -6,8 +6,7 @@ import os
 import json
 
 
-def main(simname):
-    
+def main(simname, field_flag=False):
     device="MyDevice"
     region="MyRegion"
     # 指定文件夹路径
@@ -38,7 +37,10 @@ def main(simname):
     }
         with open('./output/parainprogram/config_loopiv.json', 'w') as f:
             json.dump(params, f)
-        command = [sys.executable, './raser/field/loop_iv.py',simname]
+        if field_flag:
+            command = [sys.executable, './raser/field/get_efield.py']
+        else:
+            command = [sys.executable, './raser/field/loop_iv.py']
         process1 = subprocess.Popen(command, stdout=subprocess.PIPE)
         # 实时读取输出
         while True:
@@ -54,6 +56,7 @@ def main(simname):
 
         #DONOT CHANGE THIS PLS
     elif (os.path.exists(file_path_Potential) and os.path.exists(file_path_Electrons) and os.path.exists(file_path_Holes)):
+    #else:
         print("do 2-500")
         voltage = 2
         while voltage < 200:
@@ -63,7 +66,10 @@ def main(simname):
                     }
             with open('./output/parainprogram/config_loopiv.json', 'w') as f:
                 json.dump(params, f)
-            command = [sys.executable, './raser/field/loop_iv.py']
+            if field_flag:
+                command = [sys.executable, './raser/field/get_efield.py']
+            else:
+                command = [sys.executable, './raser/field/loop_iv.py']
             process2 = subprocess.Popen(command, stdout=subprocess.PIPE)
             
             while True:

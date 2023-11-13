@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from model_create import *
+from .model_create import *
 def CreateBernoulli (device, region):
     '''
     Creates the Bernoulli function for Scharfetter Gummel

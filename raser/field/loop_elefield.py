@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-import physics_2d
-import build_2d_device
+from . import physics_2d
+from . import build_2d_device
 import math
 import sys
 from array import array
@@ -12,7 +12,7 @@ import numpy as np
 import pickle
 import json
 import os
-import pixel_3d_mesh
+from . import pixel_3d_mesh
 simname=sys.argv[1]
 device="MyDevice"
 region="MyRegion"
