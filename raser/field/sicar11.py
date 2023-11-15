@@ -84,5 +84,13 @@ def main():
     SetDoping(device=device, region=region)
     Draw_Doping(device=device, region=region, path="./output/devsim/2DSicar1_1.png")
 
-if __name__ == '__main__':
-    main()
+
+
+
+
+
+
+
+
+
+
