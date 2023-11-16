@@ -17,9 +17,6 @@ import numpy as np
 import ROOT
 import numpy as np
 
-
-class Devsim_field:
-    def __init__(self, my_d,det_name,det_dic,dev_dic,dimension):
 class Devsim_field:
     def __init__(self, my_d,det_name,det_dic,dev_dic):
         self.voltage = my_d.voltage
