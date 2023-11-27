@@ -13,22 +13,22 @@ def Create2DMesh(device,region,simname):
         devsim.create_2d_mesh  (mesh="Sicar")
         
         devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0     , ps=2.5e-5)
-        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=66.3e-4  , ps=2.5e-5)
+        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=31.8e-4  , ps=2.5e-5)
 
         
         devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=0     , ps=2.5e-5)
         devsim.add_2d_mesh_line(mesh="Sicar", dir="y", pos=1e-4 , ps=2.5e-5)
         devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=0.3e-4     , ps=1e-5)
         devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=1.3e-4  , ps=1e-5)
-        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=51.3e-4  , ps=1e-5)
-        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=56.3e-4  , ps=1e-5)
+        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=16.8e-4  , ps=1e-5)
+        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=21.8e-4  , ps=1e-5)
         devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=-1e-4   , ps=2.5e-5)
-        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=67.3e-4, ps=2.5e-5)
+        devsim.add_2d_mesh_line(mesh="Sicar", dir="x", pos=32.8e-4, ps=2.5e-5)
         devsim.add_2d_region   (mesh="Sicar", material="SiliconCarbide", region=region)
         devsim.add_2d_region   (mesh="Sicar", material="air", region="air1", xl=-1e-4,  xh=0)
-        devsim.add_2d_region   (mesh="Sicar", material="air", region="air2", xl=67.3e-4, xh=66.3e-4)
+        devsim.add_2d_region   (mesh="Sicar", material="air", region="air2", xl=32.8e-4, xh=31.8e-4)
         devsim.add_2d_contact  (mesh="Sicar", name="top", region=region, xl=0, xh=0, bloat=1e-5, material="metal")
-        devsim.add_2d_contact  (mesh="Sicar", name="bot", region=region, xl=66.3e-4,   xh=66.3e-4, bloat=1e-5, material="metal")
+        devsim.add_2d_contact  (mesh="Sicar", name="bot", region=region, xl=31.8e-4,   xh=30.8e-4, bloat=1e-5, material="metal")
 
         devsim.finalize_mesh   (mesh="Sicar")
         devsim.create_device   (mesh="Sicar", device=device)
@@ -112,7 +112,7 @@ def SetNetDoping(device, region,simname):
     if simname=="sicar1.1.6":
         #node_in_2d.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")
         node_in_2d.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")
-        node_in_2d.CreateNodeModel(device, region, "Donors",    "7.0e16*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+        node_in_2d.CreateNodeModel(device, region, "Donors",    "7.96e16*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.1e15*( step((16.8e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((21.8e-4)-x) - step((16.8e-4)-x) )+ 1.0e19*( step((31.8e-4)-x) - step((21.8e-4)-x) )")
         #node_in_2d.CreateNodeModel(device, region, "Donors",    "1.0e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
         node_in_2d.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
     elif simname =="PNwithGainlayer":

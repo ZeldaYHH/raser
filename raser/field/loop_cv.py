@@ -17,7 +17,7 @@ device="MyDevice"
 region="MyRegion"
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
-areafactor=20000/3
+areafactor=10000
 
 with open('./output/parainprogram/config_loop.json', 'r') as f:
     params = json.load(f)
