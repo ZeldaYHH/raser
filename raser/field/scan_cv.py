@@ -37,8 +37,21 @@ def main(simname):
     }
         with open('./output/parainprogram/config_loop.json', 'w') as f:
             json.dump(params, f)
-        command = [sys.executable, './raser/field/loop_cv.py',simname]
-        process1 = subprocess.Popen(command, stdout=subprocess.PIPE)
+
+        # 获取当前文件的sys.path
+        current_path = sys.path
+
+        # 要执行的Python文件路径
+        file_path = './raser/field/loop_cv.py'
+        module_name = 'raser.field.loop_cv'
+
+        # 构建新的sys.path，将当前文件的sys.path传递给被执行的文件
+        new_sys_path = current_path + [file_path]
+
+        # 执行被执行的Python文件，并传递新的sys.path
+        process1 = subprocess.Popen([sys.executable, '-m', module_name, simname], 
+                                    env={'PYTHONPATH': ':'.join(new_sys_path)},
+                                    stdout=subprocess.PIPE)
         # 实时读取输出
         while True:
             output = process1.stdout.readline().decode().strip()
@@ -64,8 +77,20 @@ def main(simname):
                     }
             with open('./output/parainprogram/config_loop.json', 'w') as f:
                 json.dump(params, f)
-            command = [sys.executable, './raser/field/loop_cv.py']
-            process2 = subprocess.Popen(command, stdout=subprocess.PIPE)
+            # 获取当前文件的sys.path
+            current_path = sys.path
+
+            # 要执行的Python文件路径
+            file_path = './raser/field/loop_cv.py'
+            module_name = 'raser.field.loop_cv'
+
+            # 构建新的sys.path，将当前文件的sys.path传递给被执行的文件
+            new_sys_path = current_path + [file_path]
+
+            # 执行被执行的Python文件，并传递新的sys.path
+            process2 = subprocess.Popen([sys.executable, '-m', module_name, simname], 
+                                        env={'PYTHONPATH': ':'.join(new_sys_path)},
+                                        stdout=subprocess.PIPE)
             
             while True:
                 output = process2.stdout.readline().decode().strip()

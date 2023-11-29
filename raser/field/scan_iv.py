@@ -37,11 +37,25 @@ def main(simname, field_flag=False):
     }
         with open('./output/parainprogram/config_loopiv.json', 'w') as f:
             json.dump(params, f)
+        # 获取当前文件的sys.path
+        current_path = sys.path
+
+        # 要执行的Python文件路径
         if field_flag:
-            command = [sys.executable, './raser/field/get_efield.py']
+            file_path = './raser/field/get_efield.py'
+            module_name = 'raser.field.get_efield'
         else:
-            command = [sys.executable, './raser/field/loop_iv.py']
-        process1 = subprocess.Popen(command, stdout=subprocess.PIPE)
+            file_path = './raser/field/loop_iv.py'
+            module_name = 'raser.field.loop_iv'
+
+        # 构建新的sys.path，将当前文件的sys.path传递给被执行的文件
+        new_sys_path = current_path + [file_path]
+
+        # 执行被执行的Python文件，并传递新的sys.path
+        process1 = subprocess.Popen([sys.executable, '-m', module_name, simname], 
+                                    env={'PYTHONPATH': ':'.join(new_sys_path)},
+                                    stdout=subprocess.PIPE)
+
         # 实时读取输出
         while True:
             output = process1.stdout.readline().decode().strip()
@@ -66,11 +80,24 @@ def main(simname, field_flag=False):
                     }
             with open('./output/parainprogram/config_loopiv.json', 'w') as f:
                 json.dump(params, f)
+                    # 获取当前文件的sys.path
+            current_path = sys.path
+
+            # 要执行的Python文件路径
             if field_flag:
-                command = [sys.executable, './raser/field/get_efield.py']
+                file_path = './raser/field/get_efield.py'
+                module_name = 'raser.field.get_efield'
             else:
-                command = [sys.executable, './raser/field/loop_iv.py']
-            process2 = subprocess.Popen(command, stdout=subprocess.PIPE)
+                file_path = './raser/field/loop_iv.py'
+                module_name = 'raser.field.loop_iv'
+
+            # 构建新的sys.path，将当前文件的sys.path传递给被执行的文件
+            new_sys_path = current_path + [file_path]
+
+            # 执行被执行的Python文件，并传递新的sys.path
+            process2 = subprocess.Popen([sys.executable, '-m', module_name, simname], 
+                                        env={'PYTHONPATH': ':'.join(new_sys_path)},
+                                        stdout=subprocess.PIPE)
             
             while True:
                 output = process2.stdout.readline().decode().strip()
