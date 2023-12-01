@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from . import physics
 from . import node
 from . import initial
-from raser.read_json import Setting
+from util.read_json import Setting
 
 
 import matplotlib
