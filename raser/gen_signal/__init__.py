@@ -18,7 +18,7 @@ from field import solve_field as stripfield
 from current import cal_current as ccrt
 from elec import ele_readout as rdout
 
-from read_json import Setting
+from util.read_json import Setting
 from draw import draw_save
 import math
 

@@ -9,7 +9,7 @@ import subprocess
 from . import telescope as tlcp
 #from . import test
 from particle.g4simulation import Particles
-from read_json import Setting
+from util.read_json import Setting
 from particle.geometry import R3dDetector
 from current.cal_current import CalCurrentPixel
 from draw import draw_save

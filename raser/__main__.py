@@ -58,7 +58,7 @@ if submodule not in submodules:
     raise NameError(submodule)
 
 if vars(args)['batch'] == True:
-    batchjob = importlib.import_module('batchjob')
+    from util import batchjob
     destination = submodule
     command = ' '.join(sys.argv[1:])
     command = command.replace('--batch ', '')
