@@ -10,12 +10,6 @@ from . import node
 from . import initial
 # import Setting
 
-from . import nju_pin_5mm_5mm_mesh
-from . import hpk_pin_5mm_5mm_mesh
-from . import sicar1_lgad_mesh
-from . import itk_md8_mesh
-
-
 import matplotlib 
 import matplotlib.pyplot
 import csv
@@ -82,9 +76,9 @@ def set_para(para_list):
 
 def set_mesh(device,region):
     if device == "1D_SICAR1_LGAD":
-        device_mesh = field.sicar1_lgad_mesh
+        device_mesh = sicar1_lgad_mesh
     elif device == "1D_ITK_MD8" or device == "1D_ITK_ATLAS18":
-        device_mesh = field.itk_md8_mesh
+        device_mesh = itk_md8_mesh
     else: 
         raise NameError
     device_mesh.Create1DMesh(device=device, region=region)
@@ -99,21 +93,21 @@ def extend_set():
 
 def initial_solution(device,region,para_dict):
     # Initial DC solution
-    field.initial.InitialSolution(device, region, circuit_contacts="top")
+    initial.InitialSolution(device, region, circuit_contacts="top")
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
-            field.initial.DriftDiffusionInitialSolutionSiIrradiated(
+            initial.DriftDiffusionInitialSolutionSiIrradiated(
                 device, region, circuit_contacts="top")
             devsim.set_parameter(device=device, 
             name=physics.GetContactBiasName("top"), value=0)
         else:
-            field.initial.DriftDiffusionInitialSolutionIrradiated(
+            initial.DriftDiffusionInitialSolutionIrradiated(
                 device, region, circuit_contacts="top")
     else:
     ### Drift diffusion simulation at equilibrium
-        field.initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+        initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
         
 def set_defect(paras):
