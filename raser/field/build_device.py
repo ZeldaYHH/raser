@@ -75,6 +75,7 @@ def DrawDoping(device, region, path):
 def main(device):
     from util.output import output
     import json
+    import os
     region = device
     device_json = "./setting/detector/"+device+".json"
     with open(device_json) as f:
@@ -82,7 +83,9 @@ def main(device):
 
     Create2DMesh(device, region, device_dict)
     SetDoping(device, region, device_dict)
-    DrawDoping(device=device, region=region, path=output(__file__, device))
+    path = output(__file__, device)
+    DrawDoping(device=device, region=region, path=path)
+    devsim.write_devices(file=os.path.join(path,device+".dat"),type="tecplot")
 
 if __name__ == "__main__":
     import sys
