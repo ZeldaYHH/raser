@@ -1,0 +1,37 @@
+{
+    "det_name" : "ring",
+    "det_model" : "planarRing",
+    "material" : "SiC",
+
+    "lx" : 500,
+    "ly" : 500,
+    "lz" : 100,
+    "e_r_inner" : 200,
+    "e_r_outer" : 250,
+
+    "doping":{
+        "Acceptors" : "0",
+        "Donors" : "5.2e13"
+    },
+
+    "voltage" : -500,
+    "temperature" : 300.0,
+
+    "mesh" : {
+        "gmsh_mesh":{
+            "file" : "foo.msh",
+            "region" : [
+                {
+                    "material" : "SiliconCarbide", 
+                    "region" : "plugin3D", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    }
+}

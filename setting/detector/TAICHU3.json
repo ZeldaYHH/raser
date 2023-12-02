@@ -1,0 +1,41 @@
+{
+    "det_name" : "Taichu3",
+    "det_model" : "pixeldetector",
+    "material" : "Si",
+
+    "lx" : 1500,
+    "ly" : 1500,
+    "lz" : 20,
+
+    "doping":{
+        "Acceptors" : "1e12",
+        "Donors" : "0"
+    },
+
+    "voltage" : -1.8,
+    "temperature" : 300.0,
+
+    "px" : 25.0,
+    "py" : 25.0,
+    "pz" : 20.0,
+    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
+    "seedcharge": 100,
+
+    "mesh" : {
+        "gmsh_mesh":{
+            "file" : "foo.msh",
+            "region" : [
+                {
+                    "material" : "Silicon", 
+                    "region" : "TAICHU3", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    }
+}
