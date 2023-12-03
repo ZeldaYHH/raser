@@ -1,5 +1,5 @@
 {
-    "det_name" : "Si-Strip",
+    "det_name" : "ITk-Si-strip",
     "det_model" : "planar3D",
     "material" : "Si",
 
@@ -33,7 +33,7 @@
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "Si-Strip"
+                    "region" : "ITk-Si-strip"
                 },
                 {
                     "material" : "air",
@@ -49,17 +49,17 @@
                 }
             ],
             "contact" : [
-                {"name" : "top2", "material" : "metal", "region" : "Si-Strip",
+                {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 0,     "xh" : 0,     "yl" : 0,       "yh" : 0.2e-2,  "bloat" : 1e-10},
-                {"name" : "top1", "material" : "metal", "region" : "Si-Strip",
+                {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 0,     "xh" : 0,     "yl" : 0.75e-2, "yh" : 0.95e-2, "bloat" : 1e-10},
-                {"name" : "top3", "material" : "metal", "region" : "Si-Strip",
+                {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 0,     "xh" : 0,     "yl" : 1.5e-2,  "yh" : 1.7e-2,  "bloat" : 1e-10},
-                {"name" : "top4", "material" : "metal", "region" : "Si-Strip",
+                {"name" : "top4", "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 0,     "xh" : 0,     "yl" : 2.25e-2, "yh" : 2.45e-2, "bloat" : 1e-10},
-                {"name" : "top5", "material" : "metal", "region" : "Si-Strip",
+                {"name" : "top5", "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 0,     "xh" : 0,     "yl" : 3e-2,    "yh" : 3.2e-2,  "bloat" : 1e-10},
-                {"name" : "bot",  "material" : "metal", "region" : "Si-Strip",
+                {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 30e-3, "xh" : 30e-3, "bloat" : 1e-10}
             ]
         }

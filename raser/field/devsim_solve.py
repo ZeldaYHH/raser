@@ -33,8 +33,8 @@ def main(label=None,v_max = 400):
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
-        device = "itk-md8"
-        region = "itk-md8"
+        device = "ITk-md8"
+        region = "ITk-md8"
         para_dict=[]
         set_mesh(device,region)
         extend_set()
@@ -44,8 +44,8 @@ def main(label=None,v_max = 400):
     elif label=='itkmd8_iv_v1':
         area_factor=1.0/(0.76*0.76)
         v_max=700
-        device = "itk-md8"
-        region = "itk-md8"
+        device = "ITk-md8"
+        region = "ITk-md8"
         para_dict=[]
         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
         devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
@@ -56,8 +56,8 @@ def main(label=None,v_max = 400):
     elif label=='itkatlas18_iv_v1':
         area_factor=1.0/(10.0*10.0)
         v_max=700
-        device = "Si-Strip"
-        region = "Si-Strip"
+        device = "ITk-Si-strip"
+        region = "ITk-Si-strip"
         para_dict=[]
         set_mesh(device,region)
         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
@@ -79,7 +79,7 @@ def set_para(para_list):
 def set_mesh(device,region):
     if device == "SICAR-1.1.8":
         MyDetector = Detector(device, 1)
-    elif device == "itk-md8" or device == "Si-Strip":
+    elif device == "ITk-md8" or device == "ITk-Si-strip":
         MyDetector = Detector(device, 1)
     else: 
         raise NameError
@@ -96,7 +96,7 @@ def initial_solution(device,region,para_dict):
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
-        if device == "itk-md8":
+        if device == "ITk-md8":
             initial.DriftDiffusionInitialSolutionSiIrradiated(
                 device, region, circuit_contacts="top")
             devsim.set_parameter(device=device, 
@@ -240,7 +240,7 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
             holes.append(p)
 
 
-        if device == "itk-md8":
+        if device == "ITk-md8":
             reverse_voltage.append(reverse_v)
         else:
             reverse_voltage.append(0-reverse_v)
@@ -311,7 +311,7 @@ def solve_iv_Rirr(device,region,Rirr,v_max,area_factor,para_dict):
             holes.append(p)
 
 
-        if device == "itk-md8":
+        if device == "ITk-md8":
             reverse_voltage.append(reverse_v)
         else:
             reverse_voltage.append(0-reverse_v)

@@ -24,8 +24,8 @@ import itk_md8_mesh
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="itk-md8"
-region="itk-md8"
+device="ITk-md8"
+region="ITk-md8"
 
 # Area factor
 # 1D 1cm*1cm

@@ -19,8 +19,8 @@ import math
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="itk-md8"
-region="itk-md8"
+device="ITk-md8"
+region="ITk-md8"
 
 # Area factor
 # 1D 1cm*1cm
@@ -28,7 +28,7 @@ region="itk-md8"
 area_factor = 1.0/(0.76*0.76)
 
 
-MyDetector = Detector("itk-md8", 1)
+MyDetector = Detector("ITk-md8", 1)
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 

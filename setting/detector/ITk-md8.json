@@ -1,5 +1,5 @@
 {
-    "det_name" : "HPK-Si-PIN",
+    "det_name" : "ITk-md8",
     "det_model" : "planar3D",
     "material" : "Si",
 
@@ -28,7 +28,7 @@
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "HPK-Si-PIN", 
+                    "region" : "ITk-md8", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
