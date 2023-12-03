@@ -69,7 +69,7 @@ class Detector:
         for mesh_line in mesh["mesh_line"]:
             devsim.add_2d_mesh_line(mesh=mesh_name, **mesh_line)
         for region in mesh["region"]:
-            # Must define material regions before air regions!
+            # Must define material regions before air regions when material borders not clarified!
             devsim.add_2d_region   (mesh=mesh_name, **region)
         for contact in mesh["contact"]:
             devsim.add_2d_contact  (mesh=mesh_name, **contact)
