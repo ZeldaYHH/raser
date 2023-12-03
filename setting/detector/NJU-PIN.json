@@ -8,8 +8,8 @@
     "lz" : 100,
 
     "doping":{
-        "Acceptors" : "1.0e19*step(1e-4-x)",
-        "Donors" : "5.2e13*step(x-1e-4)"
+        "Acceptors" : "1.0e18*step(1e-4-x)",
+        "Donors" : "5.2e15*step(x-1e-4)"
     },
 
     "voltage" : -500,
