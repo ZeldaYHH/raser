@@ -6,7 +6,7 @@ Description:  physics.py
 '''
 
 import devsim
-from .node import *
+from .model_create import *
 from .drift_diffusion import *
 import math
 

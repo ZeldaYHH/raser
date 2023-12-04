@@ -2,8 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import node
-from . import node_in_2d
+from . import model_create
 
 from util.output import output
 import json
@@ -91,9 +90,9 @@ class Detector:
         '''
         Doping
         '''
-        node.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
-        node.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
-        node.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
+        model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
+        model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
+        model_create.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="NetDoping")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Donors")
@@ -102,9 +101,9 @@ class Detector:
         '''
         Doping
         '''
-        node_in_2d.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
-        node_in_2d.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
-        node_in_2d.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
+        model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
+        model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
+        model_create.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="NetDoping")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Donors")

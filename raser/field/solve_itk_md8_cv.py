@@ -6,7 +6,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from . import physics
-from . import node
+from . import model_create
 from . import initial
 
 from .build_device import Detector

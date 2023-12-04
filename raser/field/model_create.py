@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+# Copyright 2013 DEVSIM LLC
+#
+# SPDX-License-Identifier: Apache-2.0
+
 from devsim import *
 debug = False
 def CreateSolution(device, region, name):

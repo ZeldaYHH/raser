@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from .simple_dd import *
+from .drift_diffusion import *
 from devsim import *
 #TODO: make this a class so that paramters can be changed
 contactcharge_node="contactcharge_node"

@@ -7,7 +7,7 @@ import sys
 import math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from . import physics
-from . import node
+from . import model_create
 from . import initial
 from util.read_json import Setting
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from . import driftdiffusion_2d 
-from . import node_in_2d
+from . import drift_diffusion
+from . import model_create
 import devsim
 import math
 import pickle
@@ -58,7 +58,7 @@ E_g=5.216e-19
        
 def InitialSolution(device, region, circuit_contacts=None):
     # Create Potential, Potential@n0, Potential@n1
-    node_in_2d.CreateSolution(device, region, "Potential")
+    model_create.CreateSolution(device, region, "Potential")
 
     # Create potential only physical models
     CreateSiliconPotentialOnly(device, region)
@@ -79,8 +79,8 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
-    node_in_2d.CreateSolution(device, region, "Electrons")
-    node_in_2d.CreateSolution(device, region, "Holes")
+    model_create.CreateSolution(device, region, "Electrons")
+    model_create.CreateSolution(device, region, "Holes")
 
     ####
     #### create initial guess from dc only solution
@@ -102,8 +102,8 @@ def CVDriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
-    node_in_2d.CreateSolution(device, region, "Electrons")
-    node_in_2d.CreateSolution(device, region, "Holes")
+    model_create.CreateSolution(device, region, "Electrons")
+    model_create.CreateSolution(device, region, "Holes")
 
     ####
     #### create initial guess from dc only solution
@@ -124,8 +124,8 @@ def SiDriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
-    node_in_2d.CreateSolution(device, region, "Electrons")
-    node_in_2d.CreateSolution(device, region, "Holes")
+    model_create.CreateSolution(device, region, "Electrons")
+    model_create.CreateSolution(device, region, "Holes")
 
     ####
     #### create initial guess from dc only solution
@@ -204,7 +204,7 @@ def CreateOxideContact(device, region, contact):
     devsim.CreateContactNodeModelDerivative(device, contact, contact_model_name, eq, "Potential")
 
     #TODO: make everyone use dfield
-    if not devsim.node_in_2d.InEdgeModelList(device, region, contactcharge_edge):
+    if not devsim.model_create.InEdgeModelList(device, region, contactcharge_edge):
         devsim.CreateEdgeModel(device, region, contactcharge_edge, "Permittivity*ElectricField")
         devsim.CreateEdgeModelDerivatives(device, region, contactcharge_edge, "Permittivity*ElectricField", "Potential")
 
@@ -289,9 +289,9 @@ def CreateSiliconPotentialOnly(device, region):
     '''
       Creates the physical models for a Silicon region
     '''
-    if not node_in_2d.InNodeModelList(device, region, "Potential"):
+    if not model_create.InNodeModelList(device, region, "Potential"):
         print("Creating Node Solution Potential")
-        node_in_2d.CreateSolution(device, region, "Potential")
+        model_create.CreateSolution(device, region, "Potential")
     elec_i = "n_i*exp(Potential/V_t)"
     hole_i = "n_i*exp(-Potential/V_t)"
     #hole_i = "n_i^2/IntrinsicElectrons"
@@ -307,8 +307,8 @@ def CreateSiliconPotentialOnly(device, region):
     ):
         n = i[0]
         e = i[1]
-        node_in_2d.CreateNodeModel(device, region, n, e)
-        node_in_2d.CreateNodeModelDerivative(device, region, n, e, "Potential")
+        model_create.CreateNodeModel(device, region, n, e)
+        model_create.CreateNodeModelDerivative(device, region, n, e, "Potential")
 
     ### TODO: Edge Average Model
     for i in (
@@ -317,8 +317,8 @@ def CreateSiliconPotentialOnly(device, region):
     ):
         n = i[0]
         e = i[1]
-        node_in_2d.CreateEdgeModel(device, region, n, e)
-        node_in_2d.CreateEdgeModelDerivatives(device, region, n, e, "Potential")
+        model_create.CreateEdgeModel(device, region, n, e)
+        model_create.CreateEdgeModelDerivatives(device, region, n, e, "Potential")
 
     devsim.equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialIntrinsicCharge", edge_model="PotentialEdgeFlux", variable_update="log_damp")
@@ -330,12 +330,12 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
     '''
     # Means of determining contact charge
     # Same for all contacts
-    if not node_in_2d.InNodeModelList(device, region, "contactcharge_node"):
-        node_in_2d.CreateNodeModel(device, region, "contactcharge_node", "ElectronCharge*IntrinsicCharge")
+    if not model_create.InNodeModelList(device, region, "contactcharge_node"):
+        model_create.CreateNodeModel(device, region, "contactcharge_node", "ElectronCharge*IntrinsicCharge")
     #### TODO: This is the same as D-Field
-    if not node_in_2d.InEdgeModelList(device, region, "contactcharge_edge"):
-        node_in_2d.CreateEdgeModel(device, region, "contactcharge_edge", "Permittivity*ElectricField")
-        node_in_2d.CreateEdgeModelDerivatives(device, region, "contactcharge_edge", "Permittivity*ElectricField", "Potential")
+    if not model_create.InEdgeModelList(device, region, "contactcharge_edge"):
+        model_create.CreateEdgeModel(device, region, "contactcharge_edge", "Permittivity*ElectricField")
+        model_create.CreateEdgeModelDerivatives(device, region, "contactcharge_edge", "Permittivity*ElectricField", "Potential")
 
 #  devsim.set_parameter(device=device, region=region, name=GetContactBiasName(contact), value=0.0)
 
@@ -344,11 +344,11 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
     V_t*log({2}/n_i))".format(GetContactBiasName(contact), celec_model, chole_model)
 
     contact_model_name = GetContactNodeModelName(contact)
-    node_in_2d.CreateContactNodeModel(device, contact, contact_model_name, contact_model)
+    model_create.CreateContactNodeModel(device, contact, contact_model_name, contact_model)
     # Simplify it too complicated
-    node_in_2d.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_model_name,"Potential"), "1")
+    model_create.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_model_name,"Potential"), "1")
     if is_circuit:
-        node_in_2d.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_model_name,GetContactBiasName(contact)), "-1")
+        model_create.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_model_name,GetContactBiasName(contact)), "-1")
 
     if is_circuit:
         devsim.contact_equation(device=device, contact=contact, name="PotentialEquation",
@@ -375,7 +375,7 @@ def CreateImpactGenerationSiliconCarbide(device, region):
     #k_T0_ev = 0.0257 # eV
     # gamma = math.tanh(0.19/(2*0.0257))/math.tanh(0.19/(2*0.0257*T/T0))
     
-    # if not node_in_2d.InEdgeModelList(device, region, "ElectricField"):
+    # if not model_create.InEdgeModelList(device, region, "ElectricField"):
     #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
     #     CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
 
@@ -383,38 +383,38 @@ def CreateImpactGenerationSiliconCarbide(device, region):
     sin_cutoff_angle = math.sin(math.radians(cutoff_angle))
     cos_cutoff_angle = math.cos(math.radians(cutoff_angle))
 
-    if not node_in_2d.InEdgeModelList(device, region, "ElectricField_0001"):
-        node_in_2d.CreateEdgeModel(device, region, "ElectricField_0001", "abs(ElectricField+1)*{0}".format(cos_cutoff_angle))
+    if not model_create.InEdgeModelList(device, region, "ElectricField_0001"):
+        model_create.CreateEdgeModel(device, region, "ElectricField_0001", "abs(ElectricField+1)*{0}".format(cos_cutoff_angle))
 
-    if not node_in_2d.InEdgeModelList(device, region, "ElectricField_1120"):
-        node_in_2d.CreateEdgeModel(device, region, "ElectricField_1120", "abs(ElectricField+1)*{0}".format(sin_cutoff_angle))
+    if not model_create.InEdgeModelList(device, region, "ElectricField_1120"):
+        model_create.CreateEdgeModel(device, region, "ElectricField_1120", "abs(ElectricField+1)*{0}".format(sin_cutoff_angle))
 
-    if not node_in_2d.InEdgeModelList(device, region, "n_B"):
-        node_in_2d.CreateEdgeModel(device, region, "n_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/n_b_1120 , 2) + pow( ElectricField_0001/n_b_0001 , 2) , 0.5)")
+    if not model_create.InEdgeModelList(device, region, "n_B"):
+        model_create.CreateEdgeModel(device, region, "n_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/n_b_1120 , 2) + pow( ElectricField_0001/n_b_0001 , 2) , 0.5)")
 
-    if not node_in_2d.InEdgeModelList(device, region, "p_B"):
-        node_in_2d.CreateEdgeModel(device, region, "p_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/p_b_1120 , 2) + pow( ElectricField_0001/p_b_0001 , 2) , 0.5)")
-
-
-    if not node_in_2d.InEdgeModelList(device, region, "n_a_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "n_a_aniso", "pow( n_a_1120, pow( n_B*ElectricField_1120/n_b_1120/abs(ElectricField+1), 2) ) * pow( n_a_0001, pow( n_B*ElectricField_0001/n_b_0001/abs(ElectricField+1), 2) )")
-
-    if not node_in_2d.InEdgeModelList(device, region, "p_a_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "p_a_aniso", "pow( p_a_1120, pow( p_B*ElectricField_1120/p_b_1120/abs(ElectricField+1), 2) ) * pow( p_a_0001, pow( p_B*ElectricField_0001/p_b_0001/abs(ElectricField+1), 2) )")
+    if not model_create.InEdgeModelList(device, region, "p_B"):
+        model_create.CreateEdgeModel(device, region, "p_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/p_b_1120 , 2) + pow( ElectricField_0001/p_b_0001 , 2) , 0.5)")
 
 
+    if not model_create.InEdgeModelList(device, region, "n_a_aniso"):
+        model_create.CreateEdgeModel(device, region, "n_a_aniso", "pow( n_a_1120, pow( n_B*ElectricField_1120/n_b_1120/abs(ElectricField+1), 2) ) * pow( n_a_0001, pow( n_B*ElectricField_0001/n_b_0001/abs(ElectricField+1), 2) )")
 
-    if not node_in_2d.InEdgeModelList(device, region, "n_A"):
-        node_in_2d.CreateEdgeModel(device, region, "n_A", "log(n_a_0001/n_b_1120)")
+    if not model_create.InEdgeModelList(device, region, "p_a_aniso"):
+        model_create.CreateEdgeModel(device, region, "p_a_aniso", "pow( p_a_1120, pow( p_B*ElectricField_1120/p_b_1120/abs(ElectricField+1), 2) ) * pow( p_a_0001, pow( p_B*ElectricField_0001/p_b_0001/abs(ElectricField+1), 2) )")
 
-    if not node_in_2d.InEdgeModelList(device, region, "p_A"):
-        node_in_2d.CreateEdgeModel(device, region, "p_A", "log(p_a_0001/p_b_1120)")
 
-    if not node_in_2d.InEdgeModelList(device, region, "n_b_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "n_b_aniso", "n_B * pow( 1-pow(n_A,2)* pow( (n_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*n_b_1120*n_b_0001), 2), 0.5)")
 
-    if not node_in_2d.InEdgeModelList(device, region, "p_b_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "p_b_aniso", "p_B * pow( 1-pow(p_A,2)* pow( (p_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*p_b_1120*p_b_0001), 2), 0.5)")
+    if not model_create.InEdgeModelList(device, region, "n_A"):
+        model_create.CreateEdgeModel(device, region, "n_A", "log(n_a_0001/n_b_1120)")
+
+    if not model_create.InEdgeModelList(device, region, "p_A"):
+        model_create.CreateEdgeModel(device, region, "p_A", "log(p_a_0001/p_b_1120)")
+
+    if not model_create.InEdgeModelList(device, region, "n_b_aniso"):
+        model_create.CreateEdgeModel(device, region, "n_b_aniso", "n_B * pow( 1-pow(n_A,2)* pow( (n_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*n_b_1120*n_b_0001), 2), 0.5)")
+
+    if not model_create.InEdgeModelList(device, region, "p_b_aniso"):
+        model_create.CreateEdgeModel(device, region, "p_b_aniso", "p_B * pow( 1-pow(p_A,2)* pow( (p_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*p_b_1120*p_b_0001), 2), 0.5)")
 
     gamma_str = "tanh(0.19/(2*0.0257))/tanh(0.19/(2*0.0257*T/T0))"
     Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, {0} * n_a_aniso * exp( - {1} * n_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
@@ -422,27 +422,27 @@ def CreateImpactGenerationSiliconCarbide(device, region):
 
     Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
 
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
     defect_R="1.7*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e5)"
     # defect_R="1.7*abs(ElectricField)^2.5*exp(abs(ElectricField)/1.5e5)"
-    node_in_2d.CreateEdgeModel(device, region, "defect_R", defect_R)
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"defect_R",defect_R,"Potential")
+    model_create.CreateEdgeModel(device, region, "defect_R", defect_R)
+    model_create.CreateEdgeModelDerivatives(device,region,"defect_R",defect_R,"Potential")
  
     ImpactGen_n = "+q*(%s+defect_R)"%(Ion_coeff_rate)
     ImpactGen_p = "-q*(%s+defect_R)"%(Ion_coeff_rate)
 
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
     
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
 
 
 def CreateImpactGeneration(device, region):
@@ -455,23 +455,23 @@ def CreateImpactGeneration(device, region):
 
     Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
 
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
  
     ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
     ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
 
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
     
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
   
 
 
@@ -479,59 +479,59 @@ def CreateTunnelingAndAvalanche(device,region):
     cutoff_angle = 4 #degree
     sin_cutoff_angle = math.sin(math.radians(cutoff_angle))
     cos_cutoff_angle = math.cos(math.radians(cutoff_angle))
-    if not node_in_2d.InEdgeModelList(device, region, "ElectricField_0001"):
-        node_in_2d.CreateEdgeModel(device, region, "ElectricField_0001", "abs(ElectricField+1)*{0}".format(cos_cutoff_angle))
-    if not node_in_2d.InEdgeModelList(device, region, "ElectricField_1120"):
-        node_in_2d.CreateEdgeModel(device, region, "ElectricField_1120", "abs(ElectricField+1)*{0}".format(sin_cutoff_angle))
-    if not node_in_2d.InEdgeModelList(device, region, "n_B"):
-        node_in_2d.CreateEdgeModel(device, region, "n_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/n_b_1120 , 2) + pow( ElectricField_0001/n_b_0001 , 2) , 0.5)")
-    if not node_in_2d.InEdgeModelList(device, region, "p_B"):
-        node_in_2d.CreateEdgeModel(device, region, "p_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/p_b_1120 , 2) + pow( ElectricField_0001/p_b_0001 , 2) , 0.5)")
-    if not node_in_2d.InEdgeModelList(device, region, "n_a_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "n_a_aniso", "pow( n_a_1120, pow( n_B*ElectricField_1120/n_b_1120/abs(ElectricField+1), 2) ) * pow( n_a_0001, pow( n_B*ElectricField_0001/n_b_0001/abs(ElectricField+1), 2) )")
-    if not node_in_2d.InEdgeModelList(device, region, "p_a_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "p_a_aniso", "pow( p_a_1120, pow( p_B*ElectricField_1120/p_b_1120/abs(ElectricField+1), 2) ) * pow( p_a_0001, pow( p_B*ElectricField_0001/p_b_0001/abs(ElectricField+1), 2) )")
-    if not node_in_2d.InEdgeModelList(device, region, "n_A"):
-        node_in_2d.CreateEdgeModel(device, region, "n_A", "log(n_a_0001/n_b_1120)")
-    if not node_in_2d.InEdgeModelList(device, region, "p_A"):
-        node_in_2d.CreateEdgeModel(device, region, "p_A", "log(p_a_0001/p_b_1120)")
-    if not node_in_2d.InEdgeModelList(device, region, "n_b_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "n_b_aniso", "n_B * pow( 1-pow(n_A,2)* pow( (n_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*n_b_1120*n_b_0001), 2), 0.5)")
-    if not node_in_2d.InEdgeModelList(device, region, "p_b_aniso"):
-        node_in_2d.CreateEdgeModel(device, region, "p_b_aniso", "p_B * pow( 1-pow(p_A,2)* pow( (p_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*p_b_1120*p_b_0001), 2), 0.5)")
+    if not model_create.InEdgeModelList(device, region, "ElectricField_0001"):
+        model_create.CreateEdgeModel(device, region, "ElectricField_0001", "abs(ElectricField+1)*{0}".format(cos_cutoff_angle))
+    if not model_create.InEdgeModelList(device, region, "ElectricField_1120"):
+        model_create.CreateEdgeModel(device, region, "ElectricField_1120", "abs(ElectricField+1)*{0}".format(sin_cutoff_angle))
+    if not model_create.InEdgeModelList(device, region, "n_B"):
+        model_create.CreateEdgeModel(device, region, "n_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/n_b_1120 , 2) + pow( ElectricField_0001/n_b_0001 , 2) , 0.5)")
+    if not model_create.InEdgeModelList(device, region, "p_B"):
+        model_create.CreateEdgeModel(device, region, "p_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/p_b_1120 , 2) + pow( ElectricField_0001/p_b_0001 , 2) , 0.5)")
+    if not model_create.InEdgeModelList(device, region, "n_a_aniso"):
+        model_create.CreateEdgeModel(device, region, "n_a_aniso", "pow( n_a_1120, pow( n_B*ElectricField_1120/n_b_1120/abs(ElectricField+1), 2) ) * pow( n_a_0001, pow( n_B*ElectricField_0001/n_b_0001/abs(ElectricField+1), 2) )")
+    if not model_create.InEdgeModelList(device, region, "p_a_aniso"):
+        model_create.CreateEdgeModel(device, region, "p_a_aniso", "pow( p_a_1120, pow( p_B*ElectricField_1120/p_b_1120/abs(ElectricField+1), 2) ) * pow( p_a_0001, pow( p_B*ElectricField_0001/p_b_0001/abs(ElectricField+1), 2) )")
+    if not model_create.InEdgeModelList(device, region, "n_A"):
+        model_create.CreateEdgeModel(device, region, "n_A", "log(n_a_0001/n_b_1120)")
+    if not model_create.InEdgeModelList(device, region, "p_A"):
+        model_create.CreateEdgeModel(device, region, "p_A", "log(p_a_0001/p_b_1120)")
+    if not model_create.InEdgeModelList(device, region, "n_b_aniso"):
+        model_create.CreateEdgeModel(device, region, "n_b_aniso", "n_B * pow( 1-pow(n_A,2)* pow( (n_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*n_b_1120*n_b_0001), 2), 0.5)")
+    if not model_create.InEdgeModelList(device, region, "p_b_aniso"):
+        model_create.CreateEdgeModel(device, region, "p_b_aniso", "p_B * pow( 1-pow(p_A,2)* pow( (p_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*p_b_1120*p_b_0001), 2), 0.5)")
     gamma_str = "tanh(0.19/(2*0.0257))/tanh(0.19/(2*0.0257*T/T0))"
     Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, {0} * n_a_aniso * exp( - {1} * n_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
     Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, {0} * p_a_aniso * exp( - {1} * p_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
     Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
-    node_in_2d.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
+    model_create.CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
     
     R_improved="3.11*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e4)"
-    node_in_2d.CreateEdgeModel(device,region,"R_improved",R_improved)
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"R_improved",R_improved,"Potential")
+    model_create.CreateEdgeModel(device,region,"R_improved",R_improved)
+    model_create.CreateEdgeModelDerivatives(device,region,"R_improved",R_improved,"Potential")
     R_BTBT="1e21*abs(ElectricField)^2.5*exp(-0.8e7/(1+abs(ElectricField)))"
-    node_in_2d.CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
+    model_create.CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
+    model_create.CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
     devsim.edge_from_node_model(device=device,region=region,node_model="USRH")
     R_TAT="2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*USRH@n1"
-    node_in_2d.CreateEdgeModel(device,region,"R_TAT",R_TAT)
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Holes")
+    model_create.CreateEdgeModel(device,region,"R_TAT",R_TAT)
+    model_create.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
+    model_create.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")
+    model_create.CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Holes")
     ImpactGen_n = "+q*(%s+R_improved)"%(Ion_coeff_rate)
     ImpactGen_p = "-q*(%s+R_improved)"%(Ion_coeff_rate)
 
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
     
-    node_in_2d.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
-    node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
+    model_create.CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
+    model_create.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
 
 
 def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
@@ -570,13 +570,13 @@ def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
         #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
         R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=nametype)
 
-    node_in_2d.CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
-    node_in_2d.CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
-    node_in_2d.CreateNodeModel(device, region, "R_t_irr", R_t_irr)
+    model_create.CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
+    model_create.CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
+    model_create.CreateNodeModel(device, region, "R_t_irr", R_t_irr)
     for i in ("Electrons", "Holes", "Potential"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
+        model_create.CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
+        model_create.CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
+        model_create.CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
 
 
 #add srh1&2
@@ -585,9 +585,9 @@ def CreateSRH1(device, region):
     Add defect Z 1 / 2
     '''
     R_z="(sigma_n*sigma_p*v_T*N_t*(Electrons*Holes - n_i^2))/(sigma_n*(Electrons - n1*exp(1.6e-19/(k_T0))) + sigma_p*(Holes + p1*exp(1.6e-19/(k_T0))))"
-    node_in_2d.CreateNodeModel(device, region, "R_z", R_z)
+    model_create.CreateNodeModel(device, region, "R_z", R_z)
     for i in ("Electrons", "Holes"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "R_z", R_z, i)
+        model_create.CreateNodeModelDerivative(device, region, "R_z", R_z, i)
 
 def CreateSRH2(device, region):
     '''
@@ -595,9 +595,9 @@ def CreateSRH2(device, region):
     '''
    
     R_h6="(sigma_n_HS6*sigma_p_HS6*v_T*N_t_HS6*(Electrons*Holes - n_i^2))/(sigma_n_HS6*(Electrons - n1*exp(4.8e-22/(k_T0))) + sigma_p_HS6*(Holes + p1*exp(4.8e-22/(k_T0))))"
-    node_in_2d.CreateNodeModel(device, region, "R_h6", R_h6)
+    model_create.CreateNodeModel(device, region, "R_h6", R_h6)
     for i in ("Electrons", "Holes"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
+        model_create.CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
           
 
 
@@ -612,13 +612,13 @@ def CreateSRH(device, region):
     #Gp = "+ElectronCharge * USRH"
     Gn = "-q * (USRH -1e12)"
     Gp = "+q * (USRH -1e12)"
-    node_in_2d.CreateNodeModel(device, region, "USRH", USRH)
-    node_in_2d.CreateNodeModel(device, region, "ElectronGeneration", Gn)
-    node_in_2d.CreateNodeModel(device, region, "HoleGeneration", Gp)
+    model_create.CreateNodeModel(device, region, "USRH", USRH)
+    model_create.CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    model_create.CreateNodeModel(device, region, "HoleGeneration", Gp)
     for i in ("Electrons", "Holes"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "USRH", USRH, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
+        model_create.CreateNodeModelDerivative(device, region, "USRH", USRH, i)
+        model_create.CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
+        model_create.CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
 
 
 
@@ -627,10 +627,10 @@ def CreateSRH(device, region):
 
 
 def CreateHCE(device, region, mu_p):
-    driftdiffusion_2d.CreateHoleCurrent(device, region, mu_p)
+    drift_diffusion.CreateHoleCurrent(device, region, mu_p)
     PCharge = "ElectronCharge * Holes"
-    node_in_2d.CreateNodeModel(device, region, "PCharge", PCharge)
-    node_in_2d.CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
+    model_create.CreateNodeModel(device, region, "PCharge", PCharge)
+    model_create.CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
     #addimpact
     CreateImpactGenerationSiliconCarbide(device, region)
    
@@ -647,11 +647,11 @@ def CreateHCE(device, region, mu_p):
              )
 
 def CreateECE(device, region, mu_n):
-    driftdiffusion_2d.CreateElectronCurrent(device, region, mu_n)
+    drift_diffusion.CreateElectronCurrent(device, region, mu_n)
 
     NCharge = "-ElectronCharge * Electrons"
-    node_in_2d.CreateNodeModel(device, region, "NCharge", NCharge)
-    node_in_2d.CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
+    model_create.CreateNodeModel(device, region, "NCharge", NCharge)
+    model_create.CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
     #addimpact
     CreateImpactGenerationSiliconCarbide(device, region)
   
@@ -669,11 +669,11 @@ def CreateECE(device, region, mu_n):
 
 
 def CreateSiECE(device, region, mu_n):
-    driftdiffusion_2d.CreateElectronCurrent(device, region, mu_n)
+    drift_diffusion.CreateElectronCurrent(device, region, mu_n)
 
     NCharge = "-ElectronCharge * Electrons"
-    node_in_2d.CreateNodeModel(device, region, "NCharge", NCharge)
-    node_in_2d.CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
+    model_create.CreateNodeModel(device, region, "NCharge", NCharge)
+    model_create.CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
     #CreateImpactGeneration(device, region)
    
     devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
@@ -683,10 +683,10 @@ def CreateSiECE(device, region, mu_n):
 
 
 def CreateSiHCE(device, region, mu_p):
-    driftdiffusion_2d.CreateHoleCurrent(device, region, mu_p)
+    drift_diffusion.CreateHoleCurrent(device, region, mu_p)
     PCharge = "ElectronCharge * Holes"
-    node_in_2d.CreateNodeModel(device, region, "PCharge", PCharge)
-    node_in_2d.CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
+    model_create.CreateNodeModel(device, region, "PCharge", PCharge)
+    model_create.CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
 
     #CreateImpactGeneration(device, region)
    
@@ -701,9 +701,9 @@ def CreatePE(device, region):
     #CreateIrradiatedCharge(device, region, Neutron_eq=1e9)
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     #pne = "-q*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
-    node_in_2d.CreateNodeModel(device, region, "PotentialNodeCharge", pne)
-    node_in_2d.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
-    node_in_2d.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
+    model_create.CreateNodeModel(device, region, "PotentialNodeCharge", pne)
+    model_create.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
+    model_create.CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
 
     devsim.equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialNodeCharge", edge_model="PotentialEdgeFlux",
@@ -713,7 +713,7 @@ def CreatePE(device, region):
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
 
-    driftdiffusion_2d.CreateBernoulli(device, region) 
+    drift_diffusion.CreateBernoulli(device, region) 
     CreatePE(device, region)
     CreateSRH(device, region)
     #CreateNetGeneration(device, region)
@@ -722,7 +722,7 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     
 def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
  
-    driftdiffusion_2d.CreateBernoulli(device, region) 
+    drift_diffusion.CreateBernoulli(device, region) 
 
     CreatePE(device, region)
     CreateSRH(device, region)
@@ -731,7 +731,7 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
        
 def CVCreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     
-    driftdiffusion_2d.CreateBernoulli(device, region) 
+    drift_diffusion.CreateBernoulli(device, region) 
 
     CreatePE(device, region)
     CreateSRH(device, region)
@@ -748,13 +748,13 @@ def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=Fal
     contact_electrons_name = "{0}nodeelectrons".format(contact)
     contact_holes_name = "{0}nodeholes".format(contact)
 
-    node_in_2d.CreateContactNodeModel(device, contact, contact_electrons_name, contact_electrons_model)
+    model_create.CreateContactNodeModel(device, contact, contact_electrons_name, contact_electrons_model)
     #TODO: The simplification of the ifelse statement is time consuming
 #  devsim.CreateContactNodeModelDerivative(device, contact, contact_electrons_name, contact_electrons_model, "Electrons")
-    node_in_2d.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_electrons_name, "Electrons"), "1")
+    model_create.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_electrons_name, "Electrons"), "1")
 
-    node_in_2d.CreateContactNodeModel(device, contact, contact_holes_name, contact_holes_model)
-    node_in_2d.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_holes_name, "Holes"), "1")
+    model_create.CreateContactNodeModel(device, contact, contact_holes_name, contact_holes_model)
+    model_create.CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_holes_name, "Holes"), "1")
 
     #TODO: keyword args
     if is_circuit:

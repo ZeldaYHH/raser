@@ -6,7 +6,7 @@ Description:  Initial.py
 '''
 
 import devsim
-from .node import *
+from .model_create import *
 from .physics import *
 
 def InitialSolution(device, region, circuit_contacts=None):

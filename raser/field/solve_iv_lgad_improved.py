@@ -7,7 +7,7 @@ import sys
 import math
 
 from . import physics
-from . import node
+from . import model_create
 from . import initial
 
 from .build_device import Detector

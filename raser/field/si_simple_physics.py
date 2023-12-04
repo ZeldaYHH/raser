@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .si_simple_dd import *
+from .drift_diffusion import *
 from devsim import *
 #TODO: make this a class so that paramters can be changed
 contactcharge_node="contactcharge_node"
