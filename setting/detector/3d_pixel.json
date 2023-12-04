@@ -26,7 +26,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "foo.msh",
+            "file" : "output/parainprogram/pixel.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

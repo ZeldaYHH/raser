@@ -19,7 +19,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "foo.msh",
+            "file" : "output/parainprogram/RINGdevice.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

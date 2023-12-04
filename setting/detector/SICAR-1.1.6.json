@@ -62,7 +62,7 @@
             ]
         },
         "gmsh_mesh":{
-            "file" : "foo.msh",
+            "file" : "output/parainprogram/3d_lgad.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

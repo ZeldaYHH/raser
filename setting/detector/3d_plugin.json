@@ -21,7 +21,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "foo.msh",
+            "file" : "output/parainprogram/3d_time.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
