@@ -94,7 +94,7 @@ def main(args):
         draw_save.cce(my_d,my_f,my_current)
         return
    
-    if "SICAR-1" == dset.detector_name:
+    if "SICAR-1.1.8" == dset.detector_name:
         my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)
         my_g4p = g4s.Particles(my_d, dset)   
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)

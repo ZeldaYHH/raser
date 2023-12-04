@@ -9,7 +9,7 @@ from . import physics
 from . import node
 from . import initial
 
-from . import itk_md8_mesh
+from .build_device import Detector
 
 import matplotlib
 import matplotlib.pyplot
@@ -19,8 +19,8 @@ import math
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="1D_ITK_MD8"
-region="1D_ITK_MD8"
+device="ITk-md8"
+region="ITk-md8"
 
 # Area factor
 # 1D 1cm*1cm
@@ -28,9 +28,7 @@ region="1D_ITK_MD8"
 area_factor = 1.0/(0.76*0.76)
 
 
-itk_md8_mesh.Create1DMesh(device=device, region=region)
-itk_md8_mesh.SetDoping(device=device, region=region)
-itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
+MyDetector = Detector("ITk-md8", 1)
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 

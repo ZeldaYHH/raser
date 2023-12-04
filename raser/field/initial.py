@@ -51,7 +51,7 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    if device == "1D_ITK_MD8":
+    if device == "ITk-md8":
         CreateSiDriftDiffusion(device, region)
     else:
         CreateDriftDiffusion(device, region)
@@ -79,7 +79,7 @@ def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=Non
     ###
     ### Set up equations
     ###
-    if device == "1D_ITK_MD8":
+    if device == "ITk-md8":
         CreateSiDriftDiffusionIrradiated(device, region)
     else:
         CreateDriftDiffusionIrradiated(device, region)

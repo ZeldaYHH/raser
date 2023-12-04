@@ -11,8 +11,8 @@ import csv
 
 def main(simname):
     
-    device="MyDevice"
-    region="MyRegion"
+    device=simname
+    region=simname
     # 指定文件夹路径
     folder_path = "./output/parainprogram"
 

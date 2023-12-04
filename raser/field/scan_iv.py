@@ -7,8 +7,8 @@ import json
 
 
 def main(simname, field_flag=False):
-    device="MyDevice"
-    region="MyRegion"
+    device=simname
+    region=simname
     # 指定文件夹路径
     folder_path = "./output/parainprogram"
 

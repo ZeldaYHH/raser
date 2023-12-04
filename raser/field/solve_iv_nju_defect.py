@@ -11,13 +11,12 @@ from . import physics
 from . import node
 from . import initial
 
+from .build_device import Detector
+
 import matplotlib
 import matplotlib.pyplot
 import csv
 import numpy as np
-
-
-import nju_pin_5mm_5mm_mesh
 
 if not (os.path.exists("./output/devsim")):
     os.makedir("./output/devsim")
@@ -30,9 +29,7 @@ region="1D_NJU_PIN"
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
-nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
-nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
+MyDetector = Detector("NJU-PIN", 1)
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 

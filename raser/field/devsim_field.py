@@ -36,7 +36,7 @@ class Devsim_field:
             for i in range(int(self.read_ele_num)):
                 self.w_p.append(strip_w_p(i))
 
-        if(det_name=="SICAR-1"):
+        if(det_name=="SICAR-1.1.6"):
             with open("output/devsim/2D_SICAR/80V_potential.pkl",'rb') as file:
                 data = pickle.load(file)
                 self.dimension = data['metadata']['dimension']

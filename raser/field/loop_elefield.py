@@ -3,7 +3,7 @@
 
 import devsim
 from . import physics_2d
-from . import build_2d_device
+from .build_device import Detector
 import math
 import sys
 from array import array
@@ -12,10 +12,10 @@ import numpy as np
 import pickle
 import json
 import os
-from . import pixel_3d_mesh
+
 simname=sys.argv[1]
-device="MyDevice"
-region="MyRegion"
+device=simname
+region=simname
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 areafactor=2e2
@@ -29,19 +29,11 @@ voltage= float(params["voltage"])
 devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
-if simname =="3d_pixel":
-    pixel_3d_mesh.Create3DSICARFromGmesh(device,region)
-    pixel_3d_mesh.SetDoping(device,region)
-    build_2d_device.SetParameters(device=device, region=region)
-elif simname =="3d_time":
-    build_2d_device.Create2DMesh(device, region,simname)
-    build_2d_device.SetParameters(device=device, region=region)
-    build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
-elif simname =="3d_ringcontact":
-    build_2d_device.Create2DMesh(device, region,simname)
-    build_2d_device.SetParameters(device=device, region=region)
-    build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
-    
+
+MyDetector = Detector(simname, 3)
+
+physics_2d.SetSiliconParameters(device, region, 300)
+
 physics_2d.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
 

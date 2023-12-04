@@ -10,27 +10,24 @@ from . import physics
 from . import node
 from . import initial
 
+from .build_device import Detector
+
 import matplotlib
 import matplotlib.pyplot
 import csv
 
-
-import sicar1_lgad_mesh
-
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="1D_SICAR1_LGAD"
-region="1D_SICAR1_LGAD"
+device="SICAR-1.1.8"
+region="SICAR-1.1.8"
 
 # Area factor
 # 1D 1cm*1cm
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-sicar1_lgad_mesh.CreateMesh(device=device, region=region)
-sicar1_lgad_mesh.SetDoping(device=device, region=region)
-sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/sicar1_lgad_doping.png")
+MyDetector = Detector("SICAR-1.1.8", 1)
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 # Extended precision

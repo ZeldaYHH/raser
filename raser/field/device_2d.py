@@ -6,7 +6,6 @@ import devsim
 from . import diode_element_physics
 import sys
 import math
-from . import pixel_3d_mesh
 sys.path.append("..")
 import matplotlib
 import os
@@ -43,8 +42,8 @@ def createMesh(device, region):
 
 
 
-device="MyDevice"
-region="MyRegion"
+device=simname
+region=simname
 
 createMesh(device,region)
 

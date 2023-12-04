@@ -1,0 +1,39 @@
+{
+    "det_name" : "plugin3D",
+    "det_model" : "plugin3D",
+    "material" : "SiC",
+
+    "lx" : 10000,
+    "ly" : 10000,
+    "lz" : 350,
+    
+    "custom_electrode" : "True",
+    "e_r" : 50.0,
+    "e_gap" : 150.0,
+
+    "doping":{
+        "Acceptors" : "0",
+        "Donors" : "1e13"
+    },
+
+    "voltage" : -500,
+    "temperature" : 300.0,
+
+    "mesh" : {
+        "gmsh_mesh":{
+            "file" : "output/parainprogram/3d_time.msh",
+            "region" : [
+                {
+                    "material" : "SiliconCarbide", 
+                    "region" : "plugin3D", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    }
+}

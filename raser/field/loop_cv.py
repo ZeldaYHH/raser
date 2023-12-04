@@ -3,7 +3,7 @@
 
 import devsim
 from . import physics_2d
-from . import build_2d_device
+from .build_device import Detector
 import math
 import sys
 from array import array
@@ -13,8 +13,9 @@ import pickle
 import json
 import os
 simname=sys.argv[1]
-device="MyDevice"
-region="MyRegion"
+device=simname
+region=simname
+
 #This requires a circuit element to integrated current
 devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 areafactor=10000
@@ -29,14 +30,9 @@ devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 
-build_2d_device.Create2DMesh(device, region,simname)
+MyDetector = Detector(simname)
 
-build_2d_device.SetParameters(device=device, region=region)
-
-build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
-
-
-
+physics_2d.SetSiliconParameters(device, region, 300)
     
 physics_2d.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")

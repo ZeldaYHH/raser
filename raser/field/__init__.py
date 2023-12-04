@@ -24,15 +24,15 @@ def main(args):
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
     elif label == 'sicar1.1.6_cv_v1':
-        scan_cv.main(simname="sicar1.1.6")
+        scan_cv.main(simname="SICAR-1.1.6")
     elif label == "NJUPIN_cv_v1":
-        scan_cv.main(simname="NJUPIN")
+        scan_cv.main(simname="NJU-PIN")
     elif label == 'sicar1.1.6_iv_v1':
-        scan_iv.main(simname="sicar1.1.6")
+        scan_iv.main(simname="SICAR-1.1.6")
     elif label == 'NJUPIN_iv_v1':
-        scan_iv.main(simname="NJUPIN")
+        scan_iv.main(simname="NJU-PIN")
     elif label == 'NJUPIN_defect_iv_v1':
-        scan_iv.main(simname="NJUPIN_defect")
+        scan_iv.main(simname="NJU-PIN")
     elif label == 'sicar1.1.8_cv_0-1v':
         devsim_solve.main()
     elif label == 'sicar1.1.8_cv_v1':
@@ -53,18 +53,15 @@ def main(args):
         scan_elefield.main("3d_pixel")
     elif label == "3d_lgad_cv_v1":
         scan_cv.main("3d_lgad")
-    elif label == "3d_time_potential":
-        scan_elefield.main("3d_time")
+    elif label == "3d_plugin_potential":
+        scan_elefield.main("3d_plugin")
     elif label == "3d_ringcontact_potential":
         scan_elefield.main("3d_ringcontact")
-    elif label == "3d_time_field":
+    elif label == "3d_plugin_field":
         test4hsic.main("2dfield_4HSiC")
     elif label == "3d_ringcontact_ELefield":
         test4hsic.main("3d_ringcontact")
-    elif label == "sicar11":
-        from . import sicar11
-        sicar11.main()
     elif label == 'nju_pin_get_efield':
-        scan_iv.main(simname="NJUPIN", field_flag=True)
+        scan_iv.main(simname="NJU-PIN", field_flag=True)
     else:
         raise NameError(label)

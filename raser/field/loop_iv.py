@@ -3,7 +3,7 @@
 
 import devsim
 from . import physics_2d
-from . import build_2d_device
+from .build_device import Detector
 import math
 import sys
 from array import array
@@ -20,8 +20,8 @@ areafactor=250
 simname=sys.argv[1]
 
 
-device="MyDevice"
-region="MyRegion"
+device=simname
+region=simname
 with open('./output/parainprogram/config_loopiv.json', 'r') as f:
     params = json.load(f)
 bias_v=float(params["bias_v"])
@@ -31,12 +31,9 @@ devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 
-build_2d_device.Create2DMesh(device, region,simname)
+MyDetector = Detector(simname)
 
-build_2d_device.SetParameters(device=device, region=region)
-
-build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
-
+physics_2d.SetSiliconParameters(device, region, 300)
 
 physics_2d.InitialSolution(device, region, circuit_contacts=False)
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")

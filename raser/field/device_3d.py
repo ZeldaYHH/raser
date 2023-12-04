@@ -4,7 +4,7 @@
 
 import devsim
 from . import diode_element_physics
-from . import pixel_3d_mesh
+from .build_device import Detector
 import sys
 import math
 sys.path.append("..")
@@ -16,16 +16,15 @@ import matplotlib.pyplot
 if not (os.path.exists("./output/pixel")):
     os.mkdir("./output/pixel")
 
-
-device="MyDevice"
-region="MyRegion"
+simname="3d_pixel"
+device=simname
+region=simname
 
 
 
 
 def main():
-    pixel_3d_mesh.Create3DSICARFromGmesh(device,region)
-    pixel_3d_mesh.SetDoping(device,region)
+    Pixel3D = Detector(simname, 3)
 
     diode_element_physics.setMaterialParameters(device, region)
 
