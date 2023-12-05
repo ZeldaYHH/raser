@@ -23,7 +23,7 @@ import pickle
 # in dio2 add recombination
 #
 def main():
-    open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+    open_db(filename="./output/field/SICARDB.db", permission="readonly")
     device="MyDevice"
     region="MyRegion"
 

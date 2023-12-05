@@ -30,7 +30,7 @@ area_factor = 1.0/(0.76*0.76)
 
 MyDetector = Detector("ITk-md8", 1)
 
-devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)

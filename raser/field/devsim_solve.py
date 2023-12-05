@@ -21,7 +21,7 @@ if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
 def main(label=None,v_max = 400):
-    devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+    devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
     if label=='sicar1.1.8_cv_v1':
         device = "SICAR-1.1.8"
         region = "SICAR-1.1.8"

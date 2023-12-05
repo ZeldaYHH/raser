@@ -32,7 +32,7 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 MyDetector = Detector(simname, 3)
 
-devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
 
 initial.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")

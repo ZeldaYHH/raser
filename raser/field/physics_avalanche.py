@@ -72,6 +72,7 @@ def CreateImpactModel_vanOvenstraeten(device, region):
 def CreateImpactModel_Hatakeyama(device, region, cutoff_angle = 4):
     """
     Hatakeyama Model for cutoff angle of 4°
+    Ref : https://onlinelibrary.wiley.com/doi/abs/10.1002/pssa.200925213
     """
 
     #hbarOmega = 0.19 # eV

@@ -31,7 +31,7 @@ area_factor = 4.0
 
 MyDetector = Detector("NJU-PIN", 1)
 
-devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
 
 
 #add defect parameters

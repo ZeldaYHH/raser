@@ -34,7 +34,7 @@ print()
 
 MyDetector = Detector(device, 1)
 
-devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
+devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
