@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import physics_2d
+from . import physics_drift_diffusion
 from . import diode_common
 from .build_device import Detector
 import math
@@ -54,10 +54,10 @@ intensities=[]
 positions=[]
 def loop(bias_v,voltage):   
     while bias_v < voltage:
-        devsim.set_parameter(device=device, name=physics_2d.GetContactBiasName("top"), value=0-bias_v)
+        devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-bias_v)
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-6, maximum_iterations=1500)
-        physics_2d.PrintCurrents(device, "top")
-        physics_2d.PrintCurrents(device, "bot")
+        physics_drift_diffusion.PrintCurrents(device, "top")
+        physics_drift_diffusion.PrintCurrents(device, "bot")
         reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
         reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
         #reverse_bot_electron_current= devsim.get_contact_current(device=device, contact="bot", equation="ElectronContinuityEquation")

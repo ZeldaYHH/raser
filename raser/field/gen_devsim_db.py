@@ -25,12 +25,12 @@ def CreateGlobalConstant():
     k = 1.3806503e-23  # J/K
     eps_0 = 8.85e-14   # F/cm^2
     T0 = 300.0         # K
-    devsim.add_db_entry(material="global",   parameter="q",       value=q,          unit="coul",     description="Unit Charge")
+    devsim.add_db_entry(material="global",   parameter="ElectronCharge",       value=q,          unit="coul",     description="Unit Charge")
     devsim.add_db_entry(material="global",   parameter="k",       value=k,          unit="J/K",      description="Boltzmann Constant")
     devsim.add_db_entry(material="global",   parameter="eps_0",   value=eps_0,      unit="F/cm^2",   description="Absolute Dielectric Constant")
     devsim.add_db_entry(material="global",   parameter="T0",      value=T0,         unit="K",        description="T0")
     devsim.add_db_entry(material="global",   parameter="k_T0",    value=k*T0,       unit="J",        description="k*T0")
-    devsim.add_db_entry(material="global",   parameter="V_T0",    value=k*T0/q,     unit="J/coul",   description="k*T0/q")
+    devsim.add_db_entry(material="global",   parameter="V_t",    value=k*T0/q,     unit="J/coul",   description="k*T0/q")
 
     T = 300.0         # K
     devsim.add_db_entry(material="global",   parameter="T",    value=T,     unit="K",   description="T")
@@ -47,6 +47,8 @@ def CreateSiliconCarbideConstant():
     devsim.add_db_entry(material="SiliconCarbide",   parameter="E_g",    value=E_g,       unit="J",         description="E_g")
     # material
     devsim.add_db_entry(material="SiliconCarbide",   parameter="eps",    value=9.76,      unit="1",         description="Dielectric Constant")
+    eps_0 = 8.85e-14
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="Permittivity",    value=9.76*eps_0,      unit="F/cm^2",         description="Dielectric Constant")
     devsim.add_db_entry(material="SiliconCarbide",   parameter="n_i",    value=3.89e-9,   unit="/cm^3",     description="Intrinsic Electron Concentration")
     # mobility
     devsim.add_db_entry(material="SiliconCarbide",   parameter="mu_n",   value=1100,      unit="cm^2/Vs",   description="Constant Mobility of Electron")
@@ -54,8 +56,8 @@ def CreateSiliconCarbideConstant():
     # SRH
     devsim.add_db_entry(material="SiliconCarbide",   parameter="n1",     value=3.89e-9,   unit="/cm^3",     description="n1")
     devsim.add_db_entry(material="SiliconCarbide",   parameter="p1",     value=3.89e-9,   unit="/cm^3",     description="p1")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="tau_n",  value=2.5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
-    devsim.add_db_entry(material="SiliconCarbide",   parameter="tau_p",  value=0.5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="taun",  value=2.5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="taup",  value=0.5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
 
 
 def CreateSiliconConstant():
@@ -70,6 +72,8 @@ def CreateSiliconConstant():
     devsim.add_db_entry(material="Silicon",   parameter="E_g",    value=E_g,       unit="J",         description="E_g")
     # material
     devsim.add_db_entry(material="Silicon",   parameter="eps",    value=11.9,      unit="1",         description="Dielectric Constant")
+    eps_0 = 8.85e-14
+    devsim.add_db_entry(material="Silicon",   parameter="Permittivity",    value=11.9*eps_0,      unit="F/cm^2",         description="Dielectric Constant")
     devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=1.02e10,   unit="/cm^3",     description="Intrinsic Electron Concentration")
     # mobility
     devsim.add_db_entry(material="Silicon",   parameter="mu_n",   value=1450,      unit="cm^2/Vs",   description="Constant Mobility of Electron")
@@ -79,8 +83,8 @@ def CreateSiliconConstant():
     # SRH
     devsim.add_db_entry(material="Silicon",   parameter="n1",     value=1.02e10,   unit="/cm^3",     description="n1")
     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=1.02e10,   unit="/cm^3",     description="p1")
-    devsim.add_db_entry(material="Silicon",   parameter="tau_n",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
-    devsim.add_db_entry(material="Silicon",   parameter="tau_p",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
+    devsim.add_db_entry(material="Silicon",   parameter="taun",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
+    devsim.add_db_entry(material="Silicon",   parameter="taup",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
 
 
 '''
@@ -223,15 +227,15 @@ def CreateVanOvenstraetenImpact():
     p_b_high = 1.693e6 # cm-1
 
     devsim.add_db_entry(material="Silicon",   parameter="gamma",  value=gamma,   unit="1",     description="gamma for van Ovenstraeten Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_a_high",  value=n_a_high,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_b_high",  value=n_b_high,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_a_high",  value=p_a_high,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_b_high",  value=p_b_high,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_a_high",  value=n_a_high,   unit="cm-1",     description="n_a for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_b_high",  value=n_b_high,   unit="V/cm",     description="n_b for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_a_high",  value=p_a_high,   unit="cm-1",     description="p_a for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_b_high",  value=p_b_high,   unit="V/cm",     description="p_b for Hatakeyama Avalanche Model")
 
-    devsim.add_db_entry(material="Silicon",   parameter="n_a_low",  value=n_a_low,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_b_low",  value=n_b_low,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_a_low",  value=p_a_low,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_b_low",  value=p_b_low,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_a_low",  value=n_a_low,   unit="cm-1",     description="n_a for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_b_low",  value=n_b_low,   unit="V/cm",     description="n_b for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_a_low",  value=p_a_low,   unit="cm-1",     description="p_a for Hatakeyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_b_low",  value=p_b_low,   unit="V/cm",     description="p_b for Hatakeyama Avalanche Model")
 
 
     def cal_impact_coefficient(electric_field):
@@ -321,7 +325,7 @@ def SaveDataBase():
 
 
 def main():
-    CreateDataBase("./output/devsim/SICARDB")
+    CreateDataBase("./output/devsim/SICARDB.db")
     CreateGlobalConstant()
     CreateSiliconCarbideConstant()
     CreateSiliconConstant()

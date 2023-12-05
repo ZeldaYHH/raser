@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from devsim import *
-from .si_simple_physics import *
+from .physics_drift_diffusion import *
 from . import si_diode_common
 
 import os

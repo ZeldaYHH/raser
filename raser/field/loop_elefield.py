@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import physics_2d
+from . import physics_drift_diffusion
 from .build_device import Detector
 import math
 import sys
@@ -17,7 +17,7 @@ simname=sys.argv[1]
 device=simname
 region=simname
 #This requires a circuit element to integrated current
-devsim.circuit_element(name="V1", n1=physics_2d.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
+devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 areafactor=2e2
 
 with open('./output/parainprogram/config_loop_elefield.json', 'r') as f:
@@ -32,16 +32,16 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 MyDetector = Detector(simname, 3)
 
-physics_2d.SetSiliconParameters(device, region, 300)
+devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
 
-physics_2d.InitialSolution(device, region, circuit_contacts="top")
+initial.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 
 
-physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
+initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")

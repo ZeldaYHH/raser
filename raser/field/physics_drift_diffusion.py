@@ -1,100 +1,28 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-from .drift_diffusion import *
+
+'''
+Description:  physics_drift_diffusion.py
+@Date       : 2023/12/05 13:10:36
+@Author     : Chenxi Fu
+@Original   : DEVSIM LLC
+@version    : 1.0
+'''
+
 from devsim import *
-#TODO: make this a class so that paramters can be changed
-contactcharge_node="contactcharge_node"
+from .model_create import *
+
 contactcharge_edge="contactcharge_edge"
 ece_name="ElectronContinuityEquation"
 hce_name="HoleContinuityEquation"
 celec_model = "(1e-10 + 0.5*abs(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
 chole_model = "(1e-10 + 0.5*abs(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5)))"
 
-q      = 1.6e-19 # coul
-k      = 1.3806503e-23 # J/K
-eps_0  = 8.85e-14 # F/cm^2
-#T      = 300 # K
-eps_si = 9.76
-eps_ox = 3.9
-# TODO: make this temperature dependent
-n_i    = 3.8e-9 # #/cm^3
-# constant in our approximation
-mu_n   = 1100
-mu_p   = 114
-#n_a    = 2.1e7
-n_a    = 176000000
-#p_a    =  1.7e7
-p_a    = 341000000
 def GetContactBiasName(contact):
-    return "{0}".format(contact)
+    return "{0}_bias".format(contact)
 
 def GetContactNodeModelName(contact):
     return "{0}nodemodel".format(contact)
-
-def PrintCurrents(device, contact):
-    '''
-       print out contact currents
-    '''
-    # TODO add charge
-    contact_bias_name = GetContactBiasName(contact)
-    electron_current= get_contact_current(device=device, contact=contact, equation=ece_name)
-    hole_current    = get_contact_current(device=device, contact=contact, equation=hce_name)
-    total_current   = electron_current + hole_current                                        
-    voltage         = get_parameter(device=device, name=GetContactBiasName(contact))
-    print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact_bias_name, voltage, electron_current, hole_current, total_current))
-
-#in the future, worry about workfunction
-def CreateOxideContact(device, region, contact):
-    conteq="Permittivity*ElectricField"
-    contact_bias_name  = GetContactBiasName(contact)
-    contact_model_name = GetContactNodeModelName(contact)
-    eq = "Potential - {0}".format(contact_bias_name)
-    CreateContactNodeModel(device, contact, contact_model_name, eq)
-    CreateContactNodeModelDerivative(device, contact, contact_model_name, eq, "Potential")
-
-    #TODO: make everyone use dfield
-    if not InEdgeModelList(device, region, contactcharge_edge):
-        CreateEdgeModel(device, region, contactcharge_edge, "Permittivity*ElectricField")
-        CreateEdgeModelDerivatives(device, region, contactcharge_edge, "Permittivity*ElectricField", "Potential")
-
-    contact_equation(device=device, contact=contact, name="PotentialEquation",
-                     node_model=contact_model_name, edge_charge_model= contactcharge_edge)
-
-
-
-
-#####
-##### Constants
-#####
-def SetOxideParameters(device, region, T):
-    '''
-      Sets physical parameters
-    '''
-    set_parameter(device=device, region=region, name="Permittivity",   value=eps_ox * eps_0)
-    set_parameter(device=device, region=region, name="ElectronCharge", value=q)
-
-def SetSiliconParameters(device, region, T):
-    '''
-      Sets physical parameters assuming constants
-    '''
-    #### TODO: make T a free parameter and T dependent parameters as models
-    set_parameter(device=device, region=region, name="Permittivity",   value=eps_si * eps_0)
-    set_parameter(device=device, region=region, name="ElectronCharge", value=q)
-    set_parameter(device=device, region=region, name="n_i",            value=n_i)
-    set_parameter(device=device, region=region, name="T",              value=T)
-    set_parameter(device=device, region=region, name="kT",             value=k * T)
-    set_parameter(device=device, region=region, name="V_t",            value=k*T/q)
-    set_parameter(device=device, region=region, name="mu_n",           value=mu_n)
-    set_parameter(device=device, region=region, name="mu_p",           value=mu_p)
-    set_parameter(device=device, region=region, name="q",           value=q)
-    
-    #default SRH parameters
-    set_parameter(device=device, region=region, name="n1", value=n_i)
-    set_parameter(device=device, region=region, name="p1", value=n_i)
-    set_parameter(device=device, region=region, name="taun", value=2.5e-6)
-    set_parameter(device=device, region=region, name="taup", value=5e-7)
-    set_parameter(device=device, region=region, name="n_a", value=n_a)
-    set_parameter(device=device, region=region, name="p_a", value=p_a)
 
 def CreateSiliconPotentialOnly(device, region):
     '''
@@ -111,9 +39,9 @@ def CreateSiliconPotentialOnly(device, region):
     # require NetDoping
     for i in (
         ("IntrinsicElectrons", elec_i),
-         ("IntrinsicHoles", hole_i),
-         ("IntrinsicCharge", charge_i),
-         ("PotentialIntrinsicCharge", pcharge_i)
+        ("IntrinsicHoles", hole_i),
+        ("IntrinsicCharge", charge_i),
+        ("PotentialIntrinsicCharge", pcharge_i)
     ):
         n = i[0]
         e = i[1]
@@ -123,7 +51,7 @@ def CreateSiliconPotentialOnly(device, region):
     ### TODO: Edge Average Model
     for i in (
         ("ElectricField",     "(Potential@n0-Potential@n1)*EdgeInverseLength"),
-      ("PotentialEdgeFlux", "Permittivity * ElectricField")
+        ("PotentialEdgeFlux", "Permittivity * ElectricField")
     ):
         n = i[0]
         e = i[1]
@@ -133,6 +61,7 @@ def CreateSiliconPotentialOnly(device, region):
     equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialIntrinsicCharge", edge_model="PotentialEdgeFlux", variable_update="log_damp")
 
+
 def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False):
     '''
       Creates the potential equation at the contact
@@ -140,18 +69,16 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
     '''
     # Means of determining contact charge
     # Same for all contacts
-    if not InNodeModelList(device, region, "contactcharge_node"):
-        CreateNodeModel(device, region, "contactcharge_node", "ElectronCharge*IntrinsicCharge")
     #### TODO: This is the same as D-Field
     if not InEdgeModelList(device, region, "contactcharge_edge"):
         CreateEdgeModel(device, region, "contactcharge_edge", "Permittivity*ElectricField")
         CreateEdgeModelDerivatives(device, region, "contactcharge_edge", "Permittivity*ElectricField", "Potential")
 
-#  set_parameter(device=device, region=region, name=GetContactBiasName(contact), value=0.0)
+    # set_parameter(device=device, region=region, name=GetContactBiasName(contact), value=0.0)
 
     contact_model = "Potential -{0} + ifelse(NetDoping > 0, \
-    -V_t*log({1}/n_i), \
-    V_t*log({2}/n_i))".format(GetContactBiasName(contact), celec_model, chole_model)
+                    -V_t*log({1}/n_i), \
+                    V_t*log({2}/n_i))".format(GetContactBiasName(contact), celec_model, chole_model)
 
     contact_model_name = GetContactNodeModelName(contact)
     CreateContactNodeModel(device, contact, contact_model_name, contact_model)
@@ -164,17 +91,86 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
         contact_equation(device=device, contact=contact, name="PotentialEquation",
                          node_model=contact_model_name, edge_model="",
                          node_charge_model="", edge_charge_model="contactcharge_edge",
-                         #node_charge_model="contactcharge_node", edge_charge_model="contactcharge_edge",
                          node_current_model="", edge_current_model="", circuit_node=GetContactBiasName(contact))
     else:
         contact_equation(device=device, contact=contact, name="PotentialEquation",
                          node_model=contact_model_name, edge_model="",
                          node_charge_model="", edge_charge_model="contactcharge_edge",
-                         #node_charge_model="contactcharge_node", edge_charge_model="contactcharge_edge",
                          node_current_model="", edge_current_model="")
 
+
+def CreateBernoulli (device, region):
+    '''
+    Creates the Bernoulli function for Scharfetter Gummel
+    '''
+    #### test for requisite models here
+    EnsureEdgeFromNodeModelExists(device, region, "Potential")
+    vdiffstr="(Potential@n0 - Potential@n1)/V_t"
+    CreateEdgeModel(device, region, "vdiff", vdiffstr)
+    CreateEdgeModel(device, region, "vdiff:Potential@n0",  "V_t^(-1)")
+    CreateEdgeModel(device, region, "vdiff:Potential@n1",  "-vdiff:Potential@n0")
+    CreateEdgeModel(device, region, "Bern01",              "B(vdiff)")
+    CreateEdgeModel(device, region, "Bern01:Potential@n0", "dBdx(vdiff) * vdiff:Potential@n0")
+    CreateEdgeModel(device, region, "Bern01:Potential@n1", "-Bern01:Potential@n0")
+    #identity of Bernoulli functions
+    # CreateEdgeModel(device, region, "Bern10",              "Bern01 + vdiff")
+    # CreateEdgeModel(device, region, "Bern10:Potential@n0", "Bern01:Potential@n0 + vdiff:Potential@n0")
+    # CreateEdgeModel(device, region, "Bern10:Potential@n1", "Bern01:Potential@n1 + vdiff:Potential@n1")
+
+
+def CreateElectronCurrent(device, region, mu_n):
+    '''
+    Electron current
+    '''
+    EnsureEdgeFromNodeModelExists(device, region, "Potential")
+    EnsureEdgeFromNodeModelExists(device, region, "Electrons")
+    EnsureEdgeFromNodeModelExists(device, region, "Holes")
+    # Make sure the bernoulli functions exist
+    if not InEdgeModelList(device, region, "Bern01"):
+        CreateBernoulli(device, region)
+    #### test for requisite models here
+    # Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*(Electrons@n1*Bern10 - Electrons@n0*Bern01)".format(mu_n)
+    Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)".format(mu_n)
+    # Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*((Electrons@n1-Electrons@n0)*Bern01 +  Electrons@n1*vdiff)".format(mu_n)
+
+    CreateEdgeModel(device, region, "ElectronCurrent", Jn)
+    for i in ("Electrons", "Potential", "Holes"):
+        CreateEdgeModelDerivatives(device, region, "ElectronCurrent", Jn, i)
+
+
+def CreateHoleCurrent(device, region, mu_p):
+    '''
+    Hole current
+    '''
+    EnsureEdgeFromNodeModelExists(device, region, "Potential")
+    EnsureEdgeFromNodeModelExists(device, region, "Holes")
+    # Make sure the bernoulli functions exist
+    if not InEdgeModelList(device, region, "Bern01"):
+        CreateBernoulli(device, region)
+    ##### test for requisite models here
+    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*(Holes@n1*Bern01 - Holes@n0*Bern10)".format(mu_p)
+    Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
+    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*((Holes@n1 - Holes@n0)*Bern01 - Holes@n0*vdiff)".format(mu_p)
+    CreateEdgeModel(device, region, "HoleCurrent", Jp)
+    for i in ("Holes", "Potential", "Electrons"):
+        CreateEdgeModelDerivatives(device, region, "HoleCurrent", Jp, i)
+
+
+def PrintCurrents(device, contact):
+    '''
+       print out contact currents
+    '''
+    # TODO add charge
+    contact_bias_name = GetContactBiasName(contact)
+    electron_current= get_contact_current(device=device, contact=contact, equation=ece_name)
+    hole_current    = get_contact_current(device=device, contact=contact, equation=hce_name)
+    total_current   = electron_current + hole_current                                        
+    voltage         = get_parameter(device=device, name=GetContactBiasName(contact))
+    print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
+
+
 def CreateSRH(device, region):
-    USRH="-q*(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
+    USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
     Gn = "-ElectronCharge * USRH"
     Gp = "+ElectronCharge * USRH"
     CreateNodeModel(device, region, "USRH", USRH)
@@ -186,48 +182,6 @@ def CreateSRH(device, region):
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
 
 
-
-
-def CreateImpactGeneration(device, region):
-    
-    # if not InEdgeModelList(device, region, "ElectricField"):
-    #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
-    #     CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
-
-
-    #Ion_coeff_n  = "gamma * n_a * exp( - gamma * n_b / (ElectricField))"
-    #Ion_coeff_p  = "gamma * p_a * exp( - gamma * p_b / (ElectricField))"
-
-    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, gamma * n_a * exp( - gamma * n_b / (abs(ElectricField)+1)), 1)"
-    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, gamma * p_a * exp( - gamma * p_b / (abs(ElectricField)+1)), 1)"
-
-    Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
-
-    CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
-    CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Electrons")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Holes")
-    CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
-    CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Electrons")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Holes")
-    #CreateEdgeModel(device, region, "Ion_coeff_rate", Ion_coeff_rate)
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
- 
-    ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
-    ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
-
-    CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
-    
-    CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
-    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
-    #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
-
 def CreateECE(device, region, mu_n):
     CreateElectronCurrent(device, region, mu_n)
 
@@ -238,6 +192,7 @@ def CreateECE(device, region, mu_n):
     equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration")
+    
 
 def CreateHCE(device, region, mu_p):
     CreateHoleCurrent(device, region, mu_p)
@@ -248,6 +203,7 @@ def CreateHCE(device, region, mu_p):
     equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
+    
 
 def CreatePE(device, region):
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
@@ -257,8 +213,7 @@ def CreatePE(device, region):
 
     equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialNodeCharge", edge_model="PotentialEdgeFlux",
-             time_node_model="", variable_update="default")
-
+             time_node_model="", variable_update="log_damp")
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
@@ -267,8 +222,6 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSRH(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
-    
-    CreateImpactGeneration(device, region)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
@@ -283,7 +236,7 @@ def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=Fal
 
     CreateContactNodeModel(device, contact, contact_electrons_name, contact_electrons_model)
     #TODO: The simplification of the ifelse statement is time consuming
-#  CreateContactNodeModelDerivative(device, contact, contact_electrons_name, contact_electrons_model, "Electrons")
+    # CreateContactNodeModelDerivative(device, contact, contact_electrons_name, contact_electrons_model, "Electrons")
     CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_electrons_name, "Electrons"), "1")
 
     CreateContactNodeModel(device, contact, contact_holes_name, contact_holes_model)
@@ -329,6 +282,24 @@ def CreateOxidePotentialOnly(device, region, update_type="default"):
              edge_model="PotentialEdgeFlux", variable_update=update_type)
 
 
+#in the future, worry about workfunction
+def CreateOxideContact(device, region, contact):
+    conteq="Permittivity*ElectricField"
+    contact_bias_name  = GetContactBiasName(contact)
+    contact_model_name = GetContactNodeModelName(contact)
+    eq = "Potential - {0}".format(contact_bias_name)
+    CreateContactNodeModel(device, contact, contact_model_name, eq)
+    CreateContactNodeModelDerivative(device, contact, contact_model_name, eq, "Potential")
+
+    #TODO: make everyone use dfield
+    if not InEdgeModelList(device, region, contactcharge_edge):
+        CreateEdgeModel(device, region, contactcharge_edge, "Permittivity*ElectricField")
+        CreateEdgeModelDerivatives(device, region, contactcharge_edge, "Permittivity*ElectricField", "Potential")
+
+    contact_equation(device=device, contact=contact, name="PotentialEquation",
+                     node_model=contact_model_name, edge_charge_model= contactcharge_edge)
+
+
 def CreateSiliconOxideInterface(device, interface):
     '''
       continuous potential at interface
@@ -348,4 +319,30 @@ def CreateSiliconSiliconInterface(device, interface):
     interface_equation(device=device, interface=interface, name="ElectronContinuityEquation", interface_model=ename, type="continuous")
     hname = CreateContinuousInterfaceModel(device, interface, "Holes")
     interface_equation(device=device, interface=interface, name="HoleContinuityEquation", interface_model=hname, type="continuous")
+
+'''
+def CreateMobility(device, region):
+
+    if not InEdgeModelList(device, region, "ElectricField"):
+        
+        CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
+        CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
+
+    # debugE = devsim.get_edge_model_values(device, region, "Eparallel")
+    # print("\n\n*********************************\n")
+    # print(debugE)
+    # print("\n*********************************\n\n")
+
+    #mu_n = "{0} / (pow(1.0 + pow({1} * ElectricField /{2}, {3}), 1.0 / {4}))".format( str(n_lfm), str(n_lfm), str(n_vsatp), str(n_betap), str(n_betap))
+    mu_n = "n_lfm / (pow(1.0 + pow(n_lfm * 40.0 / n_vsatp, n_betap), 1.0 / n_betap))"
+
+    #mu_p = "{0} / (pow(1.0 + pow({1} * ElectricField /{2}, {3}), 1.0 / {4}))".format( str(p_lfm), str(p_lfm), str(p_vsatp), str(p_betap), str(p_betap))
+    mu_p = "p_lfm / (pow(1.0 + pow(p_lfm * 40.0 / p_vsatp, p_betap), 1.0/p_betap))"
+
+    CreateEdgeModel(device, region, "ElectronMobility", mu_n)
+    CreateEdgeModel(device, region, "HoleMobility", mu_p)
+
+    CreateEdgeModelDerivatives(device, region,"ElectronMobility", mu_n, "Potential")
+    CreateEdgeModelDerivatives(device, region, "HoleMobility", mu_p, "Potential")
+'''
 

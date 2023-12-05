@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from devsim import *
-from .si_simple_physics import *
+from .physics_drift_diffusion import *
 #####
 # dio1
 #
@@ -25,7 +25,7 @@ def CreateMesh(device, region):
     add_1d_mesh_line(mesh="dio", pos=30e-3, ps=2e-5, tag="bot")
     add_1d_contact  (mesh="dio", name="top", tag="top", material="metal")
     add_1d_contact  (mesh="dio", name="bot", tag="bot", material="metal")
-    add_1d_region   (mesh="dio", material="Si", region=region, tag1="top", tag2="bot")
+    add_1d_region   (mesh="dio", material="Silicon", region=region, tag1="top", tag2="bot")
     finalize_mesh(mesh="dio")
     create_device(mesh="dio", device=device)
 
@@ -38,7 +38,7 @@ def CreateMesh2(device, region):
     add_1d_mesh_line(mesh="dio", pos=1e-5, ps=1e-7, tag="bot")
     add_1d_contact(mesh="dio", name="top", tag="top", material="metal")
     add_1d_contact(mesh="dio", name="bot", tag="bot", material="metal")
-    add_1d_region(mesh="dio", material="Si", region=region, tag1="top", tag2="bot")
+    add_1d_region(mesh="dio", material="Silicon", region=region, tag1="top", tag2="bot")
     finalize_mesh(mesh="dio")
     create_device(mesh="dio", device=device)
 
@@ -53,9 +53,9 @@ def Create2DMesh(device, region):
     add_2d_mesh_line(mesh="dio", dir="x", pos=-1e-8,    ps=1e-8)
     add_2d_mesh_line(mesh="dio", dir="x", pos=3000.001e-5, ps=1e-8)
 
-    add_2d_region(mesh="dio", material="Si", region=region)
-    add_2d_region(mesh="dio", material="Si", region="air1", xl=-1e-8,  xh=0)
-    add_2d_region(mesh="dio", material="Si", region="air2", xl=3000.0e-5, xh=3000.001e-5)
+    add_2d_region(mesh="dio", material="Silicon", region=region)
+    add_2d_region(mesh="dio", material="Silicon", region="air1", xl=-1e-8,  xh=0)
+    add_2d_region(mesh="dio", material="Silicon", region="air2", xl=3000.0e-5, xh=3000.001e-5)
 
     add_2d_contact(mesh="dio", name="top1", material="metal", region=region,yl=0.75e-2, yh=0.95e-2, xl=0, xh=0, bloat=1e-10)
     add_2d_contact(mesh="dio", name="top2", material="metal", region=region,yl=0, yh=0.2e-2, xl=0, xh=0, bloat=1e-10)

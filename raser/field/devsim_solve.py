@@ -5,8 +5,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from . import physics
 from . import model_create
+from . import physics_drift_diffusion
 from . import initial
 # import Setting
 
@@ -21,7 +21,7 @@ if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
 def main(label=None,v_max = 400):
-    devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
+    devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
     if label=='sicar1.1.8_cv_v1':
         device = "SICAR-1.1.8"
         region = "SICAR-1.1.8"
@@ -88,7 +88,7 @@ def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
     devsim.set_parameter(name = "extended_equation", value=True)
-    devsim.circuit_element(name="V1", n1=physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
+    devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 
 def initial_solution(device,region,para_dict):
     # Initial DC solution
@@ -100,7 +100,7 @@ def initial_solution(device,region,para_dict):
             initial.DriftDiffusionInitialSolutionSiIrradiated(
                 device, region, circuit_contacts="top")
             devsim.set_parameter(device=device, 
-            name=physics.GetContactBiasName("top"), value=0)
+            name=physics_drift_diffusion.GetContactBiasName("top"), value=0)
         else:
             initial.DriftDiffusionInitialSolutionIrradiated(
                 device, region, circuit_contacts="top")
@@ -357,10 +357,10 @@ def solve_cv(device,region,v_max,para_dict,area_factor, frequency):
     draw_cv(reverse_voltage, ssac_top_cap, device,condition)
 
 def solve_iv_single_point(device,region,reverse_v):
-    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=100,maximum_divergence=50)
-    physics.PrintCurrents(device, "top")
-    physics.PrintCurrents(device, "bot")
+    physics_drift_diffusion.PrintCurrents(device, "top")
+    physics_drift_diffusion.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current
@@ -370,7 +370,7 @@ def solve_iv_single_point(device,region,reverse_v):
 def solve_cv_single_point(device,region,reverse_v,frequency):
     devsim.circuit_alter(name="V1", value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
-    physics.PrintCurrents(device, "bot")
+    physics_drift_diffusion.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=frequency)
     cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi*frequency)
     print("capacitance {0} {1}".format(reverse_v, cap))

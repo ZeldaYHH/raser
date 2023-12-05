@@ -6,7 +6,7 @@ import os
 import sys
 import math
 
-from . import physics
+from . import physics_drift_diffusion
 from . import model_create
 from . import initial
 
@@ -29,7 +29,7 @@ area_factor = 4.0
 
 MyDetector = Detector("SICAR-1.1.8", 1)
 
-devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
+devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
 # Extended precision
 # devsim.set_parameter(name='direct_solver', value='superlu')
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -37,11 +37,11 @@ devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
 
 # Initial DC solution
-Initial.InitialSolution(device, region)
+initial.InitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=30)
 
 ### Drift diffusion simulation at equilibrium
-Initial.ImprovedDriftDiffusionInitialSolution(device, region)
+initial.ImprovedDriftDiffusionInitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
 
 #### Ramp the bias to Reverse
@@ -67,10 +67,10 @@ ax1 = fig1.add_subplot(111)
 
 while reverse_v < 4000.0:
 
-    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
-    physics.PrintCurrents(device, "top")
-    physics.PrintCurrents(device, "bot")
+    physics_drift_diffusion.PrintCurrents(device, "top")
+    physics_drift_diffusion.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       

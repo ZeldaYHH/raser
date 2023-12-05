@@ -6,10 +6,11 @@ import os
 import sys
 import math
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from . import physics
+from . import physics_drift_diffusion
 from . import model_create
 from . import initial
 from util.read_json import Setting
+from .build_device import Detector
 
 
 import matplotlib
@@ -17,9 +18,6 @@ import matplotlib
 import matplotlib.pyplot
 import csv
 import numpy as np
-
-
-import itk_md8_mesh
 
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
@@ -34,11 +32,9 @@ area_factor = 1/(0.8*0.8)
 
 print()
 
-itk_md8_mesh.Create1DMesh(device=device, region=region)
-itk_md8_mesh.SetDoping(device=device, region=region)
-itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
+MyDetector = Detector(device, 1)
 
-devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
+devsim.open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
 
 # Extended precision
 devsim.set_parameter(name = "extended_solver", value=True)
@@ -97,15 +93,15 @@ ax1 = fig1.add_subplot(111)
 
 while reverse_v < 700.0:
 
-    devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=reverse_v)
-    #devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
+    devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=reverse_v)
+    #devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-reverse_v)
     try:
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
     except devsim.error as msg:
         if msg=="Convergence failure!":
             raise
-    physics.PrintCurrents(device, "top")
-    physics.PrintCurrents(device, "bot")
+    physics_drift_diffusion.PrintCurrents(device, "top")
+    physics_drift_diffusion.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current       
