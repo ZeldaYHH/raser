@@ -33,7 +33,7 @@ def InitialSolution(device, region, circuit_contacts=None):
             CreateSiliconPotentialOnlyContact(device, region, i)
 
 
-def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
+def DriftDiffusionInitialSolution(device, region, irradiation_label="test", impact_label="test", circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
@@ -51,7 +51,7 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    CreateSiliconDriftDiffusion(device, region)
+    CreateSiliconDriftDiffusion(device, region, irradiation_label, impact_label)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateSiliconDriftDiffusionAtContact(device, region, i, True)
