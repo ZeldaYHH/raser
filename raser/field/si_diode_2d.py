@@ -61,8 +61,8 @@ def main():
     x = np.array(get_node_model_values(device=device, region=region, name="x")) # get x-node values
     y = np.array(get_node_model_values(device=device, region=region, name="y")) # get y-node values
     potential = np.array(get_node_model_values(device=device, region=region, name="Potential")) # get the potential data
-    Trappingtime_n = np.array(get_node_model_values(device=device, region=region, name="Trappingtime_n"))
-    Trappingtime_p = np.array(get_node_model_values(device=device, region=region, name="Trappingtime_p"))
+    TrappingRate_n = np.array(get_node_model_values(device=device, region=region, name="TrappingRate_n"))
+    TrappingRate_p = np.array(get_node_model_values(device=device, region=region, name="TrappingRate_p"))
 
     element_from_edge_model(edge_model="ElectricField",   device=device, region=region)
     edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
@@ -73,8 +73,8 @@ def main():
 
     draw(x,y,potential,"potential",v)
     draw(x_mid,y_mid,ElectricField,"ElectricField",v)
-    draw(x,y,Trappingtime_n,"Trappingtime_n",v)
-    draw(x,y,Trappingtime_p,"Trappingtime_p",v)
+    draw(x,y,TrappingRate_n,"TrappingRate_n",v)
+    draw(x,y,TrappingRate_p,"TrappingRate_p",v)
 
     delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
     delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")
@@ -87,10 +87,10 @@ def main():
         pickle.dump(x, file)
     with open("./output/strip/y.pkl",'wb') as file:
         pickle.dump(y, file)
-    with open("./output/strip/Trappingtime_p_1e15_{}.pkl".format(v),'wb') as file:
-        pickle.dump(Trappingtime_p, file)
-    with open("./output/strip/Trappingtime_n_1e15_{}.pkl".format(v),'wb') as file:
-        pickle.dump(Trappingtime_n, file)
+    with open("./output/strip/TrappingRate_p_1e15_{}.pkl".format(v),'wb') as file:
+        pickle.dump(TrappingRate_p, file)
+    with open("./output/strip/TrappingRate_n_1e15_{}.pkl".format(v),'wb') as file:
+        pickle.dump(TrappingRate_n, file)
 
 def draw(x,y,value,title,v):
     graph = ROOT.TGraph2D()

@@ -31,8 +31,8 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
 
     TrappedElectrons="0"
     TrappedHoles="0"
-    Trappingtime_n="0"
-    Trappingtime_p="0"
+    TrappingRate_n="0"
+    TrappingRate_p="0"
     U_r = "0"
 
     for defect in defects:
@@ -58,8 +58,8 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
 
         TrappedElectrons=TrappedElectrons+n_t_irr_n
         TrappedHoles=TrappedHoles+n_t_irr_p
-        Trappingtime_n=Trappingtime_n+trap_n
-        Trappingtime_p=Trappingtime_p+trap_p
+        TrappingRate_n=TrappingRate_n+trap_n
+        TrappingRate_p=TrappingRate_p+trap_p
         U_r = U_r+U_r_i
 
     CreateNodeModel(device, region, "TrappedElectrons", TrappedElectrons)
@@ -72,8 +72,8 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
     for i in ("Electrons", "Holes"):
         CreateNodeModelDerivative(device, region, "U_r", U_r, i)
 
-    CreateNodeModel(device, region, "Trappingtime_n", Trappingtime_n)
-    CreateNodeModel(device, region, "Trappingtime_p", Trappingtime_p)
+    CreateNodeModel(device, region, "TrappingRate_n", TrappingRate_n)
+    CreateNodeModel(device, region, "TrappingRate_p", TrappingRate_p)
 
 
 def CreateIrradiationModel_XingChen(device, region):

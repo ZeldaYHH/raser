@@ -23,12 +23,12 @@ class FieldCal:
             potential=pickle.load(file)
         self.x_efield,self.y_efield,self.potential=get_field(x,y,potential)
 
-        with open("./output/strip/Trappingtime_p_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
-            Trappingtime_p=pickle.load(file)
-        with open("./output/strip/Trappingtime_n_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
-            Trappingtime_n=pickle.load(file)
-        self.Trappingtime_p=get_trapping_time(x,y,Trappingtime_p)
-        self.Trappingtime_n=get_trapping_time(x,y,Trappingtime_n)
+        with open("./output/strip/TrappingRate_p_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
+            TrappingRate_p=pickle.load(file)
+        with open("./output/strip/TrappingRate_n_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
+            TrappingRate_n=pickle.load(file)
+        self.TrappingRate_p=get_trapping_rate(x,y,TrappingRate_p)
+        self.TrappingRate_n=get_trapping_rate(x,y,TrappingRate_n)
         if not os.access("./output/strip/weighting_field/", os.F_OK):
             os.makedirs("./output/strip/weighting_field/", exist_ok=True) 
             total_w_p=[]
@@ -54,11 +54,11 @@ class FieldCal:
         
 
     def get_trap_e(self,x,y,depth):
-        t_e=self.Trappingtime_n.Interpolate(depth,x)
+        t_e=self.TrappingRate_n.Interpolate(depth,x)
         return t_e
     
     def get_trap_h(self,x,y,depth):
-        t_h=self.Trappingtime_p.Interpolate(depth,x)
+        t_h=self.TrappingRate_p.Interpolate(depth,x)
         return t_h
     
     def get_e_field(self, x, y, depth):    
@@ -114,10 +114,10 @@ def w_p(x,z,w_p):
     return weighting_potential
     
 
-def get_trapping_time(x,y,trapping_time):
+def get_trapping_rate(x,y,trapping_rate):
     trap_time=ROOT.TGraph2D()
     for i in range(len(y)):
-        trap_time.SetPoint(i,x[i]*1e4,y[i]*1e4,trapping_time[i])
+        trap_time.SetPoint(i,x[i]*1e4,y[i]*1e4,trapping_rate[i])
     return trap_time
 
 

@@ -62,16 +62,16 @@ def main():
     edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
     x_mid = get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
     ElectricField = get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
-    Trappingtime_n = np.array(get_node_model_values(device=device, region=region, name="Trappingtime_n"))
-    Trappingtime_p = np.array(get_node_model_values(device=device, region=region, name="Trappingtime_p"))
+    TrappingRate_n = np.array(get_node_model_values(device=device, region=region, name="TrappingRate_n"))
+    TrappingRate_p = np.array(get_node_model_values(device=device, region=region, name="TrappingRate_p"))
 
     if not os.access('output/testdiode', os.F_OK):
             os.makedirs('output/testdiode', exist_ok=True)
 
     draw(x,potential,"Potential","Depth[cm]","Potential[V]",v)
     draw(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]",v)
-    draw(x,Trappingtime_n,"Trappingtime_n","Depth[cm]","Trappingtime_n[s]",v)
-    draw(x,Trappingtime_p,"Trappingtime_p","Depth[cm]","Trappingtime_p[s]",v)
+    draw(x,TrappingRate_n,"TrappingRate_n","Depth[cm]","TrappingRate_n[s]",v)
+    draw(x,TrappingRate_p,"TrappingRate_p","Depth[cm]","TrappingRate_p[s]",v)
 
     delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
     delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")

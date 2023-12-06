@@ -34,7 +34,6 @@
         "voltage" : -500,
         "temperature" : 300.0,
         "material" : "SiC",
-        "trapping_time" : 7.77e-10,
         "Irradiation" : 0,
 
         "mesh" : 32,

@@ -170,11 +170,6 @@ class Setting:
                              'pz':p['pz'],
                              'ltz':p['ltz'],
                              'seedcharge':p['seedcharge']})
-        if "trapping_time" in p:
-            detector['trapping_time']=p['trapping_time']
-        
-        # if "Irradiation" in p:
-        #     detector['Irradiation']=p['Irradiation']
         
         return detector
 
