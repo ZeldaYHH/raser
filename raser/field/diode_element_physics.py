@@ -27,7 +27,7 @@ def setMaterialParameters(device, region):
       ("ElectronCharge", q),
       ("n_i", 1.0e10),
       ("kT", eps * T),
-      ("V_t", k*T/q),
+      ("Volt_thermal", k*T/q),
       ("mu_n", 400),
       ("mu_p", 200),
     ):
@@ -39,8 +39,8 @@ def createSolution(device, region, name):
 
 def createPotentialOnly(device, region):
     for name, equation in (
-        ("IntrinsicElectrons",                     "n_i*exp(Potential/V_t)"),
-      ("IntrinsicElectrons:Potential",           "diff(n_i*exp(Potential/V_t), Potential)"),
+        ("IntrinsicElectrons",                     "n_i*exp(Potential/Volt_thermal)"),
+      ("IntrinsicElectrons:Potential",           "diff(n_i*exp(Potential/Volt_thermal), Potential)"),
       ("IntrinsicHoles",                         "n_i^2/IntrinsicElectrons"),
       ("IntrinsicHoles:Potential",               "diff(n_i^2  /IntrinsicElectrons, Potential)"),
       ("IntrinsicCharge",                        "IntrinsicHoles-IntrinsicElectrons + NetDoping"),
@@ -85,8 +85,8 @@ def createPotentialOnlyContact(device, region, contact):
         ("celec_%(contact)s", "1e-10 + 0.5*(NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5))+1e-10"),
       ("chole_%(contact)s", "1e-10 + 0.5*(-NetDoping+(NetDoping^2 + 4 * n_i^2)^(0.5))+1e-10"),
       ("%(contact)snodemodel", '''ifelse(NetDoping > 0,
-      Potential-%(contact)sbias-V_t*log(celec_%(contact)s/n_i),
-      Potential-%(contact)sbias+V_t*log(chole_%(contact)s/n_i))'''),
+      Potential-%(contact)sbias-Volt_thermal*log(celec_%(contact)s/n_i),
+      Potential-%(contact)sbias+Volt_thermal*log(chole_%(contact)s/n_i))'''),
       ("%(contact)snodemodel:Potential", "1"),
     ):
         name_sub     = name % format_dict
@@ -109,9 +109,9 @@ def createDriftDiffusion(device, region):
                     element_model="PotentialEdgeFlux", variable_update="log_damp")
 
     for name, equation in (
-        ("vdiff"              , "(Potential@n0 - Potential@n1)/V_t"),
-      ("vdiff:Potential@n0" , "V_t^(-1)"),
-      ("vdiff:Potential@n1" , "-V_t^(-1)"),
+        ("vdiff"              , "(Potential@n0 - Potential@n1)/Volt_thermal"),
+      ("vdiff:Potential@n0" , "Volt_thermal^(-1)"),
+      ("vdiff:Potential@n1" , "-Volt_thermal^(-1)"),
       ("Bern01"             , "B(vdiff)"),
       ("Bern01:Potential@n0", "dBdx(vdiff)*vdiff:Potential@n0"),
       ("Bern01:Potential@n1", "dBdx(vdiff)*vdiff:Potential@n1"),
@@ -121,7 +121,7 @@ def createDriftDiffusion(device, region):
     ):
         devsim.edge_model(device=device, region=region, name=name, equation=equation)
 
-    Jn      ="ElectronCharge*mu_n*EdgeInverseLength*V_t*(Electrons@n1*Bern10 - Electrons@n0*Bern01)"
+    Jn      ="ElectronCharge*mu_n*EdgeInverseLength*Volt_thermal*(Electrons@n1*Bern10 - Electrons@n0*Bern01)"
     dJndn0  ="simplify(diff( %s, Electrons@n0))" % Jn
     dJndn1  ="simplify(diff( %s, Electrons@n1))" % Jn
     dJndpot0="simplify(diff( %s, Potential@n0))" % Jn
@@ -135,7 +135,7 @@ def createDriftDiffusion(device, region):
     ):
         devsim.edge_model(device=device, region=region, name=name, equation=equation)
 
-    Jp      ="-ElectronCharge*mu_p*EdgeInverseLength*V_t*(Holes@n1*Bern01 - Holes@n0*Bern10)"
+    Jp      ="-ElectronCharge*mu_p*EdgeInverseLength*Volt_thermal*(Holes@n1*Bern01 - Holes@n0*Bern10)"
     dJpdp0  ="simplify(diff(%s, Holes@n0))" % Jp
     dJpdp1  ="simplify(diff(%s, Holes@n1))" % Jp
     dJpdpot0="simplify(diff(%s, Potential@n0))" % Jp

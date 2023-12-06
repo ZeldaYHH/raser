@@ -33,7 +33,7 @@ def CreateSiliconPotentialOnly(device, region):
     if not InNodeModelList(device, region, "Potential"):
         print("Creating Node Solution Potential")
         CreateSolution(device, region, "Potential")
-    elec_i = "n_i*exp(Potential/V_t)"
+    elec_i = "n_i*exp(Potential/Volt_thermal)"
     hole_i = "n_i^2/IntrinsicElectrons"
     charge_i = "kahan3(IntrinsicHoles, -IntrinsicElectrons, NetDoping)"
     pcharge_i = "-ElectronCharge * IntrinsicCharge"
@@ -79,8 +79,8 @@ def CreateSiliconPotentialOnlyContact(device, region, contact, is_circuit=False)
     # set_parameter(device=device, region=region, name=GetContactBiasName(contact), value=0.0)
 
     contact_model = "Potential -{0} + ifelse(NetDoping > 0, \
-                    -V_t*log({1}/n_i), \
-                    V_t*log({2}/n_i))".format(GetContactBiasName(contact), celec_model, chole_model)
+                    -Volt_thermal*log({1}/n_i), \
+                    Volt_thermal*log({2}/n_i))".format(GetContactBiasName(contact), celec_model, chole_model)
 
     contact_model_name = GetContactNodeModelName(contact)
     CreateContactNodeModel(device, contact, contact_model_name, contact_model)
@@ -107,9 +107,9 @@ def CreateBernoulli (device, region):
     '''
     #### test for requisite models here
     EnsureEdgeFromNodeModelExists(device, region, "Potential")
-    vdiffstr="(Potential@n0 - Potential@n1)/V_t"
+    vdiffstr="(Potential@n0 - Potential@n1)/Volt_thermal"
     CreateEdgeModel(device, region, "vdiff", vdiffstr)
-    CreateEdgeModel(device, region, "vdiff:Potential@n0",  "V_t^(-1)")
+    CreateEdgeModel(device, region, "vdiff:Potential@n0",  "Volt_thermal^(-1)")
     CreateEdgeModel(device, region, "vdiff:Potential@n1",  "-vdiff:Potential@n0")
     CreateEdgeModel(device, region, "Bern01",              "B(vdiff)")
     CreateEdgeModel(device, region, "Bern01:Potential@n0", "dBdx(vdiff) * vdiff:Potential@n0")
@@ -131,9 +131,9 @@ def CreateElectronCurrent(device, region, mu_n):
     if not InEdgeModelList(device, region, "Bern01"):
         CreateBernoulli(device, region)
     #### test for requisite models here
-    # Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*(Electrons@n1*Bern10 - Electrons@n0*Bern01)".format(mu_n)
-    Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)".format(mu_n)
-    # Jn = "ElectronCharge*{0}*EdgeInverseLength*V_t*((Electrons@n1-Electrons@n0)*Bern01 +  Electrons@n1*vdiff)".format(mu_n)
+    # Jn = "ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*(Electrons@n1*Bern10 - Electrons@n0*Bern01)".format(mu_n)
+    Jn = "ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*kahan3(Electrons@n1*Bern01,  Electrons@n1*vdiff,  -Electrons@n0*Bern01)".format(mu_n)
+    # Jn = "ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*((Electrons@n1-Electrons@n0)*Bern01 +  Electrons@n1*vdiff)".format(mu_n)
 
     CreateEdgeModel(device, region, "ElectronCurrent", Jn)
     for i in ("Electrons", "Potential", "Holes"):
@@ -150,9 +150,9 @@ def CreateHoleCurrent(device, region, mu_p):
     if not InEdgeModelList(device, region, "Bern01"):
         CreateBernoulli(device, region)
     ##### test for requisite models here
-    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*(Holes@n1*Bern01 - Holes@n0*Bern10)".format(mu_p)
-    Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
-    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*V_t*((Holes@n1 - Holes@n0)*Bern01 - Holes@n0*vdiff)".format(mu_p)
+    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*(Holes@n1*Bern01 - Holes@n0*Bern10)".format(mu_p)
+    Jp ="-ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*kahan3(Holes@n1*Bern01, -Holes@n0*Bern01, -Holes@n0*vdiff)".format(mu_p)
+    # Jp ="-ElectronCharge*{0}*EdgeInverseLength*Volt_thermal*((Holes@n1 - Holes@n0)*Bern01 - Holes@n0*vdiff)".format(mu_p)
     CreateEdgeModel(device, region, "HoleCurrent", Jp)
     for i in ("Holes", "Potential", "Electrons"):
         CreateEdgeModelDerivatives(device, region, "HoleCurrent", Jp, i)
