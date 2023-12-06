@@ -3,7 +3,7 @@
 
 import devsim
 from . import physics_drift_diffusion
-from . import diode_common
+from . import initial
 from .build_device import Detector
 import math
 import sys
@@ -36,15 +36,12 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 MyDetector = Detector(simname)
 
-#build_2d_device.InitialSolution(device, region, circuit_contacts=False)
-diode_common.InitialSolution(device, region, circuit_contacts="bot")
+initial.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
-
-#build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
-diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
+initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 

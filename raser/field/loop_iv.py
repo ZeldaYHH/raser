@@ -37,14 +37,11 @@ MyDetector = Detector(simname)
 devsim.open_db(filename="./output/field/SICARDB.db", permission="readonly")
 
 initial.InitialSolution(device, region, circuit_contacts=False)
-#diode_common.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
-
 initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
-#diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 

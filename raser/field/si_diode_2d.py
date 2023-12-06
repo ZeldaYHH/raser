@@ -6,7 +6,8 @@
 
 from devsim import *
 from .physics_drift_diffusion import *
-from . import si_diode_common
+from .initial import *
+from .build_device import Detector
 
 import os
 import ROOT
@@ -24,22 +25,18 @@ import pickle
 #
 def main():
     open_db(filename="./output/field/SICARDB.db", permission="readonly")
-    device="MyDevice"
-    region="MyRegion"
+    device='ITk-Si-strip'
+    region='ITk-Si-strip'
 
-    si_diode_common.Create2DMesh(device, region)
+    MyDetector = Detector('ITk-Si-strip', 2)
 
-    #si_diode_common.SetParameters(device=device, region=region)
-
-    si_diode_common.SetNetDoping(device=device, region=region)
-
-    si_diode_common.InitialSolution(device, region)
+    InitialSolution(device, region)
 
     # Initial DC solution
     solve(type="dc", absolute_error=1e1, relative_error=1e-7, maximum_iterations=1000)
     #solve(type="dc", absolute_error=1.0, relative_error=1e-12, maximum_iterations=30)
 
-    si_diode_common.DriftDiffusionInitialSolution(device, region)
+    DriftDiffusionInitialSolution(device, region)
     ###
     ### Drift diffusion simulation at equilibrium
     ###

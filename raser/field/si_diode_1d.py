@@ -6,7 +6,8 @@
 
 from devsim import *
 from .physics_drift_diffusion import *
-from . import si_diode_common
+from .initial import *
+from .build_device import Detector
 
 import numpy as np
 import os
@@ -21,21 +22,17 @@ import ROOT
 #
 def main():
     open_db(filename="./output/field/SICARDB.db", permission="readonly")
-    device="MyDevice"
-    region="MyRegion"
+    device='HPK-Si-PIN'
+    region='HPK-Si-PIN'
 
-    si_diode_common.CreateMesh(device=device, region=region)
+    MyDetector = Detector('HPK-Si-PIN', 1)
 
-    #si_diode_common.SetParameters(device=device, region=region)
-
-    si_diode_common.SetNetDoping(device=device, region=region)
-
-    si_diode_common.InitialSolution(device, region)
+    InitialSolution(device, region)
 
     # Initial DC solution
     solve(type="dc", absolute_error=1.0, relative_error=1e-7, maximum_iterations=1000)
 
-    si_diode_common.DriftDiffusionInitialSolution(device, region)
+    DriftDiffusionInitialSolution(device, region)
     ###
     ### Drift diffusion simulation at equilibrium
     ###
