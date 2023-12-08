@@ -82,10 +82,10 @@ def CreateIrradiationModel_XingChen(device, region):
     """
     
     defects = []
-    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.239*2, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
-    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.09*2,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
-    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*2, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
-    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*2, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
+    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.209*1.3, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
+    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.09*1.5,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
+    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*1.5, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
+    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*1.3, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
 
     return defects
 
