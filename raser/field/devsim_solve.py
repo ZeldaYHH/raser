@@ -40,6 +40,15 @@ def main(label=None,v_max = 400):
         extend_set()
         initial_solution(device,region,para_dict)
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)
+    elif label=='1d_njupin_1.5mm_cv_ir':
+        area_factor=44.44
+        device = "NJU-PIN"
+        region = "NJU-PIN"
+        para_dict=[]
+        set_mesh(device,region)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)
         
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
