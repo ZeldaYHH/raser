@@ -25,6 +25,8 @@ def main(args):
         gen_devsim_db.main()
     elif label == 'sicar1.1.6_cv_v1':
         scan_cv.main(simname="SICAR-1.1.6")
+    elif label == "1d_njupin_1.5mm_cv":
+        devsim_solve.main(label)
     elif label == "NJUPIN_cv_v1":
         scan_cv.main(simname="NJU-PIN")
     elif label == 'sicar1.1.6_iv_v1':
