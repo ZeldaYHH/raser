@@ -210,7 +210,7 @@ def milestone_save_2D(device, region, v, path):
     dd = os.path.join(path, str(v)+'V.dd')
     devsim.write_devices(file=dd, type="tecplot")
 
-    metadata=[]
+    metadata = {}
     metadata['voltage'] = v
     metadata['dimension'] = 2
 
@@ -245,7 +245,7 @@ def milestone_save_3D(device, region, v, path):
     z=devsim.get_node_model_values(device=device,region=region,name="z")
     Potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
 
-    metadata=[]
+    metadata = {}
     metadata['voltage'] = v
     metadata['dimension'] = 3
 
