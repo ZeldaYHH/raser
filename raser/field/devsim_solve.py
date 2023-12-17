@@ -191,7 +191,7 @@ def milestone_save_1D(device, region, v, path):
 def milestone_save_2D(device, region, v, path):
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x")) # get x-node values
     y = np.array(devsim.get_node_model_values(device=device, region=region, name="y")) # get y-node values
-    potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential data
+    Potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential data
     TrappingRate_n = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_n"))
     TrappingRate_p = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_p"))
 
@@ -202,7 +202,7 @@ def milestone_save_2D(device, region, v, path):
     x_mid = np.array(devsim.get_edge_model_values(device=device, region=region, name="xmid")) 
     y_mid = np.array(devsim.get_edge_model_values(device=device, region=region, name="ymid")) 
 
-    draw2D(x,y,potential,"potential",v, path)
+    draw2D(x,y,Potential,"Potential",v, path)
     draw2D(x_mid,y_mid,ElectricField,"ElectricField",v, path)
     draw2D(x,y,TrappingRate_n,"TrappingRate_n",v, path)
     draw2D(x,y,TrappingRate_p,"TrappingRate_p",v, path)
@@ -210,28 +210,51 @@ def milestone_save_2D(device, region, v, path):
     dd = os.path.join(path, str(v)+'V.dd')
     devsim.write_devices(file=dd, type="tecplot")
 
-    with open(os.path.join(path, "potential_{}V.pkl".format(v)),'wb') as file:
-        pickle.dump(potential, file)
-    with open(os.path.join(path, "x.pkl"),'wb') as file:
-        pickle.dump(x, file)
-    with open(os.path.join(path, "y.pkl"),'wb') as file:
-        pickle.dump(y, file)
+    metadata=[]
+    metadata['voltage'] = v
+    metadata['dimension'] = 2
+
+    with open(os.path.join(path, "ElectricField_{}V.pkl".format(v)),'wb') as file:
+        data = {}
+        ElectricFieldFunction = zip(ElectricField, x_mid, y_mid)
+        data['ElectricField'] = zip(*ElectricFieldFunction)
+        data['metadata'] = metadata
+        pickle.dump(data, file)
+    with open(os.path.join(path, "Potential_{}V.pkl".format(v)),'wb') as file:
+        data = {}
+        PotentialFunction = zip(Potential, x, y)
+        data['Potential'] = zip(*PotentialFunction)
+        data['metadata'] = metadata
+        pickle.dump(data, file)
     with open(os.path.join(path, "TrappingRate_p_{}V.pkl".format(v)),'wb') as file:
-        pickle.dump(TrappingRate_p, file)
+        data = {}
+        TrappingRate_pFunction = zip(TrappingRate_p, x, y)
+        data['TrappingRate_p'] = zip(*TrappingRate_pFunction)
+        data['metadata'] = metadata
+        pickle.dump(data, file)
     with open(os.path.join(path, "TrappingRate_n_{}V.pkl".format(v)),'wb') as file:
-        pickle.dump(TrappingRate_n, file)
+        data = {}
+        TrappingRate_nFunction = zip(TrappingRate_n, x, y)
+        data['TrappingRate_n'] = zip(*TrappingRate_nFunction)
+        data['metadata'] = metadata
+        pickle.dump(data, file)
 
 def milestone_save_3D(device, region, v, path):
     x=devsim.get_node_model_values(device=device,region=region,name="x")
     y=devsim.get_node_model_values(device=device,region=region,name="y")
     z=devsim.get_node_model_values(device=device,region=region,name="z")
-    potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
-    data = [x, y, z, potential]
-    names = ["x", "y", "z","potential"]
+    Potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
 
-    for i in range(len(data)):
-        with open(os.path.join(path, '{}_{}.pkl'.format(names[i], v)), 'wb') as file:
-            pickle.dump(data[i], file)
+    metadata=[]
+    metadata['voltage'] = v
+    metadata['dimension'] = 3
+
+    with open(os.path.join(path, "Potential_{}V.pkl".format(v)),'wb') as file:
+        data = {}
+        PotentialFunction = zip(Potential, x, y, z)
+        data['Potential'] = zip(*PotentialFunction)
+        data['metadata'] = metadata
+        pickle.dump(data, file)
 
 if __name__ == "__main__":
     main(simname = sys.argv[1])
