@@ -21,7 +21,7 @@
         "voltage" : -700
     },
     
-    "temperature" : 263.0,
+    "temperature" : 254.0,
     "irradiation" : {
         "irradiation_label" : "XingChen",
         "irradiation_flux" : 1e15
