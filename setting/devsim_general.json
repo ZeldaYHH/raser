@@ -1,0 +1,13 @@
+{
+    "absolute_error" : 1e10, 
+    "relative_error" : 1e-5, 
+    "maximum_iterations" : 1000,
+
+    "milestone_mode" : true,
+    "milestone_step" : 100,
+
+    "voltage_step" : 1,
+    "acreal" : 1.0, 
+    "acimag" : 0.0,
+    "frequency" : 1.0
+}

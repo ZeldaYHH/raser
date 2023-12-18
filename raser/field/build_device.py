@@ -25,21 +25,22 @@ class Detector:
     ---------
         2023/12/03
     """ 
-    def __init__(self, device_name, dimension=2):
+    def __init__(self, device_name):
         self.device = device_name
         self.region = device_name
         device_json = "./setting/detector/" + device_name + ".json"
         with open(device_json) as f:
             self.device_dict = json.load(f)
 
-        if dimension == 1:
+        self.dimension = self.device_dict['default_dimension']
+        if self.dimension == 1:
             self.create1DMesh()
-        elif dimension == 2:
+        elif self.dimension == 2:
             self.create2DMesh()
-        elif dimension == 3:
+        elif self.dimension == 3:
             self.createGmshMesh()
         else:
-            raise ValueError(dimension)
+            raise ValueError(self.dimension)
 
         self.setDoping()
 

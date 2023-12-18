@@ -24,14 +24,14 @@ def CreateGlobalConstant():
     devsim.add_db_entry(material="global",   parameter="k",       value=k,          unit="J/K",      description="Boltzmann Constant")
     devsim.add_db_entry(material="global",   parameter="eps_0",   value=eps_0,      unit="F/cm^2",   description="Absolute Dielectric Constant")
     devsim.add_db_entry(material="global",   parameter="T0",      value=T0,         unit="K",        description="T0")
-    devsim.add_db_entry(material="global",   parameter="k_T0",    value=k*T0,       unit="J",        description="k*T0")
-    devsim.add_db_entry(material="global",   parameter="Volt_thermal",    value=k*T0/q,     unit="J/coul",   description="k*T0/q")
 
     vel_mean = 1e7
     devsim.add_db_entry(material="global",   parameter="vel_mean",     value=vel_mean,   unit="cm/s",     description="Thermal average velocity")
 
     T = 300.0         # K
     devsim.add_db_entry(material="global",   parameter="T",    value=T,     unit="K",   description="T")
+    devsim.add_db_entry(material="global",   parameter="k_T",    value=k*T,       unit="J",        description="k*T")
+    devsim.add_db_entry(material="global",   parameter="Volt_thermal",    value=k*T/q,     unit="J/coul",   description="k*T/q")
 
 
 def CreateSiliconCarbideConstant():
