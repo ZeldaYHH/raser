@@ -15,9 +15,19 @@
     "avalanche_bond" : 3.0,
     "avalanche_model" : "Hatakeyama",
 
-    "voltage" : -500,
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : -500
+    },
+
     "temperature" : 300.0,
-    "irradiation" : 0,
+    "irradiation" : {
+        "irradiation_label" : "CommonDefect",
+        "irradiation_flux" : 0
+    },
+
+    "area_factor" : 1,
+    "default_dimension" : 2,
 
     "mesh" : {
         "2D_mesh" : {

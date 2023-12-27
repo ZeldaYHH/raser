@@ -47,9 +47,9 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
         devsim.set_parameter(device=device, region=region, name="E_t_"+name,   value=E_t)
 
         r_n = "(vel_mean * sigma_n_irr_{name})".format(name=name)#c_n
-        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=name)#e_n
+        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T))".format(name=name)#e_n
         r_p = "(vel_mean * sigma_p_irr_{name})".format(name=name)#c_p
-        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=name)#e_p
+        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T))".format(name=name)#e_p
         n_t_irr_n = "+(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
         n_t_irr_p = "+(N_t_irr_{name}*(Holes*{r_p}+{n_1}*{r_n})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
         trap_n = "+(vel_mean * sigma_n_irr_{name})*(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
@@ -123,7 +123,7 @@ def CreateIntrinsicModel_SiCCommonDefect(device, region):
     """
     
     defects = []
-    defects.append({"name" : "Z1/2",  "E_t_ev" : 1.63-0.67, "g_int" : 1, "sigma_n_irr" : 3e-16, "sigma_p_irr" : 2e-12})
-    defects.append({"name" : "EH6/7", "E_t_ev" : 1.63-1.65, "g_int" : 1, "sigma_n_irr" : 2e-17, "sigma_p_irr" : 3e-17})
+    defects.append({"name" : "Z12",  "E_t_ev" : 1.63-0.67, "g_int" : 1, "sigma_n_irr" : 3e-16, "sigma_p_irr" : 2e-12})
+    defects.append({"name" : "EH67", "E_t_ev" : 1.63-1.65, "g_int" : 1, "sigma_n_irr" : 2e-17, "sigma_p_irr" : 3e-17})
 
     return defects
