@@ -2,7 +2,7 @@
 #From: library/debian:11.7    
 
 Bootstrap: localimage
-From: raser-2.2.sif  
+From: raser-2.3.sif  
 
 %post
     ## Use huaweicloud  
@@ -25,7 +25,7 @@ From: raser-2.2.sif
     #rm -rf root_v6.26.06.source.tar.gz 
     #cd /usr/local/share/root_build
     #cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src 
-    #cmake --build . -- install -j24   
+    #cmake --build . -- install -j$(nproc)   
     
 
     ## Geant4-pybind    
@@ -35,8 +35,8 @@ From: raser-2.2.sif
 
     ## DevSim    
     #pip install mkl devsim 
-    #pip install mkl -U # 2023.2.0
-    #pip install devsim -U # 2.6.3
+    #pip install mkl -U # mkl-2024.0.0
+    #pip install devsim -U # 2.7.0
 
     ## NGSpice & KiCAD
     #apt -y install ngspice 
@@ -59,7 +59,7 @@ From: raser-2.2.sif
 
     #vim acts_src/thirdparty/dfelibs/CMakeLists.txt # replace github to gitlab 
     #cmake --trace -B acts_build -S acts_src -DACTS_BUILD_EXAMPLES_PYTHON_BINDINGS=ON
-    #cmake --build acts_build -j28 # -v for verbose 
+    #cmake --build acts_build -j$(nproc) # -v for verbose 
     #Note: need to do a clean to avoid stuck 
 
     ## pyMTL3 
@@ -77,3 +77,16 @@ From: raser-2.2.sif
     # make -j24 
     # make install
 
+    ## RISC-V software 
+    # apt install autoconf automake autotools-dev curl libmpc-dev \
+    #    libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo \
+    #    gperf libtool patchutils bc zlib1g-dev git libexpat1-dev
+    # mkdir /opt/riscv32i 
+    # cd /usr/local/share
+    # git clone https://gitlab.com/raser-team/external/riscv-gnu-toolchain.git
+    # cd riscv-gnu-toolchain 
+    # git submodule update --init --recursive 
+    # mkdir build 
+    # cd build 
+    # ../configure --with-arch=rv32i --prefix=/opt/riscv32i 
+    # make -j$(nproc) 
