@@ -30,6 +30,9 @@ parser_field.add_argument('label', help='LABEL to identify operation')
 parser_field.add_argument('-v', '--verbose', help='VERBOSE level', 
                           action='count', default=0)
 
+parser_fpga = subparsers.add_parser('fpga', help='FPGA design')
+parser_fpga.add_argument('label', help='LABEL to identify FPGA design')
+
 parser_root = subparsers.add_parser('root', help='root files conversion')
 parser_root.add_argument('label', help='LABEL to identify root files')
 
@@ -51,7 +54,7 @@ if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
-submodules = ['asic', 'draw', 'field', 'root', 'spaceres', 'gen_signal','particle','elec']
+submodules = ['asic', 'draw', 'field','fpga', 'root', 'spaceres', 'gen_signal','particle','elec']
 
 submodule = vars(args)['subparser_name']
 if submodule not in submodules:
