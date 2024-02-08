@@ -51,8 +51,8 @@ class DevsimField:
             PotentialUniform =get_common_interpolate_3d(PotentialNotUniform)
 
         self.Potential = PotentialUniform
-        # Electric field intensity
 
+        # Electric field intensity
         gradient = 0
 
     def set_w_p(self):
