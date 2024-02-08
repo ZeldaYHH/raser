@@ -197,10 +197,8 @@ def milestone_save_1D(device, region, v, path):
     for name in ['Potential', 'TrappingRate_p', 'TrappingRate_n']: # scalar field on mesh point (instead of on edge)
         with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
             data = {}
-            value = eval(name) # refer to the object with given name
-            merged_list = [value, x]
-            transposed_list = list(map(list, zip(*merged_list)))
-            data[name] = transposed_list
+            data['values'] = eval(name) # refer to the object with given name
+            data['points'] = x
             data['metadata'] = metadata
             pickle.dump(data, file)
 
@@ -233,10 +231,10 @@ def milestone_save_2D(device, region, v, path):
     for name in ['Potential', 'TrappingRate_p', 'TrappingRate_n']: # scalar field on mesh point (instead of on edge)
         with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
             data = {}
-            value = eval(name) # refer to the object with given name
-            merged_list = [value, x, y]
+            data['values'] = eval(name) # refer to the object with given name
+            merged_list = [x, y]
             transposed_list = list(map(list, zip(*merged_list)))
-            data[name] = transposed_list
+            data['points'] = transposed_list
             data['metadata'] = metadata
             pickle.dump(data, file)
 
@@ -253,10 +251,10 @@ def milestone_save_3D(device, region, v, path):
     for name in ['Potential']: # scalar field on mesh point (instead of on edge)
         with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
             data = {}
-            value = eval(name) # refer to the object with given name
-            merged_list = [value, x, y, z]
+            data['values'] = eval(name) # refer to the object with given name
+            merged_list = [x, y, z]
             transposed_list = list(map(list, zip(*merged_list)))
-            data[name] = transposed_list
+            data['points'] = transposed_list
             data['metadata'] = metadata
             pickle.dump(data, file)
 

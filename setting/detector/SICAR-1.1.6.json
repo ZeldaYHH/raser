@@ -30,6 +30,29 @@
     "default_dimension" : 2,
 
     "mesh" : {
+        "1D_mesh" : {
+            "mesh_line" : [
+                {"pos" : 0,       "ps" : 2.5e-5, "tag" : "top"},
+                {"pos" : 66.3e-4, "ps" : 2.5e-5, "tag" : "bot"},
+
+                {"pos" : 0.3e-4,  "ps" : 1e-5},
+                {"pos" : 1.3e-4,  "ps" : 1e-5},
+                {"pos" : 51.3e-4, "ps" : 1e-5},
+                {"pos" : 56.3e-4, "ps" : 1e-5}
+            ],
+            "region" : [
+                {
+                    "material" : "SiliconCarbide", 
+                    "region" : "SICAR-1.1.6",
+                    "tag1" : "top",
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        },
         "2D_mesh" : {
             "mesh_line" : [
                 {"dir" : "x", "pos" : 0,       "ps" : 2.5e-5},
