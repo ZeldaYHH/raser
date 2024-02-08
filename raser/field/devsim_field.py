@@ -16,7 +16,7 @@ from scipy.interpolate import LinearNDInterpolator as LNDI
 diff_res = 1e-5 # difference resolution in cm
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_ele_num = 1):
+    def __init__(self, device_name, dimension, voltage, read_ele_num = 0):
         self.name = device_name
         self.voltage = voltage # float
         self.dimension = dimension
@@ -56,10 +56,10 @@ class DevsimField:
 
     def set_w_p(self):
         self.WeightingPotentials = [] #length = ele_num
-        if self.read_ele_num == 1:
+        if self.read_ele_num == 0:
             print("Linear weighting potential loaded")
             pass
-        elif self.read_ele_num >1:  
+        elif self.read_ele_num >= 0:  
             for i in range(self.read_ele_num):
                 self.WeightingPotentials.append(strip_w_p(i))
                 print("Weighting potential loaded for {}, strip {}".format(self.name, i))
@@ -270,5 +270,5 @@ def strip_w_p(ele_number):
     return w_potential
 
 if __name__ == "__main__":
-    testField = DevsimField("ITk-Si-strip", 2, -500.0)
+    testField = DevsimField("ITk-Si-strip", 2, -500.0, 4)
     print(testField.get_e_field(0.01,0.01,0.005))
