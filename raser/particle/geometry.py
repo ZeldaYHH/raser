@@ -78,6 +78,9 @@ class R3dDetector:
         @Modify:
             2021/08/31
         """
+
+        # TODO: move this into setting/detector as 3d_plugin_7e.json
+
         self.e_gap = e_gap
         e_int = e_gap 
         e_t_y = self.infor_ele(e_r,e_int)
