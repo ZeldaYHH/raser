@@ -26,6 +26,7 @@ class Detector:
         2023/12/03
     """ 
     def __init__(self, device_name):
+        self.det_name = device_name
         self.device = device_name
         self.region = device_name
         device_json = "./setting/detector/" + device_name + ".json"

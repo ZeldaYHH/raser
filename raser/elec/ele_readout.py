@@ -42,7 +42,7 @@ class Amplifier:
         self.read_ele_num = my_current.read_ele_num
         self.ampli_define(ampl_par)
         self.sampling_charge(my_current,mintstep)
-        self.ampl_sim() 
+        self.ampl_sim()
 
     def ampli_define(self,ampl_par):
         """
@@ -58,6 +58,15 @@ class Amplifier:
             self.t_fall    = ampl_par['t_fall']
             self.trans_imp = ampl_par['trans_imp']
             self.CDet      = ampl_par['CDet']
+            self.BBW       = ampl_par['BBW']
+            self.BBGain    = ampl_par['BBGain']
+            self.BB_imp    = ampl_par['BB_imp']
+            self.OscBW     = ampl_par['OscBW'] 
+
+            tau_BB_RC = 1.0e-12*self.BB_imp*self.CDet     #BB RC
+            tau_BB_BW = 0.35/(1.0e9*self.BBW)/2.2    #BB Tau
+
+            self.tau_BBA = math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))
 
         elif ampl_par['ele_name'] == 'BB':
             self.CDet      = ampl_par['CDet']

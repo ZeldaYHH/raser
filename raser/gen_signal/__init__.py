@@ -41,13 +41,13 @@ def main(kwargs):
     ---------
         2021/09/02
     """
-    detector_name = kwargs['detector_name']
+    det_name = kwargs['det_name']
     voltage = float(kwargs['voltage'])
     absorber = kwargs['absorber_name']
-    amplifier = kwargs['absorber_name']
+    amplifier = kwargs['amplifier']
 
-    my_d = bdv.Detector(detector_name)
-    if "strip" in detector_name:
+    my_d = bdv.Detector(det_name)
+    if "strip" in det_name:
         my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 2)
     else: 
         my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage)
@@ -71,7 +71,7 @@ def main(kwargs):
         g4_seed = random.randint(0,1e7)
         my_g4p = g4s.Particles(my_d, absorber, g4_seed)
 
-    if "strip" in detector_name:
+    if "strip" in det_name:
         my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
     else: 
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
@@ -85,7 +85,7 @@ def main(kwargs):
         ele_current = rdout.Amplifier(my_current, amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         
-    if "strip" in my_d.detector_name:
+    if "strip" in my_d.det_name:
         draw_save.cce(my_d,my_f,my_current)
 
     del my_f
