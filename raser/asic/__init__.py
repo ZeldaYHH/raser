@@ -1,7 +1,7 @@
 
 
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
         
     if label == 'regincr':
         from . import regincr

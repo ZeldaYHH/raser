@@ -10,11 +10,13 @@ Description:
 import math
 import ROOT
 
+import json
+
 # TODO: Need to be TOTALLY rewritten
 
 # CSA and BB amplifier simulation
 class Amplifier:
-    def __init__(self,my_current,ampl_par,mintstep="50e-12"):
+    def __init__(self,my_current,amplifier,mintstep="50e-12"):
         """
         Description:
             Get current after CSA and BB amplifier
@@ -30,17 +32,19 @@ class Amplifier:
         ---------
             2021/09/09
         """
-        self.CSA_ele=[]
-        self.BB_ele = []
+        self.ele = []
 
+        ele_json = "./setting/electronics/" + amplifier + ".json"
+        with open(ele_json) as f:
+            ampl_par = json.load(f)
+
+        self.ele_name = ampl_par['ele_name']
         self.read_ele_num = my_current.read_ele_num
-        CSA_par = ampl_par[0]
-        BB_par = ampl_par[1]
-        self.ampli_define(CSA_par,BB_par)
+        self.ampli_define(ampl_par)
         self.sampling_charge(my_current,mintstep)
         self.ampl_sim() 
 
-    def ampli_define(self,CSA_par,BB_par):
+    def ampli_define(self,ampl_par):
         """
         Description:
             The parameters of CSA and BB amplifier.
@@ -49,21 +53,25 @@ class Amplifier:
         ---------
             2021/09/09
         """
-        self.t_rise    = CSA_par['t_rise']
-        self.t_fall    = CSA_par['t_fall']
-        self.trans_imp = CSA_par['trans_imp']
-        self.CDet      = CSA_par['CDet']
-        self.BBW       = BB_par['BBW']
-        self.BBGain    = BB_par['BBGain']
-        self.BB_imp    = BB_par['BB_imp']
-        self.OscBW     = BB_par['OscBW'] 
-        ##BB simualtion parameter
-        tau_C50 = 1.0e-12*50.*self.CDet          #Oscil. RC
-        tau_BW = 0.35/(1.0e9*self.OscBW)/2.2      #Oscil. RC
-        tau_BB_RC = 1.0e-12*self.BB_imp*self.CDet     #BB RC
-        tau_BB_BW = 0.35/(1.0e9*self.BBW)/2.2    #BB Tau
-        self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
-        self.tau_BBA = math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))
+        if ampl_par['ele_name'] == 'CSA':
+            self.t_rise    = ampl_par['t_rise']
+            self.t_fall    = ampl_par['t_fall']
+            self.trans_imp = ampl_par['trans_imp']
+            self.CDet      = ampl_par['CDet']
+
+        elif ampl_par['ele_name'] == 'BB':
+            self.CDet      = ampl_par['CDet']
+            self.BBW       = ampl_par['BBW']
+            self.BBGain    = ampl_par['BBGain']
+            self.BB_imp    = ampl_par['BB_imp']
+            self.OscBW     = ampl_par['OscBW'] 
+            ##BB simualtion parameter
+            tau_C50 = 1.0e-12*50.*self.CDet          #Oscil. RC
+            tau_BW = 0.35/(1.0e9*self.OscBW)/2.2      #Oscil. RC
+            tau_BB_RC = 1.0e-12*self.BB_imp*self.CDet     #BB RC
+            tau_BB_BW = 0.35/(1.0e9*self.BBW)/2.2    #BB Tau
+            self.tau_scope = math.sqrt(pow(tau_C50,2)+pow(tau_BW,2))
+            self.tau_BBA = math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))
 
     def sampling_charge(self,my_current,mintstep):
         """ Transform current to charge 
@@ -120,20 +128,30 @@ class Amplifier:
                 elif (i != 0):
                     preamp_Q[k][i]=0.0
 
-        for k in range(self.read_ele_num):
-            self.CSA_p_init()
-            self.BB_p_init()
-            for i in range(IMaxSh-step):
-                if i >= step:
-                    dif_shaper_Q = preamp_Q[k][i]
-                else:
-                    dif_shaper_Q = 0
-                for j in range(IMaxSh-i):
-                    self.fill_CSA_out(i,j,dif_shaper_Q)
-                    self.fill_BB_out(i,j,dif_shaper_Q)
-                self.max_CSA(i)
-            self.fill_CSA_th1f(k)
-            self.fill_BB_th1f(k)
+        if self.ele_name == 'CSA':
+            for k in range(self.read_ele_num):
+                self.CSA_p_init()
+                for i in range(IMaxSh-step):
+                    if i >= step:
+                        dif_shaper_Q = preamp_Q[k][i]
+                    else:
+                        dif_shaper_Q = 0
+                    for j in range(IMaxSh-i):
+                        self.fill_CSA_out(i,j,dif_shaper_Q)
+                    self.max_CSA(i)
+                self.fill_CSA_th1f(k)
+
+        elif self.ele_name == 'BB':
+            for k in range(self.read_ele_num):
+                self.BB_p_init()
+                for i in range(IMaxSh-step):
+                    if i >= step:
+                        dif_shaper_Q = preamp_Q[k][i]
+                    else:
+                        dif_shaper_Q = 0
+                    for j in range(IMaxSh-i):
+                        self.fill_BB_out(i,j,dif_shaper_Q)
+                self.fill_BB_th1f(k)
 
     def CSA_p_init(self):
         """ CSA parameter initialization"""
@@ -185,7 +203,7 @@ class Amplifier:
         Ci = 3.5e-11  #fF
         Qfrac = 1.0/(1.0+self.CDet*1e-12/Ci)
         
-        self.CSA_ele.append(ROOT.TH1F("electronics"+str(k+1), "electronics",
+        self.ele.append(ROOT.TH1F("electronics"+str(k+1), "electronics",
                                 self.IMaxSh, 0, self.IMaxSh*self.time_unit))
         for i in range(self.IMaxSh):
             if self.sh_max == 0.0:
@@ -199,7 +217,7 @@ class Amplifier:
             elif self.CDet_j ==1:
                 self.shaper_out_V[i] = self.shaper_out_Q[i]*self.trans_imp\
                                        * 1e15*self.qtot[k]/self.sh_max
-            self.CSA_ele[k].SetBinContent(i,self.shaper_out_V[i])
+            self.ele[k].SetBinContent(i,self.shaper_out_V[i])
         #Print the max current time of CSA
         max_CSA_height = min(self.shaper_out_V)
         time_t = self.shaper_out_V.index(max_CSA_height)
@@ -210,13 +228,13 @@ class Amplifier:
             and save in the th1f
         """
         
-        self.BB_ele.append(ROOT.TH1F("electronics BB"+str(k+1),"electronics BB",
+        self.ele.append(ROOT.TH1F("electronics BB"+str(k+1),"electronics BB",
                                 self.IMaxSh,0,self.IMaxSh*self.time_unit))
         for i in range(len(self.Vout_scope)+1):
             if i == 0:
-                self.BB_ele[k].SetBinContent(i,0)
+                self.ele[k].SetBinContent(i,0)
             else:
-                self.BB_ele[k].SetBinContent(i,self.Vout_scope[i-1])
+                self.ele[k].SetBinContent(i,self.Vout_scope[i-1])
         # Print the max current time of BB
         max_BB_height = min(self.Vout_scope)
         time_t = self.Vout_scope.index(max_BB_height)

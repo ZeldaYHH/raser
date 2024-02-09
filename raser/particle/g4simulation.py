@@ -16,15 +16,17 @@ import sys
 import numpy as np
 import random
 
+import json
+
 # Geant4 main process
 class Particles:
     #model name for other class to use
     _model = None
     #other pars may use in other class define here
-    #use in pixeldetector
+    #use in pixel_detector
     _randx = None
     _randy = None
-    def __init__(self, my_d, dset):
+    def __init__(self, my_d, absorber, g4_seed):
         """
         Description:
             Geant4 main process
@@ -40,11 +42,14 @@ class Particles:
         ---------
             2023/04/18
         """	
-        g4_dic = dset.pygeant4
-        self.geant4_model = g4_dic['model']
-        detector_material=dset.detector['material']
-        if(self.geant4_model=='pixeldetector'):
-            my_g4d = pixeldetectorConstruction(g4_dic,g4_dic['maxstep'])
+        geant4_json = "./setting/absorber/" + absorber + ".json"
+        with open(geant4_json) as f:
+            g4_dic = json.load(f)
+
+        self.geant4_model = g4_dic['geant4_model']
+        detector_material=my_d.device_dict['material']
+        if(self.geant4_model=='pixel_detector'):
+            my_g4d = PixelDetectorConstruction(g4_dic,g4_dic['maxstep'])
             Particles._model = self.geant4_model
             Particles._randx = g4_dic['par_randx']
             Particles._randy = g4_dic['par_randy']
@@ -60,7 +65,7 @@ class Particles:
         gRunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
         rand_engine= g4b.RanecuEngine()
         g4b.HepRandom.setTheEngine(rand_engine)
-        g4b.HepRandom.setTheSeed(dset.g4seed)
+        g4b.HepRandom.setTheSeed(g4_seed)
         gRunManager.SetUserInitialization(my_g4d)	
         # set physics list
         physics_list =  g4b.FTFP_BERT()
@@ -87,7 +92,7 @@ class Particles:
             UImanager = g4b.G4UImanager.GetUIpointer()
             UImanager.ApplyCommand('/run/initialize')
             
-        gRunManager.BeamOn(int(dset.total_events))
+        gRunManager.BeamOn(int(g4_dic['total_events']))
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
@@ -100,7 +105,7 @@ class Particles:
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
 
-        if(self.geant4_model=='pixeldetector'):
+        if(self.geant4_model=='pixel_detector'):
             #record localpos in logicvolume
             self.devicenames = s_devicenames
             self.localposition = s_localposition
@@ -143,8 +148,8 @@ class Particles:
         
     def __del__(self):
         pass
-#Geant4 for pixeldetector
-class pixeldetectorConstruction(g4b.G4VUserDetectorConstruction):                
+#Geant4 for pixel_detector
+class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):                
     "Pixel Detector Construction"
     def __init__(self,g4_dic,maxStep=0.5):
         g4b.G4VUserDetectorConstruction.__init__(self)
@@ -450,7 +455,7 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                    par_in[2]*g4b.um))  
         self.particleGun = beam
         self.position = par_in
-        if(self.geant4_model=="Time_resolution"):
+        if(self.geant4_model=="time_resolution"):
             beam2 = g4b.G4ParticleGun(1)
             beam2.SetParticleEnergy(0.546*g4b.MeV)
             beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
@@ -461,17 +466,17 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                         par_in[1]*g4b.um,
                                                         par_in[2]*g4b.um))  
             self.particleGun2 = beam2
-        if(self.geant4_model=="pixeldetector"):
+        if(self.geant4_model=="pixel_detector"):
             self.directionx = par_direction[0]
             self.directiony = par_direction[1]
             self.directionz = par_direction[2]
 
     def GeneratePrimaries(self, event):
-        if(self.geant4_model=="Time_resolution"):
+        if(self.geant4_model=="time_resolution"):
             self.particleGun.GeneratePrimaryVertex(event)
             self.particleGun2.GeneratePrimaryVertex(event)
             pass
-        elif(self.geant4_model=="pixeldetector"):
+        elif(self.geant4_model=="pixel_detector"):
             randx = Particles._randx
             randy = Particles._randy
             rdo_x = random.uniform(-randx,randx)
@@ -527,7 +532,7 @@ class MyEventAction(g4b.G4UserEventAction):
         self.event_angle = 0.
         self.p_step = []
         self.energy_step = []
-        #use in pixeldetector
+        #use in pixel_detector
         self.volume_name = []
         self.localposition = []
 
@@ -542,8 +547,8 @@ class MyEventAction(g4b.G4UserEventAction):
             self.event_angle = None
         save_geant4_events(eventID,self.edep_device,
                            self.p_step,self.energy_step,self.event_angle)
-        if(Particles._model == "pixeldetector"):
-            save_pixeldetector_events(self.volume_name,self.localposition)
+        if(Particles._model == "pixel_detector"):
+            save_pixel_detector_events(self.volume_name,self.localposition)
 
     def RecordDevice(self, edep,point_in,point_out):
         self.edep_device += edep
@@ -592,7 +597,7 @@ def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
         s_energy_steps.append([0])
         s_events_angle.append(event_angle)
         
-def save_pixeldetector_events(volume_name,localposition):
+def save_pixel_detector_events(volume_name,localposition):
         global s_devicenames,s_localposition
         s_devicenames.append(volume_name)
         s_localposition.append(localposition)

@@ -3,9 +3,9 @@ import devsim
 from . import gen_devsim_db
 from . import devsim_solve
 from . import test4hsic
-def main(args):
-    label = vars(args)['label']
-    verbose = vars(args)['verbose'] 
+def main(kwargs):
+    label = kwargs['label']
+    verbose = kwargs['verbose'] 
 
     if verbose == 1: # -v 
         logging.basicConfig(level=logging.INFO)

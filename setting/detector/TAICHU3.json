@@ -1,6 +1,6 @@
 {
     "det_name" : "Taichu3",
-    "det_model" : "pixeldetector",
+    "det_model" : "pixel_detector",
     "material" : "Si",
 
     "lx" : 1500,

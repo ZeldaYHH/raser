@@ -54,8 +54,8 @@ def convert_csv_to_root(input_dir, output_dir, label):
         sys.stdout.write('Saved as {}\n'.format(output_file))
 
 
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
 
     if label == 'sicar1.1.8':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'

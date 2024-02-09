@@ -1,6 +1,0 @@
-{
-    "detector": "Taichu3",
-    "absorber": "pixeldetector",
-    "electronics": "CSA",
-    "laser": "top_TCT"
-}
