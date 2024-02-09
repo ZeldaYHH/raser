@@ -69,6 +69,8 @@ class Amplifier:
             self.tau_BBA = math.sqrt(pow(tau_BB_RC,2)+pow(tau_BB_BW,2))
 
         elif ampl_par['ele_name'] == 'BB':
+            self.t_rise    = ampl_par['t_rise']
+            self.t_fall    = ampl_par['t_fall']
             self.CDet      = ampl_par['CDet']
             self.BBW       = ampl_par['BBW']
             self.BBGain    = ampl_par['BBGain']
