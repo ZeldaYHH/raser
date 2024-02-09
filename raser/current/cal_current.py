@@ -92,7 +92,9 @@ class Carrier:
         
         average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
         mobility = Material(my_d.material)
-        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
+        #mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
+        mu = mobility.cal_mobility(my_d.temperature, 1e12, self.charge, average_intensity)
+        # TODO: rebuild the doping function or admit this as an approximation
         velocity = mu*average_intensity
 
         # get diffution from mobility and temperature

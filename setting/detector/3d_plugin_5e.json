@@ -7,9 +7,40 @@
     "ly" : 10000,
     "lz" : 350,
     
-    "custom_electrode" : "True",
     "e_r" : 50.0,
     "e_gap" : 150.0,
+    "e_t" : [
+        {
+            "x_coord" : 5000,
+            "y_coord" : 5000,
+            "radius" : 50.0,
+            "doping" : "p"
+        },
+        {
+            "x_coord" : 4787.868,
+            "y_coord" : 4787.868,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5212.132,
+            "y_coord" : 4787.868,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 4787.868,
+            "y_coord" : 5212.132,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5212.132,
+            "y_coord" : 5212.132,
+            "radius" : 50.0,
+            "doping" : "n"
+        }
+    ],
 
     "doping":{
         "Acceptors" : "0",

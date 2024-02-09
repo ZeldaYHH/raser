@@ -16,7 +16,7 @@ from scipy.interpolate import LinearNDInterpolator as LNDI
 diff_res = 1e-5 # difference resolution in cm
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_ele_num = 0):
+    def __init__(self, device_name, dimension, voltage, read_ele_num = 1):
         self.name = device_name
         self.voltage = voltage # float
         self.dimension = dimension
@@ -56,10 +56,10 @@ class DevsimField:
 
     def set_w_p(self):
         self.WeightingPotentials = [] #length = ele_num
-        if self.read_ele_num == 0:
+        if self.read_ele_num == 1:
             print("Linear weighting potential loaded")
             pass
-        elif self.read_ele_num >= 0:  
+        elif self.read_ele_num >= 2:  
             for i in range(self.read_ele_num):
                 self.WeightingPotentials.append(strip_w_p(i))
                 print("Weighting potential loaded for {}, strip {}".format(self.name, i))
@@ -114,6 +114,7 @@ class DevsimField:
     # RASER dimension order: z, x, y
     
     def get_potential(self, x, y, z):
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.Potential(z)
         elif self.dimension == 2:
@@ -121,7 +122,8 @@ class DevsimField:
         elif self.dimension == 3:
             return self.Potential(z, x, y)
     
-    def get_e_field(self, x, y, z):    
+    def get_e_field(self, x, y, z):  
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm  
         if self.dimension == 1:
             try:
                 E_z = (self.Potential(z+diff_res/2) - self.Potential(z-diff_res/2)) / diff_res
@@ -198,6 +200,7 @@ class DevsimField:
             return get_common_interpolate_2d(self.WeightingPotentials[i], z, x)
     
     def get_trap_e(self, x, y, z):
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.TrappingRate_n(z)
         elif self.dimension == 2:
@@ -206,6 +209,7 @@ class DevsimField:
             return self.TrappingRate_n(z, x, y)
     
     def get_trap_h(self, x, y, z):
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.TrappingRate_p(z)
         elif self.dimension == 2:
@@ -271,4 +275,4 @@ def strip_w_p(ele_number):
 
 if __name__ == "__main__":
     testField = DevsimField("ITk-Si-strip", 2, -500.0, 4)
-    print(testField.get_e_field(0.01,0.01,0.005))
+    print(testField.get_e_field(100,100,50))

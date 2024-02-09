@@ -40,7 +40,11 @@ parser_spaceres = subparsers.add_parser('spaceres', help='spaceres calculation')
 parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 
 parser_gen_signal = subparsers.add_parser('gen_signal', help='generate signal')
-parser_gen_signal.add_argument('label', nargs='*', help='LABEL to identify spaceres files')
+parser_gen_signal.add_argument('det_name', help='name of the detector')
+parser_gen_signal.add_argument('voltage', help='bias voltage')
+parser_gen_signal.add_argument('absorber_name', help='model of particle energy absorber')
+parser_gen_signal.add_argument('amplifier', help='amplifier')
+parser_gen_signal.add_argument('-s', '--scan', nargs=1, type=int, help='instance number for scan mode')
 
 parser_gsignal = subparsers.add_parser('particle', help='calculate particle')
 parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
@@ -54,13 +58,15 @@ if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
+kwargs = vars(args)
+
 submodules = ['asic', 'draw', 'field','fpga', 'root', 'spaceres', 'gen_signal','particle','elec']
 
-submodule = vars(args)['subparser_name']
+submodule = kwargs['subparser_name']
 if submodule not in submodules:
     raise NameError(submodule)
 
-if vars(args)['batch'] == True:
+if kwargs['batch'] == True:
     from util import batchjob
     destination = submodule
     command = ' '.join(sys.argv[1:])
@@ -68,7 +74,7 @@ if vars(args)['batch'] == True:
     command = command.replace('-b ', '')
     print('batch command: {}'.format(command))
     batchjob.main(destination, command, args)
-elif vars(args)['shell'] == False: # not in shell
+elif kwargs['shell'] == False: # not in shell
     command = ' '.join(['-sh']+sys.argv[1:])
     import os
     IMGFILE = os.environ.get('IMGFILE')
@@ -81,7 +87,5 @@ elif vars(args)['shell'] == False: # not in shell
     subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
 else: # in shell
     submodule = importlib.import_module(submodule)
-    if submodule.__name__ == "gen_signal":
-        submodule.main(vars(args)['label'])
-    else:
-        submodule.main(args)
+    submodule.main(kwargs)
+    

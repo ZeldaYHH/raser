@@ -1,6 +1,6 @@
 from . import *
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
     if label == 'temperature':
         from . import cal_temp
         cal_temp.main()

@@ -9,18 +9,17 @@ import subprocess
 from . import telescope as tlcp
 #from . import test
 from particle.g4simulation import Particles
-from util.read_json import Setting
 from particle.geometry import R3dDetector
 from current.cal_current import CalCurrentPixel
 from draw import draw_save
 
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
     if label == "-h":
         print("taichu_v1:   ","first version of telescope simulation")
         print("taichu_v2:   ","second version of telescope simulation")
     elif label.startswith("taichu_v1"):
-        #paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=readjson/absorber.json', 'pixeldetector']
+        #paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixel_detector', 'geant4_parfile=readjson/absorber.json', 'pixel_detector']
         dset = Setting() #read label.json instead of inputting path
         my_d = R3dDetector(dset) #remain the same
         my_f = 0

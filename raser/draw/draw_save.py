@@ -33,8 +33,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         draw_ele_field_1D(my_d,my_f,path)
         draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     for i in range(my_f.read_ele_num):
-        draw_current(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
-        draw_current(my_d, my_current,ele_current.BB_ele,i,"BB",path)
+        draw_current(my_d, my_current,ele_current.ele,i,ele_current.ele_name,path) # Draw current
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         my_l.draw_nocarrier3D(path)
@@ -65,11 +64,11 @@ def save_signal_TTree(dset,my_d,key,ele_current,my_f):
         t_out.Write()
         fout.Close()
 
-def save_current(dset,my_d,my_l,my_current,my_f,key):
+def save_current(my_d,my_l,my_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
+        path = os.path.join('output', 'pintct', my_d.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
+        path = os.path.join('output', 'lgadtct', my_d.det_name, )
     create_path(path) 
     L = eval("my_l.{}".format(key))
     #L is defined by different keys
@@ -764,11 +763,11 @@ def cce(my_d,my_f,my_current):
     
 
 
-def set_input(dset,my_current,my_l,my_d,key):
+def set_input(my_current,my_l,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
+        path = os.path.join('output', 'pintct', my_d.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
+        path = os.path.join('output', 'lgadtct', my_d.det_name, )
     L = eval("my_l.{}".format(key))
     current=[]
     time=[]
