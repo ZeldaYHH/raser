@@ -43,14 +43,14 @@ def main(kwargs):
     """
     det_name = kwargs['det_name']
     voltage = float(kwargs['voltage'])
-    absorber = kwargs['absorber_name']
+    absorber = kwargs['absorber']
     amplifier = kwargs['amplifier']
 
     my_d = bdv.Detector(det_name)
     if "strip" in det_name:
         my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_ele_num)
     else: 
-        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage)
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 1)
 
     if kwargs['scan'] != None:
         from util.output import output
