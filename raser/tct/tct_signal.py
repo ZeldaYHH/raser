@@ -9,7 +9,7 @@ import raser
 # TODO: Need to be rewritten!
 
 import time
-import draw.draw_save
+from draw import draw_save
 
 args = sys.argv[1:]
 start = time.time()

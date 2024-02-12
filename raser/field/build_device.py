@@ -34,19 +34,6 @@ class Detector:
             self.device_dict = json.load(f)
 
         self.dimension = self.device_dict['default_dimension']
-        if self.dimension == 1:
-            self.create1DMesh()
-        elif self.dimension == 2:
-            self.create2DMesh()
-        elif self.dimension == 3:
-            self.createGmshMesh()
-        else:
-            raise ValueError(self.dimension)
-
-        self.setDoping()
-        path = output(__file__, device_name)
-        self.drawDoping(path)
-        devsim.write_devices(file=os.path.join(path, device_name+".dat"),type="tecplot")
 
         self.l_x = self.device_dict['lx'] 
         self.l_y = self.device_dict['ly']  
@@ -82,6 +69,21 @@ class Detector:
             self.p_z = self.device_dict['pz']
             self.lt_z = self.device_dict['ltz']
             self.seedcharge = self.device_dict['seedcharge']
+
+    def mesh_define(self):
+        if self.dimension == 1:
+            self.create1DMesh()
+        elif self.dimension == 2:
+            self.create2DMesh()
+        elif self.dimension == 3:
+            self.createGmshMesh()
+        else:
+            raise ValueError(self.dimension)
+
+        self.setDoping()
+        path = output(__file__, self.det_name)
+        self.drawDoping(path)
+        devsim.write_devices(file=os.path.join(path, self.det_name+".dat"),type="tecplot")
 
     def create1DMesh(self):
         mesh_name = self.device

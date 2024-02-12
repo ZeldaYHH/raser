@@ -39,6 +39,7 @@ def main(simname):
     device = simname
     region = simname
     MyDetector = Detector(device)
+    MyDetector.mesh_define()
 
     T = MyDetector.device_dict['temperature']
     k = 1.3806503e-23  # J/K
