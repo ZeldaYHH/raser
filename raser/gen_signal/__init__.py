@@ -42,15 +42,27 @@ def main(kwargs):
         2021/09/02
     """
     det_name = kwargs['det_name']
-    voltage = float(kwargs['voltage'])
-    absorber = kwargs['absorber']
-    amplifier = kwargs['amplifier']
-
     my_d = bdv.Detector(det_name)
+    
+    if kwargs['voltage'] != None:
+        voltage = float(kwargs['voltage'])
+    else:
+        voltage = float(my_d.voltage)
+
+    if kwargs['absorber'] != None:
+        absorber = kwargs['absorber']
+    else:
+        absorber = my_d.absorber
+
+    if kwargs['amplifier'] != None:
+        amplifier = kwargs['amplifier']
+    else:
+        amplifier = my_d.amplifier
+
     if "strip" in det_name:
-        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_ele_num)
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_ele_num, my_d.l_z)
     else: 
-        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 1)
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 1, my_d.l_z)
 
     if kwargs['scan'] != None:
         from util.output import output

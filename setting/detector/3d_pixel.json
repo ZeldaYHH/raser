@@ -29,12 +29,6 @@
     "area_factor" : 1,
     "default_dimension" : 3,
 
-    "px" : 25.0,
-    "py" : 25.0,
-    "pz" : 20.0,
-    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
-    "seedcharge": 100,
-
     "mesh" : {
         "gmsh_mesh":{
             "file" : "output/parainprogram/pixel.msh",
@@ -51,5 +45,14 @@
                 {"name" : "bot", "tag" : "bot", "material" : "metal"}
             ]
         }
-    }
+    },
+
+    "absorber" : "pixel_detector",
+    "px" : 25.0,
+    "py" : 25.0,
+    "pz" : 20.0,
+    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
+    "seedcharge": 100,
+
+    "amplifier" : "CSA"
 }

@@ -77,5 +77,8 @@
                 {"name" : "bot", "tag" : "bot", "material" : "metal"}
             ]
         }
-    }
+    },
+
+    "absorber" : "time_resolution",
+    "amplifier" : "CSA"
 }

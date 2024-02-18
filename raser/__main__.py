@@ -41,9 +41,9 @@ parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 
 parser_gen_signal = subparsers.add_parser('gen_signal', help='generate signal')
 parser_gen_signal.add_argument('det_name', help='name of the detector')
-parser_gen_signal.add_argument('voltage', help='bias voltage')
-parser_gen_signal.add_argument('absorber', help='model of particle energy absorber')
-parser_gen_signal.add_argument('amplifier', help='amplifier')
+parser_gen_signal.add_argument('-vol', '--voltage', nargs=1, type=str, help='bias voltage')
+parser_gen_signal.add_argument('-abs', '--absorber', nargs=1, type=str, help='model of particle energy absorber')
+parser_gen_signal.add_argument('-amp', '--amplifier', nargs=1, type=str, help='amplifier')
 parser_gen_signal.add_argument('-s', '--scan', nargs=1, type=int, help='instance number for scan mode')
 
 parser_gsignal = subparsers.add_parser('particle', help='calculate particle')

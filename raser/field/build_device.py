@@ -46,6 +46,9 @@ class Detector:
 
         self.doping = self.device_dict['doping']
 
+        self.absorber = self.device_dict['absorber']
+        self.amplifier = self.device_dict['amplifier']
+
         if "lgad3D" in self.det_model:
             self.avalanche_bond = self.device_dict['avalanche_bond']
             self.avalanche_model = self.device_dict['avalanche_model']

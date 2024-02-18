@@ -16,12 +16,12 @@ from scipy.interpolate import LinearNDInterpolator as LNDI
 diff_res = 1e-5 # difference resolution in cm
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_ele_num):
+    def __init__(self, device_name, dimension, voltage, read_ele_num, l_z):
         self.name = device_name
         self.voltage = voltage # float
         self.dimension = dimension
         self.read_ele_num = int(read_ele_num) 
-        self.l_z = 300 # used for planar weighting field TODO: auto weighting field
+        self.l_z = l_z # used for planar weighting field TODO: auto weighting field
 
         PotentialFile = "./output/field/{}/Potential_{}V.pkl".format(self.name, self.voltage)
         TrappingRate_pFile = "./output/field/{}/TrappingRate_p_{}V.pkl".format(self.name, self.voltage)
