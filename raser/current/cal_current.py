@@ -397,7 +397,10 @@ class CalCurrentGain(CalCurrent):
         self.holes = []
         cal_coefficient = Material(my_d.material).cal_coefficient
         gain_rate, alpha_ratio = self.gain_rate(my_d,my_f,cal_coefficient)
-        fluctuation = gain_rate * alpha_ratio + (1 - 1/gain_rate) * (1 - alpha_ratio)
+        if gain_rate == 0:
+            fluctuation = 0
+        else:
+            fluctuation = gain_rate * alpha_ratio + (1 - 1/gain_rate) * (1 - alpha_ratio)
 
         print("gain_rate="+str(gain_rate))
         # assuming gain layer at d>0
@@ -477,7 +480,11 @@ class CalCurrentGain(CalCurrent):
             alpha_minor_list = alpha_n_list
         diff_list = alpha_major_list - alpha_minor_list
         int_alpha_list = np.zeros(n-1)
-        alpha_ratio = max(alpha_minor_list)/max(alpha_major_list)
+
+        if max(alpha_major_list) <=0 :
+            alpha_ratio = 0
+        else:
+            alpha_ratio = max(alpha_minor_list)/max(alpha_major_list)
 
         for i in range(1,n):
             int_alpha = 0

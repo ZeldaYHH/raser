@@ -134,7 +134,7 @@ class DevsimField:
                     try:
                         E_z = (self.Potential(z) - self.Potential(z-diff_res)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound z")
+                        raise ValueError("Point {} might be out of bound z".format(z))
             return (0, 0, E_z)
         
         elif self.dimension == 2:
@@ -147,7 +147,7 @@ class DevsimField:
                     try:
                         E_z = (self.Potential(z, x) - self.Potential(z-diff_res, x)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound z")
+                        raise ValueError("Point {} might be out of bound z".format(z))
             try:
                 E_x = (self.Potential(z, x+diff_res/2) - self.Potential(z, x-diff_res/2)) / diff_res
             except ValueError:
@@ -157,7 +157,7 @@ class DevsimField:
                     try:
                         E_x = (self.Potential(z, x) - self.Potential(z, x-diff_res)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound x")
+                        raise ValueError("Point {} might be out of bound x".format(x))
             return (E_x, 0, E_z)
         
         elif self.dimension == 3:
@@ -170,7 +170,7 @@ class DevsimField:
                     try:
                         E_z = (self.Potential(z, x, y) - self.Potential(z-diff_res, x, y)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound z")
+                        raise ValueError("Point {} might be out of bound z".format(z))
             try:
                 E_x = (self.Potential(z, x+diff_res/2, y) - self.Potential(z, x-diff_res/2, y)) / diff_res
             except ValueError:
@@ -180,7 +180,7 @@ class DevsimField:
                     try:
                         E_x = (self.Potential(z, x, y) - self.Potential(z, x-diff_res, y)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound x")
+                        raise ValueError("Point {} might be out of bound x".format(x))
             try:
                 E_y = (self.Potential(z, x, y+diff_res/2) - self.Potential(z, x, y-diff_res/2)) / diff_res
             except ValueError:
@@ -190,7 +190,7 @@ class DevsimField:
                     try:
                         E_y = (self.Potential(z, x, y) - self.Potential(z, x, y-diff_res)) / diff_res
                     except ValueError:
-                        raise ValueError("Point might be out of bound y")
+                        raise ValueError("Point {} might be out of bound y".format(y))
             return (E_x, E_y, E_z)
 
     def get_w_p(self, x, y, z, i):
