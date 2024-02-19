@@ -244,9 +244,9 @@ def linear_w_p(z, l_z):
 
 def strip_w_p(ele_number):
     nx = 51  
-    ny = 226  
+    ny = 321  
     xmin, xmax = 0.0, 50.0  
-    ymin, ymax = 0.0, 225.0 
+    ymin, ymax = 0.0, 320.0 
     dx = (xmax - xmin) / (nx - 1)  
     dy = (ymax - ymin) / (ny - 1) 
 

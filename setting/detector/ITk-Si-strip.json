@@ -3,13 +3,13 @@
     "det_model" : "planar3D",
     "material" : "Si",
 
-    "lx" : 300,
+    "lx" : 320,
     "ly" : 5000,
     "lz" : 300,
 
     "striplenth" : 75,
     "elelenth" : 20,
-    "read_ele_num" : 4,
+    "read_ele_num" : 5,
 
     "doping": {
         "Acceptors" : "3.2e12*step(x-1e-4)",
