@@ -85,7 +85,7 @@ elif kwargs['shell'] == False: # not in shell
                 + BINDPATH + " " \
                 + IMGFILE + " " \
                 + "python3 raser"
-    subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
+    subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash', stderr=subprocess.DEVNULL)
 else: # in shell
     submodule = importlib.import_module(submodule)
     submodule.main(kwargs)

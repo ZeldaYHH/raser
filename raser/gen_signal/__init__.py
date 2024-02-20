@@ -2,9 +2,9 @@
 # -*- encoding: utf-8 -*-
 '''
 @Description: The main program of Raser induced current simulation      
-@Date       : 2021/09/7 12:14:31
-@Author     : tanyuhang
-@version    : 1.0
+@Date       : 2024/02/20 18:12:26
+@Author     : tanyuhang, Chenxi Fu
+@version    : 2.0
 '''
 import sys
 import os

@@ -280,7 +280,7 @@ def fill_his_1D(model,my_d,my_f):
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
                                 +math.pow(f_v[2],2))
-                e_v.GetYaxis().SetTitle(model+"[V/\mu m]")                        
+                e_v.GetYaxis().SetTitle(model+"[V/cm]")                        
         except RuntimeError:
             f_v = 0.0
         e_v.SetBinContent(i+1,f_v)
