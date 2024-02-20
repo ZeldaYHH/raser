@@ -41,6 +41,8 @@ def main(kwargs):
     ---------
         2021/09/02
     """
+    start = time.time()
+
     det_name = kwargs['det_name']
     my_d = bdv.Detector(det_name)
     
@@ -102,6 +104,9 @@ def main(kwargs):
 
     del my_f
 
+    end = time.time()
+    print("total_time:%s"%(end-start))
+
 def ngspice(input_c, input_p):
     with open('./paras/T1.cir', 'r') as f:
         lines = f.readlines()
@@ -154,10 +159,11 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)
 
-
 if __name__ == '__main__':
-    start = time.time()
-    main(sys.argv[1], sys.argv[2])
-    print("drift_total1:%s"%(time.time()-start))
-    print("RUN END")
-    os._exit(0) 
+    args = sys.argv[1:]
+    kwargs = {}
+    for arg in args:
+        key, value = arg.split('=')
+        kwargs[key] = value
+    main(kwargs)
+    

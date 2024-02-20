@@ -5,7 +5,7 @@
 
     "lx" : 1000,
     "ly" : 1000,
-    "lz" : 50,
+    "lz" : 66.3,
 
     "doping":{
         "Acceptors" : "2.0e19*step(3e-5-x)",

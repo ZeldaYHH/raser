@@ -11,9 +11,15 @@ import pickle
 import ROOT
 import numpy as np
 from scipy.interpolate import interp1d as p1d
+from scipy.interpolate import interp2d as p2d
+from scipy.interpolate import griddata
 from scipy.interpolate import LinearNDInterpolator as LNDI
 
 diff_res = 1e-5 # difference resolution in cm
+
+x_bin = 1000
+y_bin = 1000
+z_bin = 1000
 
 class DevsimField:
     def __init__(self, device_name, dimension, voltage, read_ele_num, l_z):
@@ -245,8 +251,16 @@ def get_common_interpolate_1d(data):
 
 def get_common_interpolate_2d(data):
     values = data['values']
-    points = data['points']
-    f = LNDI(points, values)
+    points_x = []
+    points_y = []
+    for point in data['points']:
+        points_x.append(point[0])
+        points_y.append(point[1])
+    new_x = np.linspace(min(points_x), max(points_x), x_bin)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin)
+    new_points = np.array(np.meshgrid(new_x, new_y)).T.reshape(-1, 2)
+    new_values = griddata((points_x, points_y), values, new_points, method='linear')
+    f = p2d(new_x, new_y, new_values)
     return f
 
 def get_common_interpolate_3d(data):
