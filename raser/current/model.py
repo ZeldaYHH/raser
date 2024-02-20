@@ -10,6 +10,8 @@ Description:  Define physical models for different materials
 """ Define Material """
 
 import math
+import matplotlib.pyplot as plt
+import os
 
 class Material:
 
@@ -344,27 +346,30 @@ class Vector:
         return math.sqrt(self.components[0]*self.components[0]+self.components[1]*self.components[1]+self.components[2]*self.components[2])
 
     def add(self,Vector_b):
-        " Return the added two Vectors. eg:[1,2,3]+[1,2,3] = [2,4,6]"
+        " Return the sum of two Vectors. eg: [1,2,3]+[1,2,3] = [2,4,6]"
         o1 = self.components[0]+Vector_b.components[0]
         o2 = self.components[1]+Vector_b.components[1]
         o3 = self.components[2]+Vector_b.components[2]
         return Vector(o1,o2,o3)
 
     def sub(self,Vector_b):
-        " Return the subtracted two Vectors. eg:[1,2,3]-[1,2,3] = [0,0,0]"
+        " Return the subtraction of two Vectors. eg: [1,2,3]-[1,2,3] = [0,0,0]"
         o1 = self.components[0]-Vector_b.components[0]
         o2 = self.components[1]-Vector_b.components[1]
         o3 = self.components[2]-Vector_b.components[2]
         return Vector(o1,o2,o3)
+    
+    def mul(self,k):
+        " Return Vector multiplied by number. eg: 2 * [1,2,3] = [2,4,6]"
+        return Vector(self.components[0]*k,self.components[1]*k,self.components[2]*k)
 
-
-if __name__ == "__main__":
-    #usage: apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif raser/model.py
-    import matplotlib.pyplot as plt
-    import os
+def main():
     if not (os.path.exists("./output/model")):
         os.makedirs("./output/model")
     mob = Material("Si")
     mob.draw_velocity(300,5)
     mob = Material("SiC")
     mob.draw_velocity(300,50)
+
+if __name__ == "__main__":
+    main()

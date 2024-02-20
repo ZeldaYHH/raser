@@ -2,7 +2,8 @@ from . import *
 def main(kwargs):
     label = kwargs['label']
 
-    if label == 'foo':
-        foo.main()
+    if label == 'model':
+        from . import model
+        model.main()
     else:
         raise NameError(label)

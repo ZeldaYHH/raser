@@ -15,7 +15,9 @@ from .model import Vector
 t_bin = 50e-12
 t_end = 10e-9
 t_start = 0
+delta_t = 10e-12
 pixel = 25 #um
+min_intensity = 1 # V/cm
 
 class Carrier:
     """
@@ -66,39 +68,32 @@ class Carrier:
             self.end_condition = "out of bound"
         return self.end_condition
 
-    def drift_single_step(self,my_d,my_f,step=0.1):
+    def drift_single_step(self, my_d, my_f, delta_t=delta_t):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
-        if(intensity!=0):
+        mobility = Material(my_d.material)
+        #mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
+        mu = mobility.cal_mobility(my_d.temperature, 1, self.charge, intensity)
+        # TODO: rebuild the doping function or admit this as an approximation
+        velocity_vector = [e_field[0]*mu, e_field[1]*mu, e_field[2]*mu]
+        if self.charge<0:
+            print(velocity_vector)
+
+        if(intensity > min_intensity):
             #project steplength on the direction of electric field
             if(self.charge>0):
-                delta_x=step*e_field[0]/intensity
-                delta_y=step*e_field[1]/intensity
-                delta_z=step*e_field[2]/intensity
+                delta_x = velocity_vector[0]*delta_t*1e4
+                delta_y = velocity_vector[1]*delta_t*1e4
+                delta_z = velocity_vector[2]*delta_t*1e4
             else:
-                delta_x=-step*e_field[0]/intensity
-                delta_y=-step*e_field[1]/intensity
-                delta_z=-step*e_field[2]/intensity
+                delta_x = -velocity_vector[0]*delta_t*1e4
+                delta_y = -velocity_vector[1]*delta_t*1e4
+                delta_z = -velocity_vector[2]*delta_t*1e4
         else:
             self.end_condition = "zero velocity"
             return
 
-        # get velocity from electric field
-        e_field_prime = my_f.get_e_field(self.d_x+delta_x,self.d_y+delta_y,self.d_z+delta_z)
-        intensity_prime = Vector(e_field_prime[0],e_field_prime[1],e_field_prime[2]).get_length()
-        if(intensity_prime==0):
-            self.end_condition = "zero velocity"
-            return
-        
-        average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
-        mobility = Material(my_d.material)
-        #mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
-        mu = mobility.cal_mobility(my_d.temperature, 1e12, self.charge, average_intensity)
-        # TODO: rebuild the doping function or admit this as an approximation
-        velocity = mu*average_intensity
-
         # get diffution from mobility and temperature
-        delta_t = step*1e-4/velocity
         kboltz=8.617385e-5 #eV/K
         diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
         #diffusion = 0.0
@@ -158,8 +153,8 @@ class Carrier:
 
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (abs(e_field[2]) < 0.2):
-            self.end_condition = "zero drift force"
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0):
+            self.end_condition = "out of bound"
         elif(len(self.path)>8000):
             self.end_condition = "reciprocate"
         return self.end_condition
