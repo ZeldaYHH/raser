@@ -288,9 +288,6 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def Construct(self): # return the world volume
         self.fStepLimit.SetMaxAllowedStep(self.maxStep)
         return self.physical['world']
-
-    def __del__(self):
-        print("using __del__ to delete the MyDetectorConstruction class ")
         
 #Geant4 for object
 class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):                
@@ -431,9 +428,6 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def Construct(self): # return the world volume
         self.fStepLimit.SetMaxAllowedStep(self.maxStep)
         return self.physical['world']
-
-    def __del__(self):
-        print("using __del__ to delete the MyDetectorConstruction class ")
 
 
 class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):

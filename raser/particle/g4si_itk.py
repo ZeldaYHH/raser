@@ -331,10 +331,6 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
 #         self.fMagFieldMessenger.SetVerboseLevel(1)
 
 
-    def __del__(self):
-        print("using __del__ to delete the MyDetectorConstruction class ")
-
-
 class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
     "My Primary Generator Action"
     def __init__(self,par_in,par_out):

@@ -62,7 +62,7 @@ class DevsimField:
         elif self.read_ele_num >= 2:  
             for i in range(self.read_ele_num):
                 self.WeightingPotentials.append(strip_w_p(i))
-                print("Weighting potential loaded for {}, strip {}".format(self.name, i))
+                print("Weighting potential loaded for {}, strip {}".format(self.name, i+1))
         else:
             raise ValueError(self.read_ele_num)
 

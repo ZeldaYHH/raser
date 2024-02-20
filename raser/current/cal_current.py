@@ -76,8 +76,6 @@ class Carrier:
         mu = mobility.cal_mobility(my_d.temperature, 1, self.charge, intensity)
         # TODO: rebuild the doping function or admit this as an approximation
         velocity_vector = [e_field[0]*mu, e_field[1]*mu, e_field[2]*mu]
-        if self.charge<0:
-            print(velocity_vector)
 
         if(intensity > min_intensity):
             #project steplength on the direction of electric field
@@ -836,7 +834,6 @@ class StripCarrierListFromG4P:
                         if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>5:
                             try_p=0
                     if try_p==1:
-                        print(my_g4p.edep_devices[j])
                         self.batch_def(my_g4p,j)
                         batch = 1
                         break
