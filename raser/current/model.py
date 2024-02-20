@@ -51,7 +51,7 @@ class Material:
         T = temperature # K
         t = T/300
         E = electric_field  # V/cm
-        Neff = input_doping # um^-3 into cm^-3
+        Neff = input_doping # cm^-3
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
