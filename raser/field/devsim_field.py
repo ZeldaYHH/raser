@@ -114,6 +114,10 @@ class DevsimField:
     # RASER dimension order: z, x, y
     
     def get_potential(self, x, y, z):
+        '''
+            input: position in um
+            output: potential in V
+        '''
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.Potential(z)
@@ -122,7 +126,11 @@ class DevsimField:
         elif self.dimension == 3:
             return self.Potential(z, x, y)
     
-    def get_e_field(self, x, y, z):  
+    def get_e_field(self, x, y, z): 
+        '''
+            input: position in um
+            output: intensity in V/um
+        ''' 
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm  
         if self.dimension == 1:
             try:
@@ -194,12 +202,20 @@ class DevsimField:
             return (E_x, E_y, E_z)
 
     def get_w_p(self, x, y, z, i):
+        '''
+            input: position in um
+            output: weighting potential in 1
+        '''
         if self.read_ele_num == 1:
             return linear_w_p(z, self.l_z)
         elif self.read_ele_num > 1:
             return self.WeightingPotentials[i].Interpolate(z, x)
     
     def get_trap_e(self, x, y, z):
+        '''
+            input: position in um
+            output: electron trapping rate in s^-1     
+        '''
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.TrappingRate_n(z)
@@ -209,6 +225,10 @@ class DevsimField:
             return self.TrappingRate_n(z, x, y)
     
     def get_trap_h(self, x, y, z):
+        '''
+            input: position in um
+            output: hole trapping rate in s^-1     
+        '''
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
         if self.dimension == 1:
             return self.TrappingRate_p(z)
@@ -236,10 +256,12 @@ def get_common_interpolate_3d(data):
     return f
 
 def linear_w_p(z, l_z):
-    if z >= 1:
+    if z >= l_z:
+        w_potential = 0
+    elif z >= 1:
         w_potential = 1 - (1/(l_z-1)) * (z-1)
     else:
-        w_potential = 0
+        w_potential = 1
     return w_potential
 
 def strip_w_p(ele_number):

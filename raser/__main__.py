@@ -22,6 +22,9 @@ subparsers = parser.add_subparsers(help='sub-command help', dest="subparser_name
 parser_asic = subparsers.add_parser('asic', help='ASIC design')
 parser_asic.add_argument('label', help='LABEL to identify ASIC design')
 
+parser_draw = subparsers.add_parser('current', help='calculate drift current')
+parser_draw.add_argument('label', help='LABEL to identify root files')
+
 parser_draw = subparsers.add_parser('draw', help='draw figures')
 parser_draw.add_argument('label', help='LABEL to identify root files')
 
@@ -60,7 +63,7 @@ if len(sys.argv) == 1:
 
 kwargs = vars(args)
 
-submodules = ['asic', 'draw', 'field','fpga', 'root', 'spaceres', 'gen_signal','particle','elec']
+submodules = ['asic', 'current', 'draw', 'field', 'fpga', 'root', 'spaceres', 'gen_signal','particle','elec']
 
 submodule = kwargs['subparser_name']
 if submodule not in submodules:
@@ -72,7 +75,6 @@ if kwargs['batch'] == True:
     command = ' '.join(sys.argv[1:])
     command = command.replace('--batch ', '')
     command = command.replace('-b ', '')
-    print('batch command: {}'.format(command))
     batchjob.main(destination, command, args)
 elif kwargs['shell'] == False: # not in shell
     command = ' '.join(['-sh']+sys.argv[1:])
@@ -83,7 +85,6 @@ elif kwargs['shell'] == False: # not in shell
                 + BINDPATH + " " \
                 + IMGFILE + " " \
                 + "python3 raser"
-    print('shell command: {}'.format(command))
     subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
 else: # in shell
     submodule = importlib.import_module(submodule)
