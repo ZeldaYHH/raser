@@ -230,9 +230,12 @@ class Amplifier:
                                        * 1e15*self.qtot[k]/self.sh_max
             self.ele[k].SetBinContent(i,self.shaper_out_V[i])
         #Print the max current time of CSA
-        max_CSA_height = min(self.shaper_out_V)
-        time_t = self.shaper_out_V.index(max_CSA_height)
-        print("CSA_time=%s" %(time_t*self.time_unit))
+        min_CSA_height, max_CSA_height = min(self.shaper_out_V), max(self.shaper_out_V)
+        if abs(min_CSA_height) < abs(max_CSA_height):
+            time_t = self.shaper_out_V.index(max_CSA_height)
+        else:
+            time_t = self.shaper_out_V.index(min_CSA_height)
+        print("CSA peak time={:.2e}".format(time_t*self.time_unit))
 
     def fill_BB_th1f(self,k):
         """ Change charge to amplitude [V]
@@ -247,10 +250,14 @@ class Amplifier:
             else:
                 self.ele[k].SetBinContent(i,self.Vout_scope[i-1])
         # Print the max current time of BB
-        max_BB_height = min(self.Vout_scope)
-        time_t = self.Vout_scope.index(max_BB_height)
-        print("BB_time=%s"%(time_t*self.time_unit))
-        self.max_BB_height = max_BB_height
+        min_BB_height, max_BB_height = min(self.Vout_scope), max(self.Vout_scope)
+        if abs(min_BB_height) < abs(max_BB_height):
+            time_t = self.Vout_scope.index(max_BB_height)
+            self.max_BB_height = abs(max_BB_height)
+        else:
+            time_t = self.Vout_scope.index(min_BB_height)
+            self.max_BB_height = abs(min_BB_height)
+        print("BB peak time={:.2e}".format(time_t*self.time_unit))
 
     def __del__(self):
         pass
