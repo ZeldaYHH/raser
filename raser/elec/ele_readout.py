@@ -235,7 +235,7 @@ class Amplifier:
             time_t = self.shaper_out_V.index(max_CSA_height)
         else:
             time_t = self.shaper_out_V.index(min_CSA_height)
-        print("CSA peak time={}".format(time_t*self.time_unit))
+        print("CSA peak time={:.2e}".format(time_t*self.time_unit))
 
     def fill_BB_th1f(self,k):
         """ Change charge to amplitude [V]
@@ -257,7 +257,7 @@ class Amplifier:
         else:
             time_t = self.Vout_scope.index(min_BB_height)
             self.max_BB_height = abs(min_BB_height)
-        print("BB peak time={}".format(time_t*self.time_unit))
+        print("BB peak time={:.2e}".format(time_t*self.time_unit))
 
     def __del__(self):
         pass
