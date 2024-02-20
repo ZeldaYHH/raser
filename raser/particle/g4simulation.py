@@ -63,22 +63,22 @@ class Particles:
         if g4_dic['g4_vis']: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
-        gRunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
+        g4RunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
         rand_engine= g4b.RanecuEngine()
         g4b.HepRandom.setTheEngine(rand_engine)
         g4b.HepRandom.setTheSeed(g4_seed)
-        gRunManager.SetUserInitialization(my_g4d)	
+        g4RunManager.SetUserInitialization(my_g4d)
         # set physics list
         physics_list =  g4b.FTFP_BERT()
         physics_list.SetVerboseLevel(1)
         physics_list.RegisterPhysics(g4b.G4StepLimiterPhysics())
-        gRunManager.SetUserInitialization(physics_list)
+        g4RunManager.SetUserInitialization(physics_list)
         # define global parameter
         global s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[]
 
         #define action
-        gRunManager.SetUserInitialization(MyActionInitialization(
+        g4RunManager.SetUserInitialization(MyActionInitialization(
                                           g4_dic['par_in'],
                                           g4_dic['par_out'],
                                           g4_dic['par_type'],
@@ -93,7 +93,7 @@ class Particles:
             UImanager = g4b.G4UImanager.GetUIpointer()
             UImanager.ApplyCommand('/run/initialize')
             
-        gRunManager.BeamOn(int(g4_dic['total_events']))
+        g4RunManager.BeamOn(int(g4_dic['total_events']))
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
