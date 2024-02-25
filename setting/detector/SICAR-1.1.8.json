@@ -54,5 +54,5 @@
     },
 
     "absorber" : "time_resolution",
-    "amplifier" : "CSA"
+    "amplifier" : "BB"
 }

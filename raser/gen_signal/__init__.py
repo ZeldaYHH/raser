@@ -74,10 +74,12 @@ def main(kwargs):
             g4_dic = json.load(f)
 
         total_events = int(g4_dic['total_events'])
-        instance_number = kwargs['scan']
-        g4_seed = instance_number * total_events
-        my_g4p = g4s.Particles(my_d, absorber, g4_seed)
-        batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
+        for i in range(kwargs['scan']):
+            # TODO: change this into multithread
+            instance_number = i
+            g4_seed = instance_number * total_events
+            my_g4p = g4s.Particles(my_d, absorber, g4_seed)
+            batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
         return
     
     else:  

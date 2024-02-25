@@ -76,5 +76,5 @@
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "CSA"
+    "amplifier" : "BB"
 }
