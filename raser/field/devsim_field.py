@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 @File    :   devsim.py
@@ -7,138 +7,296 @@
 @Version :   1.0
 '''
 
-import os
-import csv
-import math
 import pickle
 import ROOT
 import numpy as np
+from scipy.interpolate import interp1d as p1d
+from scipy.interpolate import interp2d as p2d
+from scipy.interpolate import griddata
+from scipy.interpolate import LinearNDInterpolator as LNDI
 
-import ROOT
-import numpy as np
+diff_res = 1e-5 # difference resolution in cm
 
-class Devsim_field:
-    def __init__(self, my_d,det_name,det_dic,dev_dic):
-        self.voltage = my_d.voltage
-        self.l_z = my_d.l_z
-        self.read_ele_num = int(dev_dic['read_ele_num']) 
-        self.w_p=[]
-        self.name = det_name
+x_bin = 1000
+y_bin = 1000
+z_bin = 1000
 
-        if(det_name=="Si_Strip"):
-            with open("./output/testdiode/x.pkl",'rb') as file:
-                x=pickle.load(file)
-            with open("./output/testdiode/y.pkl",'rb') as file:
-                y=pickle.load(file)
-            with open("./output/testdiode/potential_{}.pkl".format(self.voltage),'rb') as file:
-                potential=pickle.load(file)
-            self.x_efield,self.y_efield,self.potential=get_field_2d(x,y,potential)
-            for i in range(int(self.read_ele_num)):
-                self.w_p.append(strip_w_p(i))
+class DevsimField:
+    def __init__(self, device_name, dimension, voltage, read_ele_num, l_z):
+        self.name = device_name
+        self.voltage = voltage # float
+        self.dimension = dimension
+        self.read_ele_num = int(read_ele_num) 
+        self.l_z = l_z # used for planar weighting field TODO: auto weighting field
 
-        if(det_name=="SICAR-1.1.6"):
-            with open("output/devsim/2D_SICAR/80V_potential.pkl",'rb') as file:
-                data = pickle.load(file)
-                self.dimension = data['metadata']['dimension']
-            if self.dimension == 2:
-                xypotension = data['efield']
-                x=xypotension[0]
-                y=xypotension[1]
-                potential=xypotension[2]
-                self.x_efield,self.y_efield,self.potential=get_field_2d(x,y,potential)
-            elif self.dimension == 1:
-                efield = data['efield']
-                z = efield[0][0]
-                field = efield[1][0]
-                field = np.array([x for x in field if x != 0])
-                self.potential = get_potential_1d(z, field)
-                self.efield=get_field_1d(z, field)
+        PotentialFile = "./output/field/{}/Potential_{}V.pkl".format(self.name, self.voltage)
+        TrappingRate_pFile = "./output/field/{}/TrappingRate_p_{}V.pkl".format(self.name, self.voltage)
+        TrappingRate_nFile = "./output/field/{}/TrappingRate_n_{}V.pkl".format(self.name, self.voltage)
 
-            else:
-                raise ValueError('unexpect dimension')
-            
-        if(det_name=='NJU-PIN'):
-            with open("output/devsim/field/NJU-PIN/") as file:
-                data = pickle.load(file)
-                self.dimension = data['metadata']['dimension']
-            if self.dimension == 2:
-                pass
-            elif self.dimension ==1:                
-                z = data['efield'][0]
-                field = data['efield'][1]
-                self.efield=get_field_1d(z, field)
-            else:
-                raise ValueError('unexpect dimension')
-            
-    def get_e_field(self, x, y, depth):
-        if self.dimension == 2:
-            f_efx = self.x_efield.Interpolate(depth,x)
-            f_efz = self.y_efield.Interpolate(depth,x)
-            return f_efz, 0, f_efx
+        self.set_potential(PotentialFile) #self.potential, self.x_efield, self.y_efield, self.z_efield
+        self.set_trap_p(TrappingRate_pFile) # self.TrappingRate_p
+        self.set_trap_n(TrappingRate_nFile) # self.TrappingRate_n
+        self.set_w_p() #self.weighting_potential[]
+
+    def set_potential(self, PotentialFile):
+        try:
+            with open(PotentialFile,'rb') as file:
+                PotentialNotUniform=pickle.load(file)
+                print("Potential file loaded for {}".format(self.name))
+                if PotentialNotUniform['metadata']['dimension'] < self.dimension:
+                    print("Potential dimension not match")
+                    return
+        except FileNotFoundError:
+            print("Potential file not found, please run field simulation first")
+            print("or manually set the potential file")
+            return
+        
+        if PotentialNotUniform['metadata']['dimension'] == 1:
+            PotentialUniform = get_common_interpolate_1d(PotentialNotUniform)
+        elif PotentialNotUniform['metadata']['dimension'] == 2:
+            PotentialUniform =get_common_interpolate_2d(PotentialNotUniform)
+        elif PotentialNotUniform['metadata']['dimension'] == 3:
+            PotentialUniform =get_common_interpolate_3d(PotentialNotUniform)
+
+        self.Potential = PotentialUniform
+
+    def set_w_p(self):
+        self.WeightingPotentials = [] #length = ele_num
+        if self.read_ele_num == 1:
+            print("Linear weighting potential loaded")
+            pass
+        elif self.read_ele_num >= 2:  
+            for i in range(self.read_ele_num):
+                self.WeightingPotentials.append(strip_w_p(i))
+                print("Weighting potential loaded for {}, strip {}".format(self.name, i+1))
         else:
-            f_e = self.efield.Eval(depth)
-            return 0, 0, f_e
-    
-    def get_w_p(self, x, y, depth, i):
-        if self.name == 'Si_Strip':
-            return self.w_p[i].Interpolate(x,depth)
-        if self.name == 'Si_Strip':
-            return self.w_p[i].Interpolate(x,depth)
-        else:
-            return linearity_w_p(self.l_z, depth)
-    
-    def get_potential(self, x, y, depth):
-        if self.dimension == 2:
-            f_u = self.potential.Interpolate(depth,x)
-        else:
-            f_u = self.potential.Eval(depth)
-        return f_u
+            raise ValueError(self.read_ele_num)
 
-def get_field_1d(z, field):
-    efield = ROOT.TGraph()
-    for i in range(len(z)):
-        efield.SetPoint(len(z), z[i], field[i])
-    zgraph=ROOT.TF1("linearFit", "pol1", np.min(z), np.max(z))
-    efield.Fit(zgraph, 'Q')
-    return zgraph
+    def set_trap_p(self, TrappingRate_pFile):
+        try:
+            with open(TrappingRate_pFile,'rb') as file:
+                TrappingRate_pNotUniform=pickle.load(file)
+                print("TrappingRate_p file loaded for {}".format(self.name))
+                if TrappingRate_pNotUniform['metadata']['dimension'] < self.dimension:
+                    print("TrappingRate_p dimension not match")
+                    return
+        except FileNotFoundError:
+            print("TrappingRate_p file not found, please run field simulation first")
+            print("or manually set the hole trapping rate file")
+            return
+        
+        if TrappingRate_pNotUniform['metadata']['dimension'] == 1:
+            TrappingRate_pUniform = get_common_interpolate_1d(TrappingRate_pNotUniform)
+        elif TrappingRate_pNotUniform['metadata']['dimension'] == 2:
+            TrappingRate_pUniform =get_common_interpolate_2d(TrappingRate_pNotUniform)
+        elif TrappingRate_pNotUniform['metadata']['dimension'] == 3:
+            TrappingRate_pUniform =get_common_interpolate_3d(TrappingRate_pNotUniform)
 
-def get_field_2d(x,y,potential):
-    x_efield=[]
-    y_efield=[]
-    x_u=np.unique(x)
-    y_u=np.unique(y)
-    reorganization_potential=[]
-    for i in range(len(x_u)):
-        temporary_potential=[]
-        for j in range(len(x)):
-            if x_u[i]==x[j]:
-                temporary_potential.append(potential[j])
-        reorganization_potential.append(temporary_potential)
-    for i in range(len(reorganization_potential)-1):
-        grad=np.gradient(np.array([reorganization_potential[i], reorganization_potential[i+1]], dtype=np.float))
-        x_efield.append(grad[0][1])
-        y_efield.append(grad[1][0])
-        if i == (len(reorganization_potential)-2):
-            y_efield.append(grad[1][1])
-            x_efield.append(np.gradient(reorganization_potential[i+1]))
-    print(np.max(x_efield))
-    re_potential=ROOT.TGraph2D()
-    x_field=ROOT.TGraph2D()
-    y_field=ROOT.TGraph2D()
-    print(np.max(reorganization_potential))
-    for i in range(len(x_u)):
-        for j in range(len(y_u)):
-            x_field.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, x_efield[i][j]/3)
-            y_field.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, y_efield[i][j]/3)
-            re_potential.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, reorganization_potential[i][j])
+        self.TrappingRate_p = TrappingRate_pUniform
     
-    return x_field,y_field,re_potential
+    def set_trap_n(self, TrappingRate_nFile):
+        try:
+            with open(TrappingRate_nFile,'rb') as file:
+                TrappingRate_nNotUniform=pickle.load(file)
+                print("TrappingRate_n file loaded for {}".format(self.name))
+                if TrappingRate_nNotUniform['metadata']['dimension'] != self.dimension:
+                    print("TrappingRate_n dimension not match")
+                    return
+        except FileNotFoundError:
+            print("TrappingRate_n file not found, please run field simulation first")
+            print("or manually set the electron trapping rate file")
+            return
+        
+        if TrappingRate_nNotUniform['metadata']['dimension'] == 1:
+            TrappingRate_nUniform = get_common_interpolate_1d(TrappingRate_nNotUniform)
+        elif TrappingRate_nNotUniform['metadata']['dimension'] == 2:
+            TrappingRate_nUniform =get_common_interpolate_2d(TrappingRate_nNotUniform)
+        elif TrappingRate_nNotUniform['metadata']['dimension'] == 3:
+            TrappingRate_nUniform =get_common_interpolate_3d(TrappingRate_nNotUniform)
+
+        self.TrappingRate_n = TrappingRate_nUniform
+        
+    # DEVSIM dimension order: x, y, z
+    # RASER dimension order: z, x, y
+    
+    def get_potential(self, x, y, z):
+        '''
+            input: position in um
+            output: potential in V
+        '''
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
+        if self.dimension == 1:
+            return self.Potential(z)
+        elif self.dimension == 2:
+            return self.Potential(z, x)
+        elif self.dimension == 3:
+            return self.Potential(z, x, y)
+    
+    def get_e_field(self, x, y, z): 
+        '''
+            input: position in um
+            output: intensity in V/um
+        ''' 
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm  
+        if self.dimension == 1:
+            try:
+                E_z = - ((self.Potential(z+diff_res/2) - self.Potential(z-diff_res/2))) / diff_res
+            except ValueError:
+                try:
+                    E_z = - ((self.Potential(z+diff_res) - self.Potential(z))) / diff_res
+                except ValueError:
+                    try:
+                        E_z = - ((self.Potential(z) - self.Potential(z-diff_res))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound z".format(z))
+            return (0, 0, E_z)
+        
+        elif self.dimension == 2:
+            try:
+                E_z = - ((self.Potential(z+diff_res/2, x) - self.Potential(z-diff_res/2, x))) / diff_res
+            except ValueError:
+                try:
+                    E_z = - ((self.Potential(z+diff_res, x) - self.Potential(z, x))) / diff_res
+                except ValueError:
+                    try:
+                        E_z = - ((self.Potential(z, x) - self.Potential(z-diff_res, x))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound z".format(z))
+            try:
+                E_x = - ((self.Potential(z, x+diff_res/2) - self.Potential(z, x-diff_res/2))) / diff_res
+            except ValueError:
+                try:
+                    E_x = - ((self.Potential(z, x+diff_res) - self.Potential(z, x))) / diff_res
+                except ValueError:
+                    try:
+                        E_x = - ((self.Potential(z, x) - self.Potential(z, x-diff_res))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound x".format(x))
+            return (E_x, 0, E_z)
+        
+        elif self.dimension == 3:
+            try:
+                E_z = - ((self.Potential(z+diff_res/2, x, y) - self.Potential(z-diff_res/2, x, y))) / diff_res
+            except ValueError:
+                try:
+                    E_z = - ((self.Potential(z+diff_res, x, y) - self.Potential(z, x, y))) / diff_res
+                except ValueError:
+                    try:
+                        E_z = - ((self.Potential(z, x, y) - self.Potential(z-diff_res, x, y))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound z".format(z))
+            try:
+                E_x = - ((self.Potential(z, x+diff_res/2, y) - self.Potential(z, x-diff_res/2, y))) / diff_res
+            except ValueError:
+                try:
+                    E_x = - ((self.Potential(z, x+diff_res, y) - self.Potential(z, x, y))) / diff_res
+                except ValueError:
+                    try:
+                        E_x = - ((self.Potential(z, x, y) - self.Potential(z, x-diff_res, y))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound x".format(x))
+            try:
+                E_y = - ((self.Potential(z, x, y+diff_res/2) - self.Potential(z, x, y-diff_res/2))) / diff_res
+            except ValueError:
+                try:
+                    E_y = - ((self.Potential(z, x, y+diff_res) - self.Potential(z, x, y))) / diff_res
+                except ValueError:
+                    try:
+                        E_y = - ((self.Potential(z, x, y) - self.Potential(z, x, y-diff_res))) / diff_res
+                    except ValueError:
+                        raise ValueError("Point {} might be out of bound y".format(y))
+            return (E_x, E_y, E_z)
+
+    def get_w_p(self, x, y, z, i):
+        '''
+            input: position in um
+            output: weighting potential in 1
+        '''
+        if self.read_ele_num == 1:
+            return linear_w_p(z, self.l_z)
+        elif self.read_ele_num > 1:
+            return self.WeightingPotentials[i].Interpolate(z, x)
+    
+    def get_trap_e(self, x, y, z):
+        '''
+            input: position in um
+            output: electron trapping rate in s^-1     
+        '''
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
+        if self.dimension == 1:
+            return self.TrappingRate_n(z)
+        elif self.dimension == 2:
+            return self.TrappingRate_n(z, x)
+        elif self.dimension == 3:
+            return self.TrappingRate_n(z, x, y)
+    
+    def get_trap_h(self, x, y, z):
+        '''
+            input: position in um
+            output: hole trapping rate in s^-1     
+        '''
+        x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
+        if self.dimension == 1:
+            return self.TrappingRate_p(z)
+        elif self.dimension == 2:
+            return self.TrappingRate_p(z, x)
+        elif self.dimension == 3:
+            return self.TrappingRate_p(z, x, y)
+
+def get_common_interpolate_1d(data):
+    values = data['values']
+    points = data['points']
+    f = p1d(points, values)
+    return f
+
+def get_common_interpolate_2d(data):
+    values = data['values']
+    points_x = []
+    points_y = []
+    for point in data['points']:
+        points_x.append(point[0])
+        points_y.append(point[1])
+    new_x = np.linspace(min(points_x), max(points_x), x_bin)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin)
+    new_points = np.array(np.meshgrid(new_x, new_y)).T.reshape(-1, 2)
+    new_values = griddata((points_x, points_y), values, new_points, method='linear')
+    f = p2d(new_x, new_y, new_values)
+    return f
+
+def get_common_interpolate_3d(data):
+    values = data['values']
+    points_x = []
+    points_y = []
+    points_z = []
+    for point in data['points']:
+        points_x.append(point[0])
+        points_y.append(point[1])
+        points_z.append(point[2])
+    new_x = np.linspace(min(points_x), max(points_x), x_bin)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin)
+    new_z = np.linspace(min(points_z), max(points_z), z_bin)
+    new_points = np.array(np.meshgrid(new_x, new_y, new_z)).T.reshape(-1, 3)
+    new_values = griddata((points_x, points_y, points_z), values, new_points, method='linear')
+    lndi = LNDI(new_points, new_values)
+    def f(x, y, z):
+        point = [x, y, z]
+        return lndi(point)
+    return f
+
+def linear_w_p(z, l_z):
+    if z >= l_z:
+        w_potential = 0
+    elif z >= 1:
+        w_potential = 1 - (1/(l_z-1)) * (z-1)
+    else:
+        w_potential = 1
+    return w_potential
 
 def strip_w_p(ele_number):
     nx = 51  
-    ny = 226  
+    ny = 321  
     xmin, xmax = 0.0, 50.0  
-    ymin, ymax = 0.0, 225.0 
+    ymin, ymax = 0.0, 320.0 
     dx = (xmax - xmin) / (nx - 1)  
     dy = (ymax - ymin) / (ny - 1) 
 
@@ -165,170 +323,6 @@ def strip_w_p(ele_number):
             w_potential.SetPoint(int(i*len(x)+j),x[j]*6,y[i],u[i][j])
     return w_potential
 
-def linearity_w_p(l_z, depth):
-    if depth >= 1:
-        w_potential = 1 - (1/(l_z-1)) * (depth-1)
-    else:
-        w_potential = 0
-    return w_potential
-
-def get_potential_1d(z, field):
-    potential = []
-    temp = 0
-    for index in range(len(z)-1):
-        temp = temp + (z[index+1]-z[index])*field[index]
-        potential.append(temp)
-    potentialgraph = ROOT.TGraph()
-    for i in range(len(z)-1):
-        potentialgraph.SetPoint(len(z), z[i], potential[i])
-    graph=ROOT.TF1("linearFit", "pol1", np.min(z), np.max(z))
-    potentialgraph.Fit(graph, 'Q')
-    return graph
-
-class FieldCal:
-    def __init__(self, my_d,det_name,det_dic,dev_dic):
-        self.voltage = my_d.voltage
-        self.l_z = my_d.l_z
-        self.read_ele_num = int(dev_dic['read_ele_num'])     
-        if not os.access("./output/strip", os.F_OK):  
-            print("please run field first")
-            return
-        with open("./output/strip/x.pkl",'rb') as file:
-            x=pickle.load(file)
-        with open("./output/strip/y.pkl",'rb') as file:
-            y=pickle.load(file)
-        with open("./output/strip/potential_{}_1.6e15_.pkl".format(self.voltage),'rb') as file:
-            potential=pickle.load(file)
-        self.x_efield,self.y_efield,self.potential=get_field(x,y,potential)
-
-        with open("./output/strip/TrappingRate_p_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
-            TrappingRate_p=pickle.load(file)
-        with open("./output/strip/TrappingRate_n_1.6e15_{}.pkl".format(self.voltage),'rb') as file:
-            TrappingRate_n=pickle.load(file)
-        self.TrappingRate_p=get_trapping_rate(x,y,TrappingRate_p)
-        self.TrappingRate_n=get_trapping_rate(x,y,TrappingRate_n)
-        if not os.access("./output/strip/weighting_field/", os.F_OK):
-            os.makedirs("./output/strip/weighting_field/", exist_ok=True) 
-            total_w_p=[]
-            for i in range(self.read_ele_num):
-                total_x,total_z,t_w_p=new_w_p(i)
-                total_w_p.append(t_w_p)
-            with open("./output/strip/weighting_field/weighting_potential.pkl",'wb') as file:
-                pickle.dump(total_w_p, file)
-            with open("./output/strip/weighting_field/weighting_potential_x.pkl",'wb') as file:
-                pickle.dump(total_x, file)
-            with open("./output/strip/weighting_field/weighting_potential_z.pkl",'wb') as file:
-                pickle.dump(total_z, file)
-
-        with open("./output/strip/weighting_field/weighting_potential.pkl",'rb') as file:
-            weighting_potential=pickle.load(file)
-        with open("./output/strip/weighting_field/weighting_potential_x.pkl",'rb') as file:
-            weighting_potential_x=pickle.load(file)
-        with open("./output/strip/weighting_field/weighting_potential_z.pkl",'rb') as file:
-            weighting_potential_z=pickle.load(file)
-        self.w_p=[]  
-        for i in range(self.read_ele_num):
-            self.w_p.append(w_p(weighting_potential_x,weighting_potential_z,weighting_potential[i]))
-        
-
-    def get_trap_e(self,x,y,depth):
-        t_e=self.TrappingRate_n.Interpolate(depth,x)
-        return t_e
-    
-    def get_trap_h(self,x,y,depth):
-        t_h=self.TrappingRate_p.Interpolate(depth,x)
-        return t_h
-    
-    def get_e_field(self, x, y, depth):    
-        f_efx = self.x_efield.Interpolate(depth,x)
-        f_efz = self.y_efield.Interpolate(depth,x)
-        return f_efz, 0, f_efx
-    
-    def get_w_p(self, x, y, depth, i):
-        f_p = self.w_p[i].Interpolate(x,depth)
-        if(f_p<1e-2):
-            f_p=1e-2
-        return f_p
-    
-    def get_potential(self, x, y, depth):
-        f_u = self.potential.Interpolate(depth,x)
-        return f_u
-    
-def get_field(x,y,potential):
-    x_efield=[]
-    y_efield=[]
-    x_u=np.unique(x)
-    y_u=np.unique(y)
-    reorganization_potential=[]
-    for i in range(len(x_u)):
-        temporary_potential=[]
-        for j in range(len(x)):
-            if x_u[i]==x[j]:
-                temporary_potential.append(potential[j])
-        reorganization_potential.append(temporary_potential)
-    for i in range(len(reorganization_potential)-1):
-        grad=np.gradient(np.array([reorganization_potential[i], reorganization_potential[i+1]], dtype=np.float))
-        x_efield.append(grad[0][1])
-        y_efield.append(grad[1][0])
-        if i == (len(reorganization_potential)-2):
-            y_efield.append(grad[1][1])
-            x_efield.append(np.gradient(reorganization_potential[i+1]))
-    re_potential=ROOT.TGraph2D()
-    x_field=ROOT.TGraph2D()
-    y_field=ROOT.TGraph2D()
-    for i in range(len(x_u)):
-        for j in range(len(y_u)):
-            x_field.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, x_efield[i][j]/3)
-            y_field.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, y_efield[i][j]/3)
-            re_potential.SetPoint(int(i*len(y_u)+j), x_u[i]*1e4, y_u[j]*1e4, reorganization_potential[i][j])
-    return x_field,y_field,re_potential
-
-
-def w_p(x,z,w_p):
-    weighting_potential=ROOT.TGraph2D()
-    for i in range(len(z)):
-        for j in range(len(x)):
-            weighting_potential.SetPoint(int(i*len(x)+j),z[i],x[j]*6,w_p[i][j])
-    return weighting_potential
-    
-
-def get_trapping_rate(x,y,trapping_rate):
-    trap_time=ROOT.TGraph2D()
-    for i in range(len(y)):
-        trap_time.SetPoint(i,x[i]*1e4,y[i]*1e4,trapping_rate[i])
-    return trap_time
-
-
-def new_w_p(ele_number):
-    nx = 51  
-    ny = 301  
-    xmin, xmax = 0.0, 50.0  
-    ymin, ymax = 0.0, 300.0 
-    dx = (xmax - xmin) / (nx - 1)  
-    dy = (ymax - ymin) / (ny - 1) 
-
-
-    u = np.zeros((ny, nx))
-    u[ele_number*75:(ele_number*75+20), 0] = 1.0  
-    u[:, -1] = 0.0  
-
-    max_iter = 100000  
-    tolerance = 1e-6  
-    for iteration in range(max_iter):
-        u_old = u.copy()
-        for i in range(1, ny - 1):
-            for j in range(1, nx - 1):
-                u[i, j] = (u[i+1, j] + u[i-1, j] + u[i, j+1] + u[i, j-1]) / 4
-        diff = np.abs(u - u_old).max()
-        if diff < tolerance:
-            break
-    
-    x = np.linspace(xmin, xmax, nx)
-    y = np.linspace(ymin, ymax, ny)
-    
-    w_potential=ROOT.TGraph2D()
-    for i in range(len(y)):
-        for j in range(len(x)):
-            w_potential.SetPoint(int(i*len(x)+j),x[j]*6,y[i],u[i][j])
-    return x ,y ,u
-    
+if __name__ == "__main__":
+    testField = DevsimField("ITk-Si-strip", 2, -500.0, 4)
+    print(testField.get_e_field(100,100,50))

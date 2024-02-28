@@ -26,6 +26,7 @@ class Detector:
         2023/12/03
     """ 
     def __init__(self, device_name):
+        self.det_name = device_name
         self.device = device_name
         self.region = device_name
         device_json = "./setting/detector/" + device_name + ".json"
@@ -33,6 +34,46 @@ class Detector:
             self.device_dict = json.load(f)
 
         self.dimension = self.device_dict['default_dimension']
+
+        self.l_x = self.device_dict['lx'] 
+        self.l_y = self.device_dict['ly']  
+        self.l_z = self.device_dict['lz'] 
+        
+        self.voltage = self.device_dict['bias']['voltage'] 
+        self.temperature = self.device_dict['temperature']
+        self.material = self.device_dict['material']
+        self.det_model = self.device_dict['det_model']
+
+        self.doping = self.device_dict['doping']
+
+        self.absorber = self.device_dict['absorber']
+        self.amplifier = self.device_dict['amplifier']
+
+        if "lgad3D" in self.det_model:
+            self.avalanche_bond = self.device_dict['avalanche_bond']
+            self.avalanche_model = self.device_dict['avalanche_model']
+            
+        if 'plugin3D' in self.det_model: 
+            self.e_r = self.device_dict['e_r']
+            self.e_gap = self.device_dict['e_gap']
+            self.e_t = self.device_dict['e_t']
+
+        if "planarRing" in self.det_model:
+            self.e_r_inner = self.device_dict['e_r_inner']
+            self.e_r_outer = self.device_dict['e_r_outer']
+
+        if "strip" in self.det_name or "Strip" in self.det_name: 
+            # TODO: change this into model
+            self.read_ele_num = self.device_dict['read_ele_num']
+            
+        if "pixeldetector" in self.det_model:
+            self.p_x = self.device_dict['px']
+            self.p_y = self.device_dict['py']
+            self.p_z = self.device_dict['pz']
+            self.lt_z = self.device_dict['ltz']
+            self.seedcharge = self.device_dict['seedcharge']
+
+    def mesh_define(self):
         if self.dimension == 1:
             self.create1DMesh()
         elif self.dimension == 2:
@@ -43,10 +84,9 @@ class Detector:
             raise ValueError(self.dimension)
 
         self.setDoping()
-
-        path = output(__file__, device_name)
+        path = output(__file__, self.det_name)
         self.drawDoping(path)
-        devsim.write_devices(file=os.path.join(path, device_name+".dat"),type="tecplot")
+        devsim.write_devices(file=os.path.join(path, self.det_name+".dat"),type="tecplot")
 
     def create1DMesh(self):
         mesh_name = self.device

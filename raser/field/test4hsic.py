@@ -6,6 +6,9 @@ from scipy.interpolate import griddata
 import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
+# TODO: rewrite this after 3D field extraction verified
+
 def main(simname):
     if '3d' in simname:
         with open('./output/{}/x_500.0.pkl'.format(simname), 'rb') as file:

@@ -15,22 +15,24 @@ from .model import Vector
 t_bin = 50e-12
 t_end = 10e-9
 t_start = 0
+delta_t = 10e-12
 pixel = 25 #um
+min_intensity = 1 # V/cm
 
 class Carrier:
     """
     Description:
         Definition of carriers and the record of their movement
     Parameters:
-        d_x_init, d_y_init, d_z_init, t_init : float
+        x_init, y_init, z_init, t_init : float
             initial space and time coordinates in um and s
         charge : float
             a set of drifting carriers, absolute value for number, sign for charge
     Attributes:
-        d_x, d_y, d_z, t : float
+        x, y, z, t : float
             space and time coordinates in um and s
         path : float[]
-            recording the carrier path in [d_x, d_y, d_z, t]
+            recording the carrier path in [x, y, z, t]
         charge : float
             a set of drifting carriers, absolute value for number, sign for charge
         signal : float[]
@@ -40,14 +42,14 @@ class Carrier:
     Modify:
         2022/10/28
     """
-    def __init__(self, d_x_init, d_y_init, d_z_init, t_init, charge, material, read_ele_num):
-        self.d_x = d_x_init
-        self.d_y = d_y_init
-        self.d_z = d_z_init
+    def __init__(self, x_init, y_init, z_init, t_init, charge, material, read_ele_num):
+        self.x = x_init
+        self.y = y_init
+        self.z = z_init
         self.t = t_init
         self.t_end = t_end
         self.pixel = pixel
-        self.path = [[d_x_init, d_y_init, d_z_init, t_init]]
+        self.path = [[x_init, y_init, z_init, t_init]]
         self.signal = [[] for j in range(int(read_ele_num))]
         self.end_condition = 0
         self.diffuse_end_condition = 0
@@ -60,43 +62,36 @@ class Carrier:
             self.end_condition = "zero charge"
 
     def not_in_sensor(self,my_d):
-        if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
-            or (self.d_y<=0) or (self.d_y>=my_d.l_y)\
-            or (self.d_z<=0) or (self.d_z>=my_d.l_z):
+        if (self.x<=0) or (self.x>=my_d.l_x)\
+            or (self.y<=0) or (self.y>=my_d.l_y)\
+            or (self.z<=0) or (self.z>=my_d.l_z):
             self.end_condition = "out of bound"
         return self.end_condition
 
-    def drift_single_step(self,my_d,my_f,step=0.1):
-        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+    def drift_single_step(self, my_d, my_f, delta_t=delta_t):
+        e_field = my_f.get_e_field(self.x,self.y,self.z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
-        if(intensity!=0):
+        mobility = Material(my_d.material)
+        #mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.z+delta_z), self.charge, average_intensity)
+        mu = mobility.cal_mobility(my_d.temperature, 1e12, self.charge, intensity)
+        # TODO: rebuild the doping function or admit this as an approximation
+        velocity_vector = [e_field[0]*mu, e_field[1]*mu, e_field[2]*mu] # cm/s
+
+        if(intensity > min_intensity):
             #project steplength on the direction of electric field
             if(self.charge>0):
-                delta_x=step*e_field[0]/intensity
-                delta_y=step*e_field[1]/intensity
-                delta_z=step*e_field[2]/intensity
+                delta_x = velocity_vector[0]*delta_t*1e4 # um
+                delta_y = velocity_vector[1]*delta_t*1e4
+                delta_z = velocity_vector[2]*delta_t*1e4
             else:
-                delta_x=-step*e_field[0]/intensity
-                delta_y=-step*e_field[1]/intensity
-                delta_z=-step*e_field[2]/intensity
+                delta_x = -velocity_vector[0]*delta_t*1e4
+                delta_y = -velocity_vector[1]*delta_t*1e4
+                delta_z = -velocity_vector[2]*delta_t*1e4
         else:
             self.end_condition = "zero velocity"
             return
 
-        # get velocity from electric field
-        e_field_prime = my_f.get_e_field(self.d_x+delta_x,self.d_y+delta_y,self.d_z+delta_z)
-        intensity_prime = Vector(e_field_prime[0],e_field_prime[1],e_field_prime[2]).get_length()
-        if(intensity_prime==0):
-            self.end_condition = "zero velocity"
-            return
-        
-        average_intensity = (intensity+intensity_prime)/2.0*1e4 # V/cm
-        mobility = Material(my_d.material)
-        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
-        velocity = mu*average_intensity
-
         # get diffution from mobility and temperature
-        delta_t = step*1e-4/velocity
         kboltz=8.617385e-5 #eV/K
         diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
         #diffusion = 0.0
@@ -106,30 +101,30 @@ class Carrier:
 
         # sum up
         # x axis   
-        if((self.d_x+delta_x+dif_x)>=my_d.l_x): 
-            self.d_x = my_d.l_x
-        elif((self.d_x+delta_x+dif_x)<0):
-            self.d_x = 0
+        if((self.x+delta_x+dif_x)>=my_d.l_x): 
+            self.x = my_d.l_x
+        elif((self.x+delta_x+dif_x)<0):
+            self.x = 0
         else:
-            self.d_x = self.d_x+delta_x+dif_x
+            self.x = self.x+delta_x+dif_x
         # y axis
-        if((self.d_y+delta_y+dif_y)>=my_d.l_y): 
-            self.d_y = my_d.l_y
-        elif((self.d_y+delta_y+dif_y)<0):
-            self.d_y = 0
+        if((self.y+delta_y+dif_y)>=my_d.l_y): 
+            self.y = my_d.l_y
+        elif((self.y+delta_y+dif_y)<0):
+            self.y = 0
         else:
-            self.d_y = self.d_y+delta_y+dif_y
+            self.y = self.y+delta_y+dif_y
         # z axis
-        if((self.d_z+delta_z+dif_z)>=my_d.l_z): 
-            self.d_z = my_d.l_z
-        elif((self.d_z+delta_z+dif_z)<0):
-            self.d_z = 0
+        if((self.z+delta_z+dif_z)>=my_d.l_z): 
+            self.z = my_d.l_z
+        elif((self.z+delta_z+dif_z)<0):
+            self.z = 0
         else:
-            self.d_z = self.d_z+delta_z+dif_z
+            self.z = self.z+delta_z+dif_z
         #time
         self.t = self.t+delta_t
         #record
-        self.path.append([self.d_x,self.d_y,self.d_z,self.t]) 
+        self.path.append([self.x,self.y,self.z,self.t]) 
 
     def get_signal(self,my_f,my_d):
         """Calculate signal from carrier path"""
@@ -155,72 +150,72 @@ class Carrier:
         
 
     def drift_end(self,my_f):
-        e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
-        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0) or (abs(e_field[2]) < 0.2):
-            self.end_condition = "zero drift force"
-        elif(len(self.path)>8000):
-            self.end_condition = "reciprocate"
+        e_field = my_f.get_e_field(self.x,self.y,self.z)
+        if (e_field[0]==0 and e_field[1]==0 and e_field[2] == 0):
+            self.end_condition = "out of bound"
+        elif (self.t > t_end):
+            self.end_condition = "time out"
         return self.end_condition
 
     def diffuse_single_step(self,my_d,my_f):
         delta_t=t_bin
-        #e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
+        #e_field = my_f.get_e_field(self.x,self.y,self.z)
         intensity = 0
 
         kboltz=8.617385e-5 #eV/K
         mobility = Material(my_d.material)
-        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z), self.charge, intensity)
+        mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.z), self.charge, intensity)
         diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
         #diffusion = 0.0
         dif_x=random.gauss(0.0,diffusion)*1e4
         dif_y=random.gauss(0.0,diffusion)*1e4
         dif_z=0
 
-        if((self.d_x+dif_x)>=my_d.l_x): 
-            self.d_x = my_d.l_x
-        elif((self.d_x+dif_x)<0):
-            self.d_x = 0
+        if((self.x+dif_x)>=my_d.l_x): 
+            self.x = my_d.l_x
+        elif((self.x+dif_x)<0):
+            self.x = 0
         else:
-            self.d_x = self.d_x+dif_x
+            self.x = self.x+dif_x
         # y axis
-        if((self.d_y+dif_y)>=my_d.l_y): 
-            self.d_y = my_d.l_y
-        elif((self.d_y+dif_y)<0):
-            self.d_y = 0
+        if((self.y+dif_y)>=my_d.l_y): 
+            self.y = my_d.l_y
+        elif((self.y+dif_y)<0):
+            self.y = 0
         else:
-            self.d_y = self.d_y+dif_y
+            self.y = self.y+dif_y
         # z axis
-        if((self.d_z+dif_z)>=my_d.l_z): 
-            self.d_z = my_d.l_z
-        elif((self.d_z+dif_z)<0):
-            self.d_z = 0
+        if((self.z+dif_z)>=my_d.l_z): 
+            self.z = my_d.l_z
+        elif((self.z+dif_z)<0):
+            self.z = 0
         else:
-            self.d_z = self.d_z+dif_z
+            self.z = self.z+dif_z
         #time
         self.t = self.t+delta_t
         #record
-        self.path.append([self.d_x,self.d_y,self.d_z,self.t])
+        self.path.append([self.x,self.y,self.z,self.t])
 
     def diffuse_end(self,my_f):
-        if (self.d_z<=0):
+        if (self.z<=0):
         #    self.end_condition = "out of bound"
             self.diffuse_end_condition = "collect"
         return self.diffuse_end_condition
 
     def diffuse_not_in_sensor(self,my_d):
-        if (self.d_x<=0) or (self.d_x>=my_d.l_x)\
-            or (self.d_y<=0) or (self.d_y>=my_d.l_y)\
-            or (self.d_z>=my_d.l_z):
+        if (self.x<=0) or (self.x>=my_d.l_x)\
+            or (self.y<=0) or (self.y>=my_d.l_y)\
+            or (self.z>=my_d.l_z):
             self.diffuse_end_condition = "out of bound"
-        mod_x = self.d_x % self.pixel
-        mod_y = self.d_y % self.pixel
+        mod_x = self.x % self.pixel
+        mod_y = self.y % self.pixel
         if ((mod_x> 7.5) & (mod_x<17.5)) & ((mod_y> 7.5) & (mod_y<17.5)) \
            & (self.t <= self.t_end):
             self.diffuse_end_condition = "collect"
         return self.diffuse_end_condition
 
         '''
-        if (self.d_z<= 0) or (self.t >= self.t_end):
+        if (self.z<= 0) or (self.t >= self.t_end):
             self.diffuse_end_condition = "collect"
         #print("diffuse end")
         return self.diffuse_end_condition
@@ -228,8 +223,8 @@ class Carrier:
 
     def pixel_position(self,my_f,my_d):
         if self.diffuse_end_condition == "collect":
-            self.row = self.d_x // self.pixel
-            self.column = self.d_y // self.pixel
+            self.row = self.x // self.pixel
+            self.column = self.y // self.pixel
         else:
             self.row = -1
             self.column = -1
@@ -394,19 +389,16 @@ class CalCurrentGain(CalCurrent):
         self.electrons = [] # gain carriers
         self.holes = []
         cal_coefficient = Material(my_d.material).cal_coefficient
-        gain_rate, alpha_ratio = self.gain_rate(my_d,my_f,cal_coefficient)
-        fluctuation = gain_rate * alpha_ratio + (1 - 1/gain_rate) * (1 - alpha_ratio)
-
+        gain_rate = self.gain_rate(my_d,my_f,cal_coefficient)
         print("gain_rate="+str(gain_rate))
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
             for hole in my_current.holes:
-                gain_rate_tmp = gain_rate + random.gauss(0.0,fluctuation)
                 self.electrons.append(Carrier(hole.path[-1][0],\
                                               hole.path[-1][1],\
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
-                                              -1*hole.charge*gain_rate_tmp,\
+                                              -1*hole.charge*gain_rate,\
                                               my_d.material,\
                                               my_f.read_ele_num))
                 
@@ -414,18 +406,17 @@ class CalCurrentGain(CalCurrent):
                                           hole.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           hole.path[-1][3],\
-                                          hole.charge*gain_rate_tmp,\
+                                          hole.charge*gain_rate,\
                                           my_d.material,\
                                           my_f.read_ele_num))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
-                gain_rate_tmp = gain_rate + random.gauss(0.0,fluctuation)
                 self.holes.append(Carrier(electron.path[-1][0],\
                                           electron.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
-                                          -1*electron.charge*gain_rate_tmp,\
+                                          -1*electron.charge*gain_rate,\
                                           my_d.material,\
                                           my_f.read_ele_num))
 
@@ -433,7 +424,7 @@ class CalCurrentGain(CalCurrent):
                                                 electron.path[-1][1],\
                                                 my_d.avalanche_bond,\
                                                 electron.path[-1][3],\
-                                                electron.charge*gain_rate_tmp,\
+                                                electron.charge*gain_rate,\
                                                 my_d.material,\
                                                 my_f.read_ele_num))
 
@@ -460,8 +451,8 @@ class CalCurrentGain(CalCurrent):
         alpha_n_list = np.zeros(n)
         alpha_p_list = np.zeros(n)
         for i in range(n):
-            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/um
-            E_field = Vector(Ex,Ey,Ez).get_length() * 1e4 # in V/cm
+            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/cm
+            E_field = Vector(Ex,Ey,Ez).get_length()
             alpha_n = cal_coefficient(E_field, -1, my_d.temperature)
             alpha_p = cal_coefficient(E_field, +1, my_d.temperature)
             alpha_n_list[i] = alpha_n
@@ -475,7 +466,6 @@ class CalCurrentGain(CalCurrent):
             alpha_minor_list = alpha_n_list
         diff_list = alpha_major_list - alpha_minor_list
         int_alpha_list = np.zeros(n-1)
-        alpha_ratio = max(alpha_minor_list)/max(alpha_major_list)
 
         for i in range(1,n):
             int_alpha = 0
@@ -495,7 +485,7 @@ class CalCurrentGain(CalCurrent):
             raise(ValueError)
         
         gain_rate = exp_list[n-2]/(1-det) -1
-        return gain_rate, alpha_ratio
+        return gain_rate
 
     def current_define(self,read_ele_num):
         """
@@ -514,9 +504,9 @@ class CalCurrentGain(CalCurrent):
         self.negative_cu=[]
 
         for i in range(read_ele_num):
-            self.positive_cu.append(ROOT.TH1F("gain_charge+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
+            self.positive_cu.append(ROOT.TH1F("gain_charge_tmp+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
-            self.negative_cu.append(ROOT.TH1F("gain_charge-"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
+            self.negative_cu.append(ROOT.TH1F("gain_charge_tmp-"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
         
     def get_current(self,my_d,read_ele_num):
@@ -832,7 +822,6 @@ class StripCarrierListFromG4P:
                         if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>5:
                             try_p=0
                     if try_p==1:
-                        print(my_g4p.edep_devices[j])
                         self.batch_def(my_g4p,j)
                         batch = 1
                         break
@@ -849,3 +838,26 @@ class StripCarrierListFromG4P:
         self.tracks_step = my_g4p.energy_steps[j]
         self.tracks_t_energy_deposition = my_g4p.edep_devices[j] #为什么不使用？
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]
+
+# TODO: change this to a method of CalCurrent
+def save_current(my_d,my_l,my_current,my_f,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pintct', my_d.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgadtct', my_d.det_name, )
+    create_path(path) 
+    L = eval("my_l.{}".format(key))
+    #L is defined by different keys
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    for i in range(my_f.read_ele_num):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+        fout.Close()

@@ -13,6 +13,8 @@ import sys
 import os
 import time
 
+from util.output import output
+
 def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     @description:
@@ -25,16 +27,15 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         2021/08/31
     """
     now = time.strftime("%Y_%m%d_%H%M%S")
-    path = os.path.join("output/fig", str(now),'' )
-    create_path(path) 
+    path = output(__file__, my_d.det_name, now)
+
     if "plugin" in my_d.det_model:
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
         draw_ele_field_1D(my_d,my_f,path)
         draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
     for i in range(my_f.read_ele_num):
-        draw_current(my_d, my_current,ele_current.CSA_ele,i,"CSA",path) # Draw current
-        draw_current(my_d, my_current,ele_current.BB_ele,i,"BB",path)
+        draw_current(my_d, my_current,ele_current.ele,i,ele_current.ele_name,path) # Draw current
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     if my_l != None:
         my_l.draw_nocarrier3D(path)
@@ -42,108 +43,34 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 
-def save_signal_TTree(dset,my_d,key,ele_current,my_f):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join("output", "pintct", dset.det_name, "data",)
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join("output", "lgadtct", dset.det_name, "data",)
-    create_path(path) 
-    for j in range(my_f.read_ele_num):
-        volt = array('d', [999.])
-        time = array('d', [999.])
-        if my_f.read_ele_num==1:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key) + ".root", "RECREATE")
-        else:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key)+"No_"+str(j)+".root", "RECREATE")
-        t_out = ROOT.TTree("tree", "signal")
-        t_out.Branch("volt", volt, "volt/D")
-        t_out.Branch("time", time, "time/D")
-        for i in range(ele_current.CSA_ele[j].GetNbinsX()):
-            time[0]=i*ele_current.time_unit
-            volt[0]=ele_current.CSA_ele[j][i]
-            t_out.Fill()
-        t_out.Write()
-        fout.Close()
 
-def save_current(dset,my_d,my_l,my_current,my_f,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    create_path(path) 
-    L = eval("my_l.{}".format(key))
-    #L is defined by different keys
-    time = array('d', [999.])
-    current = array('d', [999.])
-    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", time, "time/D")
-    for i in range(my_f.read_ele_num):
-        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
-        for j in range(my_current.n_bin):
-            current[0]=my_current.sum_cu[i].GetBinContent(j)
-            time[0]=j*my_current.t_bin
-            t_out.Fill()
-        t_out.Write()
-        fout.Close()
 
-def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
+
+def save_signal_time_resolution(my_d,batch_number,ele_current,my_g4p,start_n,my_f):
+
     " Save data to the file"
+
+    output_path = output(__file__, my_d.det_name, 'batch')
+
     if "strip" in my_d.det_model: # under construction
         for k in range(ele_current.read_ele_num):
-            output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
-                       + "_v="+str(my_d.voltage)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) 
-                       + "_electrode_number="+str(k))
-        
-            create_path(output_path)
             save_signal_csv(ele_current,my_g4p,batch_number,start_n,k,output_path)
 
-    elif "plugin" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.doping) 
-                       + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z)
-                       + "_radius="+str(my_d.e_r) )
-        
-        create_path(output_path)
+    else:
         save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
 
-    elif "planar" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.doping) 
-                       + "_v="+str(my_d.voltage)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z)
-                       + "_radius=None" )
-        
-        create_path(output_path)
-        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
-
-    elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
-                       + "_v="+str(my_d.voltage)
-                       + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) 
-                       + "_radius=None")
-        
-        create_path(output_path)
-        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
-
-    del ele_current.BB_ele
-    del ele_current.CSA_ele
+    del ele_current
 
 def save_signal_csv(ele_current,my_g4p,number,start_n,k,output_path="none"):
-    """ Save induced current after CSA and BB"""
+    """ Save induced current after amplification"""
     charge = "_charge=%.2f_"%(ele_current.qtot[k]*1e15)  #fc
     e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
-    f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
-    for i in range(ele_current.BB_ele[k].GetNbinsX()):
-        f1.write("%s,%s,%s \n"%(i*ele_current.time_unit,
-                                ele_current.CSA_ele[k][i],
-                                ele_current.BB_ele[k][i]))
+    f1.write("time[ns], Amplitude [mV] \n")
+    for i in range(ele_current.ele[k].GetNbinsX()):
+        f1.write("%s,%s \n"%(i*ele_current.time_unit,
+                                ele_current.ele[k][i]))
     f1.close()
 
     print("output_file:%s"%output_file)
@@ -185,8 +112,8 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
         c1.GetPad(i).SetRightMargin(0.2)
         e_field.append(fill_his(model[2],depth,my_d,my_f,plane,sensor_model,i))
         e_field[i-1].Draw("COLZ")
-    c1.SaveAs(path+my_d.det_model+plane+str(depth)+".pdf")
-    c1.SaveAs(path+my_d.det_model+plane+str(depth)+".root")
+    c1.SaveAs(path+'/'+my_d.det_model+plane+str(depth)+".pdf")
+    c1.SaveAs(path+'/'+my_d.det_model+plane+str(depth)+".root")
     del c1
 
 def draw_ele_field_1D(my_d,my_f,path):
@@ -224,8 +151,8 @@ def draw_ele_field_1D(my_d,my_f,path):
     e_field1.GetYaxis().SetLabelSize(0.05)
     e_field1.SetLineWidth(2)
     e_field1.SetTitle("")
-    c1.SaveAs(path+my_d.det_model+".pdf")
-    c1.SaveAs(path+my_d.det_model+".root")
+    c1.SaveAs(path+'/'+my_d.det_model+".pdf")
+    c1.SaveAs(path+'/'+my_d.det_model+".root")
     del c1
 
 def fill_his(model,depth,my_d,my_f,plane,sensor_model,k):
@@ -281,7 +208,7 @@ def fill_his_1D(model,my_d,my_f):
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
                                 +math.pow(f_v[2],2))
-                e_v.GetYaxis().SetTitle(model+"[V/\mu m]")                        
+                e_v.GetYaxis().SetTitle(model+"[V/cm]")                        
         except RuntimeError:
             f_v = 0.0
         e_v.SetBinContent(i+1,f_v)
@@ -488,8 +415,8 @@ def draw_current(my_d, my_current, ele_current, read_ele_num, model, path, tag="
     #legend.SetTextSize(42)
     legend.Draw("same")
     c.Update()
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.root")
+    c.SaveAs(path+'/'+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.pdf")
+    c.SaveAs(path+'/'+model+my_d.det_model+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.root")
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -585,8 +512,8 @@ def draw_drift_path(my_d,my_f,my_current,path):
     mg.Draw("APL")
     mg.GetXaxis().SetTitle("x axis")
     mg.GetYaxis().SetTitle("z axis")
-    c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
-    c1.SaveAs(path+my_d.det_model+"_drift_path.root")
+    c1.SaveAs(path+'/'+my_d.det_model+"_drift_path.pdf")
+    c1.SaveAs(path+'/'+my_d.det_model+"_drift_path.root")
     del c1
 
 def energy_deposition(my_g4v):
@@ -764,76 +691,6 @@ def cce(my_d,my_f,my_current):
     
 
 
-def set_input(dset,my_current,my_l,my_d,key):
-    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', dset.det_name, )
-    elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', dset.det_name, )
-    L = eval("my_l.{}".format(key))
-    current=[]
-    time=[]
-    myFile = ROOT.TFile(os.path.join(path,"sim-TCT-current")+str(L)+".root")
-    myt = myFile.tree
-    for entry in myt:
-       current.append(entry.current0)
-       time.append(entry.time)
-    input_c=[]
-    if abs(min(current))>max(current): #set input signal
-        c_max=min(current)
-        for i in range(0, len(current)):
-            if current[i] < c_max * 0.01:
-                input_c.append(str(0))
-                input_c.append(str(0))
-                input_c.append(str(time[i]))
-                input_c.append(str(0))
-                break
-            else:
-                current[i]=0
-        for j in range(i, len(current)):
-            input_c.append(str(time[j]))
-            input_c.append(str(current[j]))
-            if current[j] > c_max * 0.01:
-                break
-        input_c.append(str(time[j]))
-        input_c.append(str(0))
-        input_c.append(str(time[len(time)-1]))
-        input_c.append(str(0))
-        for k in range(j, len(current)):
-            current[i]=0
-    else:
-        c_max=max(current)
-        for i in range(0, len(current)):
-            current[i]=0
-            if current[i] > c_max * 0.01:
-                input_c.append(str(0))
-                input_c.append(str(0))
-                input_c.append(str(time[i]))
-                input_c.append(str(0))
-                break
-        for j in range(i, len(current)):
-            input_c.append(str(time[j]))
-            input_c.append(str(current[j]))
-            if current[j] < c_max * 0.01:
-                break
-        input_c.append(str(time[j]))
-        input_c.append(str(0))
-        input_c.append(str(time[len(time)-1]))
-        input_c.append(str(0))
-        for k in range(j, len(current)):
-            current[i]=0
-    in_put=array("d",[0.])
-    t=array("d",[0.])
-    fout = ROOT.TFile(os.path.join(path, "input") + str(L) + ".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("time", t, "time/D")
-    t_out.Branch("current", in_put, "current/D")
-    for m in range(my_current.n_bin):
-        in_put[0]=current[m]
-        t[0]=time[m]
-        t_out.Fill()
-    t_out.Write()
-    fout.Close()
-    return input_c
 
 def save_current_geant4(my_d,dset,event,my_current,my_g4p,start_n,my_f):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
@@ -863,25 +720,3 @@ def save_current_geant4(my_d,dset,event,my_current,my_g4p,start_n,my_f):
     t_out.Write()
     fout.Close()
 
-def draw_charge(my_charge):
-    path = os.path.join("output", "pixel",)
-    create_path(path) 
-    c=ROOT.TCanvas("c","canvas1",1000,1000)
-    c.cd()
-    c.Update()
-    c.SetLeftMargin(0.12)
-    # c.SetTopMargin(0.12)
-    c.SetRightMargin(0.12)
-    c.SetBottomMargin(0.14)
-    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
-    ROOT.gStyle.SetOptStat(0)
-
-    my_charge.sum_charge.GetXaxis().SetNdivisions(510)
-    my_charge.sum_charge.GetYaxis().SetNdivisions(505)
-    my_charge.sum_charge.GetXaxis().SetTitle("X")
-    my_charge.sum_charge.GetYaxis().SetTitle("Y")
-
-    my_charge.sum_charge.Draw("lego")
-    c.Update()
-    c.SaveAs(path+"/Pixel_charge.pdf")
-    c.SaveAs(path+"/Pixel_charge.root")

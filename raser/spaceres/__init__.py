@@ -9,25 +9,23 @@ import subprocess
 from . import telescope as tlcp
 #from . import test
 from particle.g4simulation import Particles
-from util.read_json import Setting
 from particle.geometry import R3dDetector
 from current.cal_current import CalCurrentPixel
-from draw import draw_save
 
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
     if label == "-h":
         print("taichu_v1:   ","first version of telescope simulation")
         print("taichu_v2:   ","second version of telescope simulation")
     elif label.startswith("taichu_v1"):
-        #paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=readjson/absorber.json', 'pixeldetector']
+        #paths = ['det_name=Taichu3', 'parfile=readjson/detector.json', 'geant4_model=pixel_detector', 'geant4_parfile=readjson/absorber.json', 'pixel_detector']
         dset = Setting() #read label.json instead of inputting path
         my_d = R3dDetector(dset) #remain the same
         my_f = 0
         my_g4p = Particles(my_d, dset) #remove my_f
         my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
         if label.endswith("draw_charge"):
-            draw_save.draw_charge(my_charge)
+            draw_charge(my_charge)
         my_telescope = tlcp.telescope(my_d,my_charge) 
         #tlcp.main(my_d)  
     elif label.startswith("taichu_v2"):
@@ -98,3 +96,25 @@ def main(args):
     else:
         raise NameError(label)
     
+def draw_charge(my_charge):
+    path = os.path.join("output", "pixel",)
+    create_path(path) 
+    c=ROOT.TCanvas("c","canvas1",1000,1000)
+    c.cd()
+    c.Update()
+    c.SetLeftMargin(0.12)
+    # c.SetTopMargin(0.12)
+    c.SetRightMargin(0.12)
+    c.SetBottomMargin(0.14)
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptStat(0)
+
+    my_charge.sum_charge.GetXaxis().SetNdivisions(510)
+    my_charge.sum_charge.GetYaxis().SetNdivisions(505)
+    my_charge.sum_charge.GetXaxis().SetTitle("X")
+    my_charge.sum_charge.GetYaxis().SetTitle("Y")
+
+    my_charge.sum_charge.Draw("lego")
+    c.Update()
+    c.SaveAs(path+"/Pixel_charge.pdf")
+    c.SaveAs(path+"/Pixel_charge.root")

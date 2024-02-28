@@ -5,11 +5,13 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
+from .save_TTree import save_signal_TTree
 
 # TODO: Need to be rewritten!
 
 import time
-import draw.draw_save
+from util.output import output
+from gen_signal.draw_save import draw_plots
 
 args = sys.argv[1:]
 start = time.time()
@@ -39,8 +41,8 @@ my_l = raser.TCTTracks(my_d, dset.laser)
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)
 ele_current = raser.Amplifier(my_current, dset.amplifier)
 if "ngspice" in args:
-    draw_save.save_current(dset,my_d,my_l,my_current,my_f,"fx_rel")
-    input_p=draw_save.set_input(dset,my_current,my_l,my_d,"fx_rel")
+    my_current.save_current(dset,my_d,my_l,my_f,"fx_rel")
+    input_p=ngsip.set_input(dset,my_current,my_l,my_d,"fx_rel")
     input_c=','.join(input_p)
     with open('paras/T1.cir', 'r') as f:
         lines = f.readlines()
@@ -52,7 +54,7 @@ if "ngspice" in args:
         f.writelines(lines)
         f.close()
 if "scan=True" in args: #assume parameter alter
-    draw_save.save_signal_TTree(dset,my_d,key_string,ele_current,my_f)
+    save_signal_TTree(dset,my_d,key_string,ele_current,my_f)
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
@@ -60,13 +62,12 @@ if "scan=True" in args: #assume parameter alter
     else:
         raise NameError
 else:
-    draw_save.draw_plots(my_d,ele_current,my_f,None,my_current,my_l)
+    draw_plots(my_d,ele_current,my_f,None,my_current,my_l)
 
 if "draw_carrier" in label:
     now = time.strftime("%Y_%m%d_%H%M")
-    path = "output/fig/" + now + "/"
-    draw_save.create_path(path)
-    draw_save.draw_nocarrier3D(path,my_l)
-    draw_save.draw_nocarrier2D(path,my_l)
+    path = output(__path__, now)
+    my_l.draw_nocarrier3D(path,my_l)
+    my_l.draw_nocarrier2D(path,my_l)
 
 print("total time used:%s"%(time.time()-start))

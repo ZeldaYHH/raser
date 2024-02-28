@@ -1,0 +1,96 @@
+{
+    "det_name" : "plugin3D",
+    "det_model" : "plugin3D",
+    "material" : "SiC",
+
+    "lx" : 10000,
+    "ly" : 10000,
+    "lz" : 350,
+    
+    "e_r" : 50.0,
+    "e_gap" : 150.0,
+    "e_t" : [
+        {
+            "x_coord" : 5000,
+            "y_coord" : 5000,
+            "radius" : 50.0,
+            "doping" : "p"
+        },
+        {
+            "x_coord" : 4850,
+            "y_coord" : 5000,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5150,
+            "y_coord" : 5000,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 4925,
+            "y_coord" : 5129.90,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 4925,
+            "y_coord" : 4870.09,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5075,
+            "y_coord" : 5129.90,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5075,
+            "y_coord" : 5129.90,
+            "radius" : 50.0,
+            "doping" : "n"
+        }
+    ],
+
+    "doping":{
+        "Acceptors" : "0",
+        "Donors" : "1e13"
+    },
+
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : -500
+    },
+    
+    "temperature" : 300.0,
+    "irradiation" : {
+        "irradiation_label" : "CommonDefect",
+        "irradiation_flux" : 0
+    },
+
+    "area_factor" : 1,
+    "default_dimension" : 3,
+
+    "mesh" : {
+        "gmsh_mesh":{
+            "file" : "output/parainprogram/3d_time.msh",
+            "region" : [
+                {
+                    "material" : "SiliconCarbide", 
+                    "region" : "plugin3D", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    },
+
+    "absorber" : "time_resolution",
+    "amplifier" : "BB"
+}

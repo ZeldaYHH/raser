@@ -23,6 +23,9 @@
         "irradiation_flux" : 0
     },
 
+    "avalanche_bond" : 3.0,
+    "avalanche_model" : "vanOverstraeten",
+
     "area_factor" : 1,
     "default_dimension" : 1,
 
@@ -48,5 +51,8 @@
                 {"name" : "bot", "tag" : "bot", "material" : "metal"}
             ]
         }
-    }
+    },
+
+    "absorber" : "time_resolution",
+    "amplifier" : "BB"
 }

@@ -4,8 +4,8 @@ from . import iv
 from . import cv
 from . import compare_iv
 from . import compare_cv
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
 
     if label == 'sicar1.1.8':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'

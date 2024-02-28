@@ -1,8 +1,9 @@
 from . import *
-def main(args):
-    label = vars(args)['label']
+def main(kwargs):
+    label = kwargs['label']
 
-    if label == 'foo':
-        foo.main()
+    if label == 'model':
+        from . import model
+        model.main()
     else:
         raise NameError(label)

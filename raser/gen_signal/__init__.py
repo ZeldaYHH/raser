@@ -2,27 +2,29 @@
 # -*- encoding: utf-8 -*-
 '''
 @Description: The main program of Raser induced current simulation      
-@Date       : 2021/09/7 12:14:31
-@Author     : tanyuhang
-@version    : 1.0
+@Date       : 2024/02/20 18:12:26
+@Author     : tanyuhang, Chenxi Fu
+@version    : 2.0
 '''
 import sys
 import os
 import time
 
-from particle import geometry as geo
+from field import build_device as bdv
 from particle import g4simulation as g4s
-#from field import pyfenics as pyf
 from field import devsim_field as devfield
-from field import solve_field as stripfield
 from current import cal_current as ccrt
 from elec import ele_readout as rdout
+from elec import ngspice_set_input as ngsip
 
-from util.read_json import Setting
-from draw import draw_save
-import math
+from . import draw_save
+from util.output import output
 
-def main(args):
+import json
+
+import random
+
+def main(kwargs):
     """
     Description:
         The main program of Raser induced current simulation      
@@ -31,8 +33,8 @@ def main(args):
     dset : class
         Parameters of simulation
     Function or class:
-        R3dDetector -- Define the structure of the detector
-        FenicsCal -- Get the electric field and weighting potential 
+        Detector -- Define the basic parameters and mesh structure of the detector
+        DevsimCal -- Get the electric field and weighting potential 
         Particles -- Electron and hole paris distibution
         CalCurrent -- Drift of e-h pais and induced current
         Amplifier -- Readout electronics simulation
@@ -41,99 +43,70 @@ def main(args):
     ---------
         2021/09/02
     """
-    dset = Setting()
-    if "scan" in args:
-        dset.scan_variation()
-    if "parameter_alter" in args:
-        # need to put the changed value at the end of the parameter list
-        key,_,value=args[-1].rpartition('=')
-        value=float(value)
-        dset.paras.update({key:value})
-    det_dic = dset.detector
-    if "plugin3D" in det_dic['det_model']:
-        if det_dic['custom_electrode'] == "False":
-            pass
-        elif det_dic['custom_electrode'] == "True":
-            set_electrodes(det_dic,dset)
-        else:
-            print("The electrode model is wrong.")
-    my_d = geo.R3dDetector(dset)
-    
-    # if "pixeldetector" in args:
-    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
-    #     #my_f = 0
-    #     my_g4p = g4s.Particles(my_d, dset)
-    #     my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-    #     if "draw_charge" in args:
-    #         draw_save.draw_charge(my_charge)
-    #     return  
-    
-    # if "beammonitor" in args:
-    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
-    #     my_g4p = g4s.Particles(my_d, dset)
-    #     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-    #     ele_current = rdout.Amplifier(my_current, dset.amplifier)
-    #     draw_save.get_beam_number(my_g4p,ele_current)
-    #     return  
+    start = time.time()
 
-    # if "proton-irrad" in args:
-    #     my_f = pyf.FenicsCal2D(my_d,dset.fenics)
-    #     my_g4p = g4s.SiITk(my_d, my_f, dset)
-    #     #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-    #     #ele_current = raser.Amplifier(my_current, dset.amplifier)
-    #     draw_save.get1_beam_number(my_g4p)
-    #     #draw_save.cce(my_d,my_f,my_current)
-    #     return
+    det_name = kwargs['det_name']
+    my_d = bdv.Detector(det_name)
     
-    if "Si_Strip"==dset.detector_name:
-        my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        draw_save.cce(my_d,my_f,my_current)
+    if kwargs['voltage'] != None:
+        voltage = float(kwargs['voltage'])
+    else:
+        voltage = float(my_d.voltage)
+
+    if kwargs['absorber'] != None:
+        absorber = kwargs['absorber']
+    else:
+        absorber = my_d.absorber
+
+    if kwargs['amplifier'] != None:
+        amplifier = kwargs['amplifier']
+    else:
+        amplifier = my_d.amplifier
+
+    if "strip" in det_name:
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_ele_num, my_d.l_z)
+    else: 
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 1, my_d.l_z)
+
+    if kwargs['scan'] != None:
+        geant4_json = "./setting/absorber/" + absorber + ".json"
+        with open(geant4_json) as f:
+            g4_dic = json.load(f)
+
+        total_events = int(g4_dic['total_events'])
+        for i in range(kwargs['scan']):
+            # TODO: change this into multithread
+            instance_number = i
+            g4_seed = instance_number * total_events
+            my_g4p = g4s.Particles(my_d, absorber, g4_seed)
+            batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
         return
-   
-    if "SICAR-1.1.8" == dset.detector_name:
-        my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)   
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        draw_save.save_current(dset, my_d, my_current, my_f, "fz_abs")
-        input_p=draw_save.set_input(dset, my_current, my_d, "fz_abs")
-        input_c=','.join(input_p)
-        ngspice(input_c, input_p)
-        
-    elif "NJU-PIN" == dset.detector_name:
-        my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)  
-        my_g4p = g4s.Particles(my_d, dset)   
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)        
-        draw_save.save_current(dset, my_d, my_current, my_f, "fz_abs")
-        input_p=draw_save.set_input(dset, my_current, my_d, "fz_abs")
-        input_c=','.join(input_p)
-        ngspice(input_c, input_p)
-        
-    else:
-        if('devsim' in args):
-            print("using devsim to build the field")
-            try:
-                my_f = devfield.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
-            except:
-                print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
-                exit(0)
-        else:
-            print("using fenics to build the field")
-            my_f = pyf.FenicsCal(my_d,dset.fenics)
-            
-        my_g4p = g4s.Particles(my_d, dset)
+    
+    else:  
+        g4_seed = random.randint(0,1e7)
+        my_g4p = g4s.Particles(my_d, absorber, g4_seed)
 
-    if "scan=True" not in args:
+    if "strip" in det_name:
+        my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
+    else: 
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+
+    if 'ngspice' in amplifier:
+        my_current.save_current(my_d, my_f, "fz_abs")
+        input_p=ngsip.set_input(my_current, my_d, "fz_abs")
+        input_c=','.join(input_p)
+        ngspice(input_c, input_p)
     else:
-        print('run batch_loop')
-        batch_loop(dset,my_d, my_f, my_g4p)
+        ele_current = rdout.Amplifier(my_current, amplifier)
+        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
+        
+    if "strip" in my_d.det_name:
+        draw_save.cce(my_d,my_f,my_current)
+
     del my_f
+
+    end = time.time()
+    print("total_time:%s"%(end-start))
 
 def ngspice(input_c, input_p):
     with open('./paras/T1.cir', 'r') as f:
@@ -146,27 +119,8 @@ def ngspice(input_c, input_p):
         f.writelines(lines)
         f.close()
 
-def set_electrodes(det_dic,dset):
-    
-    l_x = det_dic['lx'] 
-    l_y = det_dic['ly']  
-    l_z = det_dic['lz'] 
-    e_int = det_dic['e_gap']
-    e_r = det_dic['e_r']
-    e_t_xy = e_int/math.sqrt(2)
-    e_tr=[]
-    e_t_1 = [l_x*0.5           , l_y*0.5         , e_r,0, l_z,"p"]
-    e_t_2 = [l_x*0.5-e_t_xy    , l_y*0.5-e_t_xy  , e_r,0, l_z,"n"]
-    e_t_3 = [l_x*0.5-e_t_xy    , l_y*0.5+e_t_xy  , e_r,0, l_z,"n"]
-    e_t_4 = [l_x*0.5+e_t_xy    , l_y*0.5-e_t_xy  , e_r,0, l_z,"n"]
-    e_t_5 = [l_x*0.5+e_t_xy    , l_y*0.5+e_t_xy  , e_r,0, l_z,"n"]
-    for i in range(5):
-        n_e = eval('e_t_' + str(i+1))
-        e_tr.append(n_e)
-    dset.electron_custom(e_tr)
 
-
-def batch_loop(dset, my_d, my_f, my_g4p):
+def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number):
     """
     Description:
         Batch run some events to get time resolution
@@ -185,29 +139,33 @@ def batch_loop(dset, my_d, my_f, my_g4p):
     ---------
         2021/09/07
     """
-    if "plugin" in dset.det_model:
-        draw_save.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,dset.output)
+    path = output(__file__, my_d.det_name, 'batch')
+    if "plugin" in my_d.det_model:
+        draw_save.draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
     else:
-        draw_save.draw_ele_field_1D(my_d,my_f,dset.output)
-        draw_save.draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,dset.output)
-    start_n = dset.instance_number * dset.total_events
-    end_n = (dset.instance_number + 1) * dset.total_events
+        draw_save.draw_ele_field_1D(my_d,my_f,path)
+        draw_save.draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path)
+
+    start_n = instance_number * total_events
+    end_n = (instance_number + 1) * total_events
+
     effective_number = 0
     for event in range(start_n,end_n):
         print("run events number:%s"%(event))
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = rdout.Amplifier(my_current, dset.amplifier)
-            draw_save.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
+            ele_current = rdout.Amplifier(my_current, amplifier)
+            draw_save.save_signal_time_resolution(my_d,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)
 
-
 if __name__ == '__main__':
-    start = time.time()
-    main(sys.argv[1:])
-    print("drift_total1:%s"%(time.time()-start))
-    print("RUN END")
-    os._exit(0) 
+    args = sys.argv[1:]
+    kwargs = {}
+    for arg in args:
+        key, value = arg.split('=')
+        kwargs[key] = value
+    main(kwargs)
+    

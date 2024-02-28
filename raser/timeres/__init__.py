@@ -1,8 +1,3 @@
-from . import foo
-def main(args):
-    label = vars(args)['label']
-
-    if label == 'foo':
-        foo.main()
-    else:
-        raise NameError(label)
+from . import add_noise
+def main(kwargs):
+    add_noise.main(kwargs)
