@@ -75,7 +75,7 @@ def main(simname):
                            value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
     
     initial.InitialSolution(device, region, circuit_contacts=electrode)
-    devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=200)
+    devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
     initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=electrode,
                                           irradiation_label=MyDetector.device_dict['irradiation']['irradiation_label'],
                                           irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux'],

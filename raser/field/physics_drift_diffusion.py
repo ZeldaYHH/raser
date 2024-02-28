@@ -201,7 +201,7 @@ def CreateECE(device, region, mu_n, impact_label):
     equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
              edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration",
-             edge_volume_model="ImpactGen_n")#GR_n
+             edge_volume_model="ImpactGen_n")
     
 
 def CreateHCE(device, region, mu_p, impact_label):
@@ -214,7 +214,7 @@ def CreateHCE(device, region, mu_p, impact_label):
     equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration",
-             edge_volume_model="ImpactGen_p")#GR_p
+             edge_volume_model="ImpactGen_p")
     
 
 def CreatePE(device, region):
@@ -229,7 +229,7 @@ def CreatePE(device, region):
              time_node_model="", variable_update="log_damp")
 
 
-def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", irradiation_flux=1e15, impact_label="test",recombination=""):
+def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", irradiation_flux=1e15, impact_label="test"):
     CreateIrradiation(device, region, label=irradiation_label, flux=irradiation_flux)
     CreatePE(device, region)
     CreateBernoulli(device, region)
