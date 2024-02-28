@@ -90,7 +90,7 @@ class Detector:
         '''
         Doping
         '''
-        if 'donors_ir' in self.device_dict['doping']:
+        if 'acceptors_ir' in self.device_dict['doping']:
           model_create.CreateNodeModel(self.device, self.region, "Acceptors",    self.device_dict['doping']['Acceptors']+"+"+self.device_dict['doping']['acceptors_ir'])
         else:
           model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])
