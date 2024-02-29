@@ -14,7 +14,7 @@
         "donors_ir":"0"
     },
 
-    "const_U":-5e10,
+    "U_const":-5e10,
     "avalanche_model":"Hatakeyama",
 
     "bias" : {
