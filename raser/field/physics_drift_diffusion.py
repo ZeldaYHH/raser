@@ -172,9 +172,10 @@ def PrintCurrents(device, contact):
 
 
 def CreateSRH(device, region):
+    
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    Gn = "-ElectronCharge * (USRH+U_r)"
-    Gp = "+ElectronCharge * (USRH+U_r)"
+    Gn = "-ElectronCharge * (USRH+U_r+U_const)"
+    Gp = "+ElectronCharge * (USRH+U_r+U_const)"
     CreateNodeModel(device, region, "USRH", USRH)
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -182,7 +183,12 @@ def CreateSRH(device, region):
         CreateNodeModelDerivative(device, region, "USRH", USRH, i)
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
-
+    edge_from_node_model(device=device,region=region,node_model="USRH")
+    edge_from_node_model(device=device,region=region,node_model="ElectronGeneration")
+    edge_from_node_model(device=device,region=region,node_model="HoleGeneration")
+    edge_from_node_model(device=device,region=region,node_model="U_const")
+    #CreateEdgeModelDerivatives(device,region,)
+    
 
 def CreateECE(device, region, mu_n, impact_label):
     CreateElectronCurrent(device, region, mu_n)
@@ -213,6 +219,7 @@ def CreateHCE(device, region, mu_p, impact_label):
 
 def CreatePE(device, region):
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
+    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
@@ -226,7 +233,7 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradi
     CreateIrradiation(device, region, label=irradiation_label, flux=irradiation_flux)
     CreatePE(device, region)
     CreateBernoulli(device, region)
-    CreateSRH(device, region)
+    CreateSRH(device,region)
     CreateECE(device, region, mu_n, impact_label)
     CreateHCE(device, region, mu_p, impact_label)
 

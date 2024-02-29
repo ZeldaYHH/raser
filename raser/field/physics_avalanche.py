@@ -12,16 +12,34 @@ import devsim
 from .model_create import *
 import math
 
-def CreateImpactGeneration(device, region, custom_ion_n='0', custom_ion_p='0', label=""):
 
-    if label == "NoAvalanche":
+def CreateImpactGeneration(device, region, impact_label,custom_ion_n='0', custom_ion_p='0' ):   
+    
+    material = devsim.get_material(device=device, region=region)
+    #create impact ionization model
+    if impact_label == "NoAvalanche":
         Ion_coeff_rate = '0'
     else:
-        material = devsim.get_material(device=device, region=region)
-        if material == 'Silicon' and label != "CustomAvalanche":
+        
+        if material == 'Silicon' and impact_label != "CustomAvalanche":
             Ion_coeff_n, Ion_coeff_p = CreateImpactModel_vanOvenstraeten(device, region)
-        elif material == 'SiliconCarbide' and label != "CustomAvalanche":
-            Ion_coeff_n, Ion_coeff_p = CreateImpactModel_Hatakeyama(device, region)
+        elif material=='SiliconCarbide' and impact_label != "CustomAvalanche":
+            Ion_coeff_n, Ion_coeff_p = CreateImpactModel_Hatakeyama(device, region)#default SiC model
+            #changebale models
+            if impact_label=="Hatakeyama":
+                pass
+            if impact_label=="Tunnel":
+                pass
+            if impact_label=="sze":
+                Ion_coeff_n, Ion_coeff_p = CreateImpactModel_sze(device, region)
+            if impact_label=="chynoweth":
+                Ion_coeff_n, Ion_coeff_p = CreateImpactModel_chynoweth(device, region)
+            if impact_label=="bologna":
+                Ion_coeff_n, Ion_coeff_p = CreateImpactModel_bologna(device, region)
+            if impact_label=="sic_custom":
+                Ion_coeff_n, Ion_coeff_p = CreateImpactModel_sic_custom(device, region)
+            elif impact_label=="CustomAvalanche":
+                Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
         else:
             Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
 
@@ -37,13 +55,21 @@ def CreateImpactGeneration(device, region, custom_ion_n='0', custom_ion_p='0', l
         #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
     
         Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/ElectronCharge"
-
-    if label == 'Tunnel':
-        Ion_coeff_rate += CreateTunnelModel_Zaiyi(device, region)
     
-    ImpactGen_n = "+ElectronCharge*%s"%(Ion_coeff_rate)
-    ImpactGen_p = "-ElectronCharge*%s"%(Ion_coeff_rate)
+    #Create other field related models 
+    if material=='SiliconCarbide':
+        CreateFESRH(device,region)
+        Ion_coeff_rate +="+R_TAT" #default create trap assisted tunneling in SiC
+    
+    if impact_label == 'Tunnel':
+        print("creating tunnel")
+        Ion_coeff_rate += CreateTunnelModel_Zaiyi(device, region)#tunneling model in P5
+    
+    ImpactGen_n = "+ElectronCharge*(%s)"%(Ion_coeff_rate)
+    ImpactGen_p = "-ElectronCharge*(%s)"%(Ion_coeff_rate)
+    
 
+#for all material
     CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
@@ -133,3 +159,33 @@ def CreateTunnelModel_Zaiyi(device, region):
 
     return "+R_improved"
 
+def CreateImpactModel_sze(device,region):
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, a*abs(ElectricField)*exp(-b/abs(ElectricField)),1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, a*abs(ElectricField)*exp(-b/abs(ElectricField)),1)"
+
+    return Ion_coeff_n, Ion_coeff_p
+    
+def CreateImpactModel_chynoweth(device,region):
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, a*exp(-b/abs(ElectricField)),1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, a*exp(-b/abs(ElectricField)),1)"
+
+    return Ion_coeff_n, Ion_coeff_p
+
+def CreateImpactModel_bologna(device,region):
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, abs(ElectricField)/(a+b*exp(d/(abs(ElectricField)+c))),1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, abs(ElectricField)/(a+b*exp(d/(abs(ElectricField)+c))),1)"
+
+    return Ion_coeff_n, Ion_coeff_p
+    
+def CreateImpactModel_sic_custom(device,region):
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, 1.96e6*exp(-(9.96e6/abs(ElectricField))^1.6), 1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, 3.32e6*exp(-(1.07e7/abs(ElectricField))^1.1), 1)"
+
+    return Ion_coeff_n, Ion_coeff_p
+    
+def CreateFESRH(device,region):
+    R_TAT="ifelse(abs(ElectricField)<F_sat,2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*(const_U@n1),2*(3*3.14159)^0.5*abs(F_sat)/3.9e4*exp((F_sat/3.9e4)^2)*(const_U@n1))"
+    CreateEdgeModel(device,region,"R_TAT",R_TAT)
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Holes")

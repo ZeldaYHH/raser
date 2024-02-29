@@ -58,7 +58,14 @@ def main(simname):
                                     value=parameter['value'],
                                     unit=parameter['unit'],
                                     description=parameter['name'])
-
+    
+    if "parameter" in MyDetector.device_dict:
+      devsim.add_db_entry(material=MyDetector.device_dict['parameter']['material'],parameter=MyDetector.device_dict['parameter']['name'],value=MyDetector.device_dict['parameter']['value'],unit=MyDetector.device_dict['parameter']['unit'],description=MyDetector.device_dict['parameter']['description'])
+    if "U_cosnt" in MyDetector.device_dict:
+      const_U=MyDetector.device_dict["U_const"]
+      model_create.CreateNodeModel(device,region,"U_cosnt",U_const)
+    else model_create.CreateNodeModel(device,region,"U_const",0)
+      
     electrode = MyDetector.device_dict['bias']['electrode']
 
     devsim.set_parameter(name = "extended_solver", value=True)
@@ -71,7 +78,8 @@ def main(simname):
     devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
     initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=electrode,
                                           irradiation_label=MyDetector.device_dict['irradiation']['irradiation_label'],
-                                          irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux'])
+                                          irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux'],
+                                          impact_label=MyDetector.device_dict['avalanche_model'])
     devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
     devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -122,14 +130,16 @@ def main(simname):
         electron_current= devsim.get_contact_current(device=device, contact=electrode, equation="ElectronContinuityEquation")
         hole_current    = devsim.get_contact_current(device=device, contact=electrode, equation="HoleContinuityEquation")
         total_current   = electron_current + hole_current
-
+        
+        if(abs(total_current/area_factor)>105e-6): break
+        
         current.append(abs(total_current/area_factor))
         writer_iv.writerow([v,abs(total_current/area_factor)])
 
         devsim.circuit_alter(name="V1", value=v)
         #devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
         devsim.solve(type="ac", frequency=frequency)
-        cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*frequency)
+        cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*frequency)
 
         capacitance.append(abs(cap/area_factor))
         writer_cv.writerow([v,abs(cap/area_factor)])

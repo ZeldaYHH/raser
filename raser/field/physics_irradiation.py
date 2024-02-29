@@ -61,6 +61,7 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
         TrappingRate_n=TrappingRate_n+trap_n
         TrappingRate_p=TrappingRate_p+trap_p
         U_r = U_r+U_r_i
+    
 
     CreateNodeModel(device, region, "TrappedElectrons", TrappedElectrons)
     CreateNodeModel(device, region, "TrappedHoles", TrappedHoles)

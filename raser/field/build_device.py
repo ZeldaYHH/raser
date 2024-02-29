@@ -130,8 +130,14 @@ class Detector:
         '''
         Doping
         '''
-        model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
-        model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
+        if 'Acceptors_ir' in self.device_dict['doping']:
+          model_create.CreateNodeModel(self.device, self.region, "Acceptors",    self.device_dict['doping']['Acceptors']+"+"+self.device_dict['doping']['Acceptors_ir'])
+        else:
+          model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])
+        if 'Donors_ir' in self.device_dict['doping']:
+          model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors']+"+"+self.device_dict['doping']['Donors_ir'])
+        else:
+          model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
         model_create.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="NetDoping")

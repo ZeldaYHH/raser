@@ -72,6 +72,10 @@ def main(kwargs):
         path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/sicar1.1.8-11_cv.root"
         path2="./output/2Dresult/simsicar1.1.6/simCV500.0to500.0.root"
         compare_cv.main(label,path1,path2)
+    elif label == "compare_sicar_cv_1d":
+        path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/iv_cv/sicar1.1.8-8_cv.root"
+        path2="./output/field/SICAR-1.1.8/simCV-500.0to0.0.root"
+        compare_cv.main(label,path1,path2)
     elif label == "compare_sim_sicar1.1.8_iv":
         path1="/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/sicar1.1.8-11_iv.root"
         path2="./output/2Dresult/simsicar1.1.6/simIV650.0to650.0.root"
