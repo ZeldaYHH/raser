@@ -169,7 +169,7 @@ def CreateVanOvenstraetenImpact():
     devsim.add_db_entry(material="Silicon",   parameter="p_b_low",  value=p_b_low,   unit="V/cm",     description="p_b for van Ovenstraeten Avalanche Model")
 
 def CreateTAT():
-'''trap assisted tunneling model for SiC'''
+    '''trap assisted tunneling model for SiC'''
     devsim.add_db_entry(material="SiliconCarbide",   parameter="U_TAT",        value=-1.9e11,   unit="cm-3s-1",        description="recombination rate for TAT model")
     devsim.add_db_entry(material="SiliconCarbide",   parameter="F_gamma",        value=4.9e4,   unit="V/cm",        description="F_gamma in TAT model")
     devsim.add_db_entry(material="SiliconCarbide",   parameter="F_sat",        value=1e5,   unit="V/cm",        description="F_gamma in TAT model")

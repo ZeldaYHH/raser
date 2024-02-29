@@ -22,10 +22,6 @@
     },
 
     "temperature" : 300.0,
-    "irradiation" : {
-        "irradiation_label" : "CommonDefect",
-        "irradiation_flux" : 0
-    },
 
     "area_factor" : 127.32,
     "default_dimension" : 1,

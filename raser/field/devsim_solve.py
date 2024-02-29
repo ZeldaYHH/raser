@@ -31,7 +31,10 @@ paras = {
     "frequency" : 1.0
 }
 
-def main(simname):
+def main(kwargs):
+    simname = kwargs['label']
+    is_cv = kwargs['cv']
+
     with open('setting/devsim_general.json') as file:
         paras.update(json.load(file))
 
@@ -60,26 +63,38 @@ def main(simname):
                                     description=parameter['name'])
     
     if "parameter" in MyDetector.device_dict:
-      devsim.add_db_entry(material=MyDetector.device_dict['parameter']['material'],parameter=MyDetector.device_dict['parameter']['name'],value=MyDetector.device_dict['parameter']['value'],unit=MyDetector.device_dict['parameter']['unit'],description=MyDetector.device_dict['parameter']['description'])
-    if "U_cosnt" in MyDetector.device_dict:
-      const_U=MyDetector.device_dict["U_const"]
-      model_create.CreateNodeModel(device,region,"U_cosnt",U_const)
-    else model_create.CreateNodeModel(device,region,"U_const",0)
+        devsim.add_db_entry(material=MyDetector.device_dict['parameter']['material'],parameter=MyDetector.device_dict['parameter']['name'],value=MyDetector.device_dict['parameter']['value'],unit=MyDetector.device_dict['parameter']['unit'],description=MyDetector.device_dict['parameter']['description'])
+    if "U_const" in MyDetector.device_dict:
+        U_const=MyDetector.device_dict["U_const"]
+        model_create.CreateNodeModel(device,region,"U_const",U_const)
+    else:
+        model_create.CreateNodeModel(device,region,"U_const",0)
       
-    electrode = MyDetector.device_dict['bias']['electrode']
+    circuit_contacts = MyDetector.device_dict['bias']['electrode']
 
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
     devsim.set_parameter(name = "extended_equation", value=True)
-    devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName(electrode), n2=0,
+    devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName(circuit_contacts), n2=0,
                            value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
     
-    initial.InitialSolution(device, region, circuit_contacts=electrode)
+    initial.InitialSolution(device, region, circuit_contacts=circuit_contacts)
     devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
-    initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=electrode,
-                                          irradiation_label=MyDetector.device_dict['irradiation']['irradiation_label'],
-                                          irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux'],
-                                          impact_label=MyDetector.device_dict['avalanche_model'])
+
+    if "irradiation" in MyDetector.device_dict:
+        irradiation_label=MyDetector.device_dict['irradiation']['irradiation_label']
+        irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux']
+    else:
+        irradiation_label=None
+        irradiation_flux=None
+
+    if 'avalanche_model' in MyDetector.device_dict:
+        impact_label=MyDetector.device_dict['avalanche_model']
+    else:
+        impact_label=None
+
+    initial.DriftDiffusionInitialSolution(device, region, irradiation_label=irradiation_label, irradiation_flux=irradiation_flux, impact_label=impact_label, circuit_contacts=circuit_contacts)
+        
     devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
     devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
@@ -106,11 +121,12 @@ def main(simname):
     writer_iv = csv.writer(f_iv)
     writer_iv.writerow(header_iv)
 
-    cv_path = os.path.join(path,"cv.csv")
-    f_cv = open(cv_path, "w")
-    header_cv = ["Voltage","Capacitance"]
-    writer_cv = csv.writer(f_cv)
-    writer_cv.writerow(header_cv)
+    if is_cv == True:
+        cv_path = os.path.join(path,"cv.csv")
+        f_cv = open(cv_path, "w")
+        header_cv = ["Voltage","Capacitance"]
+        writer_cv = csv.writer(f_cv)
+        writer_cv.writerow(header_cv)
 
     v_max = MyDetector.device_dict['bias']['voltage']
     area_factor = MyDetector.device_dict['area_factor']
@@ -124,11 +140,11 @@ def main(simname):
 
     while abs(v) <= abs(v_max):
         voltage.append(v)
-        devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName(electrode), value=v)
+        devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName(circuit_contacts), value=v)
         devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
-        physics_drift_diffusion.PrintCurrents(device, electrode)
-        electron_current= devsim.get_contact_current(device=device, contact=electrode, equation="ElectronContinuityEquation")
-        hole_current    = devsim.get_contact_current(device=device, contact=electrode, equation="HoleContinuityEquation")
+        physics_drift_diffusion.PrintCurrents(device, circuit_contacts)
+        electron_current= devsim.get_contact_current(device=device, contact=circuit_contacts, equation="ElectronContinuityEquation")
+        hole_current    = devsim.get_contact_current(device=device, contact=circuit_contacts, equation="HoleContinuityEquation")
         total_current   = electron_current + hole_current
         
         if(abs(total_current/area_factor)>105e-6): break
@@ -136,13 +152,14 @@ def main(simname):
         current.append(abs(total_current/area_factor))
         writer_iv.writerow([v,abs(total_current/area_factor)])
 
-        devsim.circuit_alter(name="V1", value=v)
-        #devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
-        devsim.solve(type="ac", frequency=frequency)
-        cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*frequency)
+        if is_cv == True:
+            devsim.circuit_alter(name="V1", value=v)
+            #devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
+            devsim.solve(type="ac", frequency=frequency)
+            cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*frequency)
 
-        capacitance.append(abs(cap/area_factor))
-        writer_cv.writerow([v,abs(cap/area_factor)])
+            capacitance.append(abs(cap/area_factor))
+            writer_cv.writerow([v,abs(cap/area_factor)])
         
         if(paras['milestone_mode']==True and v%paras['milestone_step']==0.0):
             if MyDetector.dimension == 1:
@@ -174,7 +191,9 @@ def main(simname):
         v += voltage_step
 
     draw_iv(device, voltage, current)
-    draw_cv(device, voltage, capacitance)
+    if is_cv == True:
+        draw_cv(device, voltage, capacitance)
+    
     draw_field(device, positions_mid, intensities, voltage_milestone)
     save_field(device, positions_mid, intensities, voltage_milestone)
     draw_electrons(device, positions, electrons, voltage_milestone)
@@ -270,4 +289,9 @@ def milestone_save_3D(device, region, v, path):
             pickle.dump(data, file)
 
 if __name__ == "__main__":
-    main(simname = sys.argv[1])
+    args = sys.argv[1:]
+    kwargs = {}
+    for arg in args:
+        key, value = arg.split('=')
+        kwargs[key] = value
+    main(kwargs)

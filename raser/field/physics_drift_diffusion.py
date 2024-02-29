@@ -171,11 +171,15 @@ def PrintCurrents(device, contact):
     print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
 
 
-def CreateSRH(device, region):
-    
+def CreateSRH(device, region, irradiation_label):
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    Gn = "-ElectronCharge * (USRH+U_r+U_const)"
-    Gp = "+ElectronCharge * (USRH+U_r+U_const)"
+    Gn = "-ElectronCharge * (USRH+U_const)"
+    Gp = "+ElectronCharge * (USRH+U_const)"
+
+    if irradiation_label != None:
+        Gn = Gn + "-ElectronCharge * U_r"
+        Gp = Gp + "+ElectronCharge * U_r"
+
     CreateNodeModel(device, region, "USRH", USRH)
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -196,12 +200,16 @@ def CreateECE(device, region, mu_n, impact_label):
     NCharge = "-ElectronCharge * Electrons"
     CreateNodeModel(device, region, "NCharge", NCharge)
     CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
-    CreateImpactGeneration(device, region, impact_label)
-
-    equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
-             time_node_model = "NCharge",
-             edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration",
-             edge_volume_model="ImpactGen_n")
+    if impact_label != None:
+        CreateImpactGeneration(device, region, impact_label)
+        equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
+                time_node_model = "NCharge",
+                edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration",
+                edge_volume_model="ImpactGen_n")
+    else:
+        equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
+                time_node_model = "NCharge",
+                edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration")
     
 
 def CreateHCE(device, region, mu_p, impact_label):
@@ -209,17 +217,23 @@ def CreateHCE(device, region, mu_p, impact_label):
     PCharge = "ElectronCharge * Holes"
     CreateNodeModel(device, region, "PCharge", PCharge)
     CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
-    CreateImpactGeneration(device, region, impact_label)
-
-    equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
-             time_node_model = "PCharge",
-             edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration",
-             edge_volume_model="ImpactGen_p")
+    if impact_label != None:
+        CreateImpactGeneration(device, region, impact_label)
+        equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
+                time_node_model = "PCharge",
+                edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration",
+                edge_volume_model="ImpactGen_p")
+    else:
+        equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
+                time_node_model = "PCharge",
+                edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
     
 
-def CreatePE(device, region):
-    pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
-    #pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+def CreatePE(device, region, irradiation_label):
+    pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+    if irradiation_label != None:
+        pne = "-ElectronCharge*kahan3({}, TrappedHoles, -TrappedElectrons)".format(pne)
+
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
@@ -229,13 +243,19 @@ def CreatePE(device, region):
              time_node_model="", variable_update="log_damp")
 
 
-def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", irradiation_flux=1e15, impact_label="test"):
-    CreateIrradiation(device, region, label=irradiation_label, flux=irradiation_flux)
-    CreatePE(device, region)
+def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label=None, irradiation_flux=1e15, impact_label=None):
+    if irradiation_label != None:
+        CreateIrradiation(device, region, label=irradiation_label, flux=irradiation_flux)
+    else:
+        CreateNodeModel(device, region, "TrappingRate_n", "0")
+        CreateNodeModel(device, region, "TrappingRate_p", "0")
+        # For carrier lifetime
+
+    CreatePE(device, region, irradiation_label)
     CreateBernoulli(device, region)
-    CreateSRH(device,region)
-    CreateECE(device, region, mu_n, impact_label)
-    CreateHCE(device, region, mu_p, impact_label)
+    CreateSRH(device, region, irradiation_label)
+    CreateECE(device, region, mu_n, impact_label=impact_label)
+    CreateHCE(device, region, mu_p, impact_label=impact_label)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 

@@ -16,6 +16,7 @@ from field import devsim_field as devfield
 from current import cal_current as ccrt
 from elec import ele_readout as rdout
 from elec import ngspice_set_input as ngsip
+from elec import ngspice as ng
 
 from . import draw_save
 from util.output import output
@@ -80,6 +81,7 @@ def main(kwargs):
             g4_seed = instance_number * total_events
             my_g4p = g4s.Particles(my_d, absorber, g4_seed)
             batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
+            del my_g4p
         return
     
     else:  
@@ -95,29 +97,15 @@ def main(kwargs):
         my_current.save_current(my_d, my_f, "fz_abs")
         input_p=ngsip.set_input(my_current, my_d, "fz_abs")
         input_c=','.join(input_p)
-        ngspice(input_c, input_p)
+        ng.ngspice(input_c, input_p)
     else:
         ele_current = rdout.Amplifier(my_current, amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        
-    if "strip" in my_d.det_name:
-        draw_save.cce(my_d,my_f,my_current)
-
+    
     del my_f
-
     end = time.time()
     print("total_time:%s"%(end-start))
 
-def ngspice(input_c, input_p):
-    with open('./paras/T1.cir', 'r') as f:
-        lines = f.readlines()
-        lines[113] = 'I1 2 0 PWL('+str(input_c)+') \n'
-        lines[140] = 'tran 0.1p ' + str((input_p[len(input_p) - 2])) + '\n'
-        lines[141] = 'wrdata output/t1.raw v(out)\n'
-        f.close()
-    with open('./output/T1_tmp.cir', 'w') as f:
-        f.writelines(lines)
-        f.close()
 
 
 def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number):

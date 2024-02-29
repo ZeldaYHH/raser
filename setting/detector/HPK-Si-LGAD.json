@@ -18,11 +18,7 @@
     },
     
     "temperature" : 300.0,
-    "irradiation" : {
-        "irradiation_label" : "XingChen",
-        "irradiation_flux" : 0
-    },
-
+    
     "avalanche_bond" : 3.0,
     "avalanche_model" : "vanOverstraeten",
 

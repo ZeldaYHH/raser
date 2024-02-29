@@ -14,7 +14,7 @@
         "donors_ir":"0"
     },
 
-    "const_U":-5e10,
+    "U_const":-5e10,
     "avalanche_model":"Hatakeyama",
 
     "bias" : {
@@ -23,10 +23,6 @@
     },
 
     "temperature" : 300.0,
-    "irradiation" : {
-        "irradiation_label" : "CommonDefect",
-        "irradiation_flux" : 0
-    },
 
     "area_factor" : 4,
     "default_dimension" : 1,

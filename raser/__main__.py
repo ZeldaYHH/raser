@@ -35,6 +35,7 @@ parser_field = subparsers.add_parser('field', help='calculate field and iv/cv')
 parser_field.add_argument('label', help='LABEL to identify operation')
 parser_field.add_argument('-v', '--verbose', help='VERBOSE level', 
                           action='count', default=0)
+parser_field.add_argument('-cv', help='CV simulation', action="store_true")
 
 parser_fpga = subparsers.add_parser('fpga', help='FPGA design')
 parser_fpga.add_argument('label', help='LABEL to identify FPGA design')
@@ -52,10 +53,10 @@ parser_gsignal.add_argument('label', help='LABEL to identify spaceres files')
 parser_root = subparsers.add_parser('root', help='root files conversion')
 parser_root.add_argument('label', help='LABEL to identify root files')
 
-parser_spaceres = subparsers.add_parser('spaceres', help='spaceres calculation')
+parser_spaceres = subparsers.add_parser('spaceres', help='space resolution calculation')
 parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
 
-parser_spaceres = subparsers.add_parser('timeres', help='timeres calculation')
+parser_spaceres = subparsers.add_parser('timeres', help='time resolution calculation')
 parser_spaceres.add_argument('det_name', help='name of the detector')
 
 args = parser.parse_args()

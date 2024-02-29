@@ -184,7 +184,7 @@ def CreateImpactModel_sic_custom(device,region):
     return Ion_coeff_n, Ion_coeff_p
     
 def CreateFESRH(device,region):
-    R_TAT="ifelse(abs(ElectricField)<F_sat,2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*(const_U@n1),2*(3*3.14159)^0.5*abs(F_sat)/3.9e4*exp((F_sat/3.9e4)^2)*(const_U@n1))"
+    R_TAT="ifelse(abs(ElectricField)<F_sat,2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*(U_const@n1),2*(3*3.14159)^0.5*abs(F_sat)/3.9e4*exp((F_sat/3.9e4)^2)*(U_const@n1))"
     CreateEdgeModel(device,region,"R_TAT",R_TAT)
     CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
     CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")

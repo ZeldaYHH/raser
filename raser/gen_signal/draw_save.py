@@ -42,6 +42,8 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         my_l.draw_nocarrier2D(path)
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
+    if 'strip' in my_d.det_name:
+        cce(my_d, my_f, my_current, path)
 
 
 
@@ -664,12 +666,7 @@ def get1_beam_number(my_g4p):
     
 
 
-def cce(my_d,my_f,my_current):
-
-    now = time.strftime("%Y_%m%d_%H%M")
-    path = "output/fig/" + now + "/"
-    create_path(path) 
-
+def cce(my_d,my_f,my_current, path):
     charge=array('d')
     x=array('d')
     for i in range(my_f.read_ele_num):
@@ -686,8 +683,8 @@ def cce(my_d,my_f,my_current):
     cce.SetTitle("Charge Collection Efficiency")
     cce.GetXaxis().SetTitle("elenumber")
     cce.GetYaxis().SetTitle("charge[Coulomb]")
-    c1.SaveAs(path+"_cce.pdf")
-    c1.SaveAs(path+"_cce.root")
+    c1.SaveAs(path+"/cce.pdf")
+    c1.SaveAs(path+"/cce.root")
     
 
 
