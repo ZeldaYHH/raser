@@ -10,7 +10,7 @@ def output(current_file_path, *label):
     '''
     destination_directories = os.path.dirname(current_file_path).split(os.sep)
     for i in range(len(destination_directories)-1, -1, -1):
-        if destination_directories[i] == 'raser' and destination_directories[i-1] == 'raser':
+        if destination_directories[i] == 'raser':
             destination_directories[i] = 'output'
             break
     output_file_path = os.path.abspath(os.path.join(os.sep, *destination_directories, *label))

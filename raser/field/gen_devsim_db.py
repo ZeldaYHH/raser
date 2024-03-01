@@ -4,7 +4,7 @@
 import os
 import devsim
 import math
-from raser.util.output import output
+from util.output import output
 
 def CreateDataBase(filename):
     devsim.create_db(filename=filename)
