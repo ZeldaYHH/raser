@@ -6,3 +6,4 @@ output
 **/__pycache__
 raser/motor/GUI/*.py
 setting/labels.json
+cfg/env
