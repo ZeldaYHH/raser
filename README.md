@@ -5,10 +5,9 @@ RASER
 
 
  - [ACTS](https://acts.readthedocs.io)
- - [Apptainer](http://apptainer.org)
- - [Debian](https://www.debian.org) 
  - [DEVSIM](https://devsim.org)
  - [GEANT4](https://geant4.web.cern.ch)
+ - [NGSPICE](https://ngspice.sourceforge.io)
  - [Python](https://www.python.org)
  - [ROOT](https://root.cern.ch) 
 
