@@ -8,7 +8,7 @@ import argparse
 import importlib
 import subprocess
 
-VERSION = 4.1
+VERSION = 4.0
 
 parser = argparse.ArgumentParser(prog='raser')
 parser.add_argument('--version', action='version', 

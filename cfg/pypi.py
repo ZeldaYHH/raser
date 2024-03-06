@@ -12,10 +12,10 @@ with open("README.md", "r") as fh:
 
 setup(
     name="raser",
-    version="3.1.0",
+    version="4.0",
     author="Xin Shi",
     author_email="Xin.Shi@outlook.com",
-    description="SiC Detector Simulation",
+    description="RAdiation SEmiconductoR Detector Simulation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://raser.team",
