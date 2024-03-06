@@ -85,6 +85,9 @@ class Detector:
 
         self.setDoping()
         path = output(__file__, self.det_name)
+
+        if "irradiation" in self.device_dict:
+            path = output(__file__, str(self.det_name)+"/"+str(self.device_dict['irradiation']['irradiation_flux']))
         self.drawDoping(path)
         devsim.write_devices(file=os.path.join(path, self.det_name+".dat"),type="tecplot")
 

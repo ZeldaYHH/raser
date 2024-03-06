@@ -16,6 +16,8 @@ from util.output import output
 from .devsim_draw import *
 
 import numpy as np
+import time
+import math
 
 paras = {
     "absolute_error" : 1e10, 
@@ -50,6 +52,20 @@ def main(kwargs):
     devsim.add_db_entry(material="global",   parameter="T",    value=T,     unit="K",   description="T")
     devsim.add_db_entry(material="global",   parameter="k_T",    value=k*T,       unit="J",        description="k*T")
     devsim.add_db_entry(material="global",   parameter="Volt_thermal",    value=k*T/q,     unit="J/coul",   description="k*T/q")
+    N_c=2.82e19*pow(T/300,1.5)
+    N_v=1.83e19*pow(T/300,1.5)
+    devsim.add_db_entry(material="Silicon",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
+    devsim.add_db_entry(material="Silicon",parameter="N_v",value=N_v, unit="/cm^3", description="effective density of states in valence band")
+    E_g=1.12*1.6e-19
+    N_i=pow(N_c*N_v,0.5)*math.exp(-E_g/(2*k*T))
+    devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=N_i,   unit="/cm^3",     description="Intrinsic Electron Concentration")
+    devsim.add_db_entry(material="Silicon",   parameter="n1",     value=N_i,   unit="/cm^3",     description="n1")
+    devsim.add_db_entry(material="Silicon",   parameter="p1",     value=N_i,   unit="/cm^3",     description="p1")
+    n_i = np.array(devsim.get_db_entry(material="Silicon",  parameter="n_i"))
+    N_c = np.array(devsim.get_db_entry(material="Silicon",  parameter="N_c"))
+    N_v = np.array(devsim.get_db_entry(material="Silicon",  parameter="N_v"))
+    n1 = np.array(devsim.get_db_entry(material="Silicon",  parameter="n1"))
+    p1 = np.array(devsim.get_db_entry(material="Silicon",  parameter="p1"))
 
     if "parameter_alter" in MyDetector.device_dict:
         for material in MyDetector.device_dict["parameter_alter"]:
@@ -72,6 +88,8 @@ def main(kwargs):
       
     circuit_contacts = MyDetector.device_dict['bias']['electrode']
 
+    T1 = time.time()
+
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
     devsim.set_parameter(name = "extended_equation", value=True)
@@ -79,7 +97,7 @@ def main(kwargs):
                            value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
     
     initial.InitialSolution(device, region, circuit_contacts=circuit_contacts)
-    devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
+    devsim.solve(type="dc", absolute_error=paras['absolute_error_Initial'], relative_error=paras['relative_error_Initial'], maximum_iterations=paras['maximum_iterations_Initial'])
 
     if "irradiation" in MyDetector.device_dict:
         irradiation_label=MyDetector.device_dict['irradiation']['irradiation_label']
@@ -95,7 +113,7 @@ def main(kwargs):
 
     initial.DriftDiffusionInitialSolution(device, region, irradiation_label=irradiation_label, irradiation_flux=irradiation_flux, impact_label=impact_label, circuit_contacts=circuit_contacts)
         
-    devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
+    devsim.solve(type="dc", absolute_error=paras['absolute_error_DriftDiffusion'], relative_error=paras['relative_error_DriftDiffusion'], maximum_iterations=paras['maximum_iterations_DriftDiffusion'])
     devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
     devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
     devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
@@ -112,9 +130,12 @@ def main(kwargs):
     positions = []
     electrons = []
     holes = []
-
+    
     path = output(__file__, device)
-
+    
+    if "irradiation" in MyDetector.device_dict:
+        path = output(__file__, str(device)+"/"+str(MyDetector.device_dict['irradiation']['irradiation_flux']))
+        
     iv_path = os.path.join(path,"iv.csv")
     f_iv = open(iv_path, "w")
     header_iv = ["Voltage","Current"]
@@ -139,9 +160,9 @@ def main(kwargs):
         voltage_step = -1 * paras['voltage_step']
 
     while abs(v) <= abs(v_max):
-        voltage.append(v)
+        voltage.append(abs(v))
         devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName(circuit_contacts), value=v)
-        devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
+        devsim.solve(type="dc", absolute_error=paras['absolute_error_VoltageSteps'], relative_error=paras['relative_error_VoltageSteps'], maximum_iterations=paras['maximum_iterations_VoltageSteps'])
         physics_drift_diffusion.PrintCurrents(device, circuit_contacts)
         electron_current= devsim.get_contact_current(device=device, contact=circuit_contacts, equation="ElectronContinuityEquation")
         hole_current    = devsim.get_contact_current(device=device, contact=circuit_contacts, equation="HoleContinuityEquation")
@@ -150,7 +171,7 @@ def main(kwargs):
         if(abs(total_current/area_factor)>105e-6): break
         
         current.append(abs(total_current/area_factor))
-        writer_iv.writerow([v,abs(total_current/area_factor)])
+        writer_iv.writerow([abs(v),abs(total_current/area_factor)])
 
         if is_cv == True:
             devsim.circuit_alter(name="V1", value=v)
@@ -163,18 +184,18 @@ def main(kwargs):
         
         if(paras['milestone_mode']==True and v%paras['milestone_step']==0.0):
             if MyDetector.dimension == 1:
-                milestone_save_1D(device, region, v, path)
+                milestone_save_1D(device, region, abs(v), path)
             elif MyDetector.dimension == 2:
-                milestone_save_2D(device, region, v, path)
+                milestone_save_2D(device, region, abs(v), path)
             elif MyDetector.dimension == 3:
-                milestone_save_3D(device, region, v, path)
+                milestone_save_3D(device, region, abs(v), path)
             else:
                 raise ValueError(MyDetector.dimension)
             
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
             x_mid = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
             E = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
-            V = v
+            V = abs(v)
 
             x = devsim.get_node_model_values(device=device, region=region, name="x") # get x-node values 
             n = devsim.get_node_model_values(device=device, region=region, name="Electrons")
@@ -190,14 +211,15 @@ def main(kwargs):
 
         v += voltage_step
 
-    draw_iv(device, voltage, current)
+    draw_iv(device, voltage, current,path)
     if is_cv == True:
-        draw_cv(device, voltage, capacitance)
-    
-    draw_field(device, positions_mid, intensities, voltage_milestone)
-    save_field(device, positions_mid, intensities, voltage_milestone)
-    draw_electrons(device, positions, electrons, voltage_milestone)
-    draw_holes(device, positions, holes, voltage_milestone)
+        draw_cv(device, voltage, capacitance,path)
+    draw_field(device, positions_mid, intensities, voltage_milestone,path)
+    save_field(device, positions_mid, intensities, voltage_milestone,path)
+    draw_electrons(device, positions, electrons, voltage_milestone,path)
+    draw_holes(device, positions, holes, voltage_milestone,path)
+    T2 =time.time()
+    print('程序运行时间:%s秒' % ((T2 - T1)))
 
 def milestone_save_1D(device, region, v, path):
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x"))

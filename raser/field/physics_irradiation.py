@@ -20,7 +20,7 @@ def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect
     # TODO: change labels into formal names
     if label == 'XingChen':
         defects = CreateIrradiationModel_XingChen(device, region)
-    elif label == 'Lizhan':
+    elif label == 'Perugia':
         defects = CreateIrradiationModel_Perugia(device, region)
     elif label == 'Schwandt':
         defects = CreateIrradiationModel_Schwandt(device, region)
@@ -83,10 +83,10 @@ def CreateIrradiationModel_XingChen(device, region):
     """
     
     defects = []
-    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.209*1.3, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
-    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.09*1.5,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
-    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*1.5, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
-    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*1.3, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
+    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.209*0.7, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})#右
+    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.155,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})#右
+    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*2.6, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})#左
+    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*0.85, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})#左
 
     return defects
 
@@ -97,9 +97,9 @@ def CreateIrradiationModel_Perugia(device, region):
     """
 
     defects = []
-    defects.append({"name" : "DA1", "E_t_ev" : 4.05-0.42, "g_int" : 1.613, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
-    defects.append({"name" : "DA2", "E_t_ev" : 4.05-0.46, "g_int" : 0.9,   "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
-    defects.append({"name" : "DD",  "E_t_ev" : 5.17+0.36, "g_int" : 0.9,   "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
+    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42, "g_int" : 1.613, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
+    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46, "g_int" : 0.9,   "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
+    defects.append({"name" : "DD",  "E_t_ev" : -0.56+0.36, "g_int" : 0.9,   "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
 
     return defects
 

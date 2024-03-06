@@ -67,8 +67,10 @@ def CreateSiliconConstant():
 
     # define Silicon parameters
 
-    N_c=2.8e19
-    N_v=1.1e19
+    #N_c=2.8e19
+    #N_v=1.1e19
+    N_c=2.82e19
+    N_v=1.83e19
     #N_c=2.86e19
     #N_v=2.66e19
     devsim.add_db_entry(material="Silicon",parameter="N_c",value=N_c, unit="/cm^3", description="effective density of states in conduction band")
@@ -90,8 +92,10 @@ def CreateSiliconConstant():
     # SRH
     devsim.add_db_entry(material="Silicon",   parameter="n1",     value=1.02e10,   unit="/cm^3",     description="n1")
     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=1.02e10,   unit="/cm^3",     description="p1")
-    devsim.add_db_entry(material="Silicon",   parameter="taun",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
-    devsim.add_db_entry(material="Silicon",   parameter="taup",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")
+    """devsim.add_db_entry(material="Silicon",   parameter="taun",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Electron")
+    devsim.add_db_entry(material="Silicon",   parameter="taup",  value=5e-6,    unit="s",         description="Constant SRH Lifetime of Hole")"""
+    devsim.add_db_entry(material="Silicon",   parameter="taun",  value=7e-3,    unit="s",         description="Constant SRH Lifetime of Electron")
+    devsim.add_db_entry(material="Silicon",   parameter="taup",  value=7e-3,    unit="s",         description="Constant SRH Lifetime of Hole")
 
 
 def CreateHatakeyamaImpact():

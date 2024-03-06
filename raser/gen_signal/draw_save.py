@@ -103,12 +103,12 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.cd(i)
     c1.GetPad(i).SetRightMargin(0.2)
     e_field.append(fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model,i))
-    e_field[i-1].Draw("COLZ")
+    e_field[i-1].Draw("CONT4Z")
     i=2
     c1.cd(i)
     c1.GetPad(i).SetRightMargin(0.2)
     e_field.append(fill_his(model[i-1],depth,my_d,my_f,plane,sensor_model,i))
-    e_field[i-1].Draw("COLZ")
+    e_field[i-1].Draw("CONT4Z")
     for i in range(3,my_f.read_ele_num+3):
         c1.cd(i)
         c1.GetPad(i).SetRightMargin(0.2)
@@ -193,8 +193,12 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model,k):
         e_v.GetXaxis().SetTitle("y")
         e_v.GetYaxis().SetTitle("z")
     elif plane == "xz":
-        e_v.GetXaxis().SetTitle("x")
-        e_v.GetYaxis().SetTitle("z") 
+        e_v.GetXaxis().SetTitle("x [um]")
+        e_v.GetYaxis().SetTitle("z [um]")
+        e_v.GetXaxis().SetTitleSize(0.05)
+        e_v.GetXaxis().SetLabelSize(0.05)
+        e_v.GetYaxis().SetTitleSize(0.05)
+        e_v.GetYaxis().SetLabelSize(0.05) 
     return e_v
 
 def fill_his_1D(model,my_d,my_f):
@@ -205,7 +209,7 @@ def fill_his_1D(model,my_d,my_f):
         z_v = (i+1)*((d_r[1]-d_r[0])/nz_e)+d_r[0]
         f_v=0.0
         try:
-            f_v,e_v = get_f_v_1D(my_d.l_x/2,my_d.l_y/2,z_v,model,my_f,e_v,d_r)
+            f_v,e_v = get_f_v_1D(160,my_d.l_y/2,z_v,model,my_f,e_v,d_r)
             if model == "E":
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
@@ -351,7 +355,10 @@ def draw_current(my_d, my_current, ele_current, read_ele_num, model, path, tag="
     #my_current.sum_cu.GetYaxis().CenterTitle() 
     my_current.sum_cu[read_ele_num].GetXaxis().SetTitle("Time [s]")
     my_current.sum_cu[read_ele_num].GetYaxis().SetTitle("Current [A]")
-
+    my_current.sum_cu[read_ele_num].GetXaxis().SetLabelSize(0.05)
+    my_current.sum_cu[read_ele_num].GetXaxis().SetTitleSize(0.05)
+    my_current.sum_cu[read_ele_num].GetYaxis().SetLabelSize(0.05)
+    my_current.sum_cu[read_ele_num].GetYaxis().SetTitleSize(0.05)
     my_current.sum_cu[read_ele_num].Draw("HIST")
     my_current.positive_cu[read_ele_num].Draw("SAME HIST")
     my_current.negative_cu[read_ele_num].Draw("SAME HIST")
@@ -674,7 +681,8 @@ def cce(my_d,my_f,my_current, path):
         sum_charge=0
         for j in range(my_current.n_bin):
             sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
-        charge.append(sum_charge)
+        charge.append(sum_charge/1.6e-19)
+    print(charge)
     n=int(len(charge))
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
     cce=ROOT.TGraph(n,x,charge)

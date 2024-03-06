@@ -232,7 +232,7 @@ def CreateHCE(device, region, mu_p, impact_label):
 def CreatePE(device, region, irradiation_label):
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     if irradiation_label != None:
-        pne = "-ElectronCharge*kahan3({}, TrappedHoles, -TrappedElectrons)".format(pne)
+        pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
 
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")

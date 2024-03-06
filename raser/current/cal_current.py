@@ -816,7 +816,8 @@ class StripCarrierListFromG4P:
             max_event_bin=h1.GetMaximumBin()
             bin_wide=max(my_g4p.edep_devices)*1.1/100
             for j in range (len(my_g4p.edep_devices)):
-                if (my_g4p.edep_devices[j]<(max_event_bin)*bin_wide and my_g4p.edep_devices[j]>(max_event_bin-1)*bin_wide):
+                #compare to experimental data
+                if (my_g4p.edep_devices[j]<0.084 and my_g4p.edep_devices[j]>0.083):
                     try_p=1
                     for single_step in my_g4p.p_steps_current[j]:
                         if abs(single_step[0]-my_g4p.p_steps_current[j][0][0])>5:

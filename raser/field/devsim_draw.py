@@ -9,12 +9,12 @@ import os
 
 from util.output import output
 
-def draw_iv(device,V,I):
+def draw_iv(device,V,I,path):
     fig2=matplotlib.pyplot.figure()
     matplotlib.pyplot.semilogy(V,I)
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('Current (A)')
-    path = output(__file__, device)
+    matplotlib.pyplot.yscale('log')
     fig2.savefig(os.path.join(path, "{}_iv.png".format(device)))
     fig2.clear()
 
@@ -58,13 +58,13 @@ def draw_iv(device,V,I):
     canvas.SaveAs(os.path.join(path, "simIV{}to{}_picture.root".format(min(V),max(V))))
     canvas.SaveAs(os.path.join(path, "simIV{}to{}_picture.pdf".format(min(V),max(V))))
 
-def draw_cv(device,V,C):
+def draw_cv(device,V,C,path):
     fig3=matplotlib.pyplot.figure(num=4,figsize=(4,4))
     matplotlib.pyplot.plot(V, C)
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('Capacitance (pF)')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
-    path = output(__file__, device)
+     
     fig3.savefig(os.path.join(path, "{}_cv.png".format(device)))
     fig3.clear()
 
@@ -76,7 +76,7 @@ def draw_cv(device,V,C):
     matplotlib.pyplot.xlabel('Voltage (V)')
     matplotlib.pyplot.ylabel('1/C^2 (pF^{-2})')
     #matplotlib.pyplot.axis([-200, 0, 0, 20])
-    path = output(__file__, device)
+     
     fig4.savefig(os.path.join(path, "{}_c^-2v.png".format(device)))
     fig4.clear()
 
@@ -120,7 +120,7 @@ def draw_cv(device,V,C):
     canvas.SaveAs(os.path.join(path, "simCV{}to{}_picture.root".format(min(V),max(V))))
     canvas.SaveAs(os.path.join(path, "simCV{}to{}_picture.pdf".format(min(V),max(V))))
 
-def draw_electrons(device, positions, electrons, bias_voltages):
+def draw_electrons(device, positions, electrons, bias_voltages,path):
     fig1=matplotlib.pyplot.figure()
     ax1 = fig1.add_subplot(111)
     for (x,n,V) in zip(positions, electrons, bias_voltages):
@@ -128,15 +128,16 @@ def draw_electrons(device, positions, electrons, bias_voltages):
     matplotlib.pyplot.xlabel('Depth [cm]')
     matplotlib.pyplot.ylabel('Electron Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    matplotlib.pyplot.yscale('log')
     ax1.legend(loc='upper right')
     if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
-    path = output(__file__, device)
+     
     fig1.savefig(os.path.join(path, "{}_electrons.png".format(device)))
     fig1.clear()
 
-def draw_holes(device, positions, holes, bias_voltages):
+def draw_holes(device, positions, holes, bias_voltages,path):
     fig1=matplotlib.pyplot.figure()
     ax1 = fig1.add_subplot(111)
     for (x,p,V) in zip(positions, holes, bias_voltages):
@@ -144,15 +145,17 @@ def draw_holes(device, positions, holes, bias_voltages):
     matplotlib.pyplot.xlabel('Depth [cm]')
     matplotlib.pyplot.ylabel('Hole Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+    matplotlib.pyplot.yscale('log')
+
     ax1.legend(loc='upper right')
     if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
-    path = output(__file__, device)
+     
     fig1.savefig(os.path.join(path, "{}_holes.png".format(device)))
     fig1.clear()
 
-def draw_field(device, positions,intensities, bias_voltages):
+def draw_field(device, positions,intensities, bias_voltages,path):
     fig1=matplotlib.pyplot.figure()
     ax1 = fig1.add_subplot(111)
     for (x,E,V) in zip(positions,intensities, bias_voltages):
@@ -164,14 +167,14 @@ def draw_field(device, positions,intensities, bias_voltages):
     if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
-    path = output(__file__, device)
+     
     fig1.savefig(os.path.join(path, "{}_electricfield.png".format(device)))
     fig1.clear()
 
-def save_field(device, positions, intensities, bias_voltages):
+def save_field(device, positions, intensities, bias_voltages,path):
     for (x,E,V) in zip(positions,intensities, bias_voltages):
         header_iv = ["Depth [cm]","E (V/cm)"]
-        path = output(__file__, device)
+         
         f=open(os.path.join(path, str(V)+'V_x_E.csv'),'w')
         writer_E = csv.writer(f)
         writer_E.writerow(header_iv)
@@ -193,12 +196,13 @@ def draw1D(x,y,title,xtitle,ytitle,v,path):
 def draw2D(x,y,value,title,v,path):
     graph = ROOT.TGraph2D()
     for i in range(len(x)):
-        graph.SetPoint(i, y[i], x[i], value[i]) 
-    canvas = ROOT.TCanvas("canvas", title, 1500, 1000)
+        graph.SetPoint(i, y[i]*1e4, x[i]*1e4, value[i]) 
+    canvas = ROOT.TCanvas("canvas", title, 1700, 1000)
     graph.Draw("CONT4Z")
     canvas.Draw()
-    graph.GetXaxis().SetTitle("x[cm]")
-    graph.GetYaxis().SetTitle("z[cm]")
+    graph.GetXaxis().SetTitle("x [um]")
+    graph.GetYaxis().SetTitle("z [um]")
+    
     graph.SetTitle(title)
     canvas.SaveAs(os.path.join(path, title+"{}_2d.png".format(v)))
     canvas.SaveAs(os.path.join(path, title+"{}_2d.root".format(v)))
