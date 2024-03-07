@@ -61,11 +61,6 @@ def main(kwargs):
     devsim.add_db_entry(material="Silicon",   parameter="n_i",    value=N_i,   unit="/cm^3",     description="Intrinsic Electron Concentration")
     devsim.add_db_entry(material="Silicon",   parameter="n1",     value=N_i,   unit="/cm^3",     description="n1")
     devsim.add_db_entry(material="Silicon",   parameter="p1",     value=N_i,   unit="/cm^3",     description="p1")
-    n_i = np.array(devsim.get_db_entry(material="Silicon",  parameter="n_i"))
-    N_c = np.array(devsim.get_db_entry(material="Silicon",  parameter="N_c"))
-    N_v = np.array(devsim.get_db_entry(material="Silicon",  parameter="N_v"))
-    n1 = np.array(devsim.get_db_entry(material="Silicon",  parameter="n1"))
-    p1 = np.array(devsim.get_db_entry(material="Silicon",  parameter="p1"))
 
     if "parameter_alter" in MyDetector.device_dict:
         for material in MyDetector.device_dict["parameter_alter"]:
@@ -160,7 +155,7 @@ def main(kwargs):
         voltage_step = -1 * paras['voltage_step']
 
     while abs(v) <= abs(v_max):
-        voltage.append(abs(v))
+        voltage.append(v)
         devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName(circuit_contacts), value=v)
         devsim.solve(type="dc", absolute_error=paras['absolute_error_VoltageSteps'], relative_error=paras['relative_error_VoltageSteps'], maximum_iterations=paras['maximum_iterations_VoltageSteps'])
         physics_drift_diffusion.PrintCurrents(device, circuit_contacts)
@@ -171,7 +166,7 @@ def main(kwargs):
         if(abs(total_current/area_factor)>105e-6): break
         
         current.append(abs(total_current/area_factor))
-        writer_iv.writerow([abs(v),abs(total_current/area_factor)])
+        writer_iv.writerow([v,abs(total_current/area_factor)])
 
         if is_cv == True:
             devsim.circuit_alter(name="V1", value=v)
@@ -184,18 +179,18 @@ def main(kwargs):
         
         if(paras['milestone_mode']==True and v%paras['milestone_step']==0.0):
             if MyDetector.dimension == 1:
-                milestone_save_1D(device, region, abs(v), path)
+                milestone_save_1D(device, region, v, path)
             elif MyDetector.dimension == 2:
-                milestone_save_2D(device, region, abs(v), path)
+                milestone_save_2D(device, region, v, path)
             elif MyDetector.dimension == 3:
-                milestone_save_3D(device, region, abs(v), path)
+                milestone_save_3D(device, region, v, path)
             else:
                 raise ValueError(MyDetector.dimension)
             
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
             x_mid = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
             E = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
-            V = abs(v)
+            V = v
 
             x = devsim.get_node_model_values(device=device, region=region, name="x") # get x-node values 
             n = devsim.get_node_model_values(device=device, region=region, name="Electrons")
