@@ -9,7 +9,7 @@ cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
 cat << EOF >> $cfg_env
 # PATH 
-PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:/usr/bin:\$PATH
+PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/usr/bin:\$PATH
 
 # ROOT 
 ROOTSYS=/usr/local/share/root_install
@@ -36,7 +36,7 @@ LD_LIBRARY_PATH=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install/lib64:
 PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
-export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
+export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/s/shixin/img/raser-2.2.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/publicfs,/scratchfs,/workfs2
 
