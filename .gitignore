@@ -7,3 +7,5 @@ output
 raser/motor/GUI/*.py
 setting/labels.json
 cfg/env
+raser.egg-info
+dist

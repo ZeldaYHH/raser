@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="raser",
-    version="4.0",
+    version="4.0.1.post2",
     author="Xin Shi",
     author_email="Xin.Shi@outlook.com",
     description="RAdiation SEmiconductoR Detector Simulation",
@@ -20,6 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://raser.team",
     packages=find_packages(),
+    include_package_data=True,
     license='MIT',
     classifiers=[
 		"Programming Language :: Python :: 3",

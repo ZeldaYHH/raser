@@ -91,7 +91,7 @@
             ]
         },
         "gmsh_mesh":{
-            "file" : "./paras/3d_lgad.msh",
+            "file" : "./paras/mesh/3d_lgad.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
