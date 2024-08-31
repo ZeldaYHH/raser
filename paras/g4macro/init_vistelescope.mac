@@ -13,4 +13,4 @@
 /run/initialize
 #
 # Visualization setting
-/control/execute ./cfg/vistelescope.mac
+/control/execute ./paras/g4macro/vistelescope.mac
