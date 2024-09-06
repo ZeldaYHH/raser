@@ -24,7 +24,7 @@
 #
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:
-/vis/viewer/set/autoRefresh false
+/vis/viewer/set/autoRefresh true
 /vis/verbose errors
 #
 # Draw geometry:
@@ -53,7 +53,7 @@
 # (if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # Draw hits at end of event:
-#/vis/scene/add/hits
+/vis/scene/add/hits
 #
 # To draw only gammas:
 #/vis/filtering/trajectories/create/particleFilter
@@ -76,11 +76,11 @@
 #
 # To get nice view
 # Make the "World" box invisible
-/vis/geometry/set/visibility world 0 false
+/vis/geometry/set/visibility world 1 true
 #
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
 /vis/verbose warnings
 #
 # For file-based drivers, use this to create an empty detector view:
-#/vis/viewer/flush
+/vis/viewer/flush

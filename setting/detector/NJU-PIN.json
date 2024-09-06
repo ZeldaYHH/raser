@@ -4,8 +4,8 @@
     "material" : "SiC",
 
     "lx" : 5000,
-    "ly" : 5000,
-    "lz" : 100,
+    "ly" : 100,
+    "lz" : 5000,
 
     "doping":{
 
@@ -19,13 +19,13 @@
 
     "bias" : {
         "electrode" : "top",
-        "voltage" : -800
+        "voltage" : -300
     },
 
     "temperature" : 300.0,
 
     "area_factor" : 4,
-    "default_dimension" : 1,
+    "default_dimension" : 2,
 
     "mesh" : {
         "1D_mesh" : {
@@ -87,6 +87,6 @@
         }
     },
     
-    "absorber" : "time_resolution",
-    "amplifier" : "BB"
+    "absorber" : "cflm",
+    "amplifier" : "ngspice"
 }
