@@ -146,7 +146,7 @@ rbig coll 0 1e12
 .control
 tran 10p 20n
 * <step> <stopping time>
-wrdata fig/drs4_analog.raw v(coll)
+wrdata output/elec/drs4_analog.raw v(coll)
 * save raw data
 .endc
 
