@@ -1,12 +1,9 @@
 {
     "ele_name": "CSA",
-    "t_rise" : 0.7,
-    "t_fall" : 1.1,
-    "trans_imp" : 38,
     "CDet" : 30,
 
-    "BBW" : 0.66,
-    "BBGain" : 19500,
-    "BB_imp" : 10,
-    "OscBW" : 2
+    "t_rise" : 0.7,
+    "t_fall" : 1.1,
+    "trans_imp" : 38
+
 }
