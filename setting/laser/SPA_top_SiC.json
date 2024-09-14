@@ -1,0 +1,21 @@
+{
+    "tech" : "SPA",
+    "direction" : "top",
+    "laser_model" : "top_TCT",
+    
+    "alpha" : 21000,
+    "refractionIndex" : 3.124,
+
+    "wavelength" : 355,
+    "temporal_FWHM" : 10e-9,
+    "pulse_energy" : 1.23e-11,
+    "spacial_FWHM" : 20,
+    "central_time" : 20e-9,
+
+    "r_step" : 5,
+    "h_step" : 15,
+
+    "fx_rel" : 0.5,
+    "fy_rel" : 0.5,
+    "fz_rel" : 0   
+}
