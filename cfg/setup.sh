@@ -51,3 +51,5 @@ alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
 alias pytest="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pytest"
 alias raser-install="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pip install -e ."  
 
+alias drawfig="python3 drawfig"
+alias control="python3 control"
