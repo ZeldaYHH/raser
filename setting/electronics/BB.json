@@ -2,7 +2,7 @@
     "ele_name": "BB",
     "CDet" : 30,
     
-    "BBW" : 0.66,
+    "BB_bandwidth" : 0.66,
     "BBGain" : 19500,
     "BB_imp" : 10,
     "OscBW" : 2
