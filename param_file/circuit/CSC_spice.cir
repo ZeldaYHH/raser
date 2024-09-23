@@ -1,0 +1,30 @@
+.title KiCad schematic
+.include "param_file/circuit/Simulation_SPICE.sp"
+.save all
+.probe alli
+.probe p(R2)
+.probe p(R1)
+.probe p(C2)
+.probe p(I1)
+.probe p(C1)
+.probe p(V1)
+.probe p(V2)
+.probe p(XU1)
+.tran 10p 30n
+R2 Net-_U1--_ IN 1kOhm
+R1 OUT Net-_U1--_ 105kOhm
+C2 OUT Net-_U1--_ 60f
+I1 0 IN PULSE( 0 2uA 1n 1p 1p 1n 100n ) 
+C1 IN 0 6p
+V1 Net-_U1-V+_ 0 DC 15 
+V2 0 Net-_U1-V-_ DC 15 
+XU1 0 Net-_U1--_ Net-_U1-V+_ Net-_U1-V-_ OUT kicad_builtin_opamp POLE=1.5G GAIN=3meg VOFF=0 ROUT=1u
+
+.control
+tran 0.1n 30n
+* <step> <stopping time>
+wrdata output/elec/ABCStar_fe.raw v(out)
+* save raw data
+.endc
+
+.end
