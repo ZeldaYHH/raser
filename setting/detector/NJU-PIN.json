@@ -3,9 +3,9 @@
     "det_model" : "planar3D",
     "material" : "SiC",
 
-    "lx" : 5000,
-    "ly" : 100,
-    "lz" : 5000,
+    "lx" : 50000,
+    "ly" : 200000,
+    "lz" : 100,
 
     "doping":{
 
@@ -19,13 +19,13 @@
 
     "bias" : {
         "electrode" : "top",
-        "voltage" : -300
+        "voltage" : -300.0
     },
 
     "temperature" : 300.0,
 
     "area_factor" : 4,
-    "default_dimension" : 2,
+    "default_dimension" : 1,
 
     "mesh" : {
         "1D_mesh" : {
