@@ -10,9 +10,6 @@ From: /afs/ihep.ac.cn/users/s/shixin/img/raser-2.2.sif
     # sed -i "s@http://deb.debian.org@http://repo.huaweicloud.com@g" /etc/apt/sources.list
     # apt -y update 
     # apt -y upgrade
-    
-    # # sed
-    # apt -y install sed
 
     # # Build 
     # apt -y install apt-utils git wget vim  
@@ -34,6 +31,9 @@ From: /afs/ihep.ac.cn/users/s/shixin/img/raser-2.2.sif
     # ln -sf /usr/bin/python3 /usr/bin/python 
     # apt -y install python3-pip libice6 libsm6  
     # pip install matplotlib scipy pandas geant4-pybind 
+
+    # # hep_job
+    # pip install htcondor
 
     # # DevSim    
     # pip install mkl devsim 
