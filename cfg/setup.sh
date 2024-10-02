@@ -11,7 +11,7 @@ cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
 cat << EOF >> $cfg_env
 # PATH 
-PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/usr/bin:\$PATH
+PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/bin:\$PATH
 
 # ROOT 
 ROOTSYS=/usr/local/share/root_install

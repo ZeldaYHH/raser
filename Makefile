@@ -14,7 +14,7 @@ clean:
 	rm -rf dist raser.egg-info  
 
 build-login:
-	ssh -Y shixin@lxslc701
+	ssh -Y [user]@lxlogin@ihep.ac.cn
 
 build-raser-sandbox: 
 	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
@@ -63,12 +63,3 @@ cvmfs-geant4-patch:
 
 cvmfs-publish:
 	cvmfs_server publish common.ihep.ac.cn 
-
-
-
-
-
- 
-
-
-
