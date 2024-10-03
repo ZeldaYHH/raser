@@ -23,13 +23,13 @@ shell-raser-sandbox:
 	apptainer shell --env-file cfg/env --fakeroot -w /tmp/raser-sandbox 
 
 test-raser-sandbox:
-	apptainer shell --env-file cfg/env -B /afs,/besfs5,/cefs,/cvmfs,/etc,/publicfs,/scratchfs,/workfs2 /tmp/raser-sandbox 
+	apptainer shell --env-file cfg/env -B /afs,/besfs5,/cefs,/cvmfs,/etc/redhat-release,/publicfs,/scratchfs,/workfs2 /tmp/raser-sandbox 
 
 build-raser-sif:
-	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
+	apptainer build --force --fakeroot raser.sif /tmp/raser-sandbox  
 
 shell-raser-sif:
-	apptainer shell --env-file cfg/env -B /afs,/besfs5,/cefs,/cvmfs,/etc,/publicfs,/scratchfs,/workfs2 raser.sif 
+	apptainer shell --env-file cfg/env -B /afs,/besfs5,/cefs,/cvmfs,/etc/redhat-release,/publicfs,/scratchfs,/workfs2 raser.sif 
 
 # Install Geant4 on lxslc7 
 geant4_install_1:

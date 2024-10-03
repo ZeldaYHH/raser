@@ -2,7 +2,7 @@
 #From: library/debian:11.7    
 
 Bootstrap: localimage
-From: /afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.3.sif  
+From: raser-2.2.sif  
 
 %post
     # # Use huaweicloud  
