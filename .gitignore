@@ -7,7 +7,6 @@ output
 control/motor/GUI/*.py
 G4History.macro
 
-setting/labels.json
 cfg/env
 
 *.sif
