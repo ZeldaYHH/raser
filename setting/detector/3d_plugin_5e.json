@@ -53,12 +53,14 @@
     },
     
     "temperature" : 300.0,
+
     "area_factor" : 1,
     "default_dimension" : 3,
+    "read_out_contact" : ["center"],
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "output/parainprogram/3d_time.msh",
+            "file" : "param_file/mesh/3d_plugin_5e.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

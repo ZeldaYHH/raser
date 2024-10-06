@@ -1,4 +1,5 @@
 {
+    "geant4_model" : "cflm",
     "object" : {
         "elemental" : {
             "pipe" : {
@@ -51,7 +52,7 @@
     
     "maxStep" : 0.5,
 
-    "DetModule" : "NJU-PIN.json",
+    "DetModule" : "NJU-PIN-cflm.json",
 
     "vis" : 0,
 

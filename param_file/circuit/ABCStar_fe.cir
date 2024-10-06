@@ -2,23 +2,55 @@
 .include "param_file/circuit/Simulation_SPICE.sp"
 .save all
 .probe alli
-.probe p(R2)
-.probe p(R1)
-.probe p(C2)
-.probe p(I1)
-.probe p(C1)
-.probe p(V1)
+.probe p(V3)
+.probe p(XU2)
+.probe p(R3)
+.probe p(C4)
+.probe p(R5)
+.probe p(V4)
+.probe p(R4)
 .probe p(V2)
+.probe p(C1)
+.probe p(R2)
+.probe p(C2)
+.probe p(R1)
+.probe p(V1)
 .probe p(XU1)
-.tran 10p 30n
-R2 Net-_U1--_ IN 1kOhm
-R1 OUT Net-_U1--_ 105kOhm
-C2 OUT Net-_U1--_ 60f
-I1 0 IN PULSE( 0 2uA 1n 1p 1p 1n 100n ) 
-C1 IN 0 6p
-V1 Net-_U1-V+_ 0 DC 15 
+.probe p(V5)
+.probe p(R8)
+.probe p(XU3)
+.probe p(I1)
+.probe p(R6)
+.probe p(R7)
+.probe p(V7)
+.probe p(C5)
+.probe p(V6)
+.probe p(C3)
+.tran 250p 100n
+V3 Net-_U2-V+_ 0 DC 15 
+XU2 0 Net-_U2--_ Net-_U2-V+_ Net-_U2-V-_ IN3 kicad_builtin_opamp POLE=6.25Meg GAIN=251 VOFF=0
+R3 Net-_U2--_ IN2 15kOhm
+C4 OUT4 0 100f
+R5 OUT4 0 10kOhm
+V4 0 Net-_U2-V-_ DC 15 
+R4 IN3 Net-_U2--_ 150kOhm
 V2 0 Net-_U1-V-_ DC 15 
-XU1 0 Net-_U1--_ Net-_U1-V+_ Net-_U1-V-_ OUT kicad_builtin_opamp POLE=1.5G GAIN=3meg VOFF=0 ROUT=1u
+C1 IN1 0 6p
+R2 Net-_U1--_ IN1 1kOhm
+C2 IN2 Net-_U1--_ 128f
+R1 IN2 Net-_U1--_ 105kOhm
+V1 Net-_U1-V+_ 0 DC 15 
+XU1 0 Net-_U1--_ Net-_U1-V+_ Net-_U1-V-_ IN2 kicad_builtin_opamp POLE=20Meg GAIN=1778 VOFF=0
+V5 Net-_U3-V+_ 0 DC 15 
+R8 OUT4 Net-_R8-Pad2_ 10kOhm
+XU3 Net-_U3-+_ Net-_U3--_ Net-_U3-V+_ Net-_U3-V-_ Net-_R8-Pad2_ kicad_builtin_opamp POLE=300k GAIN=350 VOFF=0
+I1 0 IN1 PULSE( 0 0.3uA 0n 1p 1p 3.333n 1 ) 
+R6 Net-_U3-+_ Net-_C3-Pad1_ 100kOhm
+R7 Net-_U3--_ Net-_C3-Pad1_ 100kOhm
+V7 Net-_C3-Pad1_ 0 DC 1.5 
+C5 Net-_U3--_ IN3 100f
+V6 0 Net-_U3-V-_ DC 15 
+C3 Net-_C3-Pad1_ 0 100f
 
 .control
 tran 0.1n 30n

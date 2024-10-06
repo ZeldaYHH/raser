@@ -1,42 +1,41 @@
 {
-    "det_name" : "ITk-md8",
+    "det_name" : "ITk-Si-PIN",
     "det_model" : "planar3D",
     "material" : "Si",
 
     "lx" : 1300,
     "ly" : 1300,
-    "lz" : 50,
+    "lz" : 300,
 
-    "doping": {
-        "Acceptors" : "4e12*step(x-1e-4)+1e15*step(x-300e-4)",
-        "Donors" : "1e19*step(1e-4-x)"
+    "doping":{
+        "Acceptors" : "5e12*(step((300e-4)-x)-step(1e-4-x)) + 1.0e18*(step((351e-4)-x)-step((300e-4)-x))",
+        "Donors" : "1.0e19*step(1e-4-x)"
     },
 
     "bias" : {
-        "electrode" : "bot",
-        "voltage" : -700
-    },
-    
-    "temperature" : 254.0,
-    "irradiation" : {
-        "irradiation_label" : "Schwandt",
-        "irradiation_flux" : 1e15
+        "electrode" : "top",
+        "voltage" : 500
     },
 
-    "area_factor" : 1.73,
+    "temperature" : 300.0,
+
+    "area_factor" : 1,
     "default_dimension" : 1,
     "read_out_contact" : ["top"],
 
     "mesh" : {
         "1D_mesh" : {
             "mesh_line" : [
-                {"pos" : 0,      "ps" : 5e-5, "tag" : "top"},
-                {"pos" : 305e-4, "ps" : 5e-5, "tag" : "bot"}
+                {"pos" : 0,      "ps" : 1e-4, "tag" : "top"},
+                {"pos" : 0.5e-4, "ps" : 1e-5, "tag" : "jun_up"},
+                {"pos" : 1e-4,   "ps" : 1e-5, "tag" : "mid"},
+                {"pos" : 4e-4,   "ps" : 1e-5, "tag" : "jun_down"},
+                {"pos" : 350e-4, "ps" : 1e-4, "tag" : "bot"}
             ],
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "ITk-md8", 
+                    "region" : "ITk-Si-PIN", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }

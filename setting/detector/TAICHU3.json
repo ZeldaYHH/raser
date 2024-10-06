@@ -25,6 +25,7 @@
 
     "area_factor" : 1,
     "default_dimension" : 3,
+    "read_out_contact" : ["top1", "top2", "top3", "top4", "top5", "top6"],
 
     "mesh" : {
         "gmsh_mesh":{
