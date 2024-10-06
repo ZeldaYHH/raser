@@ -25,21 +25,18 @@
     
     "temperature" : 300,
 
-
-
-
     "area_factor" : 1,
     "default_dimension" : 3,
+    "read_out_contact" : ["top"],
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "paras/mesh/CEPC-passiveCMOS.msh",
+            "file" : "param_file/mesh/CEPC-passiveCMOS.msh",
             "region" : [
                 {
                     "material" : "Silicon", 
                     "region" : "CEPC_strip",
                     "gmsh_name":"Siregion"
- 
                 }
             ],
             "contact" : [

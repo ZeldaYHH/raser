@@ -29,6 +29,7 @@
 
     "area_factor" : 0.01,
     "default_dimension" : 2,
+    "read_out_contact" : ["top1", "top2", "top3"],
 
     "mesh" : {
         "2D_mesh" : {

@@ -23,10 +23,11 @@
     
     "default_dimension" : 3,
     "area_factor" : 1,
+    "read_out_contact" : ["top"],
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "./param_file/mesh/RINGdevice.msh",
+            "file" : "param_file/mesh/3d_ringcontact.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
