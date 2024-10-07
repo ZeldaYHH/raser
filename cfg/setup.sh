@@ -40,7 +40,7 @@ EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/sicar/raser-2.3.sif
-export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/condor_config,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
+export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
 
 # temporary solution for scipy import error
