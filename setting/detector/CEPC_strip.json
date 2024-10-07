@@ -3,19 +3,18 @@
     "det_model" : "planar3D",
     "material" : "Si",
 
-    "lx" : 1300,
-    "ly" : 1300,
-    "lz" : 50,
+    "lx" : 75,
+    "ly" : 1000,
+    "lz" : 150,
+
     "striplenth" : 75,
     "elelenth" : 20,
     "read_ele_num" : 1,
 
-
     "doping":{
-        "Donors" : "ifelse(0.5e-4>y&&y>0&&45.25e-4>x&&x>30.25e-4,5e19,0)+ifelse(1e-4>y&&y>0.5e-4&&45.25e-4>x&&x>30.25e-4,1e16,0)+ifelse(3e-4>y&&y>1e-4&&46.75e-4>x&&x>28.75e-4,1e16,0)",
-        "Acceptors" : "ifelse(x>0&&x<2e-4&&y>1e-4&&y<3e-4,2e18,0)+ifelse(x>73.5e-4&&x<75.5e-4&&y>1e-4&&y<3e-4,2e18,0)+ifelse(y>1e-4&&y<147e-4,2e11,0)+ifelse(y>147e-4&&y<150e-4,2e19,0)"
+        "Donors" : "ifelse(0.5e-4>x&&x>0&&45.25e-4>y&&y>30.25e-4,5e19,0)+ifelse(1e-4>x&&x>0.5e-4&&45.25e-4>y&&y>30.25e-4,1e16,0)+ifelse(3e-4>x&&x>1e-4&&46.75e-4>y&&y>28.75e-4,1e16,0)",
+        "Acceptors" : "ifelse(y>0&&y<2e-4&&x>1e-4&&x<3e-4,2e18,0)+ifelse(y>73.5e-4&&y<75.5e-4&&x>1e-4&&x<3e-4,2e18,0)+ifelse(x>1e-4&&x<147e-4,2e11,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
     },
-
 
     "weightfield" : "true",
     "bias" : {
@@ -26,7 +25,7 @@
     "temperature" : 300,
 
     "area_factor" : 1,
-    "default_dimension" : 3,
+    "default_dimension" : 2,
     "read_out_contact" : ["top"],
 
     "mesh" : {
@@ -36,12 +35,12 @@
                 {
                     "material" : "Silicon", 
                     "region" : "CEPC_strip",
-                    "gmsh_name":"Siregion"
+                    "gmsh_name": "Siregion"
                 }
             ],
             "contact" : [
-                {"name" : "top", "region" : "CEPC_strip","material" : "metal","gmsh_name" : "top"},
-                {"name" : "bot", "region" : "CEPC_strip", "material" : "metal","gmsh_name" : "bot"}
+                {"name" : "top", "region" : "CEPC_strip", "material" : "metal", "gmsh_name" : "top"},
+                {"name" : "bot", "region" : "CEPC_strip", "material" : "metal", "gmsh_name" : "bot"}
             ]
         }
     },
