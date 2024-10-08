@@ -39,7 +39,7 @@ PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/sicar/raser-2.3.sif
+export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.3.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
 
