@@ -17,7 +17,7 @@
 
     "bias" : {
         "electrode" : "top",
-        "voltage" : -500
+        "voltage" : -500.0
     },
 
     "temperature" : 300.0,
@@ -89,20 +89,6 @@
                  "xl" : 0,       "xh" : 0,       "bloat" : 1e-5},
                 {"name" : "bot", "material" : "metal", "region" : "SICAR-1.1.6",
                  "xl" : 66.3e-4, "xh" : 66.3e-4, "bloat" : 1e-5}
-            ]
-        },
-        "gmsh_mesh":{
-            "file" : "./param_file/mesh/3d_lgad.msh",
-            "region" : [
-                {
-                    "material" : "SiliconCarbide", 
-                    "region" : "SICAR-1.1.6", 
-                    "gmsh_name" : "bulk"
-                }
-            ],
-            "contact" : [
-                {"name" : "top", "region" : "SICAR-1.1.6", "material" : "metal", "gmsh_name" :"top"},
-                {"name" : "bot", "region" : "SICAR-1.1.6", "material" : "metal", "gmsh_name" :"bot"}
             ]
         }
     },
