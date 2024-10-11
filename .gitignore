@@ -2,6 +2,7 @@
 .vscode
 
 output
+param_file/temp_mesh
 
 **/__pycache__
 control/motor/GUI/*.py

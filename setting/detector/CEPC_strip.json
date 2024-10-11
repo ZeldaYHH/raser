@@ -1,19 +1,15 @@
 {
-    "det_name" : "CEPC-Si-PIN",
+    "det_name" : "CEPC_strip",
     "det_model" : "planar3D",
     "material" : "Si",
 
-    "lx" : 75,
+    "lx" : 75.5,
     "ly" : 1000,
     "lz" : 150,
 
-    "striplenth" : 75,
-    "elelenth" : 20,
-    "read_ele_num" : 1,
-
     "doping":{
-        "Donors" : "ifelse(0.5e-4>x&&x>0&&45.25e-4>y&&y>30.25e-4,5e19,0)+ifelse(1e-4>x&&x>0.5e-4&&45.25e-4>y&&y>30.25e-4,1e16,0)+ifelse(3e-4>x&&x>1e-4&&46.75e-4>y&&y>28.75e-4,1e16,0)",
-        "Acceptors" : "ifelse(y>0&&y<2e-4&&x>1e-4&&x<3e-4,2e18,0)+ifelse(y>73.5e-4&&y<75.5e-4&&x>1e-4&&x<3e-4,2e18,0)+ifelse(x>1e-4&&x<147e-4,2e11,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
+        "Donors" : "ifelse(-0.5e-4>x&&x>-1e-4&&45.25e-4>y&&y>30.25e-4,5e19,0)+ifelse(0>x&&x>-0.5e-4&&45.25e-4>y&&y>30.25e-4,1e16,0)+ifelse(2e-4>x&&x>0&&46.75e-4>y&&y>28.75e-4,1e16,0)",
+        "Acceptors" : "ifelse(y>0&&y<2e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(y>73.5e-4&&y<75.5e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(x>0&&x<147e-4,2e11,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
     },
 
     "weightfield" : "true",
@@ -30,12 +26,12 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/CEPC-passiveCMOS.msh",
+            "file" : "param_file/temp_mesh/CEPC_strip.msh",
             "region" : [
                 {
                     "material" : "Silicon", 
                     "region" : "CEPC_strip",
-                    "gmsh_name": "Siregion"
+                    "gmsh_name": "CEPC_strip"
                 }
             ],
             "contact" : [
