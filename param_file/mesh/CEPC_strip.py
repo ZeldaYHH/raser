@@ -7,7 +7,7 @@ gmsh.initialize()
 gmsh.model.add("CEPC_strip")
 
 # bulk points
-lc_up = 2e-5
+lc_up = 3e-5
 lc_down = 2e-4
 P1 = geo.addPoint(0, 0, 0, lc_up)
 P2 = geo.addPoint(0, 75.5e-4, 0, lc_up)
@@ -77,10 +77,10 @@ surf4 = geo.addPlaneSurface([loop4])
 
 # n stop
 ln = 1e-5
-P13 = geo.addPoint(0, 30.25e-4, 0, lc_up)
-P14 = geo.addPoint(0, 45.25e-4, 0, lc_up)
-P23 = geo.addPoint(-0.5e-4, 45.25e-4, 0, lc_up)
-P24 = geo.addPoint(-0.5e-4, 30.25e-4, 0, lc_up)
+P13 = geo.addPoint(0, 30.25e-4, 0, ln)
+P14 = geo.addPoint(0, 45.25e-4, 0, ln)
+P23 = geo.addPoint(-0.5e-4, 45.25e-4, 0, ln)
+P24 = geo.addPoint(-0.5e-4, 30.25e-4, 0, ln)
 P15 = geo.addPoint(-1e-4, 45.25e-4, 0, ln)
 P16 = geo.addPoint(-1e-4, 30.25e-4, 0, ln)
 
@@ -101,10 +101,11 @@ loop6 = geo.addCurveLoop([L5, -L35, L7, -L28])
 surf6 = geo.addPlaneSurface([loop6])
 
 # n well
-P25 = geo.addPoint(2e-4, 46.75e-4, 0, lc_up)
-P26 = geo.addPoint(2e-4, 28.75e-4, 0, lc_up)
-P27 = geo.addPoint(0e-4, 46.75e-4, 0, lc_up)
-P28 = geo.addPoint(0e-4, 28.75e-4, 0, lc_up)
+ln_well = 1e-5
+P25 = geo.addPoint(2e-4, 46.75e-4, 0, ln_well)
+P26 = geo.addPoint(2e-4, 28.75e-4, 0, ln_well)
+P27 = geo.addPoint(0e-4, 46.75e-4, 0, ln_well)
+P28 = geo.addPoint(0e-4, 28.75e-4, 0, ln_well)
 # P13 = geo.addPoint(0, 30.25e-4, 0, lc_up)
 # P14 = geo.addPoint(0, 45.25e-4, 0, lc_up)
 
