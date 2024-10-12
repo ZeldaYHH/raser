@@ -46,12 +46,14 @@ export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publ
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=4
 
-alias raser="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3 raser"
-alias raser-test="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3 -m unittest discover -v -s raser/tests"
+raser_python="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3"
+
+alias raser="$raser_python raser"
+alias raser-test="$raser_python -m unittest discover -v -s raser/tests"
 alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
 alias pytest="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pytest"
 alias raser-install="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pip install -e ."  
 
-alias drawfig="python3 drawfig"
-alias control="python3 control"
-alias mesh="python3 param_file/mesh"
+alias drawfig="$raser_python drawfig"
+alias control="$raser_python control"
+alias mesh="$raser_python param_file/mesh"
