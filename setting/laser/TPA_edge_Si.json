@@ -1,7 +1,7 @@
 {
     "tech" : "TPA",
     "direction" : "edge",
-    "laser_model" : "TPA-TCT_Si",
+    "laser_model" : "TPA_edge_Si",
     
     "beta_2" : 1.5E-11,
     "refractionIndex" : 3.51,
