@@ -1,7 +1,7 @@
 {
     "tech" : "SPA",
     "direction" : "edge",
-    "laser_model" : "edge_TCT_SiC",
+    "laser_model" : "SPA_edge_SiC",
 
     "alpha" : 21000,
     "refractionIndex" : 3.124,

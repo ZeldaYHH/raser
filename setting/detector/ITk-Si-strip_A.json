@@ -1,5 +1,5 @@
 {
-    "det_name" : "ITk-Si-strip",
+    "det_name" : "ITk-Si-strip_A",
     "det_model" : "planar3Dstrip",
     "material" : "Si",
 
@@ -18,14 +18,10 @@
 
     "bias" : {
         "electrode" : "bot",
-        "voltage" : -700
+        "voltage" : -700.0
     },
     
     "temperature" : 254.0,
-    "irradiation" : {
-        "irradiation_model" : "Schwandt",
-        "irradiation_flux" : 1.7e15
-    },
 
     "area_factor" : 0.01,
     "default_dimension" : 2,
@@ -44,7 +40,7 @@
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "ITk-Si-strip"
+                    "region" : "ITk-Si-strip_A"
                 },
                 {
                     "material" : "air",
@@ -60,18 +56,18 @@
                 }
             ],
             "contact" : [
-                {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip",
+                {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip_A",
                  "xl" : 0,     "xh" : 0,     "yl" : 0,       "yh" : 0.25e-2,  "bloat" : 1e-10},
-                {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip",
+                {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip_A",
                  "xl" : 0,     "xh" : 0,     "yl" : 0.75e-2, "yh" : 1e-2, "bloat" : 1e-10},
-                {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip",
+                {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip_A",
                  "xl" : 0,     "xh" : 0,     "yl" : 1.5e-2,  "yh" : 1.75e-2,  "bloat" : 1e-10},
-                {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip",
+                {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip_A",
                  "xl" : 30.5e-3, "xh" : 30.5e-3, "bloat" : 1e-10}
             ]
         }
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "ngspice"
+    "amplifier" : "BB"
 }

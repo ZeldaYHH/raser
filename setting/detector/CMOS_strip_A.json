@@ -1,0 +1,102 @@
+{
+    "det_name" : "CMOS_strip_A",
+    "det_model" : "planar3D",
+    "material" : "Si",
+
+    "lx" : 75.5,
+    "ly" : 1000,
+    "lz" : 150,
+
+    "doping":{
+        "Donors" : "ifelse(-0.5e-4>x&&x>-1e-4&&45.25e-4>y&&y>30.25e-4,5e19,0)+ifelse(0>x&&x>-0.5e-4&&45.25e-4>y&&y>30.25e-4,1e16,0)+ifelse(2e-4>x&&x>0&&46.75e-4>y&&y>28.75e-4,1e16,0)",
+        "Acceptors" : "ifelse(y>0&&y<2e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(y>73.5e-4&&y<75.5e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(x>0&&x<147e-4,2e11,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
+    },
+    
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : 150
+    },
+    
+    "temperature" : 300,
+
+    "area_factor" : 1,
+    "default_dimension" : 2,
+    "read_out_contact" : ["top"],
+
+    "mesh" : {
+        "2D_mesh" : {
+            "mesh_line" : [
+                {"dir" : "x", "pos" : -1e-4,   "ps" : 5e-6},
+                {"dir" : "x", "pos" : 0,       "ps" : 5e-6},
+                {"dir" : "x", "pos" : 150e-4,  "ps" : 5e-5},
+
+                {"dir" : "x", "pos" : -2e-4,   "ps" : 5e-6},
+                {"dir" : "x", "pos" : 151e-4,  "ps" : 5e-5},
+
+                {"dir" : "x", "pos" : 1e-4,    "ps" : 5e-6},
+                {"dir" : "x", "pos" : 2e-4,    "ps" : 2e-5},
+                {"dir" : "x", "pos" : 10e-4,   "ps" : 1e-4},
+                {"dir" : "x", "pos" : 140e-4,  "ps" : 1e-4},
+                {"dir" : "x", "pos" : 147e-4,  "ps" : 5e-5},
+
+                {"dir" : "y", "pos" : 0,       "ps" : 1e-5},
+                {"dir" : "y", "pos" : 2e-4,    "ps" : 1e-5},
+                {"dir" : "y", "pos" : 5e-4,    "ps" : 1e-4},
+                {"dir" : "y", "pos" : 25e-4,    "ps" : 1e-4},
+                {"dir" : "y", "pos" : 28.75e-4, "ps" : 1e-5},
+                {"dir" : "y", "pos" : 30.25e-4, "ps" : 1e-5},
+                {"dir" : "y", "pos" : 45.25e-4, "ps" : 1e-5},
+                {"dir" : "y", "pos" : 46.75e-4, "ps" : 1e-5},
+                {"dir" : "y", "pos" : 50.5e-4, "ps" : 1e-4},
+                {"dir" : "y", "pos" : 70.5e-4,  "ps" : 1e-4},
+                {"dir" : "y", "pos" : 73.5e-4,  "ps" : 1e-5},       
+                {"dir" : "y", "pos" : 75.5e-4, "ps" : 1e-5}
+            ],
+            "region" : [
+                {
+                    "material" : "Silicon", 
+                    "region" : "CMOS_strip_A"
+                },
+                {
+                    "material" : "air",
+                    "region" : "airtop1",
+                    "xl" : -1e-4,
+                    "xh" : 0,
+                    "yl" : 2e-4,
+                    "yh" : 30.25e-4
+                },
+                {
+                    "material" : "air",
+                    "region" : "airtop2",
+                    "xl" : -1e-4,
+                    "xh" : 0,
+                    "yl" : 45.25e-4,
+                    "yh" : 73.5e-4
+                },
+                {
+                    "material" : "air",
+                    "region" : "airtop3",
+                    "xl" : -2e-4,
+                    "xh" : -1e-4
+                },
+                {
+                    "material" : "air",
+                    "region" : "airbot",
+                    "xl" : 150e-4,
+                    "xh" : 151e-4
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "material" : "metal", "region" : "CMOS_strip_A",
+                 "xl" : -1e-4,      "xh" : -1e-4,
+                 "yl" : 30.25e-4,      "yh" : 45.25e-4,
+                 "bloat" : 1e-5},
+                {"name" : "bot", "material" : "metal", "region" : "CMOS_strip_A",
+                 "xl" : 150e-4, "xh" : 150e-4, "bloat" : 1e-5}
+            ]
+        }
+    },
+
+    "absorber" : "time_resolution",
+    "amplifier" : "BB"
+}

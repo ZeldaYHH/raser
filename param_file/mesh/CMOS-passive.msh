@@ -6,7 +6,7 @@ $PhysicalNames
 1 9 "top"
 1 10 "bot"
 1 11 "side"
-2 12 "Siregion"
+2 12 "CMOS_strip_sen"
 $EndPhysicalNames
 $Nodes
 5249
