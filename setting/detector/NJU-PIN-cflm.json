@@ -1,5 +1,5 @@
 {
-    "det_name" : "NJU-PIN",
+    "det_name" : "NJU-PIN-cflm",
     "det_model" : "planar3D",
     "material" : "SiC",
 
@@ -24,7 +24,7 @@
     "temperature" : 300.0,
 
     "area_factor" : 4,
-    "default_dimension" : 2,
+    "default_dimension" : 1,
     "read_out_contact" : ["top"],
 
     "mesh" : {
@@ -40,7 +40,7 @@
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN", 
+                    "region" : "NJU-PIN-cflm", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -63,7 +63,7 @@
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN"
+                    "region" : "NJU-PIN-cflm"
                 },
                 {
                     "material" : "air",
