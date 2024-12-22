@@ -14,4 +14,4 @@
 /run/initialize
 #
 # Visualization setting
-/control/execute param_file/g4macro/vis.mac
+/control/execute setting/g4macro/vis.mac

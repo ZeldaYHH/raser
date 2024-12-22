@@ -25,7 +25,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/temp_mesh/CMOS_strip.msh",
+            "file" : "setting/detector/CMOS_strip.msh",
             "region" : [
                 {
                     "material" : "Silicon", 

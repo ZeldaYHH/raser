@@ -28,7 +28,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/3d_pixel.msh",
+            "file" : "setting/detector/3d_pixel.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

@@ -5,7 +5,8 @@
 echo "Setting up raser ..."
 
 dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
-Geant4PATH=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02
+dir_geant4_data=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data
+GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02
 
 cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
@@ -17,49 +18,45 @@ PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/bin:\$PATH
 ROOTSYS=/usr/local/share/root_install
 
 # Geant4 
-GEANT4_INSTALL=$Geant4PATH/install
-G4ENSDFSTATEDATA=$Geant4PATH/data/G4ENSDFSTATE2.3
-G4PIIDATA=$Geant4PATH/data/G4PII1.3
-G4INCLDATA=$Geant4PATH/data/G4INCL1.0
-G4LEDATA=$Geant4PATH/data/G4EMLOW7.13
-G4PARTICLEXSDATA=$Geant4PATH/data/G4PARTICLEXS3.1.1
-G4NEUTRONHPDATA=$Geant4PATH/data/G4NDL4.6
-G4SAIDXSDATA=$Geant4PATH/data/G4SAIDDATA2.0
-G4REALSURFACEDATA=$Geant4PATH/data/RealSurface2.2
-G4ABLADATA=$Geant4PATH/data/G4ABLA3.1
-G4LEVELGAMMADATA=$Geant4PATH/data/PhotonEvaporation5.7
-G4RADIOACTIVEDATA=$Geant4PATH/data/RadioactiveDecay5.6
+GEANT4_INSTALL=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb
+G4ENSDFSTATEDATA=$dir_geant4_data/G4ENSDFSTATE2.3
+G4PIIDATA=$dir_geant4_data/G4PII1.3
+G4INCLDATA=$dir_geant4_data/G4INCL1.0
+G4LEDATA=$dir_geant4_data/G4EMLOW7.13
+G4PARTICLEXSDATA=$dir_geant4_data/G4PARTICLEXS3.1.1
+G4NEUTRONHPDATA=$dir_geant4_data/G4NDL4.6
+G4SAIDXSDATA=$dir_geant4_data/G4SAIDDATA2.0
+G4REALSURFACEDATA=$dir_geant4_data/RealSurface2.2
+G4ABLADATA=$dir_geant4_data/G4ABLA3.1
+G4LEVELGAMMADATA=$dir_geant4_data/PhotonEvaporation5.7
+G4RADIOACTIVEDATA=$dir_geant4_data/RadioactiveDecay5.6
 
 # Python 
-PYTHONPATH=$dir_raser/raser:/usr/local/share/root_install/lib:$Geant4PATH/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
-LD_LIBRARY_PATH=$Geant4PATH/install/lib64:/usr/local/share/root_install/lib:/.singularity.d/libs
+PYTHONPATH=$dir_raser/raser:/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
+LD_LIBRARY_PATH=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb/lib64:/usr/local/share/root_install/lib:/.singularity.d/libs
 
 #pyMTL3 Verilator
 PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
-
-# intel MKL potential memory leak
-MKL_DISABLE_FAST_MM=0
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.4pre3.sif
-export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
+export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.4pre3-valgrind.sif
+export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=1
 
-# intel MKL potential memory leak
-export MKL_DISABLE_FAST_MM=0
+alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
 
-raser_python="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3"
+raser_exec="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE"
+raser_python="$raser_exec python3"
 
 alias raser="$raser_python raser"
 alias raser-test="$raser_python -m unittest discover -v -s raser/tests"
-alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
-alias pytest="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pytest"
-alias raser-install="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pip install -e ."  
+alias pytest="$raser_exec pytest"
+alias raser-install="$raser_exec pip install -e ."  
 
 alias drawfig="$raser_python drawfig"
 alias control="$raser_python control"
-alias mesh="$raser_python param_file/mesh"
+alias mesh="$raser_python setting/detector"

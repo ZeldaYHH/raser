@@ -1,5 +1,5 @@
 .title KiCad schematic
-.include "param_file/circuit/Simulation_SPICE.sp"
+.include "setting/electronics/Simulation_SPICE.sp"
 .save all
 .probe alli
 .probe p(R5)

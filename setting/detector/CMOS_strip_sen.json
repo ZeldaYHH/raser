@@ -30,7 +30,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/CMOS-passive.msh",
+            "file" : "setting/detector/CMOS_strip_sen.msh",
             "region" : [
                 {
                     "material" : "Silicon", 

@@ -72,7 +72,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/3d_plugin_7e.msh",
+            "file" : "setting/detector/3d_plugin_7e.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

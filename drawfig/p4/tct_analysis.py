@@ -487,7 +487,7 @@ def analysis_voltage(path,output_path,pulse_energy_scale):
         draw_graphs(charge,V,"voltage","Charge",output_path)
 
 def dif_cal():
-    lgad_paras = ["det_name=HPK-Si-LGAD","parfile=param_file/setting.json"]
+    lgad_paras = ["det_name=HPK-Si-LGAD","parfile=setting/detector/HPK-Si-LGAD.json"]
     lgad_set = raser.Setting(lgad_paras)
     my_lgad = raser.R3dDetector(lgad_set)
     my_lgad_field = raser.FenicsCal(my_lgad,lgad_set.fenics)

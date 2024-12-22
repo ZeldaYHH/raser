@@ -1,10 +1,10 @@
 {
-    "det_name" : "NJU-PIN-cflm",
+    "det_name" : "NJU-PIN-bmos",
     "det_model" : "planar3D",
     "material" : "SiC",
 
-    "lx" : 50000,
-    "ly" : 200000,
+    "lx" : 5000,
+    "ly" : 5000,
     "lz" : 100,
 
     "doping":{
@@ -18,7 +18,7 @@
 
     "bias" : {
         "electrode" : "top",
-        "voltage" : -300.0
+        "voltage" : -500.0
     },
 
     "temperature" : 300.0,
@@ -30,17 +30,17 @@
     "mesh" : {
         "1D_mesh" : {
             "mesh_line" : [
-                {"pos" : 0,      "ps" : 1e-4, "tag" : "top"},
-                {"pos" : 0.5e-4, "ps" : 1e-5, "tag" : "jun_up"},
-                {"pos" : 1e-4,   "ps" : 1e-5, "tag" : "mid"},
-                {"pos" : 4e-4,   "ps" : 1e-5, "tag" : "jun_down"},
-                {"pos" : 100e-4, "ps" : 1e-4, "tag" : "bot_bulk"},
-                {"pos" : 120e-4, "ps" : 1e-4, "tag" : "bot"}
+                {"pos" : 0,      "ps" : 1e-3, "tag" : "top"},
+                {"pos" : 0.5e-4, "ps" : 1e-4, "tag" : "jun_up"},
+                {"pos" : 1e-4,   "ps" : 1e-4, "tag" : "mid"},
+                {"pos" : 4e-4,   "ps" : 1e-4, "tag" : "jun_down"},
+                {"pos" : 100e-4, "ps" : 1e-3, "tag" : "bot_bulk"},
+                {"pos" : 120e-4, "ps" : 1e-3, "tag" : "bot"}
             ],
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN-cflm", 
+                    "region" : "NJU-PIN-bmos", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -63,7 +63,7 @@
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN-cflm"
+                    "region" : "NJU-PIN-bmos"
                 },
                 {
                     "material" : "air",
@@ -79,13 +79,13 @@
                 }
             ],
             "contact" : [
-                {"name" : "top", "material" : "metal", "region" : "NJU-PIN",
+                {"name" : "top", "material" : "metal", "region" : "NJU-PIN-bmos",
                  "xl" : 0,     "xh" : 0,     "bloat" : 1e-5},
-                {"name" : "bot", "material" : "metal", "region" : "NJU-PIN",
+                {"name" : "bot", "material" : "metal", "region" : "NJU-PIN-bmos",
                  "xl" : 10e-4, "xh" : 10e-4, "bloat" : 1e-5}
             ]
         }
     },
-    "absorber" : "cflm",
-    "amplifier" : "ngspice"
+    "absorber" : "time_resolution",
+    "amplifier" : "raser/bmos/ucsc.cir"
 }

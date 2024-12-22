@@ -27,7 +27,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/3d_ringcontact.msh",
+            "file" : "setting/detector/3d_ringcontact.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 

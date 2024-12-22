@@ -44,11 +44,11 @@
     
     "BeamOn"   : 1,
     
-    "NumofGun" : 10,
+    "NumofGun" : 1,
     "par_type" : "e-",
-    "par_energy" : 24,
-    "par_in" : [-26.9, 0, -100],
-    "par_direct" : [[-0.01, 0, 1], [-0.0069, 0, 1], [-0.0052, 0, 1], [-0.0042, 0, 1], [0.0056, -0.0625, 1], [0.0043, -0.0476, 1], [0.0035, -0.0385, 1], [0.0056, 0.0625, 1], [0.0043, -0.0476, 1], [0.0035, 0.0385, 1]],
+    "par_energy" : [24],
+    "par_in" : [[-26.9, 0, -100]],
+    "par_direct" : [[-0.01, 0, 1]],
     
     "maxStep" : 0.5,
 
@@ -56,8 +56,8 @@
 
     "vis" : 0,
 
-    "EdepBaseName" : "110mm.root",
+    "EdepBaseName" : "test.root",
     "PosBaseName"  : "test.txt",
-    "CurrentName"  : "Current_10particles.root" 
+    "CurrentName"  : "Current_test.root" 
 
 }

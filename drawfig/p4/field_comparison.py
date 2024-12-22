@@ -136,12 +136,12 @@ def main():
     if not os.access(path, os.F_OK):
         os.makedirs(path, exist_ok=True) 
 
-    pin_paras = ["det_name=HPK-Si-PIN","parfile=param_file/setting.json"]
+    pin_paras = ["det_name=HPK-Si-PIN","parfile=setting/detector/HPK-Si-PIN.json"]
     pin_set = raser.Setting(pin_paras)
     my_pin = raser.R3dDetector(pin_set)
     my_pin_field = raser.FenicsCal(my_pin,pin_set.fenics)
 
-    lgad_paras = ["det_name=HPK-Si-LGAD","parfile=param_file/setting.json"]
+    lgad_paras = ["det_name=HPK-Si-LGAD","parfile=setting/detector/HPK-Si-LGAD.json"]
     lgad_set = raser.Setting(lgad_paras)
     my_lgad = raser.R3dDetector(lgad_set)
     my_lgad_field = raser.FenicsCal(my_lgad,lgad_set.fenics)

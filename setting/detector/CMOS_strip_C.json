@@ -1,5 +1,5 @@
 {
-    "det_name" : "CMOS_strip_A",
+    "det_name" : "CMOS_strip_C",
     "det_model" : "planar3D",
     "material" : "Si",
 
@@ -25,17 +25,17 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "./setting/detector/CMOS_strip_A.msh",
+            "file" : "./setting/detector/CMOS_strip_C.msh",
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "CMOS_strip_A",
-                    "gmsh_name": "CMOS_strip_A"
+                    "region" : "CMOS_strip_C",
+                    "gmsh_name": "CMOS_strip_C"
                 }
             ],
             "contact" : [
-                {"name" : "top", "region" : "CMOS_strip_A", "material" : "metal", "gmsh_name" : "top"},
-                {"name" : "bot", "region" : "CMOS_strip_A", "material" : "metal", "gmsh_name" : "bot"}
+                {"name" : "top", "region" : "CMOS_strip_C", "material" : "metal", "gmsh_name" : "top"},
+                {"name" : "bot", "region" : "CMOS_strip_C", "material" : "metal", "gmsh_name" : "bot"}
             ]
         }
     },
