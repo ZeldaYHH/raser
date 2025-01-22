@@ -18,7 +18,7 @@
 
     "bias" : {
         "electrode" : "top",
-        "voltage" : -300.0
+        "voltage" : -500.0
     },
 
     "temperature" : 300.0,
@@ -87,5 +87,5 @@
         }
     },
     "absorber" : "time_resolution",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Charge_Sensitive_UCSC"
 }

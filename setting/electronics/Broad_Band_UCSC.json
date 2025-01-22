@@ -7,6 +7,8 @@
     "Broad_Band_Imp" : 10,
     "OscBW" : 2,
 
-    "noise_avg" : -0.001,
-    "noise_rms" : 0.01
+    "noise_avg" : -0.133,
+    "noise_rms" : 2.671,
+
+    "threshold" : 0
 }
