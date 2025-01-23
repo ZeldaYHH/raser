@@ -55,8 +55,8 @@
                 {"dir" : "x", "pos" : -0.1e-4, "ps" : 1e-5},
                 {"dir" : "x", "pos" : 0,       "ps" : 1e-4},
                 {"dir" : "x", "pos" : 1e-4,    "ps" : 1e-6},
-                {"dir" : "x", "pos" : 10e-4,   "ps" : 1e-4},
-                {"dir" : "x", "pos" : 10.1e-4, "ps" : 1e-5},
+                {"dir" : "x", "pos" : 100e-4,   "ps" : 1e-4},
+                {"dir" : "x", "pos" : 100.1e-4, "ps" : 1e-5},
                 {"dir" : "y", "pos" : 0,       "ps" : 1e-4},
                 {"dir" : "y", "pos" : 10e-4,   "ps" : 1e-4}
             ],
@@ -74,15 +74,15 @@
                 {
                     "material" : "air",
                     "region" : "air2",
-                    "xl" : 10.1e-4,
-                    "xh" : 10e-4
+                    "xl" : 100.1e-4,
+                    "xh" : 100e-4
                 }
             ],
             "contact" : [
                 {"name" : "top", "material" : "metal", "region" : "NJU-PIN-bmos",
                  "xl" : 0,     "xh" : 0,     "bloat" : 1e-5},
                 {"name" : "bot", "material" : "metal", "region" : "NJU-PIN-bmos",
-                 "xl" : 10e-4, "xh" : 10e-4, "bloat" : 1e-5}
+                 "xl" : 100e-4, "xh" : 100e-4, "bloat" : 1e-5}
             ]
         }
     },
