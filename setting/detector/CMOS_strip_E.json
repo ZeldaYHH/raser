@@ -41,5 +41,5 @@
     },
 
     "absorber" : "time_resolution",
-    "amplifier" : "BB"
+    "amplifier" : "ABCStar_fe"
 }

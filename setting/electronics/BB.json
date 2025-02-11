@@ -1,9 +1,0 @@
-{
-    "ele_name": "BB",
-    "CDet" : 30,
-    
-    "BB_bandwidth" : 0.66,
-    "BB_Gain" : 19500,
-    "BB_imp" : 10,
-    "OscBW" : 2
-}

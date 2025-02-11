@@ -69,5 +69,5 @@
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "BB"
+    "amplifier" : "Broad_Band_UCSC"
 }

@@ -46,5 +46,5 @@
     },
 
     "absorber" : "time_resolution",
-    "amplifier" : "BB"
+    "amplifier" : "Broad_Band_UCSC"
 }

@@ -73,5 +73,5 @@
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "ngspice"
+    "amplifier" : "Broad_Band_UCSC"
 }
