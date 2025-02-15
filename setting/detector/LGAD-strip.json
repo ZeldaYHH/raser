@@ -75,5 +75,5 @@
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Broad_Band_SiC_Strip"
 }
