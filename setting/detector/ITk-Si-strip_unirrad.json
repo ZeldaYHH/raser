@@ -1,5 +1,5 @@
 {
-    "det_name" : "ITk-Si-strip_A",
+    "det_name" : "ITk-Si-strip_unirrad",
     "det_model" : "planar3Dstrip",
     "material" : "Si",
 
@@ -40,7 +40,7 @@
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "ITk-Si-strip_A"
+                    "region" : "ITk-Si-strip_unirrad"
                 },
                 {
                     "material" : "air",
@@ -56,18 +56,18 @@
                 }
             ],
             "contact" : [
-                {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip_A",
+                {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip_unirrad",
                  "xl" : 0,     "xh" : 0,     "yl" : 0,       "yh" : 0.25e-2,  "bloat" : 1e-10},
-                {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip_A",
+                {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip_unirrad",
                  "xl" : 0,     "xh" : 0,     "yl" : 0.75e-2, "yh" : 1e-2, "bloat" : 1e-10},
-                {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip_A",
+                {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip_unirrad",
                  "xl" : 0,     "xh" : 0,     "yl" : 1.5e-2,  "yh" : 1.75e-2,  "bloat" : 1e-10},
-                {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip_A",
+                {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip_unirrad",
                  "xl" : 30.5e-3, "xh" : 30.5e-3, "bloat" : 1e-10}
             ]
         }
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "ABCStar_fe"
 }

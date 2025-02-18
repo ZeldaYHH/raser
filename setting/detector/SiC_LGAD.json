@@ -72,5 +72,5 @@
     },
 
     "absorber" : "time_resolution",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Broad_Band_SiC_Strip"
 }
