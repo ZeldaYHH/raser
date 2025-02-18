@@ -4,14 +4,14 @@
     "material" : "Si",
 
     "lx" : 75.5,
-    "ly" : 200,
+    "ly" : 1000,
     "lz" : 150,
 
     "doping":{
-        "Donors" : "ifelse(-0.5e-4>x&&x>-1e-4&&45.25e-4>y&&y>30.25e-4,5e19,0)+ifelse(0>x&&x>-0.5e-4&&45.25e-4>y&&y>30.25e-4,1e16,0)+ifelse(2e-4>x&&x>0&&46.75e-4>y&&y>28.75e-4,1e16,0)",
-        "Acceptors" : "ifelse(y>0&&y<2e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(y>73.5e-4&&y<75.5e-4&&x>-1e-4&&x<2e-4,2e18,0)+ifelse(x>0&&x<147e-4,2e11,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
+        "Donors" : "ifelse(0.2e-4>x&&x>0e-4&&45.25e-4>y&&y>30.25e-4,1e20,0)+ifelse(0.4e-4>x&&x>0.2e-4&&45.25e-4>y&&y>30.25e-4,3e18,0)+ifelse(1.2e-4>x&&x>0.4e-4&&46.75e-4>y&&y>28.75e-4,1e17,0)",
+        "Acceptors" : "ifelse(y>0&&y<3e-4&&x>0e-4&&x<1.2e-4,2e18,0)+ifelse(y>0&&y<3e-4&&x>1.2e-4&&x<1.6e-4,1e15,0)+ifelse(y>72.5e-4&&y<75.5e-4&&x>0e-4&&x<1.2e-4,2e18,0)+ifelse(y>72.5e-4&&y<75.5e-4&&x>1.2e-4&&x<1.6e-4,1e15,0)+ifelse(x>0&&x<147e-4,7e12,0)+ifelse(x>147e-4&&x<150e-4,2e19,0)"
     },
-    
+
     "bias" : {
         "electrode" : "top",
         "voltage" : 150
@@ -25,7 +25,7 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "setting/detector/CMOS_strip.msh",
+            "file" : "./setting/detector/CMOS_strip.msh",
             "region" : [
                 {
                     "material" : "Silicon", 
@@ -41,5 +41,5 @@
     },
 
     "absorber" : "time_resolution",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "ABCStar_fe"
 }
