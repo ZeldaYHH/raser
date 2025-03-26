@@ -4,7 +4,7 @@ import gmsh
 geo = gmsh.model.geo
 
 gmsh.initialize()
-gmsh.model.add("CMOS_strip")
+gmsh.model.add("CMOS_strip_4k")
 
 lc_bulk = 1e-4
 lc_bottom_mid = 5e-5
@@ -211,12 +211,12 @@ geo.synchronize()
 gmsh.model.addPhysicalGroup(1, [L38], name="bot")
 gmsh.model.addPhysicalGroup(1, [L6], name="top")
 
-gmsh.model.addPhysicalGroup(2, [surf1, surf2, surf3, surf4, surf5, surf6, surf7, surf8, surf9, surf10, surf11, surf12, surf201, surf401], name="CMOS_strip")
+gmsh.model.addPhysicalGroup(2, [surf1, surf2, surf3, surf4, surf5, surf6, surf7, surf8, surf9, surf10, surf11, surf12, surf201, surf401], name="CMOS_strip_4k")
 
 gmsh.option.setNumber("Geometry.MatchMeshTolerance", 1e-12)
 gmsh.model.mesh.generate(2)
 
 gmsh.option.setNumber("Mesh.MshFileVersion", 2.2)
-gmsh.write("./setting/detector/CMOS_strip.msh")
+gmsh.write("./setting/detector/CMOS_strip_4k.msh")
 gmsh.finalize()
 # gmsh.fltk.run()
