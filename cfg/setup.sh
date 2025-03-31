@@ -2,7 +2,9 @@
 # Author SHI Xin <shixin@ihep.ac.cn>  
 # Created [2023-08-31 Thu 08:36] 
 
-echo "Setting up raser ..."
+if [ -z "$PS1" ]; then
+    echo "Setting up raser ..."
+fi
 
 dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
 dir_geant4_data=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data
@@ -40,7 +42,7 @@ PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.4pre3-valgrind.sif
+export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
 
