@@ -7,7 +7,9 @@ SICAR
 Simulation with RASER 
 ====== 
 
-> source cfg/setup.sh  # only once per login 
+clone this into raser
+
+> source sicar/cfg/setup.sh  # only once per login 
 
 > raser -h 
 

@@ -1,0 +1,31 @@
+/run/verbose 2
+/run/initialize
+/control/execute param_file/g4macro/vis.mac
+/vis/open OGL 1600x900-0+0
+/vis/sceneHandler/create OGL
+/vis/viewer/create ! ! 1600x900-0+0
+/vis/viewer/refresh
+/vis/viewer/set/autoRefresh false
+/vis/verbose errors
+/vis/drawVolume
+/vis/scene/create
+/vis/scene/add/volume world -1 -1 none m 0 0 0 0 0 0
+/vis/sceneHandler/attach
+/vis/viewer/set/viewpointThetaPhi 60 150
+/vis/scene/add/trajectories smooth
+/tracking/storeTrajectory 2
+/vis/scene/notifyHandlers
+/vis/modeling/trajectories/create/drawByCharge
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+/vis/scene/notifyHandlers scene-0
+/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 1
+/vis/scene/notifyHandlers scene-0
+/vis/scene/endOfEventAction accumulate
+/vis/geometry/set/visibility world 0 false
+/vis/viewer/set/autoRefresh true
+/vis/viewer/refresh
+/vis/verbose warnings
+/run/initialize
+/tracking/verbose 2
+/run/beamOn 100000
+/vis/scene/notifyHandlers scene-0

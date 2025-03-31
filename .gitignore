@@ -1,14 +1,7 @@
 .DS_Store
 .vscode
 
-output
 *.msh
 
 **/__pycache__
 control/motor/GUI/*.py
-G4History.macro
-
-cfg/env
-
-*.sif
-raser-sandbox

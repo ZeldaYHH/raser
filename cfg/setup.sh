@@ -45,6 +45,7 @@ export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
+export RASER_SETTING_PATH=$dir_raser/sicar/setting
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=1
@@ -61,4 +62,4 @@ alias raser-install="$raser_exec pip install -e ."
 
 alias drawfig="$raser_python drawfig"
 alias control="$raser_python control"
-alias mesh="$raser_python setting/detector"
+alias mesh="$raser_python sicar/setting/detector"
