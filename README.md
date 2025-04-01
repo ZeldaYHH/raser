@@ -20,7 +20,7 @@ or
 
 If you install the softwares above, you need to change the ```dir_geant4_data``` and the ```GEANT4_INSTALL``` in cfg/setup.sh by your Geant4 data path and install path.
 
-.sif should be in `img/`.
+For external users, .sif should be in `img/`.
 
 .sif download link: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/rDAgsChX9inhX8u
 
@@ -85,11 +85,6 @@ Before Run
 
 While running raser you need in the directory of raser.
 
-before first run:
-
-    git submodule init
-    git submodule update
-
 if you use .sif container:
 
     source cfg/setup.sh # before run
@@ -108,7 +103,8 @@ else if you have installed the prerequisites:
 update:
 
     git pull
-    git submodule update
+
+For internal users on lxlogin, use cfg/setup_lxlogin.sh instead.
 
 Output
 ======
@@ -143,4 +139,4 @@ For time resolution of NJU SiC PiN in https://doi.org/10.3389/fphy.2022.718071 :
     raser field [-cv] NJU-PIN
     raser field -wf NJU-PIN
     raser gen_signal -s 20 NJU-PIN
-    raser timeres NJU-PIN
+    raser resolution NJU-PIN
