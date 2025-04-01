@@ -22,6 +22,6 @@ def main(kwargs):
         args = sys.argv[1:]
         args.remove('-umf')
         command_tail = " ".join(args)
-        command_head = "python3 -mdevsim.umfpack.umfshim raser/__main__.py"
+        command_head = "python3 -mdevsim.umfpack.umfshim src/raser/__main__.py"
         command = command_head + " " + command_tail
         subprocess.run([command], shell=True)

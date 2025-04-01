@@ -12,7 +12,8 @@ def output(current_file_path, *label):
     for i in range(len(destination_directories)-1, -1, -1):
         if destination_directories[i] == 'raser':
             destination_directories[i] = 'output'
-            break
+        if destination_directories[i] == 'src':
+            destination_directories.pop(i)
     output_file_path = os.path.abspath(os.path.join(os.sep, *destination_directories, *label))
     create_path(output_file_path)
     # 星号将列表转化为递归，头一个os.sep使其输出绝对路径；外圈abspath考虑潜在的windows用户

@@ -104,6 +104,8 @@ def job_main(kwargs):
         
     print('successfully')
 
+# TODO: fix raser path
+
 def main(kwargs):
     scan_number = kwargs['scan']
     for i in range(scan_number):

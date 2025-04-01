@@ -332,7 +332,7 @@ def job_main(kwargs):
     draw_2D_position_error(error_data,output_file)
 
 
-
+# TODO: fix raser path
 
 def main(kwargs):
     scan_number = kwargs['scan']
