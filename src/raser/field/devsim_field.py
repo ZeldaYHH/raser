@@ -8,6 +8,8 @@
 '''
 
 import pickle
+import re
+import os
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -35,7 +37,13 @@ class DevsimField:
         if irradiation_flux != 0:
             path = "./output/field/{}/{}/".format(self.name, irradiation_flux)
 
-        DopingFile = path + "NetDoping_0V.pkl"
+        doping_file_pattern = re.compile(r'^NetDoping_(\d+\.?\d*)V\.pkl$')
+        for filename in os.listdir(path):
+            if doping_file_pattern.match(filename):
+                DopingFile = path + filename
+                # example: DopingFile = path + "NetDoping_0V.pkl"
+                break
+
         PotentialFile = path + "Potential_{}V.pkl".format(self.voltage)
         TrappingRate_pFile = path + "TrappingRate_p_{}V.pkl".format(self.voltage)
         TrappingRate_nFile = path + "TrappingRate_n_{}V.pkl".format(self.voltage)
