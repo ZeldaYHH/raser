@@ -241,7 +241,7 @@ def save_field(device, positions, intensities, bias_voltages,path):
 def draw1D(x,y,title,xtitle,ytitle,v,path):
     graph = ROOT.TGraph()
     for i in range(len(x)):
-        graph.SetPoint(i, x[i],y[i])
+        graph.SetPoint(i, x[i]*1e4, y[i])
     graph.SetTitle(title)
     canvas = ROOT.TCanvas("canvas", title, 1900, 600)
     graph.Draw("AL") 
@@ -266,10 +266,11 @@ def draw2D(x,y,value,title,v,path):
     graph = ROOT.TGraph2D()
     graph_1d = ROOT.TGraph()
     j = 0
+    y_middle = 0.5*max(y)
     for i in range(len(x)):
         graph.SetPoint(i, y[i]*1e4, x[i]*1e4, value[i]) 
-        if abs(y[i]*1e4 - 100.0) < 0.1 :
-            graph_1d.SetPoint(j, x[i]*1e4,v-value[i])
+        if abs(y[i]*1e4 - y_middle) < 0.1 :
+            graph_1d.SetPoint(j, x[i]*1e4,value[i])
             j=j+1
     canvas = ROOT.TCanvas("canvas", title, 1700, 1000)
     graph.Draw("CONT4Z")
