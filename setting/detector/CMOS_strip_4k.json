@@ -40,6 +40,6 @@
         }
     },
 
-    "g4experiment" : "time_resolution",
+    "g4experiment" : "beta_source",
     "amplifier" : "ABCStar_fe"
 }
