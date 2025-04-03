@@ -8,7 +8,7 @@
     "par_type" : "proton",
     "par_energy" : 1600,
     "maxstep" : 2,
-    "g4_vis" : 0,
+    "g4_vis" : false,
     "par_in" : [0, 0, 500],
     "par_out" : [0, 0, 0]
 }

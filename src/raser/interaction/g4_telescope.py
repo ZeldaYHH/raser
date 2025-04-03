@@ -31,7 +31,7 @@ class TelescopeParticles:
     #use in pixel_detector
     _randx = None
     _randy = None
-    def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7)):
+    def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7), g4_vis = False):
         """
         Description:
             Geant4 main process
@@ -65,7 +65,8 @@ class TelescopeParticles:
         s_devicenames,s_localposition=[],[]
         print("end g4")
 	
-        if g4_dic['g4_vis']: 
+        g4_vis = g4_vis or g4_dic['g4_vis']
+        if g4_vis: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
         g4RunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
@@ -88,7 +89,7 @@ class TelescopeParticles:
                                           g4_dic['par_type'],
                                           g4_dic['par_energy'],
                                           self.geant4_model))
-        if g4_dic['g4_vis']:    
+        if g4_vis:    
             visManager = g4b.G4VisExecutive()
             visManager.Initialize()
             UImanager = g4b.G4UImanager.GetUIpointer()
@@ -101,7 +102,7 @@ class TelescopeParticles:
             UImanager.ApplyCommand('/run/initialize')
             
         g4RunManager.BeamOn(int(g4_dic['total_events']))
-        if g4_dic['g4_vis']:  
+        if g4_vis:  
             ui.SessionStart()
         self.p_steps=s_p_steps
         self.init_tz_device = 0    

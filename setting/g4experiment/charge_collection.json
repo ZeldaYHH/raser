@@ -129,7 +129,7 @@
     "par_type" : "alpha",
     "par_energy" : 5.54,
     "maxstep" : 2,
-    "g4_vis" : 0,
+    "g4_vis" : false,
     "par_in" : [0, 0, 5089.4],
     "par_out" : [0, 0,-1500]
 }

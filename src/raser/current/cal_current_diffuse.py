@@ -27,7 +27,7 @@ delta_t = 10e-12
 pixel = 25 #um
 min_intensity = 1 # V/cm
 
-class Carrier:
+class CarrierCluster:
     """
     Description:
         Definition of carriers and the record of their movement
@@ -162,7 +162,7 @@ class CalCurrentDiffuse:
                 print("%f pairs of carriers are generated from G4 in event_ %d layer %d" %(sum(G4P_carrier_list.ionized_pairs[k][j]),k,j))
                 #print(G4P_carrier_list.track_position[k][j])
                 for i in range(len(G4P_carrier_list.track_position[k][j])):
-                    electron = Carrier(G4P_carrier_list.track_position[k][j][i][0],\
+                    electron = CarrierCluster(G4P_carrier_list.track_position[k][j][i][0],\
                                        G4P_carrier_list.track_position[k][j][i][1],\
                                        G4P_carrier_list.track_position[k][j][i][2],\
                                        0,\
