@@ -30,7 +30,7 @@ t_start = 0
 delta_t = 1e-12
 min_intensity = 1 # V/cm
 
-class Carrier:
+class CarrierCluster:
     """
     Description:
         Definition of carriers and the record of their movement
@@ -96,10 +96,18 @@ class Carrier:
             self.end_condition = "zero velocity"
             return
 
-        # get diffution from mobility and temperature
+        # Since the signal amplitude is proportional to charge:
+        # - For n charge carriers (each with charge q) undergoing random walks with diffusion coefficient D,
+        #   the variance of signal perturbation becomes n times that of a single charge carrier
+        # - A single charge carrier with charge n*q under the same diffusion conditions
+        #   also produces signal perturbation variance n times that of a single charge
+        # This equivalence implies that a group of charge carriers can be treated as
+        # a single composite carrier when modeling random walk behavior,
+        # provided their total charge and diffusion characteristics are properly scaled
+
         kboltz=8.617385e-5 #eV/K
         diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
-        #diffusion = 0.0
+
         dif_x=random.gauss(0.0,diffusion)*1e4
         dif_y=random.gauss(0.0,diffusion)*1e4
         dif_z=random.gauss(0.0,diffusion)*1e4
@@ -174,7 +182,7 @@ class CalCurrent:
         track_position : float[]
             position of the generated carriers
     Attributes:
-        electrons, holes : Carrier[]
+        electrons, holes : CarrierCluster[]
             the generated carriers, able to calculate their movement
     Modify:
         2022/10/28
@@ -186,14 +194,14 @@ class CalCurrent:
         self.holes = []
 
         for i in range(len(track_position)):
-            electron = Carrier(track_position[i][0],\
+            electron = CarrierCluster(track_position[i][0],\
                                track_position[i][1],\
                                track_position[i][2],\
                                track_position[i][3],\
                                -1*ionized_pairs[i],\
                                my_d.material,\
                                self.read_ele_num)
-            hole = Carrier(track_position[i][0],\
+            hole = CarrierCluster(track_position[i][0],\
                            track_position[i][1],\
                            track_position[i][2],
                            track_position[i][3],\
@@ -388,7 +396,7 @@ class CalCurrentGain(CalCurrent):
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
             for hole in my_current.holes:
-                self.electrons.append(Carrier(hole.path[-1][0],\
+                self.electrons.append(CarrierCluster(hole.path[-1][0],\
                                               hole.path[-1][1],\
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
@@ -396,7 +404,7 @@ class CalCurrentGain(CalCurrent):
                                               my_d.material,\
                                               self.read_ele_num))
                 
-                self.holes.append(Carrier(hole.path[-1][0],\
+                self.holes.append(CarrierCluster(hole.path[-1][0],\
                                           hole.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           hole.path[-1][3],\
@@ -406,7 +414,7 @@ class CalCurrentGain(CalCurrent):
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
-                self.holes.append(Carrier(electron.path[-1][0],\
+                self.holes.append(CarrierCluster(electron.path[-1][0],\
                                           electron.path[-1][1],\
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
@@ -414,7 +422,7 @@ class CalCurrentGain(CalCurrent):
                                           my_d.material,\
                                           self.read_ele_num))
 
-                self.electrons.append(Carrier(electron.path[-1][0],\
+                self.electrons.append(CarrierCluster(electron.path[-1][0],\
                                                 electron.path[-1][1],\
                                                 my_d.avalanche_bond,\
                                                 electron.path[-1][3],\
