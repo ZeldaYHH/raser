@@ -19,7 +19,7 @@ ROOT.gROOT.SetBatch(True)
 import geant4_pybind as g4b
 
 from device import build_device as bdv
-from interaction import g4_time_resolution as g4t
+from interaction import g4_general as g4g
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe import readout as rdo
@@ -50,24 +50,25 @@ def main(kwargs):
     det_name = kwargs['det_name']
     my_d = bdv.Detector(det_name)
     if kwargs['voltage'] != None:
-        voltage = float(kwargs['voltage'])
-    else:
-        voltage = float(my_d.voltage)
+        my_d.voltage = kwargs['voltage']
 
-    if kwargs['absorber'] != None:
-        absorber = kwargs['absorber']
+    if kwargs['irradiation'] != None:
+        my_d.irradiation_flux = float(kwargs['irradiation'])
+
+    if kwargs['g4experiment'] != None:
+        g4experiment = kwargs['g4experiment']
     else:
-        absorber = my_d.absorber
+        g4experiment = my_d.g4experiment
 
     if kwargs['amplifier'] != None:
         amplifier = kwargs['amplifier']
     else:
         amplifier = my_d.amplifier
 
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
     
     g4_seed = random.randint(0,1e7)
-    my_g4p = g4t.Particles(my_d, absorber, g4_seed)
+    my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
     ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
 

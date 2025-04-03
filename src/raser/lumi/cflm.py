@@ -18,7 +18,7 @@ class cflmG4Particles:
 
         self.geant4_model = "cflm"
 
-        geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm.json"
+        geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm.json"
         with open(geant4_json) as f:
              g4_dic = json.load(f)
 
@@ -61,7 +61,7 @@ class cflmG4Particles:
         self.HitFlag = 0
         print(f'The edep of detector: {self.edep_devices[0]}')
 
-        with open("raser/cflm/output/TimeSignalEdep.txt", "a") as TimeSignalEdep:
+        with open("output/lumiTimeSignalEdep.txt", "a") as TimeSignalEdep:
              TimeSignalEdep.write(str(self.edep_devices[0])+'\n')
              
 
@@ -313,7 +313,7 @@ class cflmRunAction(g4b.G4UserRunAction):
     def BeginOfRunAction(self, run):
 
         analysisManager = g4b.G4AnalysisManager.Instance()
-        EdepName = f"raser/cflm/output/{self.EdepBaseName}"
+        EdepName = f"output/lumi{self.EdepBaseName}"
         analysisManager.OpenFile(EdepName)
         
     def EndOfRunAction(self, run):
@@ -334,7 +334,7 @@ class cflmRunAction(g4b.G4UserRunAction):
         # save histograms & ntuple
         analysisManager.Write()
         
-        PosName = f"raser/cflm/output/{self.PosBaseName}"
+        PosName = f"output/lumi{self.PosBaseName}"
         with open(PosName, 'w') as file:  
              for i in range(len(Particle)):
                 file.write(f"{Particle[i]} {X_position[i]} {Z_position[i]} {Y_position[i]}\n")
@@ -384,7 +384,7 @@ def main():
     global s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps
     s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps = [],[],[],[]
 
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm.json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm.json"
     with open(geant4_json) as f:
         g4_dic = json.load(f)
 

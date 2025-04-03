@@ -1,6 +1,6 @@
 {
     "det_name" : "NJU-PIN-bmos",
-    "det_model" : "planar3D",
+    "det_model" : "planar",
     "material" : "SiC",
 
     "lx" : 5000,
@@ -86,6 +86,6 @@
             ]
         }
     },
-    "absorber" : "time_resolution",
-    "amplifier" : "raser/bmos/ucsc.cir"
+    "g4experiment" : "time_resolution",
+    "amplifier" : "src/raser/bmos/ucsc.cir"
 }

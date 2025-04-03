@@ -18,7 +18,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 from device import build_device as bdv
-from interaction import g4_time_resolution as g4t
+from interaction import g4_general as g4g
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe import readout as rdo
@@ -94,10 +94,10 @@ def main(kwargs):
     else:
         voltage = my_d.voltage
 
-    if kwargs['absorber'] != None:
-        absorber = kwargs['absorber']
+    if kwargs['g4experiment'] != None:
+        g4experiment = kwargs['g4experiment']
     else:
-        absorber = my_d.absorber
+        g4experiment = my_d.g4experiment
 
     if kwargs['amplifier'] != None:
         amplifier = kwargs['amplifier']
@@ -106,7 +106,7 @@ def main(kwargs):
 
     my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
 
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/" + absorber + ".json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/" + g4experiment + ".json"
     with open(geant4_json) as f:
         g4_dic = json.load(f)
     total_events = int(g4_dic['total_events'])
@@ -115,7 +115,7 @@ def main(kwargs):
     instance_number = job_number
 
     g4_seed = instance_number * total_events
-    my_g4p = g4t.Particles(my_d, absorber, g4_seed)
+    my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
     batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
     del my_g4p
 

@@ -1,6 +1,6 @@
 {
     "det_name" : "SICAR_Tao",
-    "det_model" : "lgad3D",
+    "det_model" : "lgad",
     "material" : "SiC",
 
     "lx" : 1000,

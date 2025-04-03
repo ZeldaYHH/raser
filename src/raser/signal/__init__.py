@@ -9,10 +9,10 @@ def main(kwargs):
             scan_number = kwargs['scan']
             det_name = kwargs['det_name']
             for i in range(scan_number):
-                args = ['gen_signal', '--job', str(i), det_name]
+                args = ['signal', '--job', str(i), det_name]
                 command = ' '.join(args) 
                 print(command)
-                destination = 'gen_signal'
+                destination = 'signal'
                 batchjob.main(destination, command, 1, is_test=False)
         elif job_number != None:
             from . import gen_signal_scan

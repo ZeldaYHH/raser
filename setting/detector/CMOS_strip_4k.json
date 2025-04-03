@@ -1,6 +1,6 @@
 {
     "det_name" : "CMOS_strip_4k",
-    "det_model" : "planar3D",
+    "det_model" : "planar",
     "material" : "Si",
 
     "lx" : 75.5,
@@ -40,6 +40,6 @@
         }
     },
 
-    "absorber" : "time_resolution",
+    "g4experiment" : "time_resolution",
     "amplifier" : "ABCStar_fe"
 }

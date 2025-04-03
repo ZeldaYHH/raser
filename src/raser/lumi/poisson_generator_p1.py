@@ -7,13 +7,13 @@ import json
 import multiprocessing
 import shutil
 
-from signal import build_device as bdv
+from device import build_device as bdv
 from . import cflm_p1
 from . import get_current_p1
 
 def main():
     
-    output_path = "raser/cflm/output/dSides/pixel"   #
+    output_path = "output/lumidSides/pixel"   #
     random.seed(3020122)                             #
     
     rand = ROOT.TRandom3()
@@ -35,7 +35,7 @@ def main():
 
     cp.SaveAs(os.path.join(output_path, 'poisson_dis.pdf'))
 
-    with open('./setting/absorber/cflm_p1.json', 'r') as p:   #
+    with open('./setting/g4experiment/cflm_p1.json', 'r') as p:   #
          g4_dic = json.load(p)
     
     detector_json = os.getenv("RASER_SETTING_PATH")+"/detector/"
@@ -45,7 +45,7 @@ def main():
     det_name = det_dic['det_name']
     my_d = bdv.Detector(det_name)
 
-    file = ROOT.TFile("raser/cflm/output/DataFile_p1.root", "READ")
+    file = ROOT.TFile("output/lumiDataFile_p1.root", "READ")
     tree = file.Get("electrons")
 
     pos, mom, energy = [], [], []
@@ -111,7 +111,7 @@ def main():
                             pos.append(ele[0])
                             mom.append(ele[1])
                             energy.append(ele[2])
-                   with open('./setting/absorber/cflm_p1.json', 'r') as file:
+                   with open('./setting/g4experiment/cflm_p1.json', 'r') as file:
                             g4_dic = json.load(file)    
                             g4_dic['NumofGun']    = int(hitEvents)
                             g4_dic['par_in']      = pos
@@ -120,7 +120,7 @@ def main():
                             g4_dic['CurrentName'] = f"PoiPixelCurrent_{hitTime}.root"   
                             updated_g4_dic = json.dumps(g4_dic, indent=4)
                 
-                   with open('./setting/absorber/cflm_p1.json', 'w') as file:
+                   with open('./setting/g4experiment/cflm_p1.json', 'w') as file:
                         file.write(updated_g4_dic)
     
                    p = multiprocessing.Process(target=worker_function_I, args=(queue, lock, line, hitTime))

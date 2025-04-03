@@ -26,7 +26,7 @@ world_size = 25000
 
 # Geant4 main process
 class Particles:
-    def __init__(self, my_d, absorber, g4_seed = random.randint(0, 1e7)):
+    def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7)):
         """
         Description:
             Geant4 main process
@@ -42,7 +42,7 @@ class Particles:
         ---------
             2023/04/18
         """	
-        geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/" + absorber + ".json"
+        geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/" + g4experiment + ".json"
         with open(geant4_json) as f:
             g4_dic = json.load(f)
 

@@ -141,11 +141,11 @@ class Carrier:
 
 
 
-class CalCurrentPixel:
+class CalCurrentDiffuse:
     """Calculation of diffusion electrons in pixel detector"""
     def __init__(self, my_d, my_g4p):
         batch = len(my_g4p.localposition)
-        layer = len(my_d.lt_z)
+        layer = len(my_g4p.ltz)
         G4P_carrier_list = PixelCarrierListFromG4P(my_d, my_g4p)                 
         self.collected_charge=[] #temp paras don't save as self.
         self.sum_signal = []

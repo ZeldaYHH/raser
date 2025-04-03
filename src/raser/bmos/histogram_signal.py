@@ -13,7 +13,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy
 
-from signal import build_device as bdv
+from device import build_device as bdv
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe.set_pwl_input import set_pwl_input as pwlin
@@ -29,7 +29,7 @@ def mkdir(folder_name):
 def get_signal():
     signal = []
 
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/bmos.json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/bmos.json"
     with open(geant4_json) as f:
          g4_dic = json.load(f)
 
@@ -49,7 +49,7 @@ def get_signal():
 
     my_g4p = bmos.bmosG4Particles(my_d)
 
-    output_path = "raser/bmos/output/"
+    output_path = "output/bmos/"
     tag = f"{g4_dic['par_type']}_{g4_dic['par_energy']}MeV_{g4_dic['par_num']}particle"
     dirname = f"{g4_dic['par_type']}_{g4_dic['par_energy']}MeV"
     root_name = f"{g4_dic['CurrentName'].split('.')[0]}_{tag}.root"
@@ -61,8 +61,8 @@ def get_signal():
 
         save_current(my_current, output_path, root_name, pwl_name, 1)
 
-        pwlin(os.path.join(output_path, pwl_name), amplifier, output_path, filename_after_ngspice)
-        subprocess.run([f"ngspice -b -r ./xxx.raw raser/bmos/output/ucsc_tmp.cir"], shell=True)
+        pwlin(os.path.join(output_path, pwl_name), 'src/raser/bmos/ucsc.cir', os.path.join(output_path, filename_after_ngspice), output_path)
+        subprocess.run([f"ngspice -b -r ./xxx.raw output/bmos/ucsc_tmp.cir"], shell=True)
         time_v, volt = read_file_voltage(output_path, filename_after_ngspice)
         signal.append(max(volt))
 
@@ -161,8 +161,9 @@ def draw(output_path, signal, tag, dirname):
     # wave_graph.Fit("gaus")
     wave_graph.Fit("landau")
 
+    mkdir(os.path.join(output_path, 'histogram', 'pdf', dirname))
     # c.SaveAs(os.path.join(output_path, f"Histogram_{tag}.root"))
-    c.SaveAs(os.path.join(output_path, 'histogram', 'pdf', f"Histogram_{tag}.pdf"))
+    c.SaveAs(os.path.join(output_path, 'histogram', 'pdf', dirname, f"Histogram_{tag}.pdf"))
 
     amplitude.Write()
     wave_graph.Write()

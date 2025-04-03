@@ -1,6 +1,6 @@
 {
     "det_name" : "ITk-md8",
-    "det_model" : "planar3D",
+    "det_model" : "planar",
     "material" : "Si",
 
     "lx" : 1300,
@@ -48,6 +48,6 @@
         }
     },
 
-    "absorber" : "time_resolution",
+    "g4experiment" : "time_resolution",
     "amplifier" : "Broad_Band_UCSC"
 }

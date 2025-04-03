@@ -1,6 +1,6 @@
 {
     "det_name" : "NJU-PIN-cflm",
-    "det_model" : "planar3D",
+    "det_model" : "planar",
     "material" : "SiC",
 
     "lx" : 50000,
@@ -86,6 +86,6 @@
             ]
         }
     },
-    "absorber" : "cflm",
+    "g4experiment" : "cflm",
     "amplifier" : "ngspice"
 }

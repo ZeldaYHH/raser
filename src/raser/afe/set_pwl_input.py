@@ -9,7 +9,7 @@ def set_pwl_input(pwl_file, cir_file, voltage_file, output_folder):
     cir_base=os.path.basename(cir_file)
     tmp_cir_base=cir_base.split('.')[0]+'_tmp'+'.cir'
 
-    os.rename(output_folder+cir_base, output_folder+tmp_cir_base)
+    os.rename(os.path.join(output_folder,cir_base), os.path.join(output_folder,tmp_cir_base))
     print('Temporary circuit file has been created:', tmp_cir_base)
 
     tmp_cir_file=os.path.join(output_folder, tmp_cir_base)

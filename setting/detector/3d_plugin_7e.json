@@ -1,6 +1,6 @@
 {
-    "det_name" : "plugin3D",
-    "det_model" : "plugin3D",
+    "det_name" : "3Dpixel",
+    "det_model" : "3Dpixel",
     "material" : "SiC",
 
     "lx" : 10000,
@@ -72,11 +72,11 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "setting/detector/3d_plugin_7e.msh",
+            "file" : "setting/detector/3d_3Dpixel_7e.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "plugin3D", 
+                    "region" : "3Dpixel", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -88,6 +88,6 @@
         }
     },
 
-    "absorber" : "time_resolution",
+    "g4experiment" : "time_resolution",
     "amplifier" : "Broad_Band_UCSC"
 }

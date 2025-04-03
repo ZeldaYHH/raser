@@ -1,6 +1,9 @@
 {
-    "geant4_model" : "pixel_detector",
+    "geant4_model" : "telescope",
     "total_events" : 1000,
+
+    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
+    "seedcharge": 100,
 
     "object" : {
         "pixel"  : {

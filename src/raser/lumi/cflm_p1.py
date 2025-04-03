@@ -35,9 +35,9 @@ class cflmPixelG4Particles:
                     s_p_steps[f'detector_{k}'][f'{m}_{n}'] = []
                     s_energy_steps[f'detector_{k}'][f'{m}_{n}'] = []
         
-        json_s_p_steps_path = 'raser/cflm/output/dSides/pixel/s_p_steps.json'                           #
-        json_s_energy_steps_path = 'raser/cflm/output/dSides/pixel/s_energy_steps.json'                 #
-        json_s_edep_devices_path = 'raser/cflm/output/dSides/pixel/s_edep_devices.json'                 #
+        json_s_p_steps_path = 'output/lumidSides/pixel/s_p_steps.json'                           #
+        json_s_energy_steps_path = 'output/lumidSides/pixel/s_energy_steps.json'                 #
+        json_s_edep_devices_path = 'output/lumidSides/pixel/s_edep_devices.json'                 #
                                         
         if os.path.exists(json_s_p_steps_path) and os.path.exists(json_s_energy_steps_path) and os.path.exists(json_s_edep_devices_path):
            if l=='I':
@@ -96,7 +96,7 @@ class cflmPixelG4Particles:
                               for single_step in p_step] for p_step in self.p_steps]
         
         else:       
-            geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm_p1.json"    #
+            geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p1.json"    #
             with open(geant4_json) as f:
                 g4_dic = json.load(f)
 
@@ -447,9 +447,9 @@ def dividedAreaEdep(detectorID, pixelAreaEdep):
    
     i_value, j_value, valueEdep = array.array('d',[999.]), array.array('d',[999.]), array.array('d',[999.])
     
-    file_I = ROOT.TFile("raser/cflm/output/dSides/pixel/detector_I_pixelEdep.root", "RECREATE")
+    file_I = ROOT.TFile("output/lumidSides/pixel/detector_I_pixelEdep.root", "RECREATE")
     tree_I = ROOT.TTree("DetectorID", "DetectorID")
-    file_II = ROOT.TFile("raser/cflm/output/dSides/pixel/detector_II_pixelEdep.root", "RECREATE")
+    file_II = ROOT.TFile("output/lumidSides/pixel/detector_II_pixelEdep.root", "RECREATE")
     tree_II = ROOT.TTree("DetectorID", "DetectorID")
 
     tree_I.Branch("i", i_value, 'i/D')
@@ -482,9 +482,9 @@ def SaveJson(dic, dicFile):
 
 def main():
     
-    from signal import build_device as bdv
+    from device import build_device as bdv
     
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm_p1.json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p1.json"
     with open(geant4_json) as f:
             g4_dic = json.load(f)
 

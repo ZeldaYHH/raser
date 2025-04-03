@@ -1,5 +1,5 @@
 {
-    "geant4_model" : "time_resolution",
+    "geant4_model" : "charge_collection",
     "total_events" : 10000,
 
     "object" : {

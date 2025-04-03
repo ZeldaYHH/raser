@@ -62,6 +62,7 @@ def CreateSiliconConstant(T, device, region):
     devsim.set_parameter(device=device, region=region, name="N_v", value=N_v)
 
     E_g = 1.12 * 1.6e-19
+    devsim.set_parameter(device=device, region=region, name="E_g", value=E_g)
 
     devsim.set_parameter(device=device, region=region, name="eps", value=11.9)
     eps_0 = 8.85e-14

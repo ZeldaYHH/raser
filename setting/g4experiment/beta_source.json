@@ -1,5 +1,5 @@
 {
-    "geant4_model" : "Si_strip",
+    "geant4_model" : "beta_source",
     "total_events" : 100,
     
     "object":{},
