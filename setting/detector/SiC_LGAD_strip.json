@@ -1,6 +1,6 @@
 {
     "det_name" : "SiC_LGAD_strip",
-    "det_model" : "lgad3D",
+    "det_model" : "lgad",
     "material" : "SiC",
 
     "lx" : 420,
@@ -79,6 +79,6 @@
         }
     },
 
-    "absorber" : "strip_detector",
+    "g4experiment" : "beta_source",
     "amplifier" : "Broad_Band_SiC_Strip"
 }

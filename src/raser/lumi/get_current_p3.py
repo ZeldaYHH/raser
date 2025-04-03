@@ -4,7 +4,7 @@ import time
 import multiprocessing
 import ROOT
 
-from signal import build_device as bdv
+from device import build_device as bdv
 from . import cflm_p3
 from field import devsim_field as devfield
 from current import cal_current as ccrt
@@ -14,7 +14,7 @@ import json
 
 def main():
     
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm_p3.json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p3.json"
     with open(geant4_json) as f:
          g4_dic = json.load(f)
 
@@ -77,7 +77,7 @@ def save_current(my_current, g4_dic, read_ele_num, p, q):
  
     time = array.array('d', [999.])
     current = array.array('d', [999.])
-    fout = ROOT.TFile(os.path.join("raser/cflm/output/p3", g4_dic['CurrentName'].split('.')[0])  + ".root", "RECREATE")
+    fout = ROOT.TFile(os.path.join("output/lumip3", g4_dic['CurrentName'].split('.')[0])  + ".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("time", time, "time/D")
     for i in range(len(read_ele_num)):
@@ -89,10 +89,10 @@ def save_current(my_current, g4_dic, read_ele_num, p, q):
     t_out.Write()
     fout.Close()
    
-    file = ROOT.TFile(os.path.join("raser/cflm/output/p3", g4_dic['CurrentName'].split('.')[0])  + ".root", "READ")
+    file = ROOT.TFile(os.path.join("output/lumip3", g4_dic['CurrentName'].split('.')[0])  + ".root", "READ")
     tree = file.Get("tree")
 
-    pwl_file = open(os.path.join("raser/cflm/output/p3", f"{g4_dic['CurrentName'].split('.')[0]}_{p}_{q}.txt"), "w")
+    pwl_file = open(os.path.join("output/lumip3", f"{g4_dic['CurrentName'].split('.')[0]}_{p}_{q}.txt"), "w")
 
     for i in range(tree.GetEntries()):
        tree.GetEntry(i)

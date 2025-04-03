@@ -30,9 +30,9 @@ class cflmPixelG4Particles:
                 s_p_steps[f'{m}_{n}'] = []
                 s_energy_steps[f'{m}_{n}'] = []
         
-        json_s_p_steps_path = 'raser/cflm/output/p3/s_p_steps.json'
-        json_s_energy_steps_path = 'raser/cflm/output/p3/s_energy_steps.json'
-        json_s_edep_devices_path = 'raser/cflm/output/p3/s_edep_devices.json'
+        json_s_p_steps_path = 'output/lumip3/s_p_steps.json'
+        json_s_energy_steps_path = 'output/lumip3/s_energy_steps.json'
+        json_s_edep_devices_path = 'output/lumip3/s_edep_devices.json'
                                         
         if os.path.exists(json_s_p_steps_path) and os.path.exists(json_s_energy_steps_path) and os.path.exists(json_s_edep_devices_path):
 
@@ -64,7 +64,7 @@ class cflmPixelG4Particles:
            if len(self.p_steps[0]) != 1:
               self.HitFlag = 1
         else:
-           geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm_p3.json"
+           geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p3.json"
            with open(geant4_json) as f:
                 g4_dic = json.load(f)
 
@@ -399,7 +399,7 @@ def pixelAreaEdep(detectorID, singleAreaEdep):
    
     i_value, j_value, valueEdep = array.array('d',[999.]), array.array('d',[999.]), array.array('d',[999.])
     
-    file = ROOT.TFile("raser/cflm/output/p3/pixelAreaEdep.root", "RECREATE")
+    file = ROOT.TFile("output/lumip3/pixelAreaEdep.root", "RECREATE")
     tree = ROOT.TTree("DetectorID", "DetectorID")
 
     tree.Branch("i", i_value, 'i/D')
@@ -423,9 +423,9 @@ def SaveJson(dic, dicFile):
 
 def main():
    
-   from signal import build_device as bdv
+   from device import build_device as bdv
    
-   geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm_p3.json"
+   geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p3.json"
    with open(geant4_json) as f:
          g4_dic = json.load(f)
 

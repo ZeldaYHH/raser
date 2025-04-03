@@ -221,7 +221,7 @@ class CalCurrent:
             self.sum_cu[i].Add(self.positive_cu[i])
             self.sum_cu[i].Add(self.negative_cu[i])
 
-        if "lgad3D" in my_d.det_model:
+        if "lgad" in my_d.det_model:
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             for i in range(self.read_ele_num):
                 self.gain_positive_cu[i].Reset()
@@ -508,7 +508,8 @@ class CalCurrentG4P(CalCurrent):
         G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
         super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
         if self.read_ele_num > 1:
-            self.cross_talk()
+            #self.cross_talk()
+            pass
             
     def cross_talk(self):
         temp_cu = []

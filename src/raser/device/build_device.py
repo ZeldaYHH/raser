@@ -46,22 +46,18 @@ class Detector:
             self.irradiation_model = None
             self.irradiation_flux = 0
 
-        self.absorber = self.device_dict['absorber']
+        self.g4experiment = self.device_dict['g4experiment']
         self.amplifier = self.device_dict['amplifier']
 
 
-        if "lgad3D" in self.det_model:
+        if "lgad" in self.det_model:
             self.avalanche_bond = self.device_dict['avalanche_bond']
             self.avalanche_model = self.device_dict['avalanche_model']
             
-        if 'plugin3D' in self.det_model: 
+        if "3Dpixel" in self.det_model: 
             self.e_r = self.device_dict['e_r']
             self.e_gap = self.device_dict['e_gap']
             self.e_t = self.device_dict['e_t']
-
-        if "planarRing" in self.det_model:
-            self.e_r_inner = self.device_dict['e_r_inner']
-            self.e_r_outer = self.device_dict['e_r_outer']
 
         if "strip" in self.det_model: 
             self.read_ele_num = self.device_dict['read_ele_num']
@@ -72,8 +68,6 @@ class Detector:
             self.p_x = self.device_dict['px']
             self.p_y = self.device_dict['py']
             self.p_z = self.device_dict['pz']
-            self.lt_z = self.device_dict['ltz']
-            self.seedcharge = self.device_dict['seedcharge']
 
 if __name__ == "__main__":
     import sys

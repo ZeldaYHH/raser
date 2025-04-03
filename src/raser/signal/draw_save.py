@@ -77,13 +77,13 @@ def draw_drift_path(my_d,my_g4p,my_f,my_current,path):
     c1 = ROOT.TCanvas("c", "canvas1", 200, 10, 1500, 2000)
     c1.Divide(1,2)
 
-    if "plugin3D" in my_d.det_model:
+    if "3Dpixel" in my_d.det_model:
         n_bin=[int((my_f.sx_r-my_f.sx_l)/5),
                 int((my_f.sy_r-my_f.sy_l)/5),int((my_d.l_z)/10)]
         structure = ROOT.TH3D("","",n_bin[0],my_f.sx_l,my_f.sx_r,
                                     n_bin[1],my_f.sy_l,my_f.sy_r,
                                     n_bin[2],0,my_d.l_z)
-    elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing" in my_d.det_model:
+    else:
         n_bin=[int(my_d.l_x/50),int(my_d.l_y/50),int(my_d.l_z)]
         structure = ROOT.TH3D("","",n_bin[0],0,my_d.l_x,
                                     n_bin[1],0,my_d.l_y,
@@ -93,11 +93,11 @@ def draw_drift_path(my_d,my_g4p,my_f,my_current,path):
     for k in range(n_bin[2]):
         for j in range (n_bin[1]):
             for i in range(n_bin[0]):
-                if "plugin3D" in my_d.det_model:
+                if "3Dpixel" in my_d.det_model:
                     x_v = (i+1)*((my_f.sx_r-my_f.sx_l)/n_bin[0])+my_f.sx_l
                     y_v = (j+1)*((my_f.sx_r-my_f.sx_l)/n_bin[1])+my_f.sx_l
                     z_v = (k+1)*(my_d.l_z/n_bin[2])
-                elif "planar3D" in my_d.det_model or "lgad3D" in my_d.det_model or "planarRing"in my_d.det_model:
+                else:
                     x_v = (i+1)*(my_d.l_x/n_bin[0])
                     y_v = (j+1)*(my_d.l_y/n_bin[1])
                     z_v = (k+1)*(my_d.l_z/n_bin[2])

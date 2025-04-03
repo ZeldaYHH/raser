@@ -55,6 +55,8 @@ def main (kwargs):
     is_cv = kwargs['cv']
     is_wf = kwargs["wf"]
     is_noise = kwargs["noise"]
+    irradiation_flux = kwargs["irradiation_flux"]
+    v_goal = kwargs["bias"]
     
     if is_wf:
         paras.update({"weightfield": True})
@@ -82,7 +84,8 @@ def main (kwargs):
 
     if "irradiation" in MyDetector.device_dict:
         irradiation_model=MyDetector.device_dict['irradiation']['irradiation_model']
-        irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux']
+        if irradiation_flux == None:
+            irradiation_flux=MyDetector.device_dict['irradiation']['irradiation_flux']
     else:
         irradiation_model=None
         irradiation_flux=0
@@ -157,7 +160,8 @@ def main (kwargs):
         v_current = 0
         loop.initial_solver(contact=circuit_contacts,set_contact_type=None,irradiation_model=irradiation_model,irradiation_flux=irradiation_flux,impact_model=impact_model)
         v_current = 0
-        v_goal = MyDetector.device_dict['bias']['voltage']
+        if v_goal == None:
+            v_goal = MyDetector.device_dict['bias']['voltage']
         if v_goal > 0:
             voltage_step = paras['voltage_step']
         else: 

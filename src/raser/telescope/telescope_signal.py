@@ -15,13 +15,13 @@ ROOT.gROOT.SetBatch(True)
 import acts
 import numpy as np
 
-from interaction.g4_pixel import PixelParticles
+from interaction.g4_telescope import TelescopeParticles
 from device.build_device import Detector
-from current.cal_current_diffuse import CalCurrentPixel
+from current.cal_current_diffuse import CalCurrentDiffuse
 from util.output import create_path
 
 class Telescope:
-    def __init__(self,my_d,my_c):
+    def __init__(self,my_d,my_g4p,my_c):
         """
         Description:
             Telescope spatical resolution analysis, only consider vertical layer, ignore alignment
@@ -50,8 +50,8 @@ class Telescope:
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
         self.pixelsize_z = my_d.p_z
-        self.layer_z = my_d.lt_z
-        self.seedcharge = my_d.seedcharge
+        self.layer_z = my_g4p.ltz
+        self.seedcharge = my_g4p.seedcharge
         
         #IO and mid paras
         self.Clusters = []
@@ -385,13 +385,13 @@ class island:
 
 #interface to generate simple examples for  debugging
 class PixelHitTest:
-    def __init__(self,my_d):
+    def __init__(self,my_d,my_g4p):
         self.event = []
         
         if my_d == 0:
             raise TypeError(my_d)
             
-        self.layer_z = my_d.lt_z
+        self.layer_z = my_g4p.ltz
         self.pixelsizex = my_d.p_x
         self.pixelsizey = my_d.p_y
         self.thickness = my_d.p_z
@@ -477,12 +477,12 @@ def draw_charge(my_charge):
 
 def main():
     my_d = Detector("TAICHU3") #remain the same
-    my_g4p = PixelParticles(my_d, my_d.absorber) #remove my_f
-    my_hit_charge = CalCurrentPixel(my_d,my_g4p)
+    my_g4p = TelescopeParticles(my_d, my_d.g4experiment) #remove my_f
+    my_hit_charge = CalCurrentDiffuse(my_d,my_g4p)
     draw_charge(my_hit_charge)
-    my_telescope_charge = Telescope(my_d,my_hit_charge) 
-    my_hit_test = PixelHitTest(my_d)
-    my_telescope_test = Telescope(my_d,my_hit_test)
+    my_telescope_charge = Telescope(my_d,my_g4p.ltz,my_hit_charge) 
+    my_hit_test = PixelHitTest(my_d, my_g4p)
+    my_telescope_test = Telescope(my_d,my_g4p.ltz,my_hit_test)
 
 def taichu_v2(label=""):
     #virtual object
@@ -495,14 +495,15 @@ def taichu_v2(label=""):
     MaxSize = 25.
     for i in range(N):
         t_my_d = MyObject()
-        t_my_d.seedcharge = 100
         t_my_d.p_x = MaxSize*(i+1)/N
         t_my_d.p_y = MaxSize*(i+1)/N
         t_my_d.p_z = 200.
-        t_my_d.lt_z = [20000.,60000.,100000.,140000.,180000.,220000.]
+        t_my_g = MyObject()
+        t_my_g.seedcharge = 100
+        t_my_g.ltz = [20000.,60000.,100000.,140000.,180000.,220000.]
         psize.append(t_my_d.p_x)
-        my_hit_test = PixelHitTest(t_my_d)
-        my_telescope_test = Telescope(t_my_d,my_hit_test)
+        my_hit_test = PixelHitTest(t_my_d, t_my_g)
+        my_telescope_test = Telescope(t_my_d,t_my_g,my_hit_test)
         res.append(my_telescope_test.Resolution_Tol[2][0])
 
     graph = ROOT.TGraph()

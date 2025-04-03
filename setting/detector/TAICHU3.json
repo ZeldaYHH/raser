@@ -1,6 +1,6 @@
 {
     "det_name" : "Taichu3",
-    "det_model" : "pixel_detector",
+    "det_model" : "pixel",
     "material" : "Si",
 
     "lx" : 1500,
@@ -45,12 +45,10 @@
         }
     },
 
-    "absorber" : "pixel_detector",
+    "g4experiment" : "telescope",
     "px" : 25.0,
     "py" : 25.0,
     "pz" : 20.0,
-    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
-    "seedcharge": 100,
 
     "amplifier" : "Broad_Band_UCSC"
 }

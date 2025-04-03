@@ -13,7 +13,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy
 
-from signal import build_device as bdv
+from device import build_device as bdv
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe.set_pwl_input import set_pwl_input as pwlin
@@ -22,7 +22,7 @@ from . import bmos
 
 def get_signal():
 
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/bmos.json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/bmos.json"
     with open(geant4_json) as f:
          g4_dic = json.load(f)
 
@@ -48,7 +48,7 @@ def get_signal():
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
     totalengry = my_g4p.energy_steps
 
-    output_path = "raser/bmos/output/"
+    output_path = output(__file__) # output/bmos/
     tag = f"{g4_dic['par_type']}_{g4_dic['par_energy']}MeV_{g4_dic['par_num']}particle"
     root_name = f"{g4_dic['CurrentName'].split('.')[0]}_{tag}.root"
     pwl_name = f"pwl{g4_dic['CurrentName'].split('.')[0]}_{tag}.txt"
@@ -56,8 +56,9 @@ def get_signal():
 
     save_current(my_current, output_path, root_name, pwl_name, 1)
 
+    # TODO: fix this
     pwlin(os.path.join(output_path, pwl_name), amplifier, output_path, filename_after_ngspice)
-    subprocess.run([f"ngspice -b -r ./xxx.raw raser/bmos/output/ucsc_tmp.cir"], shell=True)
+    subprocess.run([f"ngspice -b -r ./xxx.raw output/bmos/ucsc_tmp.cir"], shell=True)
 
     draw(output_path, pwl_name, filename_after_ngspice, tag, totalengry)
 
@@ -129,7 +130,7 @@ def read_file_current(file_path, file_name):
 def draw(output_path, pwl_name, filename_after_ngspice, tag, totalengry):
     file_path = output_path
     
-    # geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/cflm.json"
+    # geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm.json"
     # with open(geant4_json) as f:
     #      g4_dic = json.load(f)
 

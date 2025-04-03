@@ -1,6 +1,6 @@
 {
     "det_name" : "NJU-PIN",
-    "det_model" : "planar3D",
+    "det_model" : "planar",
     "material" : "SiC",
 
     "lx" : 5000,
@@ -86,6 +86,6 @@
             ]
         }
     },
-    "absorber" : "time_resolution",
+    "g4experiment" : "time_resolution",
     "amplifier" : "Charge_Sensitive_UCSC"
 }

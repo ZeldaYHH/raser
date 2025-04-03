@@ -192,7 +192,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         #2D source order: beta->Si->SiC
         tx_all = my_d.l_x/2.0*g4b.um
         ty_all = my_d.l_y/2.0*g4b.um
-        if "planar3D" or "lgad3D" in sensor_model:
+        if "planar" or "lgad" in sensor_model:
             tz_device = my_d.l_z/2.0*g4b.um
             self.init_tz_device = 0
             device_x = my_d.l_x*g4b.um 

@@ -56,7 +56,7 @@ raser_exec="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE"
 raser_python="$raser_exec python3"
 
 alias raser="$raser_python src/raser"
-alias raser-test="$raser_python -m unittest discover -v -s raser/tests"
+alias raser-test="$raser_python -m unittest discover -v -s src/raser/tests"
 alias pytest="$raser_exec pytest"
 alias raser-install="$raser_exec pip install -e ."  
 

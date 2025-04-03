@@ -1,6 +1,6 @@
 {
     "det_name" : "ITk-Si-strip",
-    "det_model" : "planar3Dstrip",
+    "det_model" : "strip",
     "material" : "Si",
 
     "lx" : 170,
@@ -72,6 +72,6 @@
         }
     },
 
-    "absorber" : "strip_detector",
+    "g4experiment" : "beta_source",
     "amplifier" : "Broad_Band_UCSC"
 }

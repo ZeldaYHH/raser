@@ -13,7 +13,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy
 
-from signal import build_device as bdv
+from device import build_device as bdv
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe.set_pwl_input import set_pwl_input as pwlin
@@ -86,16 +86,16 @@ def draw(amplitudes, file_name):
     latex.SetTextFont(42)
     latex.Draw()
 
-    mkdir(os.path.join("/scratchfs/atlas/xiekaibo/sicar/raser/bmos/output/", 'histogram', 'pdf'))
+    mkdir(os.path.join("/scratchfs/atlas/xiekaibo/sicar/output/bmos/", 'histogram', 'pdf'))
 
-    c.SaveAs(os.path.join("/scratchfs/atlas/xiekaibo/sicar/raser/bmos/output/", 'histogram', 'pdf', f"{file_name}.pdf"))
+    c.SaveAs(os.path.join("/scratchfs/atlas/xiekaibo/sicar/output/bmos/", 'histogram', 'pdf', f"{file_name}.pdf"))
 
     
 
 def main(choose):
     tag = 'proton_80MeV'
     # tag = ''
-    root_path = os.path.join("/scratchfs/atlas/xiekaibo/sicar/raser/bmos/output/histogram/root", tag)
+    root_path = os.path.join("/scratchfs/atlas/xiekaibo/sicar/output/bmos/histogram/root", tag)
     root_names = os.listdir(root_path)
 
     if choose == "all":
@@ -137,8 +137,8 @@ def main(choose):
             his[i].GetYaxis().SetTitleOffset(0.9)
             his[i].GetYaxis().SetRangeUser(0, 150)
 
-        mkdir(os.path.join("/scratchfs/atlas/xiekaibo/sicar/raser/bmos/output/", 'histogram', 'pdf', tag))
-        c.SaveAs(os.path.join("/scratchfs/atlas/xiekaibo/sicar/raser/bmos/output/", 'histogram', 'pdf', tag, f"{file_name}_all.pdf"))
+        mkdir(os.path.join("/scratchfs/atlas/xiekaibo/sicar/output/bmos/", 'histogram', 'pdf', tag))
+        c.SaveAs(os.path.join("/scratchfs/atlas/xiekaibo/sicar/output/bmos/", 'histogram', 'pdf', tag, f"{file_name}_all.pdf"))
 
     
     

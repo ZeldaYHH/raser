@@ -20,7 +20,7 @@ class CarrierListFromG4P:
         elif (material == "Si"):
             self.energy_loss = 3.6 #ev
 
-        if batch == -1 and (my_g4p.geant4_model == "time_resolution" or my_g4p.geant4_model == "bmos"):
+        if batch == -1 and (my_g4p.geant4_model == "time_resolution" or my_g4p.geant4_model == "charge_collection" or my_g4p.geant4_model == "bmos"  or my_g4p.geant4_model == "beta_source"):
             total_step=0
             particle_number=0
             for p_step in my_g4p.p_steps_current:   # selecting particle with long enough track
@@ -41,6 +41,7 @@ class CarrierListFromG4P:
             
         elif batch == -1 and my_g4p.geant4_model == "Si_strip":
             # P13 cut condition
+            # TODO: specify device name
             h1 = ROOT.TH1F("Edep_device", "Energy deposition in Detector", 100, 0, max(my_g4p.edep_devices)*1.1)
             for i in range (len(my_g4p.edep_devices)):
                 h1.Fill(my_g4p.edep_devices[i])
@@ -67,6 +68,7 @@ class CarrierListFromG4P:
                 print("=========RASER info ===========\nGeant4:the sensor didn't have particles hitted\n==========================")
                 raise ValueError
         else:
+            my_g4p.selected_batch_number=batch
             self.batch_def(my_g4p,batch)
 
     def batch_def(self,my_g4p,j):
@@ -92,7 +94,7 @@ class PixelCarrierListFromG4P:
             2022/10/25
         """
         batch = len(my_g4p.localposition)
-        layer = len(my_d.lt_z)
+        layer = len(my_g4p.ltz)
         material = my_d.material
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y

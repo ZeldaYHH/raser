@@ -22,7 +22,7 @@ class bmosG4Particles:
         global s_eventIDs, s_edep_devices, s_p_steps, s_energy_steps
         s_eventIDs, s_edep_devices, s_p_steps, s_energy_steps = [], [], [], []
 
-        geant4_json = os.getenv("RASER_SETTING_PATH")+"/absorber/bmos.json"
+        geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/bmos.json"
         with open(geant4_json) as f:
              g4_dic = json.load(f)
 
