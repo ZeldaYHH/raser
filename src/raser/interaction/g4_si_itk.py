@@ -17,7 +17,7 @@ class SiITk:
 
         g4_dic = dset.pygeant4
         my_g4d = MyDetectorConstruction(my_d,my_f,g4_dic['det_model'],g4_dic['maxstep'])		
-        if g4_dic['g4_vis']: 
+        if g4_vis: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
         g4RunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
@@ -43,7 +43,7 @@ class SiITk:
         g4RunManager.SetUserInitialization(MyActionInitialization(
                                           g4_dic['par_in'],
                                           g4_dic['par_out']))
-        if g4_dic['g4_vis']:    
+        if g4_vis:    
             visManager = g4b.G4VisExecutive()
             visManager.Initialize()
             UImanager = g4b.G4UImanager.GetUIpointer()
@@ -54,7 +54,7 @@ class SiITk:
             
         g4RunManager.BeamOn(int(dset.total_events))
         
-        if g4_dic['g4_vis']:  
+        if g4_vis:  
             ui.SessionStart()
         self.p_steps=s_p_steps
         #print(s_p_steps)

@@ -136,7 +136,7 @@
     "par_type" : "e-",
     "par_energy" : 5000,
     "maxstep" : 2,
-    "g4_vis" : 0,
+    "g4_vis" : false,
     "par_in" : [0, 0, -600000],
     "par_out" : [0, 0, 100000],
     "par_randx": 750,

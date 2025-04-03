@@ -26,7 +26,7 @@ world_size = 25000
 
 # Geant4 main process
 class Particles:
-    def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7)):
+    def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7), g4_vis = False):
         """
         Description:
             Geant4 main process
@@ -50,7 +50,9 @@ class Particles:
         detector_material=my_d.device_dict['material']
         my_g4d = MyDetectorConstruction(my_d,g4_dic,detector_material,g4_dic['maxstep'])
 
-        if g4_dic['g4_vis']: 
+        g4_vis = g4_vis or g4_dic['g4_vis']
+
+        if g4_vis: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
         g4RunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
@@ -73,7 +75,7 @@ class Particles:
                                           g4_dic['par_type'],
                                           g4_dic['par_energy'],
                                           self.geant4_model))
-        if g4_dic['g4_vis']:    
+        if g4_vis:    
             visManager = g4b.G4VisExecutive()
             visManager.Initialize()
             UImanager = g4b.G4UImanager.GetUIpointer()
@@ -86,7 +88,7 @@ class Particles:
             UImanager.ApplyCommand('/run/initialize')
             
         g4RunManager.BeamOn(int(g4_dic['total_events']))
-        if g4_dic['g4_vis']:  
+        if g4_vis:  
             ui.SessionStart()
         self.p_steps=s_p_steps
         self.init_tz_device = 0    

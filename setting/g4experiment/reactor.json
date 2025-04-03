@@ -22,7 +22,7 @@
     "par_type" : "gamma",
     "par_energy" : 1.33,
     "maxstep" : 2,
-    "g4_vis" : 0,
+    "g4_vis" : false,
     "par_in" : [0, 0, 1000],
     "par_out" : [0, 0, 0]
 }

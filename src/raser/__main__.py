@@ -73,6 +73,7 @@ parser_signal.add_argument('-l','--label', help='LABEL to identify signal genera
 parser_signal.add_argument('-vol', '--voltage', type=str, help='bias voltage')
 parser_signal.add_argument('-irr', '--irradiation', type=str, help='irradiation flux')
 parser_signal.add_argument('-g4', '--g4experiment', type=str, help='model of Geant4 experiment')
+parser_signal.add_argument('-g4_vis', help='visualization of Geant4 experiment', action="store_true")
 parser_signal.add_argument('-amp', '--amplifier', type=str, help='amplifier')
 parser_signal.add_argument('-s', '--scan', type=int, help='instance number for scan mode')
 parser_signal.add_argument('--job', type=int, help='flag of run in job')
