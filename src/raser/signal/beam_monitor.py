@@ -10,6 +10,8 @@ import numpy as np
 
 from util.output import create_path
 
+# TODO: tagged orphan file
+
 def get_beam_number(my_g4p,ele_current):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "output/" + "beam_monitor/" + now + "/" 

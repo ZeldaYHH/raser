@@ -163,7 +163,7 @@ class WaveformStatistics():
                 path = os.path.join(input_path, file)
 
                 iw = InputWaveform(threshold) 
-                iw.read(path)
+                iw.read(path, 0)
                 iw.get_total_data()
                 self.waveforms[0].append(iw.waveforms[0])
                 self.fill_data(iw.data, event_number)
@@ -408,7 +408,10 @@ def main(kwargs):
     device_json = os.getenv("RASER_SETTING_PATH")+"/detector/" + det_name + ".json"
     with open(device_json) as f:
         device_dict = json.load(f)
-        read_ele_num = device_dict['read_ele_num']
+        if device_dict['det_model'] == 'planar':
+            read_ele_num = 1
+        else:
+            read_ele_num = device_dict['read_ele_num']
         daq_name = device_dict['daq']
 
     if kwargs['daq'] != None:

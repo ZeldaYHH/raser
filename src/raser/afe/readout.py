@@ -420,8 +420,10 @@ class Amplifier:
             a_max = temp_amplified_current.GetMaximum()
             c_abs_max = max(abs(c_max), abs(c_min))
             a_abs_max = max(abs(a_max), abs(a_min))
-
-            scale_factor = c_abs_max / a_abs_max
+            if c_abs_max == 0 or a_abs_max == 0:
+                scale_factor = 1
+            else:
+                scale_factor = c_abs_max / a_abs_max
             temp_amplified_current.Scale(scale_factor)
             a_min_scaled = temp_amplified_current.GetMinimum()
             a_max_scaled = temp_amplified_current.GetMaximum()
