@@ -22,6 +22,7 @@ from device import build_device as bdv
 from interaction import g4_general as g4g
 from field import devsim_field as devfield
 from current import cal_current as ccrt
+from current.cross_talk import cross_talk
 from afe import readout as rdo
 from .draw_save import energy_deposition, draw_drift_path, cce
 from util.output import output
@@ -73,13 +74,21 @@ def main(kwargs):
     my_g4p = g4g.Particles(my_d, g4experiment, g4_seed, g4_vis)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
     ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
+    if my_d.det_model == "strip":
+        my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
+        ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier)
+    else:
+        ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
 
     now = time.strftime("%Y_%m%d_%H%M%S")
     path = output(__file__, my_d.det_name, now)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     draw_drift_path(my_d,my_g4p,my_f,my_current,path)
     my_current.draw_currents(path) # Draw current
-    ele_current.draw_waveform(my_current.sum_cu, path) # Draw waveform
+    if my_d.det_model == "strip":
+        ele_current.draw_waveform(my_current.cross_talk_cu, path) # Draw waveform
+    else:
+        ele_current.draw_waveform(my_current.sum_cu, path)
 
     if 'strip' in my_d.det_model:
         cce(my_current, path)

@@ -23,7 +23,6 @@ ROOT.gROOT.SetBatch(True)
 
 from util.math import signal_convolution
 from util.output import output
-from util.root_tree_to_csv import root_tree_to_csv as rt2csv
 from util.output import delete_file
 
 class Amplifier:
@@ -375,34 +374,6 @@ class Amplifier:
             for k in range(1, int(time[-1]/self.time_unit)-1):
                 if k not in filled:
                     self.amplified_currents[i].SetBinContent(k, self.amplified_currents[i][k-1])
-
-    def save_signal_TTree(self, path, tag=""):
-        if tag != "":
-            tag = "_" + str(tag)
-        for j in range(self.read_ele_num):
-            time = array('d', [0.])
-            volt = array('d', [0.])
-            if self.read_ele_num==1:
-                tree_file_name = os.path.join(path, "amplified-current") + str(tag) + ".root"
-                csv_file_name = os.path.join(path, "amplified-current") + str(tag) + ".csv"
-            else:
-                tree_file_name = os.path.join(path, "amplified-current") + str(tag)+"No_"+str(j)+".root"
-                csv_file_name = os.path.join(path, "amplified-current") + str(tag)+"No_"+str(j) + ".csv"
-            
-            tree_file = ROOT.TFile(tree_file_name, "RECREATE")
-            t_out = ROOT.TTree("tree", "signal")
-            t_out.Branch("time_s", time, "time_s/D")
-            t_out.Branch("volt_mV", volt, "volt_mV/D")
-
-            for i in range(self.amplified_currents[j].GetNbinsX()):
-                time[0]=i*self.amplified_currents[j].GetBinWidth(i)
-                volt[0]=self.amplified_currents[j][i]
-                t_out.Fill()
-            
-            t_out.Write()
-            tree_file.Close()
-
-            rt2csv(csv_file_name, tree_file_name, "tree")
 
     def draw_waveform(self, currents, path):
         for i in range(self.read_ele_num):

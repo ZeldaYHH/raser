@@ -88,5 +88,5 @@
     },
     "g4experiment" : "time_resolution",
     "amplifier" : "Charge_Sensitive_UCSC",
-    "daq" : "Alibava"
+    "daq" : "NJU-PIN"
 }

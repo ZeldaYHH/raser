@@ -18,7 +18,7 @@ from signal import draw_save
 from util.output import output
 
 from .laser import LaserInjection
-from util.root_tree_to_csv import root_tree_to_csv as rt2csv
+from util.root_tree import root_tree_to_csv as rt2csv
 
 def is_number(s):
     """ 

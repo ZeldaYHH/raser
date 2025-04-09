@@ -1,4 +1,5 @@
 import csv
+from array import array
 
 import ROOT
 

@@ -12,6 +12,7 @@ import random
 import math
 import os
 from array import array
+import csv
 
 import numpy as np
 import ROOT
@@ -21,7 +22,6 @@ from .model import Material
 from interaction.carrier_list import CarrierListFromG4P
 from util.math import Vector, signal_convolution
 from util.output import output
-import csv
 
 t_bin = 10e-12
 # resolution of oscilloscope
@@ -229,15 +229,12 @@ class CalCurrent:
             self.sum_cu[i].Add(self.positive_cu[i])
             self.sum_cu[i].Add(self.negative_cu[i])
 
-        if "lgad" in my_d.det_model:
+        self.det_model = my_d.det_model
+        if "lgad" in self.det_model:
             self.gain_current = CalCurrentGain(my_d, my_f, self)
             for i in range(self.read_ele_num):
-                self.gain_positive_cu[i].Reset()
-                self.gain_negative_cu[i].Reset()
-                self.gain_negative_cu[i] = self.gain_current.negative_cu[i]
-                self.gain_positive_cu[i] = self.gain_current.positive_cu[i]
-                self.sum_cu[i].Add(self.gain_negative_cu[i])
-                self.sum_cu[i].Add(self.gain_positive_cu[i])
+                self.sum_cu[i].Add(self.gain_current.negative_cu[i])
+                self.sum_cu[i].Add(self.gain_current.positive_cu[i])
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -264,18 +261,12 @@ class CalCurrent:
         """
         self.positive_cu=[]
         self.negative_cu=[]
-        self.gain_positive_cu=[]
-        self.gain_negative_cu=[]
         self.sum_cu=[]
 
         for i in range(read_ele_num):
             self.positive_cu.append(ROOT.TH1F("charge+"+str(i+1), " No."+str(i+1)+"Positive Current",
                                         self.n_bin, self.t_start, self.t_end))
             self.negative_cu.append(ROOT.TH1F("charge-"+str(i+1), " No."+str(i+1)+"Negative Current",
-                                        self.n_bin, self.t_start, self.t_end))
-            self.gain_positive_cu.append(ROOT.TH1F("gain_charge+"+str(i+1)," No."+str(i+1)+"Gain Positive Current",
-                                        self.n_bin, self.t_start, self.t_end))
-            self.gain_negative_cu.append(ROOT.TH1F("gain_charge-"+str(i+1)," No."+str(i+1)+"Gain Negative Current",
                                         self.n_bin, self.t_start, self.t_end))
             self.sum_cu.append(ROOT.TH1F("charge"+str(i+1),"Total Current"+" No."+str(i+1)+"electrode",
                                     self.n_bin, self.t_start, self.t_end))
@@ -299,7 +290,6 @@ class CalCurrent:
                     test_n.Fill(electron.path[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
                 self.negative_cu[j].Add(test_n)
                 test_n.Reset()
-
 
     def draw_currents(self, path, tag=""):
         """
@@ -345,34 +335,49 @@ class CalCurrent:
             self.sum_cu[read_ele_num].Draw("HIST")
             self.positive_cu[read_ele_num].Draw("SAME HIST")
             self.negative_cu[read_ele_num].Draw("SAME HIST")
-            self.gain_positive_cu[read_ele_num].Draw("SAME HIST")
-            self.gain_negative_cu[read_ele_num].Draw("SAME HIST")
             self.sum_cu[read_ele_num].Draw("SAME HIST")
 
             self.positive_cu[read_ele_num].SetLineColor(877)#kViolet-3
             self.negative_cu[read_ele_num].SetLineColor(600)#kBlue
-            self.gain_positive_cu[read_ele_num].SetLineColor(617)#kMagneta+1
-            self.gain_negative_cu[read_ele_num].SetLineColor(867)#kAzure+7
             self.sum_cu[read_ele_num].SetLineColor(418)#kGreen+2
 
             self.positive_cu[read_ele_num].SetLineWidth(2)
             self.negative_cu[read_ele_num].SetLineWidth(2)
-            self.gain_positive_cu[read_ele_num].SetLineWidth(2)
-            self.gain_negative_cu[read_ele_num].SetLineWidth(2)
             self.sum_cu[read_ele_num].SetLineWidth(2)
             c.Update()
+
+            if "lgad" in self.det_model:
+                self.gain_current.positive_cu[read_ele_num].Draw("SAME HIST")
+                self.gain_current.negative_cu[read_ele_num].Draw("SAME HIST")
+                self.gain_current.positive_cu[read_ele_num].SetLineColor(617)#kMagneta+1
+                self.gain_current.negative_cu[read_ele_num].SetLineColor(867)#kAzure+7
+                self.gain_current.positive_cu[read_ele_num].SetLineWidth(2)
+                self.gain_current.negative_cu[read_ele_num].SetLineWidth(2)
+
+            if "strip" in self.det_model:
+                # make sure you run cross_talk() first and attached cross_talk_cu to self
+                self.cross_talk_cu[read_ele_num].Draw("SAME HIST")
+                self.cross_talk_cu[read_ele_num].SetLineColor(420)#kGreen+4
+                self.cross_talk_cu[read_ele_num].SetLineWidth(2)
 
             legend = ROOT.TLegend(0.5, 0.2, 0.8, 0.5)
             legend.AddEntry(self.negative_cu[read_ele_num], "electron", "l")
             legend.AddEntry(self.positive_cu[read_ele_num], "hole", "l")
-            legend.AddEntry(self.gain_negative_cu[read_ele_num], "gain electron", "l")
-            legend.AddEntry(self.gain_positive_cu[read_ele_num], "gain hole", "l")
             legend.AddEntry(self.sum_cu[read_ele_num], "e+h", "l")
+
+            if "lgad" in self.det_model:
+                legend.AddEntry(self.gain_current.negative_cu[read_ele_num], "electron gain", "l")
+                legend.AddEntry(self.gain_current.positive_cu[read_ele_num], "hole gain", "l")
+
+            if "strip" in self.det_model:
+                legend.AddEntry(self.cross_talk_cu[read_ele_num], "cross talk", "l")
+            
             legend.SetBorderSize(0)
             #legend.SetTextFont(43)
             legend.SetTextSize(0.08)
             legend.Draw("same")
             c.Update()
+
             c.SaveAs(path+'/'+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.pdf")
             c.SaveAs(path+'/'+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.root")
             del c
@@ -388,10 +393,10 @@ class CalCurrentGain(CalCurrent):
         gain_rate = self.gain_rate(my_d,my_f,cal_coefficient)
         print("gain_rate="+str(gain_rate))
         path = output(__file__, my_d.det_name)
-        f_gain_rate = open(path+'/votage-gain_rate.csv', "a")
+        f_gain_rate = open(path+'/voltage-gain_rate.csv', "a")
         writer_gain_rate = csv.writer(f_gain_rate)
         writer_gain_rate.writerow([str(my_f.voltage),str(gain_rate)])
-        with open(path+'/Votage-gain_rate.txt', 'a') as file:
+        with open(path+'/Voltage-gain_rate.txt', 'a') as file:
             file.write(str(my_f.voltage)+' -- '+str(gain_rate)+ '\n')
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
@@ -518,22 +523,6 @@ class CalCurrentG4P(CalCurrent):
         if self.read_ele_num > 1:
             #self.cross_talk()
             pass
-            
-    def cross_talk(self):
-        temp_cu = []
-        for i in range(self.read_ele_num):
-            temp_cu.append(self.sum_cu[i].Clone())
-            self.sum_cu[i].Reset()
-        for i in range(self.read_ele_num):
-            if i == 0:
-                pass
-            else:
-                self.sum_cu[i-1].Add(temp_cu[i], 0.1)
-            self.sum_cu[i].Add(temp_cu[i], 0.8)
-            if i == self.read_ele_num-1:
-                pass
-            else:
-                self.sum_cu[i+1].Add(temp_cu[i], 0.1)
 
 
 class CalCurrentLaser(CalCurrent):

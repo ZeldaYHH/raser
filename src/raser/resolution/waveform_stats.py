@@ -19,8 +19,8 @@ class InputWaveform():
     charge : total charge for current sensitive preamp
     ToR : time of ratio (CFD)
     """
-    def __init__(self, threshold, read_ele_num=1, CFD=CFD):
-        self.waveforms = [[] for i in range(read_ele_num)]
+    def __init__(self, input_entry, threshold, read_ele_num=1, CFD=CFD):
+        self.waveforms = [None for _ in range(read_ele_num)]
         self.read_ele_num = read_ele_num
         self.CFD = CFD
         self.ToA = [0 for i in range(read_ele_num)]
@@ -30,25 +30,24 @@ class InputWaveform():
         self.ToR = [0 for i in range(read_ele_num)]
         self.threshold = threshold
 
-    def read(self, path, i):
-        with open(path) as file_in:
-            for line in file_in:
-                if not (is_number(line.strip().split(",")[0])): # strip() for \n
-                    continue
-                self.waveforms[i].append(line.strip().split(","))
+        time = input_entry.time
+        for i in range(read_ele_num):
+            amp = eval(f"input_entry.data_amp_{i}")
+            self.waveforms[i] = list(zip(time, amp))
+            self.amplitude[i] = get_amplitude(self.waveforms[i])
+            if self.amplitude[i] < self.threshold:
+                self.amplitude[i] = None
+                self.ToA[i] = None
+                self.ToT[i] = None
+                self.charge[i] = None
+                self.ToR[i] = None
+            else:
+                self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
+                self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
+                self.charge[i] = get_charge(self.waveforms[i])
+                self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
 
-        self.amplitude[i] = get_amplitude(self.waveforms[i])
-        if self.amplitude[i] < self.threshold:
-            self.amplitude[i] = None
-            self.ToA[i] = None
-            self.ToT[i] = None
-            self.charge[i] = None
-            self.ToR[i] = None
-        else:
-            self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
-            self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
-            self.charge[i] = get_charge(self.waveforms[i])
-            self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
+        self.get_total_data()
 
     def get_total_data(self):
         self.data = {}
@@ -149,70 +148,36 @@ class WaveformStatistics():
         self.gravity_center_amplitude_data = []
         self.gravity_center_charge_data = []
         self.waveforms = [[] for i in range(read_ele_num)]
-        last_event_tag = None
 
         self.output_path = output_path
 
-        if read_ele_num == 1:        
-            for file in os.listdir(input_path):
-                if '.csv' not in file:
-                    continue
-                pattern = r"event([+-]?\d+)" 
-                match = re.search(pattern, file)
-                event_number = int(match.group(1)) 
-                path = os.path.join(input_path, file)
+        files = os.listdir(input_path)
+        files.sort()
+        for file in files:
+            if '.root' not in file or "amp" not in file:
+                continue
+            
+            path = os.path.join(input_path, file)
+            file_pointer = ROOT.TFile(path, "READ")
+            tree = file_pointer.Get("tree")
+            for i in range(tree.GetEntries()):
+                tree.GetEntry(i) 
+                iw = InputWaveform(tree, threshold)
+                self.fill_data(iw.data)
+                for j in range(read_ele_num):
+                    self.waveforms[j].append(iw.waveforms[j])
 
-                iw = InputWaveform(threshold) 
-                iw.read(path, 0)
-                iw.get_total_data()
-                self.waveforms[0].append(iw.waveforms[0])
-                self.fill_data(iw.data, event_number)
-
+        for j in range(read_ele_num):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             multigraph = ROOT.TMultiGraph("mg","")
-            for waveform in (self.waveforms[0]):
+            for waveform in (self.waveforms[j]):
                 x = [float(i[0]) for i in waveform]
                 y = [float(i[1]) for i in waveform]
                 graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
                 multigraph.Add(graph)
             multigraph.Draw("APL")
-            canvas.SaveAs(os.path.join(output_path, "waveform.pdf"))
-            canvas.SaveAs(os.path.join(output_path, "waveform.png"))
-
-        else: # read_ele_num > 1, "No_" in file, multiple electrodes
-            files = os.listdir(input_path)
-            files.sort()
-            for file in files:
-                if '.csv' not in file:
-                    continue
-                pattern = r"No_([+-]?\d+)" 
-                match = re.search(pattern, file)
-                electrode_number = int(match.group(1))
-                event_tag = re.sub(pattern, '', file)
-                if last_event_tag != event_tag:
-                    if last_event_tag != None:
-                        iw.get_total_data()
-                        self.fill_data(iw.data, last_event_tag)
-                    iw = InputWaveform(threshold, read_ele_num)
-                else:
-                    pass
-
-                path = os.path.join(input_path, file)
-                iw.read(path, electrode_number)
-                self.waveforms[electrode_number].append(iw.waveforms[electrode_number])
-                last_event_tag = event_tag
-
-            for j in range(read_ele_num):
-                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-                multigraph = ROOT.TMultiGraph("mg","")
-                for waveform in (self.waveforms[j]):
-                    x = [float(i[0]) for i in waveform]
-                    y = [float(i[1]) for i in waveform]
-                    graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
-                    multigraph.Add(graph)
-                multigraph.Draw("APL")
-                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
-                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
+            canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
+            canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
 
         self.time_resolution_fit(self.ToA_data, "ToA")
         self.time_resolution_fit(self.ToR_data, "ToR")
@@ -223,7 +188,7 @@ class WaveformStatistics():
         self.gravity_center_fit(self.gravity_center_amplitude_data, "gravity_center_amplitude")
         self.gravity_center_fit(self.gravity_center_charge_data, "gravity_center_charge")
     
-    def fill_data(self, data, event_tag):
+    def fill_data(self, data):
         self.ToA_data.append(data["ToA"])
         self.ToT_data.append(data["ToT"])
         self.amplitude_data.append(data["amplitude"])
@@ -408,7 +373,7 @@ def main(kwargs):
     device_json = os.getenv("RASER_SETTING_PATH")+"/detector/" + det_name + ".json"
     with open(device_json) as f:
         device_dict = json.load(f)
-        if device_dict['det_model'] == 'planar':
+        if device_dict['det_model'] == 'planar' or device_dict['det_model'] == 'lgad':
             read_ele_num = 1
         else:
             read_ele_num = device_dict['read_ele_num']
