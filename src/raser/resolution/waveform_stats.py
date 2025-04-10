@@ -170,11 +170,15 @@ class WaveformStatistics():
         for j in range(read_ele_num):
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             multigraph = ROOT.TMultiGraph("mg","")
+            count = 0
             for waveform in (self.waveforms[j]):
+                if count > 100:
+                    break
                 x = [float(i[0]) for i in waveform]
                 y = [float(i[1]) for i in waveform]
                 graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
                 multigraph.Add(graph)
+                count += 1
             multigraph.Draw("APL")
             canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
             canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
