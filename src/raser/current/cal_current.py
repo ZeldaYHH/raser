@@ -53,14 +53,26 @@ class CarrierCluster:
     Modify:
         2022/10/28
     """
-    def __init__(self, x_init, y_init, z_init, t_init, charge, material, read_ele_num):
+    def __init__(self, x_init, y_init, z_init, t_init, p_x, p_y, n_x, n_y, l_x, l_y, field_shift_x, field_shift_y, charge, material, weighting_field_num):
         self.x = x_init
         self.y = y_init
         self.z = z_init
         self.t = t_init
         self.t_end = t_end
         self.path = [[x_init, y_init, z_init, t_init]]
-        self.signal = [[] for j in range(int(read_ele_num))]
+
+        self.field_shift_x = field_shift_x
+        self.field_shift_y = field_shift_y
+        self.p_x = p_x
+        self.p_y = p_y
+        self.x_reduced = (x_init-l_x/2) % p_x
+        self.y_reduced = (y_init-l_y/2) % p_y
+        self.x_num = int((x_init-l_x/2) / p_x + n_x/2.0)
+        self.y_num = int((y_init-l_y/2) / p_y + n_y/2.0)
+        self.path_reduced = [[(x_init-l_x/2) % p_x + field_shift_x, (y_init-l_y/2) % p_y + field_shift_y, z_init, t_init, 
+                              int((x_init-l_x/2) / p_x + n_x/2.0), int((y_init-l_y/2) / p_y + n_y/2.0)]]
+
+        self.signal = [[] for j in range(int(weighting_field_num))]
         self.end_condition = 0
 
         self.cal_mobility = Material(material).cal_mobility
@@ -74,12 +86,18 @@ class CarrierCluster:
             or (self.z<=0) or (self.z>=my_d.l_z):
             self.end_condition = "out of bound"
         return self.end_condition
+    
+    def not_in_field_range(self,my_d):
+        if (self.x_num<0) or (self.x_num>=my_d.x_ele_num)\
+            or (self.y_num<0) or (self.y_num>=my_d.y_ele_num):
+            self.end_condition = "out of field range"
+        return self.end_condition
 
     def drift_single_step(self, my_d, my_f, delta_t=delta_t):
-        e_field = my_f.get_e_field(self.x,self.y,self.z)
+        e_field = my_f.get_e_field(self.x_reduced,self.y_reduced,self.z)
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
         mobility = Material(my_d.material)
-        mu = mobility.cal_mobility(my_d.temperature, my_f.get_doping(self.x, self.y, self.z), self.charge, intensity)
+        mu = mobility.cal_mobility(my_d.temperature, my_f.get_doping(self.x_reduced, self.y_reduced, self.z), self.charge, intensity)
         velocity_vector = [e_field[0]*mu, e_field[1]*mu, e_field[2]*mu] # cm/s
 
         if(intensity > min_intensity):
@@ -114,19 +132,33 @@ class CarrierCluster:
 
         # sum up
         # x axis   
-        if((self.x+delta_x+dif_x)>=my_d.l_x): 
-            self.x = my_d.l_x
-        elif((self.x+delta_x+dif_x)<0):
-            self.x = 0
+        if((self.x_reduced+delta_x+dif_x-self.field_shift_x)>=self.p_x): 
+            self.x_reduced = self.x_reduced+delta_x+dif_x-self.p_x
+            # self.x_num = self.x_num - 1
+            # temperarily ignore the boundary effect
+            self.end_condition = "out of field range"
+        elif((self.x_reduced+delta_x+dif_x-self.field_shift_x)<0):
+            self.x_reduced = self.x_reduced+delta_x+dif_x+self.p_x
+            # self.x_num = self.x_num + 1
+            # temperarily ignore the boundary effect
+            self.end_condition = "out of field range"
         else:
-            self.x = self.x+delta_x+dif_x
+            self.x_reduced = self.x_reduced+delta_x+dif_x
+        self.x = self.x+delta_x+dif_x
         # y axis
-        if((self.y+delta_y+dif_y)>=my_d.l_y): 
-            self.y = my_d.l_y
-        elif((self.y+delta_y+dif_y)<0):
-            self.y = 0
+        if((self.y_reduced+delta_y+dif_y-self.field_shift_y)>=self.p_y):
+            self.y_reduced = self.y_reduced+delta_y+dif_y-self.p_y
+            # self.y_num = self.y_num - 1
+            # temperarily ignore the boundary effect
+            self.end_condition = "out of field range"
+        elif((self.y_reduced+delta_y+dif_y-self.field_shift_y)<0):
+            self.y_reduced = self.y_reduced+delta_y+dif_y+self.p_y
+            # self.y_num = self.y_num + 1
+            # temperarily ignore the boundary effect
+            self.end_condition = "out of field range"
         else:
-            self.y = self.y+delta_y+dif_y
+            self.y_reduced = self.y_reduced+delta_y+dif_y
+        self.y = self.y+delta_y+dif_y
         # z axis
         if((self.z+delta_z+dif_z)>=my_d.l_z): 
             self.z = my_d.l_z
@@ -137,27 +169,29 @@ class CarrierCluster:
         #time
         self.t = self.t+delta_t
         #record
+        self.path_reduced.append([self.x_reduced,self.y_reduced,self.z,self.t, self.x_num, self.y_num])
         self.path.append([self.x,self.y,self.z,self.t]) 
 
     def get_signal(self,my_f,my_d):
         """Calculate signal from carrier path"""
         # i = -q*v*nabla(U_w) = -q*dx*nabla(U_w)/dt = -q*dU_w(x)/dt
         # signal = i*dt = -q*dU_w(x)
-        for j in range(my_f.read_ele_num):
+        for j in range(my_f.weighting_field_ele_num):
             charge=self.charge
-            for i in range(len(self.path)-1): # differentiate of weighting potential
-                U_w_1 = my_f.get_w_p(self.path[i][0],self.path[i][1],self.path[i][2],j) # x,y,z
-                U_w_2 = my_f.get_w_p(self.path[i+1][0],self.path[i+1][1],self.path[i+1][2],j)
+            for i in range(len(self.path_reduced)-1): # differentiate of weighting potential
+                U_w_1 = my_f.get_w_p(self.path_reduced[i][0],self.path_reduced[i][1],self.path_reduced[i][2],j) # x,y,z
+                U_w_2 = my_f.get_w_p(self.path_reduced[i+1][0],self.path_reduced[i+1][1],self.path_reduced[i+1][2],j)
                 e0 = 1.60217733e-19
                 if i>0 and my_d.irradiation_model != None:
-                    d_t=self.path[i][3]-self.path[i-1][3]
+                    d_t=self.path_reduced[i][3]-self.path_reduced[i-1][3]
                     if self.charge>=0:
-                        self.trapping_rate=my_f.get_trap_h(self.path[i][0],self.path[i][1],self.path[i][2])
+                        self.trapping_rate=my_f.get_trap_h(self.path_reduced[i][0],self.path_reduced[i][1],self.path_reduced[i][2])
                     else:
-                        self.trapping_rate=my_f.get_trap_e(self.path[i][0],self.path[i][1],self.path[i][2])
+                        self.trapping_rate=my_f.get_trap_e(self.path_reduced[i][0],self.path_reduced[i][1],self.path_reduced[i][2])
                     charge=charge*np.exp(-d_t*self.trapping_rate)
                 q = charge * e0
                 dU_w = U_w_2 - U_w_1
+                # this is only for strip, need alter for pixel/hexagonal pixel
                 self.signal[j].append(q*dU_w)
         
 
@@ -189,26 +223,52 @@ class CalCurrent:
     """
     def __init__(self, my_d, my_f, ionized_pairs, track_position):
 
-        self.read_ele_num = my_f.read_ele_num
+        self.read_ele_num = my_d.read_ele_num
+        self.weighting_field_ele_num = my_f.weighting_field_ele_num
         self.electrons = []
         self.holes = []
 
+        if "planar" in my_d.det_model or "lgad" in my_d.det_model:
+            p_x = my_d.l_x
+            p_y = my_d.l_y
+            n_x = 1
+            n_y = 1
+            field_shift_x = 0
+            field_shift_y = 0
+        if "strip" in my_d.det_model:
+            # for "lgadstrip", this covers above
+            p_x = my_d.p_x
+            p_y = my_d.l_y
+            n_x = my_d.read_ele_num
+            n_y = 1
+            field_shift_x = my_d.field_shift_x
+            field_shift_y = 0
+        if "pixel" in my_d.det_model:
+            p_x = my_d.p_x
+            p_y = my_d.p_y
+            n_x = my_d.x_ele_num
+            n_y = my_d.y_ele_num
+            field_shift_x = my_d.field_shift_x
+            field_shift_y = my_d.field_shift_y
+
         for i in range(len(track_position)):
-            electron = CarrierCluster(track_position[i][0],\
-                               track_position[i][1],\
-                               track_position[i][2],\
-                               track_position[i][3],\
-                               -1*ionized_pairs[i],\
-                               my_d.material,\
-                               self.read_ele_num)
-            hole = CarrierCluster(track_position[i][0],\
-                           track_position[i][1],\
+            electron = CarrierCluster(track_position[i][0],
+                               track_position[i][1],
+                               track_position[i][2],
+                               track_position[i][3],
+                               p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                               -1*ionized_pairs[i],
+                               my_d.material,
+                               self.weighting_field_ele_num)
+            hole = CarrierCluster(track_position[i][0],
+                           track_position[i][1],
                            track_position[i][2],
-                           track_position[i][3],\
-                           ionized_pairs[i],\
-                           my_d.material,\
-                           self.read_ele_num)
-            if not electron.not_in_sensor(my_d):
+                           track_position[i][3],
+                           p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                           ionized_pairs[i],
+                           my_d.material,
+                           self.weighting_field_ele_num)
+            if not electron.not_in_sensor(my_d) and not electron.not_in_field_range(my_d):
                 self.electrons.append(electron)
                 self.holes.append(hole)
         
@@ -224,7 +284,7 @@ class CalCurrent:
             self.sum_cu[i].Reset()
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
-        self.get_current(self.read_ele_num)
+        self.get_current(self.read_ele_num, self.weighting_field_ele_num)
         for i in range(self.read_ele_num):
             self.sum_cu[i].Add(self.positive_cu[i])
             self.sum_cu[i].Add(self.negative_cu[i])
@@ -238,11 +298,11 @@ class CalCurrent:
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
-            while not electron.not_in_sensor(my_d) and not electron.drift_end(my_f):
+            while not electron.not_in_sensor(my_d) and not electron.not_in_field_range(my_d) and not electron.drift_end(my_f):
                 electron.drift_single_step(my_d, my_f)
             electron.get_signal(my_f,my_d)
         for hole in self.holes:
-            while not hole.not_in_sensor(my_d) and not hole.drift_end(my_f):
+            while not hole.not_in_sensor(my_d) and not hole.not_in_field_range(my_d) and not hole.drift_end(my_f):
                 hole.drift_single_step(my_d, my_f)
             hole.get_signal(my_f,my_d)
 
@@ -272,23 +332,27 @@ class CalCurrent:
                                     self.n_bin, self.t_start, self.t_end))
             
         
-    def get_current(self, read_ele_num):
+    def get_current(self, read_ele_num, wf_ele_num):
         test_p = ROOT.TH1F("test+","test+",self.n_bin,self.t_start,self.t_end)
         test_p.Reset()
-        for j in range(read_ele_num):
-            for hole in self.holes:
-                for i in range(len(hole.path)-1):
-                    test_p.Fill(hole.path[i][3],hole.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
-                self.positive_cu[j].Add(test_p)
+        for hole in self.holes:
+            for j in range(wf_ele_num):
+                for i in range(len(hole.path_reduced)-1):
+                    x_num = hole.path_reduced[i][4]
+                    # need alter for pixel
+                    # need fix for carriers drifted into different strip
+                    test_p.Fill(hole.path_reduced[i][3],hole.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
+                self.positive_cu[x_num].Add(test_p)
                 test_p.Reset()
 
         test_n = ROOT.TH1F("test-","test-",self.n_bin,self.t_start,self.t_end)
         test_n.Reset()
-        for j in range(read_ele_num):
-            for electron in self.electrons:             
-                for i in range(len(electron.path)-1):
-                    test_n.Fill(electron.path[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
-                self.negative_cu[j].Add(test_n)
+        for electron in self.electrons:   
+            for j in range(wf_ele_num):        
+                for i in range(len(electron.path_reduced)-1):
+                    x_num = electron.path_reduced[i][4]
+                    test_n.Fill(electron.path_reduced[i][3],electron.signal[j][i]/self.t_bin)# time,current=int(i*dt)/Δt
+                self.negative_cu[x_num].Add(test_n)
                 test_n.Reset()
 
     def draw_currents(self, path, tag=""):
@@ -387,6 +451,32 @@ class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''
     def __init__(self, my_d, my_f, my_current):
         self.read_ele_num = my_current.read_ele_num
+        self.weighting_field_ele_num = my_current.weighting_field_ele_num
+
+
+        if "planar" in my_d.det_model or "lgad" in my_d.det_model:
+            p_x = my_d.l_x
+            p_y = my_d.l_y
+            n_x = 1
+            n_y = 1
+            field_shift_x = 0
+            field_shift_y = 0
+        if "strip" in my_d.det_model:
+            # for "lgadstrip", this covers above
+            p_x = my_d.p_x
+            p_y = my_d.l_y
+            n_x = my_d.read_ele_num
+            n_y = 1
+            field_shift_x = my_d.field_shift_x
+            field_shift_y = 0
+        if "pixel" in my_d.det_model:
+            p_x = my_d.p_x
+            p_y = my_d.p_y
+            n_x = my_d.x_ele_num
+            n_y = my_d.y_ele_num
+            field_shift_x = my_d.field_shift_x
+            field_shift_y = my_d.field_shift_y
+
         self.electrons = [] # gain carriers
         self.holes = []
         cal_coefficient = Material(my_d.material).cal_coefficient
@@ -401,39 +491,43 @@ class CalCurrentGain(CalCurrent):
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
             for hole in my_current.holes:
-                self.electrons.append(CarrierCluster(hole.path[-1][0],\
-                                              hole.path[-1][1],\
-                                              my_d.avalanche_bond,\
-                                              hole.path[-1][3],\
-                                              -1*hole.charge*gain_rate,\
-                                              my_d.material,\
-                                              self.read_ele_num))
+                self.electrons.append(CarrierCluster(hole.path[-1][0],
+                                              hole.path[-1][1],
+                                              my_d.avalanche_bond,
+                                              hole.path[-1][3],
+                                              p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                                              -1*hole.charge*gain_rate,
+                                              my_d.material,
+                                              self.weighting_field_ele_num))
                 
-                self.holes.append(CarrierCluster(hole.path[-1][0],\
-                                          hole.path[-1][1],\
-                                          my_d.avalanche_bond,\
-                                          hole.path[-1][3],\
-                                          hole.charge*gain_rate,\
-                                          my_d.material,\
-                                          self.read_ele_num))
+                self.holes.append(CarrierCluster(hole.path[-1][0],
+                                          hole.path[-1][1],
+                                          my_d.avalanche_bond,
+                                          hole.path[-1][3],
+                                          p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                                          hole.charge*gain_rate,
+                                          my_d.material,
+                                          self.weighting_field_ele_num))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
-                self.holes.append(CarrierCluster(electron.path[-1][0],\
-                                          electron.path[-1][1],\
-                                          my_d.avalanche_bond,\
-                                          electron.path[-1][3],\
-                                          -1*electron.charge*gain_rate,\
-                                          my_d.material,\
-                                          self.read_ele_num))
+                self.holes.append(CarrierCluster(electron.path[-1][0],
+                                          electron.path[-1][1],
+                                          my_d.avalanche_bond,
+                                          electron.path[-1][3],
+                                          p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                                          -1*electron.charge*gain_rate,
+                                          my_d.material,
+                                          self.weighting_field_ele_num))
 
-                self.electrons.append(CarrierCluster(electron.path[-1][0],\
-                                                electron.path[-1][1],\
-                                                my_d.avalanche_bond,\
-                                                electron.path[-1][3],\
-                                                electron.charge*gain_rate,\
-                                                my_d.material,\
-                                                self.read_ele_num))
+                self.electrons.append(CarrierCluster(electron.path[-1][0],
+                                                electron.path[-1][1],
+                                                my_d.avalanche_bond,
+                                                electron.path[-1][3],
+                                                p_x, p_y, n_x, n_y, my_d.l_x, my_d.l_y, field_shift_x, field_shift_y,
+                                                electron.charge*gain_rate,
+                                                my_d.material,
+                                                self.weighting_field_ele_num))
 
         self.drifting_loop(my_d, my_f)
 
@@ -446,7 +540,7 @@ class CalCurrentGain(CalCurrent):
         for i in range(self.read_ele_num):
             self.positive_cu[i].Reset()
             self.negative_cu[i].Reset()
-        self.get_current(self.read_ele_num)
+        self.get_current(self.read_ele_num, self.weighting_field_ele_num)
 
     def gain_rate(self, my_d, my_f, cal_coefficient):
 

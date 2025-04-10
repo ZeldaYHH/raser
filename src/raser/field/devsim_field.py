@@ -24,7 +24,8 @@ class DevsimField:
         self.name = device_name
         self.voltage = voltage
         self.dimension = dimension
-        self.read_ele_num = int(len(read_out_contacts))
+        self.weighting_field_ele_num = int(len(read_out_contacts))
+        # need to be consistent to the detector json
 
         path = "./output/field/{}/".format(self.name)
 
@@ -101,7 +102,7 @@ class DevsimField:
 
     def set_w_p(self,WeightingPotentialFiles):
         self.WeightingPotential = []
-        for i in range(self.read_ele_num):
+        for i in range(self.weighting_field_ele_num):
             WeightingPotentialFile = WeightingPotentialFiles[i]
             try:
                 with open(WeightingPotentialFile,'rb') as file:

@@ -3,9 +3,13 @@
     "det_model" : "planar",
     "material" : "Si",
 
-    "l_x" : 20000,
+    "l_x" : 3200,
     "l_y" : 20000,
     "l_z" : 300,
+    "p_x" : 75.5,
+    "read_ele_num" : 40,
+    "weighting_field_ele_num" : 1,
+    "field_shift_x" : 0,
 
     "doping":{
         "Donors" : "ifelse(0.2e-4>x&&x>0e-4&&45.25e-4>y&&y>30.25e-4,1e20,0)+ifelse(0.4e-4>x&&x>0.2e-4&&45.25e-4>y&&y>30.25e-4,3e18,0)+ifelse(1.2e-4>x&&x>0.4e-4&&46.75e-4>y&&y>28.75e-4,1e17,0)",

@@ -3,13 +3,14 @@
     "det_model" : "strip",
     "material" : "Si",
 
-    "l_x" : 170,
+    "l_x" : 750,
     "l_y" : 5000,
     "l_z" : 305,
 
-    "striplenth" : 75,
-    "elelenth" : 25,
-    "read_ele_num" : 3,
+    "p_x" : 75,
+    "read_ele_num" : 10,
+    "weighting_field_ele_num" : 3,
+    "field_shift_x" : 47.5,
 
     "doping": {
         "Acceptors" : "4e12*step(x-1e-4)+1e15*step(x-300e-4)",

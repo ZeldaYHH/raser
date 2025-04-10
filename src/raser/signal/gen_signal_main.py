@@ -74,7 +74,7 @@ def main(kwargs):
     my_g4p = g4g.Particles(my_d, g4experiment, g4_seed, g4_vis)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
     ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
-    if my_d.det_model == "strip":
+    if "strip" in my_d.det_model:
         my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
         ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier)
     else:
@@ -85,7 +85,7 @@ def main(kwargs):
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
     draw_drift_path(my_d,my_g4p,my_f,my_current,path)
     my_current.draw_currents(path) # Draw current
-    if my_d.det_model == "strip":
+    if "strip" in my_d.det_model:
         ele_current.draw_waveform(my_current.cross_talk_cu, path) # Draw waveform
     else:
         ele_current.draw_waveform(my_current.sum_cu, path)

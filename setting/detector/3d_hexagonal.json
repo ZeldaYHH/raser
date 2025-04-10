@@ -6,7 +6,13 @@
     "l_x" : 10000,
     "l_y" : 10000,
     "l_z" : 350,
+
+    "p_r" : 150,
     
+    "read_ele_num" : 7,
+    "weighting_field_ele_num" : 1,
+    "field_shift_r" : 0,
+
     "e_r" : 50.0,
     "e_gap" : 150.0,
     "e_t" : [
