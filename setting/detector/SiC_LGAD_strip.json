@@ -7,9 +7,10 @@
     "l_y" : 420,
     "l_z" : 67.3,
 
-    "striplenth" : 60,
-    "elelenth" : 60,
+    "p_x" : 120,
     "read_ele_num" : 3,
+    "weighting_field_ele_num" : 3,
+    "field_shift_x" : 90,
 
     "doping":{
         "Acceptors" : "2.0e19*step(0.3e-4-x)",

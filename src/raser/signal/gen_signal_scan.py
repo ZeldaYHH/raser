@@ -90,7 +90,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
     # Note: TTree.Branch() needs the binded variable (namely the address) to be valid and the same while Fill(), 
     # so don't put the Branch() into other methods/functions!
 
-    if my_d.det_model == "strip":
+    if "strip" in my_d.det_model:
         tree_ct = ROOT.TTree("tree", "Waveform Data")
         tree_ct.Branch("time", time, "time[{length}]/D".format(length=length))
         data_ct = []
@@ -126,7 +126,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            if my_d.det_model == "strip":
+            if "strip" in my_d.det_model:
                 my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
                 ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier, seed=event, is_cut=True)
             else:
@@ -150,7 +150,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
                 
             tree_cu.Fill()
 
-            if my_d.det_model == "strip":
+            if "strip" in my_d.det_model:
                 for j in range(my_current.cross_talk_cu[0].GetNbinsX()):
                     time[j] = j*my_current.cross_talk_cu[0].GetBinWidth(j)
                 for i in range(len(my_current.cross_talk_cu)):
@@ -185,7 +185,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
     tree_cu.Write()
     file_cu.Close()
 
-    if my_d.det_model == "strip":
+    if "strip" in my_d.det_model:
         output_file_ct = os.path.join(output(__file__, my_d.det_name, 'batch'),"signal_ct"+str(instance_number)+".root")
         file_ct = ROOT.TFile(output_file_ct, "RECREATE")
         tree_ct.Write()

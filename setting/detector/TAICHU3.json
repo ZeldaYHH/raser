@@ -7,6 +7,13 @@
     "l_y" : 1500,
     "l_z" : 20,
 
+    "p_x" : 25.0,
+    "p_y" : 25.0,
+    "read_ele_num" : 3600,
+    "weighting_field_ele_num" : 9,
+    "field_shift_x" : 25,
+    "field_shift_y" : 25,
+
     "doping":{
         "Acceptors" : "1e12",
         "Donors" : "0"
@@ -46,9 +53,6 @@
     },
 
     "g4experiment" : "telescope",
-    "p_x" : 25.0,
-    "p_y" : 25.0,
-
     "amplifier" : "Broad_Band_UCSC",
     "daq" : "Alibava"
 }
