@@ -138,7 +138,7 @@ def remove_none(list):
     return new_list
 
 class WaveformStatistics():
-    def __init__(self, input_path, read_ele_num, threshold, output_path):
+    def __init__(self, input_path, read_ele_num, threshold, output_path, vis=False):
         self.ToA_data = []
         self.ToT_data = []
         self.amplitude_data = []
@@ -162,26 +162,28 @@ class WaveformStatistics():
             tree = file_pointer.Get("tree")
             for i in range(tree.GetEntries()):
                 tree.GetEntry(i) 
-                iw = InputWaveform(tree, threshold)
+                iw = InputWaveform(tree, threshold, read_ele_num)
                 self.fill_data(iw.data)
-                for j in range(read_ele_num):
-                    self.waveforms[j].append(iw.waveforms[j])
+                if vis == True:
+                    for j in range(read_ele_num):
+                        self.waveforms[j].append(iw.waveforms[j])
 
-        for j in range(read_ele_num):
-            canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-            multigraph = ROOT.TMultiGraph("mg","")
-            count = 0
-            for waveform in (self.waveforms[j]):
-                if count > 100:
-                    break
-                x = [float(i[0]) for i in waveform]
-                y = [float(i[1]) for i in waveform]
-                graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
-                multigraph.Add(graph)
-                count += 1
-            multigraph.Draw("APL")
-            canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
-            canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
+        if vis == True:
+            for j in range(read_ele_num):
+                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                multigraph = ROOT.TMultiGraph("mg","")
+                count = 0
+                for waveform in (self.waveforms[j]):
+                    if count > 100:
+                        break
+                    x = [float(i[0]) for i in waveform]
+                    y = [float(i[1]) for i in waveform]
+                    graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
+                    multigraph.Add(graph)
+                    count += 1
+                multigraph.Draw("APL")
+                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
+                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
 
         self.time_resolution_fit(self.ToA_data, "ToA")
         self.time_resolution_fit(self.ToR_data, "ToR")
