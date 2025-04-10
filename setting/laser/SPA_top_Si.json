@@ -8,7 +8,7 @@
 
     "wavelength" : 660,
     "temporal_FWHM" : 5e-9,
-    "pulse_energy" : 3e-15,
+    "pulse_energy" : 1e-12,
     "spacial_FWHM" : 5,
     "central_time" : 10e-9,
 

@@ -108,8 +108,8 @@ class LaserInjection():
         self.ionized_pairs = list(np.ravel(self.projGrid))
 
         # seperate the carrier groups to simulate diffusion
-        group_unit = 100 # the max number of carriers in one group
-        cut = 0.1
+        group_unit = 1000 # the max number of carriers in one group
+        cut = 1
         temp_position, temp_pairs = [],[]
         for position, pairs in zip(self.track_position, self.ionized_pairs):
             if pairs < cut:

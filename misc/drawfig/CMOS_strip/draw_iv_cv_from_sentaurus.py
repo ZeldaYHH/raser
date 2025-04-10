@@ -62,9 +62,6 @@ def func_c(c):
 def func_1_c_2(c):
     return 1/(float(c)*areafactor)**2 
 
-draw(os.path.join(path, "iv_2k_150um"), func_x=func_v, func_y=func_i, y_title="Current [A]")
-draw(os.path.join(path, "iv_4k_150um"), func_x=func_v, func_y=func_i, y_title="Current [A]")
-draw(os.path.join(path, "cv_2k_150um"), func_x=func_v, func_y=func_c, y_title="Capacitance [F]")
-draw(os.path.join(path, "cv_4k_150um"), func_x=func_v, func_y=func_c, y_title="Capacitance [F]")
-draw(os.path.join(path, "cv_2k_150um"), func_x=func_v, func_y=func_1_c_2, y_title="1/C^2 [1/(F)^2]", tag="_1_c_2")
-draw(os.path.join(path, "cv_4k_150um"), func_x=func_v, func_y=func_1_c_2, y_title="1/C^2 [1/(F)^2]", tag="_1_c_2")
+draw(os.path.join(path, "iv_2k_180um"), func_x=func_v, func_y=func_i, y_title="Current [A]")
+draw(os.path.join(path, "cv_2k_180um"), func_x=func_v, func_y=func_c, y_title="Capacitance [F]")
+draw(os.path.join(path, "cv_2k_180um"), func_x=func_v, func_y=func_1_c_2, y_title="1/C^2 [1/(F)^2]", tag="_1_c_2")
