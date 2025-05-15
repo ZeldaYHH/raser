@@ -62,8 +62,9 @@ class Amplifier:
     def __init__(self, currents: list[ROOT.TH1F], amplifier_name: str, seed = 0, CDet = None, is_cut = False):
         self.amplified_currents = []
         self.read_ele_num = len(currents)
-        self.time_unit = currents[0].GetXaxis().GetBinWidth(1)
+        self.time_unit = 10e-12
         # TODO: need to set the time unit corresponding to the oscilloscope or the TDC 
+        # TODO: and consistent with the time unit in gen_signal_scan.py
 
         ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier_name + ".json"
         ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier_name + ".cir"
@@ -353,6 +354,8 @@ class Amplifier:
         return tmp_cirs, raws
 
     def read_raw_file(self, raws):
+        time_limit = 100e-9
+        # TODO: the time limit should be consistent with the time limit in gen_signal_scan.py
         for i in range(self.read_ele_num):
             raw = raws[i]
             with open(raw, 'r') as f:
@@ -364,7 +367,7 @@ class Amplifier:
                     volt.append(float(line.split()[1])*1e3) # convert V to mV
 
             self.amplified_currents.append(ROOT.TH1F("electronics %s"%(self.name)+str(i+1), "electronics %s"%(self.name),
-                                int(time[-1]/self.time_unit),0,time[-1]))
+                                int(time_limit/self.time_unit),0,time[-1]))
             # the .raw input is not uniform, so we need to slice the time range
             filled = set()
             for j in range(len(time)):

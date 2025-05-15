@@ -374,8 +374,9 @@ class WaveformStatistics():
         
         try:
             mid = sorted(data)[int(len(data)/2)]
-        except ValueError:
+        except IndexError:
             print("No valid data for "+model)
+            return
         x2_min = mid-2
         x2_max = mid+2
         n2_bin = 100
