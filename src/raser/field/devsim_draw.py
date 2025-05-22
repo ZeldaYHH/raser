@@ -251,18 +251,20 @@ def draw1D(x,y,title,xtitle,ytitle,v,path):
     canvas.SaveAs(os.path.join(path, title+"{}_1d.png".format(v)))
 
 def draw2D(x,y,value,title,v,path):
-    # graph = ROOT.TGraph2D()
-    # for i in range(len(x)):
-    #     graph.SetPoint(i, y[i]*1e4, x[i]*1e4, value[i]) 
-    # canvas = ROOT.TCanvas("canvas", title, 1700, 1000)
-    # graph.Draw("CONT4Z")
-    # canvas.Draw()
-    # graph.GetXaxis().SetTitle("x [um]")
-    # graph.GetYaxis().SetTitle("z [um]")
+    graph = ROOT.TGraph2D()
+    for i in range(len(x)):
+        graph.SetPoint(i, y[i]*1e4, x[i]*1e4, value[i]) 
+    canvas = ROOT.TCanvas("canvas", title, 1700, 1000)
+    graph.Draw("CONT4Z")
+    canvas.Draw()
+    graph.GetXaxis().SetTitle("x [um]")
+    graph.GetYaxis().SetTitle("z [um]")
     
-    # graph.SetTitle(title)
-    # canvas.SaveAs(os.path.join(path, title+"{}_2d.png".format(v)))
-    # canvas.SaveAs(os.path.join(path, title+"{}_2d.root".format(v)))
+    graph.SetTitle(title)
+    canvas.SaveAs(os.path.join(path, title+"{}_2d.png".format(v)))
+    canvas.SaveAs(os.path.join(path, title+"{}_2d.root".format(v)))
+    """
+    #title = str(title)
     graph = ROOT.TGraph2D()
     graph_1d = ROOT.TGraph()
     j = 0
@@ -273,7 +275,7 @@ def draw2D(x,y,value,title,v,path):
         if abs(y[i]*1e4 - y_middle) < 0.1 :
             graph_1d.SetPoint(j, x[i]*1e4,value[i])
             j=j+1
-    canvas = ROOT.TCanvas("canvas", title, 1000, int(1000*x_middle/y_middle))
+    canvas = ROOT.TCanvas("canvas",title, 1000, int(1000*x_middle/y_middle))
     canvas.SetRightMargin(0.15)
     graph.Draw("CONT4Z")
     canvas.Draw()
@@ -290,4 +292,5 @@ def draw2D(x,y,value,title,v,path):
     graph_1d.GetYaxis().SetTitle("Potential")
     canvas1.SaveAs(os.path.join(path, title+"{}_1d.png".format(v)))
     canvas1.SaveAs(os.path.join(path, title+"{}_1d.root".format(v)))
+    """
 
