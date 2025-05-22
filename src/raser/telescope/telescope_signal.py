@@ -15,13 +15,13 @@ ROOT.gROOT.SetBatch(True)
 import acts
 import numpy as np
 
-from interaction.g4_telescope import TelescopeParticles
+from interaction.g4_telescope import TelescopeG4Interaction
 from device.build_device import Detector
 from current.cal_current_diffuse import CalCurrentDiffuse
 from util.output import create_path
 
 class Telescope:
-    def __init__(self,my_d,my_g4p,my_c):
+    def __init__(self,my_d,my_g4,my_c):
         """
         Description:
             Telescope spatical resolution analysis, only consider vertical layer, ignore alignment
@@ -50,8 +50,8 @@ class Telescope:
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
         self.pixelsize_z = my_d.l_z
-        self.layer_z = my_g4p.ltz
-        self.seedcharge = my_g4p.seedcharge
+        self.layer_z = my_g4.ltz
+        self.seedcharge = my_g4.seedcharge
         
         #IO and mid paras
         self.Clusters = []
@@ -385,13 +385,13 @@ class island:
 
 #interface to generate simple examples for  debugging
 class PixelHitTest:
-    def __init__(self,my_d,my_g4p):
+    def __init__(self,my_d,my_g4):
         self.event = []
         
         if my_d == 0:
             raise TypeError(my_d)
             
-        self.layer_z = my_g4p.ltz
+        self.layer_z = my_g4.ltz
         self.pixelsizex = my_d.p_x
         self.pixelsizey = my_d.p_y
         self.thickness = my_d.l_z
@@ -477,12 +477,12 @@ def draw_charge(my_charge):
 
 def main():
     my_d = Detector("TAICHU3") #remain the same
-    my_g4p = TelescopeParticles(my_d, my_d.g4experiment) #remove my_f
-    my_hit_charge = CalCurrentDiffuse(my_d,my_g4p)
+    my_g4 = TelescopeG4Interaction(my_d, my_d.g4experiment) #remove my_f
+    my_hit_charge = CalCurrentDiffuse(my_d,my_g4)
     draw_charge(my_hit_charge)
-    my_telescope_charge = Telescope(my_d,my_g4p,my_hit_charge) 
-    my_hit_test = PixelHitTest(my_d, my_g4p)
-    my_telescope_test = Telescope(my_d,my_g4p,my_hit_test)
+    my_telescope_charge = Telescope(my_d,my_g4,my_hit_charge) 
+    my_hit_test = PixelHitTest(my_d, my_g4)
+    my_telescope_test = Telescope(my_d,my_g4,my_hit_test)
 
 def taichu_v2(label=""):
     #virtual object

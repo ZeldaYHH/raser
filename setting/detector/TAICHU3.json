@@ -9,7 +9,8 @@
 
     "p_x" : 25.0,
     "p_y" : 25.0,
-    "read_ele_num" : 3600,
+    "x_ele_num" : 60,
+    "y_ele_num" : 60,
 
     "doping":{
         "Acceptors" : "1e12",

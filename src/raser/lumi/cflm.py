@@ -9,7 +9,7 @@ import json
 
 X_position, Z_position,  Y_position, Particle = [], [], [], []
 
-class cflmG4Particles:
+class cflmG4Interaction:
 
     def __init__(self, my_d):
 

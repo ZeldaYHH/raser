@@ -19,7 +19,7 @@ ROOT.gROOT.SetBatch(True)
 import geant4_pybind as g4b
 
 from device import build_device as bdv
-from interaction import g4_general as g4g
+from interaction.interaction import GeneralG4Interaction
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe import readout as rdo
@@ -38,7 +38,7 @@ def main(kwargs):
     Function or class:
         Detector -- Define the basic parameters and mesh structure of the detector
         DevsimField -- Get the electric field and weighting potential 
-        Particles -- Electron and hole paris distibution
+        G4Interaction -- Electron and hole paris distibution
         CalCurrent -- Drift of e-h pais and induced current
         Amplifier -- Readout electronics simulation  
     Modify:
@@ -60,7 +60,7 @@ def main(kwargs):
             amplifier = my_d.amplifier
     
         g4_seed = random.randint(0,1e7)
-        my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
+        my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed)
 
         voltage_max = int(kwargs['voltage'])
         for i in range(1,abs(voltage_max)+1):
@@ -76,12 +76,12 @@ def main(kwargs):
                 my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 1, my_d.l_z)
 
             
-            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
+            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
             now = time.strftime("%Y_%m%d_%H%M%S")
             path = output(__file__, my_d.det_name, now)
 
-            #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-            draw_drift_path(my_d,my_g4p,my_f,my_current,path)
+            #energy_deposition(my_g4)   # Draw Geant4 depostion distribution
+            draw_drift_path(my_d,my_g4,my_f,my_current,path)
 
             my_current.save_current(my_d)
             if 'ngspice' not in amplifier:
@@ -106,7 +106,7 @@ def main(kwargs):
             amplifier = my_d.amplifier
     
         g4_seed = random.randint(0,1e7)
-        my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
+        my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed)
 
         voltage_max = int(my_d.voltage)
         for i in range(500,abs(voltage_max)+1,10):
@@ -119,17 +119,17 @@ def main(kwargs):
             
             my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
             
-            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
+            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
             # if "strip" in det_name:
-            #     my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
+            #     my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4, 0)
             # else: 
-            #     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
+            #     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
 
             now = time.strftime("%Y_%m%d_%H%M%S")
             path = output(__file__, my_d.det_name, now)
 
-            #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-            draw_drift_path(my_d,my_g4p,my_f,my_current,path)
+            #energy_deposition(my_g4)   # Draw Geant4 depostion distribution
+            draw_drift_path(my_d,my_g4,my_f,my_current,path)
 
             my_current.save_current(my_d)
             if 'ngspice' not in amplifier:

@@ -631,8 +631,8 @@ class CalCurrentGain(CalCurrent):
                                         self.n_bin, self.t_start, self.t_end))
 
 class CalCurrentG4P(CalCurrent):
-    def __init__(self, my_d, my_f, my_g4p, batch):
-        G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4p, batch)
+    def __init__(self, my_d, my_f, my_g4, batch):
+        G4P_carrier_list = CarrierListFromG4P(my_d.material, my_g4, batch)
         super().__init__(my_d, my_f, G4P_carrier_list.ionized_pairs, G4P_carrier_list.track_position)
         if self.read_ele_num > 1:
             #self.cross_talk()

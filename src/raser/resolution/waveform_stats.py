@@ -32,10 +32,8 @@ class InputWaveform():
         self.threshold = threshold
         self.amplitude_threshold = amplitude_threshold
 
-        time = input_entry.time
         for i in range(read_ele_num):
-            amp = eval(f"input_entry.data_amp_{i}")
-            self.waveforms[i] = list(zip(time, amp))
+            self.waveforms[i] = eval(f"input_entry.amplified_waveform_{i}")
             self.amplitude[i], self.peak_time[i] = get_amplitude(self.waveforms[i])
             if self.amplitude[i] < self.threshold:
                 self.amplitude[i] = 0
@@ -82,39 +80,57 @@ class InputWaveform():
             self.data["charge"] = get_total_amp(self.charge, 1e5)
             self.data["ToR"] = get_conjoined_time(self.ToR) # TODO: conjoint measurement
 
-def get_ToA(waveform, threshold, peak_time):
-    for i in waveform[peak_time::-1]:
-        if abs(float(i[1])) < threshold:
-            return float(i[0])
+def get_ToA(hist, threshold, peak_time_bin):
+    for i in range(peak_time_bin, 0, -1):
+        content = hist.GetBinContent(i)
+        if abs(content) < threshold:
+            return hist.GetBinCenter(i)
+    return None
 
-def get_ToT(waveform, threshold, peak_time):
-    for i in waveform[peak_time::-1]:
-        if abs(float(i[1])) < threshold:
-            start = float(i[0])
+def get_ToT(hist, threshold, peak_time_bin):
+    start = None
+    for i in range(peak_time_bin, 0, -1):
+        content = abs(hist.GetBinContent(i))
+        if content < threshold:
+            start = hist.GetBinCenter(i)
             break
-    else:
-        return 0
-    for i in waveform[peak_time:]:
-        if abs(float(i[1])) < threshold:
-            end = float(i[0])
+    if start is None:
+        return 0.0
+    end = None
+    for i in range(peak_time_bin, hist.GetNbinsX() + 1):
+        content = abs(hist.GetBinContent(i))
+        if content < threshold:
+            end = hist.GetBinCenter(i)
             break
-    else:
-        return 0
+    if end is None:
+        return 0.0
     return end - start
 
-def get_amplitude(waveform):
-    return max(abs(float(i[1])) for i in waveform), waveform.index(max(waveform, key=lambda x: abs(float(x[1]))))
+def get_amplitude(hist):
+    max_val = 0.0
+    peak_bin = 0
+    for i in range(1, hist.GetNbinsX() + 1):
+        content = abs(hist.GetBinContent(i))
+        if content > max_val:
+            max_val = content
+            peak_bin = i
+    return max_val, peak_bin
 
-def get_charge(waveform):
-    return abs(sum(float(i[1]) for i in waveform))
+def get_charge(hist):
+    charge = 0.0
+    for i in range(1, hist.GetNbinsX() + 1):
+        charge += abs(hist.GetBinContent(i))
+    return charge
 
-def get_ToR(waveform, CFD, peak_time):
-    # CFD = Constant Fraction Discriminator
-    amplitude = waveform[peak_time][1]
-    for i in waveform[peak_time::-1]:
-        if abs(float(i[1])) > amplitude * CFD:
-            return float(i[0])
-        
+def get_ToR(hist, CFD, peak_time_bin):
+    amplitude = abs(hist.GetBinContent(peak_time_bin))
+    target = amplitude * CFD
+    for i in range(peak_time_bin, 0, -1):
+        content = abs(hist.GetBinContent(i))
+        if content > target:
+            return hist.GetBinCenter(i)
+    return None
+
 def get_conjoined_time(time_list):
     # TODO: conjoint measurement
     new_list = remove_none(time_list)
@@ -187,7 +203,7 @@ class WaveformStatistics():
         files = os.listdir(input_path)
         files.sort()
         for file in files:
-            if '.root' not in file or "amp" not in file:
+            if '.root' not in file:
                 continue
             
             path = os.path.join(input_path, file)
@@ -358,8 +374,9 @@ class WaveformStatistics():
         
         try:
             mid = sorted(data)[int(len(data)/2)]
-        except ValueError:
+        except IndexError:
             print("No valid data for "+model)
+            return
         x2_min = mid-2
         x2_max = mid+2
         n2_bin = 100

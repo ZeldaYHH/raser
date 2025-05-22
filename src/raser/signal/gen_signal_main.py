@@ -19,7 +19,9 @@ ROOT.gROOT.SetBatch(True)
 import geant4_pybind as g4b
 
 from device import build_device as bdv
-from interaction import g4_general as g4g
+from interaction.interaction import GeneralG4Interaction
+from interaction.detector_construction import GeneralDetectorConstruction
+from interaction.action_initialization import GeneralActionInitialization
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from current.cross_talk import cross_talk
@@ -39,7 +41,7 @@ def main(kwargs):
     Function or class:
         Detector -- Define the basic parameters and mesh structure of the detector
         DevsimField -- Get the electric field and weighting potential 
-        Particles -- Electron and hole paris distibution
+        G4Interaction -- Electron and hole paris distibution
         CalCurrent -- Drift of e-h pais and induced current
         Amplifier -- Readout electronics simulation  
     Modify:
@@ -71,8 +73,8 @@ def main(kwargs):
     my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
     
     g4_seed = random.randint(0,1e7)
-    my_g4p = g4g.Particles(my_d, g4experiment, g4_seed, g4_vis)
-    my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
+    my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed, g4_vis)
+    my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
     ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
     if "strip" in my_d.det_model:
         my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
@@ -82,8 +84,8 @@ def main(kwargs):
 
     now = time.strftime("%Y_%m%d_%H%M%S")
     path = output(__file__, my_d.det_name, now)
-    #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
-    draw_drift_path(my_d,my_g4p,my_f,my_current,path)
+    #energy_deposition(my_g4)   # Draw Geant4 depostion distribution
+    draw_drift_path(my_d,my_g4,my_f,my_current,path)
     my_current.draw_currents(path) # Draw current
     if "strip" in my_d.det_model:
         ele_current.draw_waveform(my_current.cross_talk_cu, path) # Draw waveform

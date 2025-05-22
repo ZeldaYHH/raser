@@ -47,7 +47,7 @@ def get_signal():
     
     my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
 
-    my_g4p = bmos.bmosG4Particles(my_d)
+    my_g4 = bmos.bmosG4Interaction(my_d)
 
     output_path = "output/bmos/"
     tag = f"{g4_dic['par_type']}_{g4_dic['par_energy']}MeV_{g4_dic['par_num']}particle"
@@ -56,8 +56,8 @@ def get_signal():
     pwl_name = f"pwl{g4_dic['CurrentName'].split('.')[0]}_{tag}.txt"
     filename_after_ngspice = f"UCSC_output_{tag}.raw"
     
-    for i in range(len(my_g4p.p_steps_current)):
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, i)
+    for i in range(len(my_g4.p_steps_current)):
+        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, i)
 
         save_current(my_current, output_path, root_name, pwl_name, 1)
 

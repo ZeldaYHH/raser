@@ -94,3 +94,6 @@ From: raser-2.3.sif
     # cd build 
     # ../configure --with-arch=rv32i --prefix=/opt/riscv32i 
     # make -j$(nproc) 
+
+    # # X11 test
+    # apt-get install x11-apps mesa-utils

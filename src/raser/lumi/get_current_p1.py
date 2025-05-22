@@ -36,12 +36,12 @@ def main():
        
        try:
            result_message = "Execution completed successfully"
-           my_g4p = cflm_p1.cflmPixelG4Particles(my_d, i, j, l)
-           if my_g4p.HitFlag == 0:
+           my_g4 = cflm_p1.cflmPixelG4Interaction(my_d, i, j, l)
+           if my_g4.HitFlag == 0:
                print("No secondary particles hit the detector")
            else:
                 print(f'detector_{l}_{i}_{j}')
-                my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, -1)
+                my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
                 save_current(my_current, g4_dic, det_dic['read_out_contact'], i, j, l)
        except Exception as e:
            result_message = f"Error: {e}"

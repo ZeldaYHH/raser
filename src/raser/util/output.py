@@ -9,9 +9,11 @@ def output(current_file_path, *label):
     Notice: Do not iterate this function. One call per use.
     '''
     destination_directories = os.path.dirname(current_file_path).split(os.sep)
+    inner_raser_flag = False
     for i in range(len(destination_directories)-1, -1, -1):
-        if destination_directories[i] == 'raser':
+        if destination_directories[i] == 'raser' and not inner_raser_flag:
             destination_directories[i] = 'output'
+            inner_raser_flag = True
         if destination_directories[i] == 'src':
             destination_directories.pop(i)
     output_file_path = os.path.abspath(os.path.join(os.sep, *destination_directories, *label))

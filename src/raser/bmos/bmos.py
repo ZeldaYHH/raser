@@ -15,7 +15,7 @@ Y_position = []
 Particle = []
 
 
-class bmosG4Particles:
+class bmosG4Interaction:
 
     def __init__(self, my_d):
 

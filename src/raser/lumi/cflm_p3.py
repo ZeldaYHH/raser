@@ -11,7 +11,7 @@ for i in range(30):
     pixelZIndex.append(i)
 pixelYIndex = [-3, -2, -1, 0, 1, 2]
 
-class cflmPixelG4Particles:
+class cflmPixelG4Interaction:
 
     def __init__(self, my_d, i, j):
 
@@ -436,7 +436,7 @@ def main():
    det_name = det_dic['det_name']
    my_d = bdv.Detector(det_name)
    
-   my_g4p = cflmPixelG4Particles(my_d, i=0, j=0)    
+   my_g4 = cflmPixelG4Interaction(my_d, i=0, j=0)    
 
 if __name__ == '__main__':
     main()

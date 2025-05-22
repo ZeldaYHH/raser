@@ -29,9 +29,9 @@ def main(kwargs):
         Parameters of simulation
     Function or class:
         Detector -- Define the basic parameters and mesh structure of the detector
-        DevsimCal -- Get the electric field and weighting potential 
-        Particles -- Electron and hole paris distibution
-        CalCurrent -- Drift of e-h pais and induced current
+        DevsimField -- Get the electric field and weighting potential 
+        Laser -- Electron and hole pairs distibution
+        CalCurrent -- Drift of e-h pairs and induced current
         Amplifier -- Readout electronics simulation
     Modify:
     ---------

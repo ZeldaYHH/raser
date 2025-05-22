@@ -43,7 +43,8 @@ EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
-export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$dir_raser
+export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$HOME/.Xauthority,$dir_raser
+# notice: if home is binded, then the default path in the apptainer will change from current path to the home path
 # condor_config and redhat-release for hep_job
 export RASER_SETTING_PATH=$dir_raser/setting
 

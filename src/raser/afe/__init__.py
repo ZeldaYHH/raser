@@ -28,7 +28,7 @@ def main(kwargs):
 
             command_tail_list = args[args.index('afe')+1:]
             for file in files:
-                if '.root' not in file or "cu" not in file:
+                if '.root' not in file:
                     continue
                 file = os.path.join(input_path, file)
                 args = ['afe', '-job_file', file] + command_tail_list
