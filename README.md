@@ -22,6 +22,10 @@ If you install the softwares above, you need to change the ```dir_geant4_data```
 
 For external users, .sif should be in `img/`.
 
+For developer using vscode, we recommand you follow this instruction to let Pylance able to read Python packages inside the .sif: https://stackoverflow.com/questions/63604427/launching-a-singularity-container-remotely-using-visual-studio-code
+
+Notice that if you need to mount a symbol link to the .sif while entering the .sif by vscode, you need to mount their real paths too.
+
 .sif download link: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/rDAgsChX9inhX8u
 
 cvmfs setting tutorial: https://cvmfs.readthedocs.io/en/stable/cpt-quickstart.html

@@ -40,6 +40,29 @@ EOF
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 export IMGFILE=$dir_raser/img/raser-2.5.sif
 export BINDPATH=$dir_raser,/cvmfs
+# For vscode users entering .sif, the symbol links should be converted into real paths
+
+# 定义函数：将输入路径字符串中的软链接转换为真实路径，并按原顺序返回新字符串
+resolve_and_reorder() {
+    local input_str="$1"
+    IFS=',' read -ra paths <<< "$input_str"  # 分割输入字符串为数组
+
+    local resolved_paths=()
+    for path in "${paths[@]}"; do
+        # 检查路径是否为软链接，如果是则解析真实路径，否则保留原路径
+        if [ -L "$path" ]; then
+            resolved=$(readlink -f "$path")
+        else
+            resolved="$path"
+        fi
+        resolved_paths+=("$resolved")
+    done
+
+    # 按原顺序重新拼接为逗号分隔的字符串
+    IFS=','; echo "${resolved_paths[*]}"
+}
+
+export BINDPATH=$(resolve_and_reorder "$BINDPATH")
 
 export RASER_SETTING_PATH=$dir_raser/setting
 

@@ -43,9 +43,34 @@ EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
-export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$HOME/.Xauthority,$dir_raser
+export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$HOME/.Xauthority,$HOME/.vscode-server,$HOME/vscode-container,$dir_raser
 # notice: if home is binded, then the default path in the apptainer will change from current path to the home path
+# .Xauthority for G4 visualization, .vscode-server and .vscode-container for vscode remote development
 # condor_config and redhat-release for hep_job
+# For vscode users entering .sif, the symbol links should be converted into real paths
+
+# 定义函数：将输入路径字符串中的软链接转换为真实路径，并按原顺序返回新字符串
+resolve_and_reorder() {
+    local input_str="$1"
+    IFS=',' read -ra paths <<< "$input_str"  # 分割输入字符串为数组
+
+    local resolved_paths=()
+    for path in "${paths[@]}"; do
+        # 检查路径是否为软链接，如果是则解析真实路径，否则保留原路径
+        if [ -L "$path" ]; then
+            resolved=$(readlink -f "$path")
+        else
+            resolved="$path"
+        fi
+        resolved_paths+=("$resolved")
+    done
+
+    # 按原顺序重新拼接为逗号分隔的字符串
+    IFS=','; echo "${resolved_paths[*]}"
+}
+
+export BINDPATH=$(resolve_and_reorder "$BINDPATH")
+
 export RASER_SETTING_PATH=$dir_raser/setting
 
 # temporary solution for scipy import error
