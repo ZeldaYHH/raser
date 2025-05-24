@@ -34,7 +34,7 @@ G4LEVELGAMMADATA=$dir_geant4_data/PhotonEvaporation5.7
 G4RADIOACTIVEDATA=$dir_geant4_data/RadioactiveDecay5.6
 
 # Python 
-PYTHONPATH=$dir_raser/src/raser:/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
+PYTHONPATH=/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
 LD_LIBRARY_PATH=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb/lib64:/usr/local/share/root_install/lib:/.singularity.d/libs
 
 #pyMTL3 Verilator
