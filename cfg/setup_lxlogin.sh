@@ -34,7 +34,7 @@ G4LEVELGAMMADATA=$dir_geant4_data/PhotonEvaporation5.7
 G4RADIOACTIVEDATA=$dir_geant4_data/RadioactiveDecay5.6
 
 # Python 
-PYTHONPATH=$dir_raser/raser:/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
+PYTHONPATH=$dir_raser/src/raser:/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
 LD_LIBRARY_PATH=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb/lib64:/usr/local/share/root_install/lib:/.singularity.d/libs
 
 #pyMTL3 Verilator
@@ -45,7 +45,7 @@ export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
 export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$HOME/.Xauthority,$HOME/.vscode-server,$HOME/vscode-container,$dir_raser
 # notice: if home is binded, then the default path in the apptainer will change from current path to the home path
-# .Xauthority for G4 visualization, .vscode-server and .vscode-container for vscode remote development
+# $HOME/.Xauthority for G4 visualization, $HOME/.vscode-server and $HOME/.vscode-container for vscode remote development
 # condor_config and redhat-release for hep_job
 # For vscode users entering .sif, the symbol links should be converted into real paths
 
@@ -59,8 +59,16 @@ resolve_and_reorder() {
         # 检查路径是否为软链接，如果是则解析真实路径，否则保留原路径
         if [ -L "$path" ]; then
             resolved=$(readlink -f "$path")
-        else
-            resolved="$path"
+        else 
+            # 跳过不存在的路径
+            if [ -e "$path" ]; then
+                resolved="$path"
+            else 
+                if [ -z "$PS1" ]; then
+                    echo "Warning from raser setup: $path do not exist"
+                fi
+                continue
+            fi
         fi
         resolved_paths+=("$resolved")
     done
