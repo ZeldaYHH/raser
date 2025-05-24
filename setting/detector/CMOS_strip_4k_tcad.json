@@ -28,7 +28,7 @@
 
     "mesh" : "tcad_mesh",
 
-    "g4experiment" : "proton_source",
+    "g4experiment" : "proton_beam",
     "amplifier" : "ABCStar_fe",
     "daq" : "CMOS_strip"
 }

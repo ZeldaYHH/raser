@@ -34,15 +34,20 @@ class GeneralG4Interaction:
         with open(geant4_json) as f:
             g4_dic = json.load(f)
 
+        if 'par_randx' not in g4_dic:
+            g4_dic['par_randx'] = 0
+        if 'par_randy' not in g4_dic:
+            g4_dic['par_randy'] = 0
+
         self.geant4_model = g4_dic['geant4_model']
         detector_material=my_d.device_dict['material']
         my_g4d = MyDetectorConstruction(my_d,g4_dic,detector_material,g4_dic['maxstep'])
 
         g4_vis = g4_vis or g4_dic['g4_vis']
-        	
         if g4_vis: 
             ui = None
-            ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
+            ui = g4b.G4UIExecutive(1, [os.getcwd()]) # make sure the UI is created in the current working directory
+
         g4RunManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Default)
         rand_engine= g4b.RanecuEngine()
         g4b.HepRandom.setTheEngine(rand_engine)
@@ -58,7 +63,7 @@ class GeneralG4Interaction:
 
         #define action
         g4RunManager.SetUserInitialization(MyActionInitialization(
-                                          g4_dic['par_in'], g4_dic['par_out'], g4_dic['par_type'], g4_dic['par_energy'],
+                                          g4_dic['par_in'], g4_dic['par_out'], g4_dic['par_randx'], g4_dic['par_randy'], g4_dic['par_type'], g4_dic['par_energy'],
                                           self.eventIDs, self.edep_devices, self.p_steps, self.energy_steps, self.events_angles,
                                           self.geant4_model))
         if g4_vis:    
@@ -76,6 +81,8 @@ class GeneralG4Interaction:
         g4RunManager.BeamOn(int(g4_dic['total_events']))
         if g4_vis:  
             ui.SessionStart()
+            del ui
+
         self.init_tz_device = 0    
         self.p_steps_current=[[[single_step[0]+my_d.l_x/2,
                                 single_step[1]+my_d.l_y/2,

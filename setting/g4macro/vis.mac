@@ -1,5 +1,5 @@
 # Macro file for the visualization setting for the initialization phase 
-# of the CFLM when running in interactive mode
+# when running in interactive mode
 #
 
 # Use these open statements to open selected visualization
@@ -22,6 +22,7 @@
 # viewing in a VRML viewer:
 #/vis/open VRML2FILE
 #
+
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:
 /vis/viewer/set/autoRefresh true

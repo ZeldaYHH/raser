@@ -34,12 +34,6 @@ flag = 0
 
 # Geant4 main process
 class TelescopeG4Interaction(GeneralG4Interaction):
-    #model name for other class to use
-    _model = None
-    #other pars may use in other class define here
-    #use in pixel_detector
-    _randx = None
-    _randy = None
     def __init__(self, my_d, g4experiment, g4_seed = random.randint(0, 1e7), g4_vis = False):
         """
         Description:
@@ -60,8 +54,6 @@ class TelescopeG4Interaction(GeneralG4Interaction):
         with open(geant4_json) as f:
             g4_dic = json.load(f)
         # my_g4d = PixelDetectorConstruction(g4_dic,g4_dic['maxstep'])
-        TelescopeG4Interaction._randx = g4_dic['par_randx']
-        TelescopeG4Interaction._randy = g4_dic['par_randy']
 
         devicenames,localpositions=[],[]
         self.devicenames = devicenames
@@ -71,8 +63,8 @@ class TelescopeG4Interaction(GeneralG4Interaction):
 
         class WrappedTelescopeActionInitialization(TelescopeActionInitialization):
             # make sure the class has the same parameters as the original class
-            def __init__(self,par_in,par_out,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, geant4_model):
-                super().__init__(par_in,par_out,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, devicenames, localpositions, geant4_model)
+            def __init__(self,par_in,par_out,par_randx,par_randy,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, geant4_model):
+                super().__init__(par_in,par_out,par_randx,par_randy,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, devicenames, localpositions, geant4_model)
 
         super().__init__(my_d, g4experiment, g4_seed, g4_vis, PixelDetectorConstruction, WrappedTelescopeActionInitialization)
         print("end g4")
@@ -157,7 +149,7 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
                 p_natoms_1 = part['natoms_1']
                 p_natoms_2 = part['natoms_2']
                 p_density = part['density']*g4b.g/g4b.cm3
-                p_mixture=g4b.G4Material(part['mixture_name'],p_density,2) 
+                p_mixture = g4b.G4Material(part['mixture_name'],p_density,2) 
                 p_mixture.AddElement(p_element_1,p_natoms_1*g4b.perCent)
                 p_mixture.AddElement(p_element_2,p_natoms_2*g4b.perCent)
                 p_translation = g4b.G4ThreeVector(part['position_x']*g4b.um, part['position_y']*g4b.um, part['position_z']*g4b.um)
@@ -225,27 +217,6 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.fStepLimit.SetMaxAllowedStep(self.maxStep)
         return self.physical['world']
 
-class TelescopePrimaryGeneratorAction(GeneralPrimaryGeneratorAction):
-    "My Primary Generator Action"
-    def __init__(self,par_in,par_out,par_type,par_energy,geant4_model):
-        super().__init__(par_in,par_out,par_type,par_energy,geant4_model)
-
-    def GeneratePrimaries(self, event):
-        randx = TelescopeG4Interaction._randx
-        randy = TelescopeG4Interaction._randy
-        rdo_x = random.uniform(-randx,randx)
-        rdo_y = random.uniform(-randy,randy)
-        rdi_x = random.uniform(-randx,randx)
-        rdi_y = random.uniform(-randy,randy)
-        direction = g4b.G4ThreeVector(rdo_x,rdo_y,self.par_direction[2])
-        self.particleGun.SetParticleMomentumDirection(direction)
-        self.particleGun.SetParticlePosition(g4b.G4ThreeVector(self.position[0]*g4b.um,
-                                                self.position[1]*g4b.um,
-                                                self.position[2]*g4b.um))  
-        super().GeneratePrimaries(event)
-        #print("direction:",rdo_x-rdi_x,rdo_y-rdi_y,self.par_direction[2])
-        #print(rdi_x,rdi_y,self.position[2])
-
 class TelescopeEventAction(GeneralEventAction):
     "My Event Action"
     def __init__(self, runAction, point_in, point_out, eventIDs, edep_devices, p_steps, energy_steps, events_angles, devicenames, localpositions):
@@ -308,13 +279,15 @@ class TelescopeSteppingAction(GeneralSteppingAction):
             self.fEventAction.RecordPixel(step)
 
 class TelescopeActionInitialization(g4b.G4VUserActionInitialization):
-    def __init__(self,par_in,par_out,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, devicenames, localpositions, geant4_model):
+    def __init__(self,par_in,par_out,par_randx,par_randy,par_type,par_energy, eventIDs, edep_devices, p_steps, energy_steps, events_angles, devicenames, localpositions, geant4_model):
         g4b.G4VUserActionInitialization.__init__(self)
         self.par_in = par_in
         self.par_out = par_out
         self.par_type=par_type
         self.par_energy=par_energy
         self.geant4_model=geant4_model
+        self.par_randx = par_randx
+        self.par_randy = par_randy
 
         self.eventIDs = eventIDs
         self.edep_devices = edep_devices
@@ -325,8 +298,13 @@ class TelescopeActionInitialization(g4b.G4VUserActionInitialization):
         self.localpositions = localpositions
 
     def Build(self):
-        self.SetUserAction(TelescopePrimaryGeneratorAction(self.par_in, self.par_out, self.par_type, self.par_energy,
-                                                           self.geant4_model))
+        self.SetUserAction(GeneralPrimaryGeneratorAction(self.par_in, 
+                                                         self.par_out,
+                                                         self.par_randx, 
+                                                         self.par_randy, 
+                                                         self.par_type, 
+                                                         self.par_energy, 
+                                                         self.geant4_model))
         # global myRA_action
         myRA_action = GeneralRunAction()
         self.SetUserAction(myRA_action)
