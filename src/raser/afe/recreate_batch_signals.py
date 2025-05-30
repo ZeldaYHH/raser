@@ -36,15 +36,17 @@ def main(amp_name, det_name, file_name, tct=None):
     new_tree = tree.CloneTree(0)
     new_tree.SetName("new_tree")
 
+    if "strip" in my_d.det_model:
+        temp_cross_talked_current = cross_talk(det_name, current)
+    else:
+        temp_cross_talked_current = current
+
     n = tree.GetEntries()
     for i in range(n):
         tree.GetEntry(i)
         for j in range(my_d.read_ele_num):
             cross_talked_current[j].Reset()
-            if "strip" in my_d.det_model:
-                cross_talked_current[j].Add(cross_talk(current[j]))
-            else:
-                cross_talked_current[j].Add(current[j])
+            cross_talked_current[j].Add(temp_cross_talked_current[j])
 
         amp = Amplifier(cross_talked_current, amp_name, seed=i)
         for j in range(my_d.read_ele_num):

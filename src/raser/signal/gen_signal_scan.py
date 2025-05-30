@@ -67,6 +67,7 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
     current_duration = 10e-9
     amplified_waveform_time_bin = 10e-12 # TODO: relate this to setting in readout.py
     amplified_waveform_duration = 100e-9
+    # TODO: make the time setting match the .tran in the .cir file
     current = [ROOT.TH1F("current_%s"%(i), "current_%s"%(i), int(current_duration/current_time_bin), 0, current_duration) for i in range(my_d.read_ele_num)]
     cross_talked_current = [ROOT.TH1F("cross_talked_current_%s"%(i), "cross_talked_current_%s"%(i), int(current_duration/current_time_bin), 0, current_duration) for i in range(my_d.read_ele_num)]
     amplified_waveform = [ROOT.TH1F("amplified_waveform_%s"%(i), "amplified_waveform_%s"%(i), int(amplified_waveform_duration/amplified_waveform_time_bin), 0, amplified_waveform_duration) for i in range(my_d.read_ele_num)]
@@ -85,7 +86,7 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, event-start_n)
 
             if "strip" in my_d.det_model:
-                my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
+                my_current.cross_talk_cu = cross_talk(my_d.det_name, my_current.sum_cu)
             else:
                 my_current.cross_talk_cu = my_current.sum_cu
 

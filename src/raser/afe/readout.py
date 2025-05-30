@@ -21,6 +21,8 @@ import re
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
+from .ngspice import set_ngspice_input
+from .ngspice import set_tmp_cir
 from util.math import signal_convolution
 from util.output import output
 from util.output import delete_file
@@ -64,7 +66,7 @@ class Amplifier:
         self.read_ele_num = len(currents)
         self.time_unit = 10e-12
         # TODO: need to set the time unit corresponding to the oscilloscope or the TDC 
-        # TODO: and consistent with the time unit in gen_signal_scan.py
+        # TODO: and consistent with the time unit in gen_signal_batch.py
 
         ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier_name + ".json"
         ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier_name + ".cir"
@@ -82,11 +84,12 @@ class Amplifier:
 
         elif os.path.exists(ele_cir):
             self.name = amplifier_name
-            input_current_strs = self.set_ngspice_input(currents)
+            input_current_strs = set_ngspice_input(currents)
             time_stamp = time.time_ns()
             pid = os.getpid()
             # stamp and thread name for avoiding file name conflict
-            tmp_cirs, raws = self.set_tmp_cir(input_current_strs, ele_cir, str(time_stamp)+"_"+str(pid))
+            path = output(__file__, self.name)
+            tmp_cirs, raws = set_tmp_cir(self.read_ele_num, path, input_current_strs, ele_cir, str(time_stamp)+"_"+str(pid))
             for i in range(self.read_ele_num):
                 subprocess.run(['ngspice -b '+tmp_cirs[i]], shell=True)
             self.read_raw_file(raws)
@@ -194,33 +197,7 @@ class Amplifier:
                 
             self.pulse_responce_list = [pulse_responce_Broad_Band]
             self.scale = scale_Broad_Band
-
-        elif self.amplifier_parameters['ele_name'] == 'ABCStar_fe':
-            """ ABCStar Front-end Amplifier parameter initialization"""
-
-            def pulse_responce_ABCStar_fe_input(t):
-                if t < 0:
-                    return 0
-                input_res = self.amplifier_parameters['input_res']
-                return 1/(1e-12*CDet) * math.exp(-t/(1e-12*CDet*input_res))
             
-            def pulse_responce_ABCStar_fe_RCfeedback(t):
-                if t < 0:
-                    return 0
-                input_res = self.amplifier_parameters['input_res']
-                Cf = self.amplifier_parameters['Cf']
-                Rf = self.amplifier_parameters['Rf']
-                tau_amp = 1e-12 * Cf * input_res
-                tau_f = 1e-12 * Cf * Rf
-                return 1/tau_amp * math.exp(-t/tau_f)
-            
-            def scale_ABCStar_fe(output_Q_max, input_Q_tot):
-                """ ABCStar Front-end Amplifier scale function"""
-                return 1000.0 # V to mV
-            
-            self.pulse_responce_list = [pulse_responce_ABCStar_fe_input, pulse_responce_ABCStar_fe_RCfeedback]
-            self.scale = scale_ABCStar_fe
-
 
     def fill_amplifier_output(self, currents: list[ROOT.TH1F]):
         for i in range(self.read_ele_num):
@@ -256,105 +233,10 @@ class Amplifier:
                 return
             else:
                 self.amplified_currents[i].Reset()
-    
-    def set_ngspice_input(self, currents: list[ROOT.TH1F]):
-        # TODO: check the cuts and refine the code
-        input_current_strs = []
-        for i in range(self.read_ele_num):
-            cu = currents[i]
-            current = []
-            time = []
-            for j in range(cu.GetNbinsX()):
-                current.append(cu.GetBinContent(j))
-                time.append(j*cu.GetBinWidth(0))
-            input_c = []
-            if abs(min(current))>max(current): #set input signal
-                c_max=min(current)
-                for i in range(0, len(current)):
-                    if current[i] < c_max * 0.01:
-                        input_c.append(str(0))
-                        input_c.append(str(0))
-                        input_c.append(str(time[i]))
-                        input_c.append(str(0))
-                        break
-                    else:
-                        current[i]=0
-                for j in range(i, len(current)):
-                    input_c.append(str(time[j]))
-                    input_c.append(str(current[j]))
-                    if current[j] > c_max * 0.01:
-                        break
-                input_c.append(str(time[j]))
-                input_c.append(str(0))
-                input_c.append(str(time[len(time)-1]))
-                input_c.append(str(0))
-                for k in range(j, len(current)):
-                    current[i]=0
-            else:
-                c_max=max(current)
-                for i in range(0, len(current)):
-                    current[i]=0
-                    if current[i] > c_max * 0.01:
-                        input_c.append(str(0))
-                        input_c.append(str(0))
-                        input_c.append(str(time[i]))
-                        input_c.append(str(0))
-                        break
-                for j in range(i, len(current)):
-                    input_c.append(str(time[j]))
-                    input_c.append(str(current[j]))
-                    if current[j] < c_max * 0.01:
-                        break
-                input_c.append(str(time[j]))
-                input_c.append(str(0))
-                input_c.append(str(time[len(time)-1]))
-                input_c.append(str(0))
-                for k in range(j, len(current)):
-                    current[i]=0
-
-            input_current_strs.append(','.join(input_c))
-        return input_current_strs
-    
-    def set_tmp_cir(self, input_current_strs, ele_cir, label=None):
-        if label is None:
-            label = ''
-        path = output(__file__, self.name)
-        tmp_cirs = []
-        raws = []
-        with open(ele_cir, 'r') as f_in:
-            lines = f_in.readlines()
-            for j in range(self.read_ele_num):
-                new_lines = lines.copy()
-                input_c = input_current_strs[j]
-                if self.read_ele_num==1:
-                    tmp_cir = "{}/{}_tmp.cir".format(path, label)
-                    raw = "{}/{}.raw".format(path, label)
-                else:
-                    tmp_cir = '{}/{}{}_tmp.cir'.format(path, label, "No."+str(j))
-                    raw = '{}/{}{}.raw'.format(path, label, "No."+str(j))
-
-                tmp_cirs.append(tmp_cir)
-                raws.append(raw)
-
-                for i in range(len(new_lines)):
-                    if new_lines[i].startswith('I1'):
-                        # replace pulse by PWL
-                        new_lines[i] = re.sub(r"pulse" + r".*", 'PWL('+str(input_c)+') \n', new_lines[i], flags=re.IGNORECASE)
-                    if new_lines[i].startswith('wrdata'):
-                        # replace output file name & path
-                        new_lines[i] = re.sub(r".*" + r".raw", "wrdata"+" "+raw, new_lines[i], flags=re.IGNORECASE)
-                    if new_lines[i].startswith('noise') or new_lines[i].startswith('setplot') or new_lines[i].endswith('onoise_spectrum\n'):
-                        # skip noise spectrum calculation
-                        new_lines[i] = '* skipped: ' + new_lines[i]
-                with open(tmp_cir, 'w+') as f_out:
-                    f_out.writelines(new_lines)
-                    f_out.close()
-            f_in.close()
-
-        return tmp_cirs, raws
 
     def read_raw_file(self, raws):
         time_limit = 100e-9
+        # TODO: make this match the .tran in the .cir file
         # TODO: the time limit should be consistent with the time limit in gen_signal_scan.py
         for i in range(self.read_ele_num):
             raw = raws[i]

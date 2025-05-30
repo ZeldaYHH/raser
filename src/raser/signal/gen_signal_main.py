@@ -75,9 +75,8 @@ def main(kwargs):
     g4_seed = random.randint(0,1e7)
     my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed, g4_vis)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
-    ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
     if "strip" in my_d.det_model:
-        my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
+        my_current.cross_talk_cu = cross_talk(det_name, my_current.sum_cu)
         ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier)
     else:
         ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)

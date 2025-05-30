@@ -24,7 +24,7 @@ V7 Net-_C3-Pad1_ 0 DC 1.5 AC 1
 V3 Net-_U2-V+_ 0 DC 15 
 XU2 0 Net-_U2--_ Net-_U2-V+_ Net-_U2-V-_ IN3 kicad_builtin_opamp POLE=6.25Meg GAIN=251 VOFF=0
 I1 0 IN1 PULSE( 0 0.3uA 0n 1p 1p 3.333n 1 0 ) AC 1  
-C1 IN1 0 6p
+C1 IN1 0 2.5p
 R2 Net-_U1--_ IN1 1kOhm
 
 .control
@@ -34,11 +34,11 @@ noise v(OUT4) V1 dec 100 100Hz 100GHz
 * <frequency range start, need be with unit> <frequency range end> <noise generator contribution frequency>
 setplot noise1
 * plot with noise spectrum
-wrdata output/elec/ABCStar_fe/noise.raw onoise_spectrum
+wrdata output/afe/ABCStar_fe/noise.raw onoise_spectrum
 
 tran 0.1n 100n
 * <step> <stopping time>
-wrdata output/elec/ABCStar_fe/tran.raw v(OUT4)
+wrdata output/afe/ABCStar_fe/tran.raw v(OUT4)
 * save raw data
 .endc
 
