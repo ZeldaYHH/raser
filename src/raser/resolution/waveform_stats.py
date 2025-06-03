@@ -616,7 +616,7 @@ def main(kwargs):
     if kwargs['irradiation'] != None:
         my_d.irradiation_flux = float(kwargs['irradiation'])
     if kwargs['g4experiment'] != None:
-        my_d.g4_experiment = kwargs['g4experiment']
+        my_d.g4experiment = kwargs['g4experiment']
     if kwargs['amplifier'] != None:
         my_d.amplifier = kwargs['amplifier']
     if kwargs['daq'] != None:

@@ -48,6 +48,7 @@ class Detector:
 
         self.g4experiment = self.device_dict['g4experiment']
         self.amplifier = self.device_dict['amplifier']
+        self.daq = self.device_dict['daq']
 
         if "strip" in self.det_model:
             self.x_ele_num = self.device_dict['read_ele_num']
