@@ -67,11 +67,11 @@ class loop_section():
             electron_current = devsim.get_contact_current(device=self.device, contact=circuit_contact, equation="ElectronContinuityEquation")
             hole_current     = devsim.get_contact_current(device=self.device, contact=circuit_contact, equation="HoleContinuityEquation")
             total_current    = electron_current + hole_current
-            self.current.append(total_current)
+            self.current.append(total_current*area_factor)
             if self.solve_model == "cv":
                 devsim.circuit_alter(name="V1", value=v_current)
                 devsim.solve(type="ac", frequency=self.paras["frequency"])
-                cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*self.paras["frequency"])
+                cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*self.paras["frequency"]) # pF/cm^dim
                 self.capacitance.append(cap*area_factor)
             if self.solve_model == "noise":
                 devsim.solve(type="noise", frequency=self.paras["frequency"],output_node="V1.I")

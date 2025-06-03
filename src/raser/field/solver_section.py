@@ -36,11 +36,11 @@ paras = {
     "milestone_mode" : True,
     "milestone_step" : 100.0,
 
-    "max_voltage_step" :8,
-    "increase_factor": 2,
-    "decrease_factor":0.1,
+    "max_voltage_step" :8.0,
+    "increase_factor": 2.0,
+    "decrease_factor":0.5,
 
-    "voltage_step" : 1,
+    "voltage_step" : 1.0,
     "acreal" : 1.0, 
     "acimag" : 0.0,
     "frequency" : 1000.0,
@@ -97,26 +97,26 @@ def main (kwargs):
     else:
         impact_model=None
         
-    circuit_contacts=[]
     if is_wf == True:
+        readout_contacts=[]
         if MyDetector.device_dict.get("mesh", {}).get("2D_mesh", {}).get("ac_contact"):
             print("=========RASER info===================\nACLGAD is simulating\n=============info====================")
             for read_out_electrode in MyDetector.device_dict["mesh"]["2D_mesh"]["ac_contact"]:
-                circuit_contacts.append(read_out_electrode["name"])
-            for i,c in enumerate(circuit_contacts):
+                readout_contacts.append(read_out_electrode["name"])
+            for i,c in enumerate(readout_contacts):
                 devsim.circuit_element(name="V{}".format(i+1), n1=physics_drift_diffusion.GetContactBiasName(c), n2=0,
                         value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
         else:
             print("===============RASER info===================\nNot AC detector\n===========info=============")
             for read_out_electrode in MyDetector.device_dict["read_out_contact"]:
-                circuit_contacts.append(read_out_electrode)
-            for i,c in enumerate(circuit_contacts):
+                readout_contacts.append(read_out_electrode["name"])
+            for i,c in enumerate(readout_contacts):
                 devsim.circuit_element(name="V{}".format(i+1), n1=physics_drift_diffusion.GetContactBiasName(c), n2=0,
                         value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
             
     else:
-        circuit_contacts = MyDetector.device_dict['bias']['electrode']
-        devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName(circuit_contacts), n2=0,
+        bias_contact = MyDetector.device_dict['bias']['electrode']
+        devsim.circuit_element(name="V1", n1=physics_drift_diffusion.GetContactBiasName(bias_contact), n2=0,
                            value=0.0, acreal=paras['acreal'], acimag=paras['acimag'])
     T1 = time.time()
     print("================RASER info============\nWelcome to RASER TCAD PART, mesh load successfully\n=============info===============")
@@ -143,7 +143,7 @@ def main (kwargs):
     if is_wf == True:
         v_current=1
         print("=======RASER info========\nBegin simulation WeightingField\n======================")
-        for contact in circuit_contacts:
+        for contact in readout_contacts:
             print(path)
             folder_path = os.path.join(path, "weightingfield")
             print(folder_path)
@@ -156,14 +156,14 @@ def main (kwargs):
             loop.initial_solver(contact=contact,set_contact_type=None,impact_model=impact_model,irradiation_model=irradiation_model,irradiation_flux=irradiation_flux)
             loop.loop_solver(circuit_contact=contact,v_current=v_current,area_factor=paras["area_factor"])
 
-            save_milestone.save_milestone(device=device, region=region, v=v_current, path=folder_path,dimension=default_dimension,contact=contact,is_wf=is_wf)
+            save_milestone.save_milestone(device=device, region=region, v=v_current, path=folder_path,dimension=default_dimension,contact_name=contact,is_wf=is_wf)
             devsim.write_devices(file=os.path.join(folder_path,"weightingfield.dat"), type="tecplot")
             
     elif is_wf == False:
-        loop.initial_solver(contact=circuit_contacts, set_contact_type=None, impact_model=impact_model, irradiation_model=irradiation_model, irradiation_flux=irradiation_flux)
+        loop.initial_solver(contact=bias_contact, set_contact_type=None, impact_model=impact_model, irradiation_model=irradiation_model, irradiation_flux=irradiation_flux)
         v_current = 0
         if v_goal is None:
-            v_goal = MyDetector.device_dict['bias']['voltage']
+            v_goal = float(MyDetector.device_dict['bias']['voltage'])
         voltage_step = 1.0 
         if v_goal > 0:
             voltage_step = paras['voltage_step']
@@ -172,17 +172,18 @@ def main (kwargs):
         max_voltage_step = paras['max_voltage_step']
 
         step_too_small = False
+        voltage_milestones = [n*voltage_step for n in range(1, int(abs(v_goal)/abs(voltage_step)) + 1)]
         while abs(v_current) <= abs(v_goal):
             v_last = v_current
             try:
-                loop.loop_solver(circuit_contact=circuit_contacts, v_current=v_current, area_factor=paras["area_factor"])
+                loop.loop_solver(circuit_contact=bias_contact, v_current=v_current, area_factor=paras["area_factor"])
                 if abs(voltage_step) < max_voltage_step:
-                    voltage_step = voltage_step *paras['increase_factor']
+                    voltage_step = voltage_step * paras['increase_factor']
                 else:
                     pass
                 print("=========RASER info===========\nConvergence success, voltage = {}, increased voltage step = {}\n================".format(v_current, voltage_step))      
             except devsim.error as msg:
-                if str(msg).find("Convergence failure") != 0:
+                if str(msg).find("Convergence failure") == -1:
                     raise
                 voltage_step *= paras['decrease_factor'] 
 
@@ -193,17 +194,27 @@ def main (kwargs):
                     break  
                 continue  
             if (paras['milestone_mode'] and abs(v_current % paras['milestone_step']) < 0.01 * paras['voltage_step']) or abs(abs(v_current) - abs(v_goal)) < 0.01 * paras['milestone_step']:
-                save_milestone.save_milestone(device=device, region=region, v=v_current, path=path, dimension=default_dimension, contact=circuit_contacts, is_wf=is_wf)
+                save_milestone.save_milestone(device=device, region=region, v=v_current, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
                 dd = os.path.join(path, str(v_current) + 'V.dd')
                 devsim_device = os.path.join(path, str(v_current) + 'V.devsim')
                 devsim.write_devices(file=dd, type="tecplot")
                 devsim.write_devices(file=devsim_device, type="devsim")
             v_current = v_last + voltage_step 
 
+
             if abs(v_current) > abs(v_goal):
                 v_current = v_goal
-                loop.loop_solver(circuit_contact=circuit_contacts, v_current=v_current, area_factor=paras["area_factor"])
+                loop.loop_solver(circuit_contact=bias_contact, v_current=v_current, area_factor=paras["area_factor"])
+                if (paras['milestone_mode']):
+                    save_milestone.save_milestone(device=device, region=region, v=v_current, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
+                    dd = os.path.join(path, str(v_current) + 'V.dd')
+                    devsim_device = os.path.join(path, str(v_current) + 'V.devsim')
+                    devsim.write_devices(file=dd, type="tecplot")
+                    devsim.write_devices(file=devsim_device, type="devsim")
                 break
+
+            if abs(v_current) > abs(voltage_milestones[0]):
+                v_current = voltage_milestones.pop(0)
 
         else:
             print("Loop completed successfully.")

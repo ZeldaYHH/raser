@@ -70,8 +70,8 @@ def milestone_save_1D(device, region, v, path, is_tcad):
             data['metadata'] = metadata
             pickle.dump(data, file)
 
-def milestone_save_wf_1D(device, region, v, path, contact, is_tcad):
-    save_wf_path = os.path.join(path, contact)
+def milestone_save_wf_1D(device, region, v, path, contact_name, is_tcad):
+    save_wf_path = os.path.join(path, contact_name)
     create_path(save_wf_path)
     
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x")) # get x-node values
@@ -162,8 +162,8 @@ def milestone_save_2D(device, region, v, path, is_tcad):
             pickle.dump(data, file)
 
 
-def milestone_save_wf_2D(device, region, v, path, contact, is_tcad):
-    save_wf_path = os.path.join(path,contact)
+def milestone_save_wf_2D(device, region, v, path, contact_name, is_tcad):
+    save_wf_path = os.path.join(path,contact_name)
     create_path(save_wf_path)
 
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x")) # get x-node values
@@ -198,28 +198,28 @@ def milestone_save_3D(device, region, v, path, is_tcad):
     # not finished
     pass
 
-def milestone_save_wf_3D(device, region, v, path, contact, is_tcad):
+def milestone_save_wf_3D(device, region, v, path, contact_name, is_tcad):
     # not finished
     pass
 
-def save_milestone(device, region, v, path, dimension, contact, is_wf, is_tcad = False):
-    if dimension ==1 :
+def save_milestone(device, region, v, path, dimension, contact_name, is_wf, is_tcad = False):
+    if dimension == 1:
         if is_wf == True:
-            milestone_save_wf_1D(device, region, v, path, contact, is_tcad)
+            milestone_save_wf_1D(device, region, v, path, contact_name, is_tcad)
         elif is_wf == False:
             milestone_save_1D(device, region, v, path, is_tcad)
         else:
             print("==========RASER info ==========\nis_wf only has 2 values, True or False\n==========Error=========")
     if dimension == 2:
         if is_wf == True:
-            milestone_save_wf_2D(device, region, v, path, contact, is_tcad)
+            milestone_save_wf_2D(device, region, v, path, contact_name, is_tcad)
         elif is_wf == False:
             milestone_save_2D(device, region, v, path, is_tcad)
         else:
             print("==========RASER info ==========\nis_wf only has 2 values, True or False\n==========Error=========")
     if dimension == 3:
         if is_wf == True:
-            milestone_save_wf_3D(device, region, v, path, contact, is_tcad)
+            milestone_save_wf_3D(device, region, v, path, contact_name, is_tcad)
         elif is_wf == False:
             milestone_save_3D(device, region, v, path, is_tcad)
         else:
