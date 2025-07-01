@@ -7,11 +7,15 @@ import geant4_pybind as g4b
 import json
 
 pixelAreaZIndex = []
-for i in range(40):
+for i in range(2):
     pixelAreaZIndex.append(i)
-pixelAreaYIndex = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]
+pixelAreaYIndex = []
+for y in range(-3, 3):
+    pixelAreaYIndex.append(y) 
 
-class cflmPixelG4Interaction:
+output_path = "src/raser/lumi/output/N0_3_4"
+
+class cflmPixelG4Particles:
 
     def __init__(self, my_d, i, j, l):
 
@@ -35,9 +39,9 @@ class cflmPixelG4Interaction:
                     s_p_steps[f'detector_{k}'][f'{m}_{n}'] = []
                     s_energy_steps[f'detector_{k}'][f'{m}_{n}'] = []
         
-        json_s_p_steps_path = 'output/lumidSides/pixel/s_p_steps.json'                           #
-        json_s_energy_steps_path = 'output/lumidSides/pixel/s_energy_steps.json'                 #
-        json_s_edep_devices_path = 'output/lumidSides/pixel/s_edep_devices.json'                 #
+        json_s_p_steps_path = os.path.join(output_path, "s_p_steps.json")                        
+        json_s_energy_steps_path = os.path.join(output_path, "s_energy_steps.json")           
+        json_s_edep_devices_path = os.path.join(output_path, "s_edep_devices.json")          
                                         
         if os.path.exists(json_s_p_steps_path) and os.path.exists(json_s_energy_steps_path) and os.path.exists(json_s_edep_devices_path):
            if l=='I':
@@ -57,7 +61,7 @@ class cflmPixelG4Interaction:
               elif i<0:
                  y_position = ((i + 1) * 5 - 2.5)
                     
-              z_position = (j * 5 + 2.5)
+              z_position = (j * 5 + 2.5 + 225)
 
               self.HitFlag = 0  
               if len(self.p_steps[0]) != 1:
@@ -84,7 +88,7 @@ class cflmPixelG4Interaction:
               elif i<0:
                  y_position = ((i + 1) * 5 - 2.5)
                     
-              z_position = (j * 5 + 2.5)
+              z_position = (j * 5 + 2.5 + 225)
                     
               self.HitFlag = 0  
               if len(self.p_steps[0]) != 1:
@@ -96,7 +100,7 @@ class cflmPixelG4Interaction:
                               for single_step in p_step] for p_step in self.p_steps]
         
         else:       
-            geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p1.json"    #
+            geant4_json = 'setting/g4experiment/cflm_p1.json'
             with open(geant4_json) as f:
                 g4_dic = json.load(f)
 
@@ -132,13 +136,6 @@ class cflmPixelG4Interaction:
             SaveJson(s_p_steps, json_s_p_steps_path)
             SaveJson(s_energy_steps, json_s_energy_steps_path)
             SaveJson(s_edep_devices, json_s_edep_devices_path)
-            print('*******************************************************************************')
-            print(f'{json_s_p_steps_path} has been created successfully!')
-            print(f'{json_s_energy_steps_path} has been created successfully!')
-            print(f'{json_s_edep_devices_path} has been created successfully!')
-            print('Secondary particle distribution has been created successfully!')
-            print('Energy deposition of whole detector has been created successfully!')
-            print('*******************************************************************************')
         def __del__(self):
             pass
 
@@ -152,20 +149,19 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.physical = {}
         self.checkOverlaps = True
         self.create_world(g4_dic['world'])
+        self.detector_list = []
+        self.detector_pos_list = []
 
         self.maxStep = g4_dic['maxStep']*g4b.um
 
         self.rotation = g4b.G4RotationMatrix()
         self.rotation.rotateZ(3*math.pi/2)
         
-        for object_type in g4_dic['object']:
-            if(object_type=="elemental"):
-                for every_object in g4_dic['object'][object_type]:
-                    self.create_elemental(g4_dic['object'][object_type][every_object])
-            if(object_type=="binary_compounds"):
-                for every_object in g4_dic['object'][object_type]:
-                    self.detMaterial(g4_dic['object'][object_type][every_object])
-                    self.SiCdetector(g4_dic['object'][object_type][every_object])
+        self.create_pipe(g4_dic['pipe'])
+
+        self.detMaterial()
+        self.SiCdetector()
+        self.create_vacuum(g4_dic['vacuum'])
 
         self.fStepLimit = g4b.G4UserLimits(self.maxStep)
         
@@ -173,15 +169,15 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
             for j in pixelAreaZIndex:
                 for k in ('I', 'II'):
                     self.logical[f'detector_{k}_{i}_{j}'].SetUserLimits(self.fStepLimit)
-
+        
     def create_world(self,world_type):
 
         self.nist = g4b.G4NistManager.Instance()
         material = self.nist.FindOrBuildMaterial(world_type)
         self.solid['world'] = g4b.G4Box("world",
-                                        800*g4b.mm,
-                                        800*g4b.mm,
-                                        800*g4b.mm)
+                                        2000*g4b.mm,
+                                        2000*g4b.mm,
+                                        2000*g4b.mm)
         self.logical['world'] = g4b.G4LogicalVolume(self.solid['world'],
                                                     material,
                                                     "world")
@@ -196,40 +192,65 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
         self.logical['world'].SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
-
-    def create_elemental(self,object):
-        
-            material_type = self.nist.FindOrBuildMaterial(object['material'],
-                                                        False)
-
-            translation = g4b.G4ThreeVector(object['position_x']*g4b.mm, object['position_y']*g4b.mm, object['position_z']*g4b.mm)
-            visual = g4b.G4VisAttributes(g4b.G4Color(object['colour'][0],object['colour'][1],object['colour'][2]))
-            visual.SetForceSolid(True)
-            mother = self.physical['world']
-
-            Rmin = object['Rmin']*g4b.mm
-            Rmax = object['Rmax']*g4b.mm
-            Pipe_Z = object['Pipe_Z']*g4b.mm
-            PipeSphi = object['PipeSphi']*g4b.deg
-            PipeDphi = object['PipeDphi']*g4b.deg
-
-            self.solid['pipe'] = g4b.G4Tubs("Pipe",
-                                            Rmin, Rmax, Pipe_Z/2,PipeSphi,PipeDphi)
-
-            self.logical['pipe'] = g4b.G4LogicalVolume(self.solid['pipe'],
-                                                       material_type,
-                                                       'pipe')
-            self.physical['pipe'] = g4b.G4PVPlacement(self.rotation,
-                                                      translation,
-                                                      'pipe',
-                                                      self.logical['pipe'],
-                                                      mother, 
-                                                      False,
-                                                      0,
-                                                      self.checkOverlaps)
-            self.logical['pipe'].SetVisAttributes(visual)                                                                                                                                  
     
-    def SiCdetector(self, object):
+    def create_pipe(self,object):
+        
+        pipe_name = object['name']
+        material_type = self.nist.FindOrBuildMaterial(object['material'],
+                                                    False)
+
+        translation = g4b.G4ThreeVector(object['position_x']*g4b.mm, object['position_y']*g4b.mm, object['position_z']*g4b.mm)
+        visual = g4b.G4VisAttributes(g4b.G4Color(0, 0, 0, 0.1))
+        visual.SetForceWireframe(True)
+        visual.SetForceAuxEdgeVisible(True)
+        mother = self.physical['world']
+
+        Rmin = object['Rmin']*g4b.mm
+        Rmax = object['Rmax']*g4b.mm
+        Pipe_Z = object['Pipe_Z']*g4b.mm
+        PipeSphi = object['PipeSphi']*g4b.deg
+        PipeDphi = object['PipeDphi']*g4b.deg
+
+        self.solid[pipe_name] = g4b.G4Tubs("Pipe", Rmin, Rmax, Pipe_Z/2,PipeSphi,PipeDphi)
+
+        self.logical[pipe_name] = g4b.G4LogicalVolume(self.solid[pipe_name],
+                                                    material_type,
+                                                    pipe_name)
+        self.physical[pipe_name] = g4b.G4PVPlacement(self.rotation,
+                                                    translation,
+                                                    pipe_name,
+                                                    self.logical[pipe_name],
+                                                    mother, 
+                                                    False,
+                                                    0,
+                                                    self.checkOverlaps)
+        self.logical[pipe_name].SetVisAttributes(visual)                                                                                                                                  
+
+    def create_vacuum(self, object):
+
+        vacuum_name = object['name']
+        material_type = g4b.G4Material("Galactic", z=1, a=1.01*g4b.g/g4b.mole, density=g4b.universe_mean_density, state=g4b.kStateGas, temp=2.73*g4b.kelvin, pressure=3e-18*g4b.pascal)
+
+        translation = g4b.G4ThreeVector(object['position_x']*g4b.mm, object['position_y']*g4b.mm, object['position_z']*g4b.mm)
+        visual = g4b.G4VisAttributes(g4b.G4Color(object['colour'][0],object['colour'][1],object['colour'][2]))
+        mother = self.physical['world']
+
+        VACmin =  object['VACmin']*g4b.mm
+        VACmax = object['VACmax']*g4b.mm
+        VAC_Z = object['VAC_Z']*g4b.mm
+        VACSphi = object['VACSphi']*g4b.mm
+        VACDphi = object['VACDphi']*g4b.mm
+
+        self.solid[vacuum_name] = g4b.G4Tubs(vacuum_name, VACmin, VACmax, VAC_Z/2, VACSphi, VACDphi)
+
+        self.logical[vacuum_name] = g4b.G4LogicalVolume(self.solid[vacuum_name], material_type, vacuum_name)
+        self.physical[vacuum_name] = g4b.G4PVPlacement(self.rotation, translation, vacuum_name, self.logical[vacuum_name], mother, False, 0, self.checkOverlaps)
+
+    def Construct(self): 
+        self.fStepLimit.SetMaxAllowedStep(self.maxStep)       
+        return self.physical['world']     
+        
+    def SiCdetector(self):
         for k in (-31.05, 31.05):
             for i in pixelAreaYIndex: 
                 for j in pixelAreaZIndex:
@@ -241,9 +262,9 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
                         print(name)
                     if i>=0:
                         y_position = (i * 5 + 2.5) * g4b.mm
-                        z_position = (j * 5 + 2.5) * g4b.mm
+                        z_position = (j * 5 + 2.5 + 225) * g4b.mm
                         translation = g4b.G4ThreeVector(k * g4b.mm, y_position, z_position)
-                        visual = g4b.G4VisAttributes(g4b.G4Color(0, 0.5, 0.8))
+                        visual = g4b.G4VisAttributes(g4b.G4Color(1, 0.6, 0))
                         mother = self.physical['world']
                         sidex = 5 * g4b.mm
                         sidey = 0.1 * g4b.mm
@@ -256,9 +277,9 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
                         self.logical[name].SetVisAttributes(visual)
                     if i<0:
                         y_position = ((i + 1) * 5 - 2.5) * g4b.mm
-                        z_position = (j * 5 + 2.5) * g4b.mm
+                        z_position = (j * 5 + 2.5 + 225) * g4b.mm
                         translation = g4b.G4ThreeVector(k * g4b.mm, y_position, z_position)
-                        visual = g4b.G4VisAttributes(g4b.G4Color(object['colour'][0], object['colour'][1], object['colour'][2]))
+                        visual = g4b.G4VisAttributes(g4b.G4Color(1, 0.6, 0))
                         mother = self.physical['world']
                         sidex = 5 * g4b.mm
                         sidey = 0.1 * g4b.mm
@@ -270,13 +291,13 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
                         self.physical[name] = g4b.G4PVPlacement(self.rotation, translation, name, self.logical[name], mother, False, 0, self.checkOverlaps)
                         self.logical[name].SetVisAttributes(visual)
 
-    def detMaterial(self, object):
-        material_1 = self.nist.FindOrBuildElement(object['material_1'], False)
-        material_2 = self.nist.FindOrBuildElement(object['material_2'], False)
-        material_density = object['density']*g4b.g/g4b.cm3
-        self.compound = g4b.G4Material(object['compound_name'], material_density, 2)
-        self.compound.AddElement(material_1, object['natoms_1']*g4b.perCent)
-        self.compound.AddElement(material_2, object['natoms_2']*g4b.perCent)
+    def detMaterial(self):
+        material_1 = self.nist.FindOrBuildElement("Si", False)
+        material_2 = self.nist.FindOrBuildElement("C", False)
+        material_density = 3.2*g4b.g/g4b.cm3
+        self.compound = g4b.G4Material("SiC", material_density, 2)
+        self.compound.AddElement(material_1, 50*g4b.perCent)
+        self.compound.AddElement(material_2, 50*g4b.perCent)
 
         return self.compound
     
@@ -418,7 +439,7 @@ class cflmaActionInitialization(g4b.G4VUserActionInitialization):
         self.numofgun = numofgun
 
     def BuildForMaster(self):
-        self.SetUserAction(cflmRunAction(self.PosBaseName))
+        self.SetUserAction(cflmRunAction())
     def Build(self):
         self.SetUserAction(cflmPrimaryGeneratorAction(self.par_in,
                                                       self.par_direct,
@@ -447,9 +468,9 @@ def dividedAreaEdep(detectorID, pixelAreaEdep):
    
     i_value, j_value, valueEdep = array.array('d',[999.]), array.array('d',[999.]), array.array('d',[999.])
     
-    file_I = ROOT.TFile("output/lumidSides/pixel/detector_I_pixelEdep.root", "RECREATE")
+    file_I = ROOT.TFile(os.path.join(output_path, " detector_I_pixelEdep.root"), "RECREATE") 
     tree_I = ROOT.TTree("DetectorID", "DetectorID")
-    file_II = ROOT.TFile("output/lumidSides/pixel/detector_II_pixelEdep.root", "RECREATE")
+    file_II = ROOT.TFile(os.path.join(output_path, " detector_II_pixelEdep.root"), "RECREATE")
     tree_II = ROOT.TTree("DetectorID", "DetectorID")
 
     tree_I.Branch("i", i_value, 'i/D')
@@ -481,22 +502,47 @@ def SaveJson(dic, dicFile):
     print(f'{dicFile} has been created successfully!')
 
 def main():
-    
-    from device import build_device as bdv
-    
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/cflm_p1.json"
+        
+    geant4_json = 'setting/g4experiment/cflm_p1.json'    #
     with open(geant4_json) as f:
-            g4_dic = json.load(f)
-
-    detector_json = os.getenv("RASER_SETTING_PATH")+"/detector/"
-    with open(os.path.join(detector_json , g4_dic['DetModule'])) as q:
-            det_dic = json.load(q)
-
-    det_name = det_dic['det_name']
-    my_d = bdv.Detector(det_name)
+         g4_dic = json.load(f)
     
-    my_g4 = cflmPixelG4Interaction(my_d, i=0, j=0, l=0)
-       
+    if g4_dic['vis']:
+        runManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Serial)
+
+        physicsList = g4b.FTFP_BERT()
+        physicsList.RegisterPhysics(g4b.G4StepLimiterPhysics())
+        runManager.SetUserInitialization(physicsList)
+
+        detConstruction = cflmDetectorConstruction(g4_dic)
+        runManager.SetUserInitialization(detConstruction)
+
+        visManager = g4b.G4VisExecutive()
+        visManager.Initialize()
+        UImanager = g4b.G4UImanager.GetUIpointer()
+
+        UImanager.ApplyCommand("/control/execute param_file/g4macro/init_vis.mac")
+        UImanager.ApplyCommand('/run/initialize')
+        UImanager.ApplyCommand('/tracking/verbose 0')
+        UImanager.ApplyCommand("/vis/viewer/set/background 1 1 1")
+        
+        UImanager.ApplyCommand('/vis/ogl/set/printMode vectored')
+        UImanager.ApplyCommand('/vis/ogl/export')
+
+        for i in range(1000):
+            UImanager.ApplyCommand("/vis/viewer/refresh") 
+    else:
+        
+        from device import build_device as bdv
+        detector_json = "setting/detector/"
+        with open(os.path.join(detector_json , g4_dic['DetModule'])) as q:
+             det_dic = json.load(q)
+
+        det_name = det_dic['det_name']
+        my_d = bdv.Detector(det_name)
+   
+        my_g4p = cflmPixelG4Particles(my_d, i=0, j=0, l="I")  
+
 if __name__ == '__main__':
     main()       
 

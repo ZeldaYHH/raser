@@ -3,8 +3,8 @@
     "det_model" : "planar",
     "material" : "SiC",
 
-    "l_x" : 50000,
-    "l_y" : 200000,
+    "l_x" : 5000,
+    "l_y" : 5000,
     "l_z" : 100,
 
     "doping":{
