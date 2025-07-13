@@ -20,17 +20,18 @@ ROOTSYS=/usr/local/share/root_install
 
 # Geant4 
 GEANT4_INSTALL=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb
-G4ENSDFSTATEDATA=$dir_geant4_data/G4ENSDFSTATE2.3
+G4ENSDFSTATEDATA=$dir_geant4_data/G4ENSDFSTATE3.0
 G4PIIDATA=$dir_geant4_data/G4PII1.3
-G4INCLDATA=$dir_geant4_data/G4INCL1.0
-G4LEDATA=$dir_geant4_data/G4EMLOW7.13
-G4PARTICLEXSDATA=$dir_geant4_data/G4PARTICLEXS3.1.1
-G4NEUTRONHPDATA=$dir_geant4_data/G4NDL4.6
+G4INCLDATA=$dir_geant4_data/G4INCL1.2
+G4LEDATA=$dir_geant4_data/G4EMLOW8.6.1
+G4PARTICLEXSDATA=$dir_geant4_data/G4PARTICLEXS4.1
+G4NEUTRONHPDATA=$dir_geant4_data/G4NDL4.7.1
 G4SAIDXSDATA=$dir_geant4_data/G4SAIDDATA2.0
 G4REALSURFACEDATA=$dir_geant4_data/RealSurface2.2
-G4ABLADATA=$dir_geant4_data/G4ABLA3.1
-G4LEVELGAMMADATA=$dir_geant4_data/PhotonEvaporation5.7
-G4RADIOACTIVEDATA=$dir_geant4_data/RadioactiveDecay5.6
+G4ABLADATA=$dir_geant4_data/G4ABLA3.3
+G4LEVELGAMMADATA=$dir_geant4_data/PhotonEvaporation6.1
+G4RADIOACTIVEDATA=$dir_geant4_data/RadioactiveDecay6.1.2
+G4CHANNELINGDATA=$dir_geant4_data/G4CHANNELING1.0
 
 # Python 
 PYTHONPATH=$dir_raser/raser:/usr/local/share/root_install/lib:$GEANT4_INSTALL/install/lib64/python3.6/site-packages:/usr/local/share/acts_build/python
@@ -42,7 +43,7 @@ EOF
 
 export PATH=$PATH
 export IMGFILE=$dir_raser/img/raser-2.5.sif
-export BINDPATH=$dir_raser, $dir_geant4_data, $GEANT4_INSTALL
+export BINDPATH=$dir_raser,$dir_geant4_data,$GEANT4_INSTALL
 # For vscode users entering .sif, the symbol links should be converted into real paths
 
 # 定义函数：将输入路径字符串中的软链接转换为真实路径，并按原顺序返回新字符串
