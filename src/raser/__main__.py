@@ -57,7 +57,7 @@ parser_interaction.add_argument('label', help='LABEL to identify particle-matter
 parser_interaction.add_argument('-v', '--verbose', help='VERBOSE level', 
                           action='count', default=0)
 
-parser_lumi = subparsers.add_parser('lumi', help='CEPC Fast Luminosity Measurement')
+parser_lumi = subparsers.add_parser('lumi', help='CEPC Fast Luminosity Monitor')
 parser_lumi.add_argument('label', help='LABEL to identify CFLM simulations')
 parser_lumi.add_argument('-v', '--verbose', help='VERBOSE level', 
                           action='count', default=0)
