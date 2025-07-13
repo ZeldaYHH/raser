@@ -1,16 +1,19 @@
 # Setup raser environment     
 
-echo "Setting up raser ..."
+if [ -z "$PS1" ]; then
+    echo "Setting up raser ..."
+fi
 
 dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
-dir_geant4_data=/cvmfs/geant4.cern.ch/share/data
-GEANT4_INSTALL=/cvmfs/geant4.cern.ch/geant4/10.7.p02
+
+dir_geant4_data=/home/user/Geant4/geant4-v11.3.2-install/share/Geant4-11.3.2/data
+GEANT4_INSTALL=/home/user/Geant4/geant4-v11.3.2-install
 
 cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
 cat << EOF >> $cfg_env
 # PATH 
-PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/bin:\$PATH
+PATH=/bin:\$PATH
 
 # ROOT 
 ROOTSYS=/usr/local/share/root_install
@@ -37,9 +40,9 @@ LD_LIBRARY_PATH=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb/lib64:/usr/local/shar
 PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
-export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
+export PATH=$PATH
 export IMGFILE=$dir_raser/img/raser-2.5.sif
-export BINDPATH=$dir_raser,/cvmfs
+export BINDPATH=$dir_raser, $dir_geant4_data, $GEANT4_INSTALL
 # For vscode users entering .sif, the symbol links should be converted into real paths
 
 # 定义函数：将输入路径字符串中的软链接转换为真实路径，并按原顺序返回新字符串
