@@ -16,7 +16,7 @@ An environment with
     Geant4
         you need to change the ```dir_geant4_data``` and the ```GEANT4_INSTALL``` in cfg/setup.sh by your Geant4 data path and install path.
     A virtual environment with all other prerequisites, mainly all kinds of python packages
-        we recommand use apptainer and our .sif: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/rDAgsChX9inhX8u
+        we recommand use apptainer and our .sif: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/Gp2SQIXLOUcKh4C
         or you could refer to `cfg/raser.def`. 
 
 For external users, .sif should be in `img/`.
