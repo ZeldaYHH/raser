@@ -46,6 +46,11 @@ class Detector:
             self.irradiation_model = None
             self.irradiation_flux = 0
 
+        if "cross_talk" in self.device_dict:
+            self.cross_talk = self.device_dict['cross_talk']
+        else:
+            self.cross_talk = None
+
         self.g4experiment = self.device_dict['g4experiment']
         self.amplifier = self.device_dict['amplifier']
         self.daq = self.device_dict['daq']

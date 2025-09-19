@@ -37,7 +37,7 @@ def main(amp_name, det_name, file_name, tct=None):
     new_tree.SetName("new_tree")
 
     if "strip" in my_d.det_model:
-        temp_cross_talked_current = cross_talk(det_name, current)
+        temp_cross_talked_current = cross_talk(det_name, my_d.cross_talk, current)
     else:
         temp_cross_talked_current = current
 

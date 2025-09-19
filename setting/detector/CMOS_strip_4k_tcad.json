@@ -20,13 +20,20 @@
     },
     
     "temperature" : 300,
+    
+    "cross_talk" : "./setting/detector/CMOS_strip_tcad_cross_talk.cir",
 
     "area_factor" : 1,
     "default_dimension" : 2,
     "read_out_contact" : [{"x_span":2, "y_span":0, "name":"top"}],
     "field_shift_x" : 151,
 
-    "mesh" : "tcad_mesh",
+    "mesh" : {
+        "tcad_mesh" : {
+            "file" : "./output/field/CMOS_strip_4k_tcad/-300.0V.tdr"
+        }
+    },
+
 
     "g4experiment" : "proton_beam",
     "amplifier" : "ABCStar_fe",

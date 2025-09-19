@@ -46,7 +46,9 @@ class DevsimMesh():
             devsim.add_1d_mesh_line(mesh=mesh_name, **mesh_line)
         if (self.solve_paras["weightfield"] == True) :
             for region in mesh["region"]:
-                region["material"] = "gas"
+                if region["material"] != "air":
+                    # air for space for electrode, gas for relpacement of semiconductor
+                    region["material"] = "gas"
         else:
             pass
         for region in mesh["region"]:
@@ -64,7 +66,9 @@ class DevsimMesh():
             devsim.add_2d_mesh_line(mesh=mesh_name, **mesh_line)
         if (self.solve_paras["weightfield"] == True) :
             for region in mesh["region"]:
-                region["material"] = "gas"
+                if region["material"] != "air":
+                    # air for space for electrode, gas for relpacement of semiconductor
+                    region["material"] = "gas"
         else:
             pass
         for region in mesh["region"]:

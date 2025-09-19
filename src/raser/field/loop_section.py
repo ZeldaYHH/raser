@@ -52,11 +52,11 @@ class loop_section():
         print("=========RASER info =========\nAll initialization successfully\n=========info========== ")    
 
     @memory_decorator
-    def loop_solver(self, circuit_contact, v_current, area_factor):
-        self.voltage.append(v_current)
-        devsim.set_parameter(device=self.device, name=physics_drift_diffusion.GetContactBiasName(circuit_contact), value=v_current)
+    def loop_solver(self, circuit_contact, v_trial, area_factor):
+        devsim.set_parameter(device=self.device, name=physics_drift_diffusion.GetContactBiasName(circuit_contact), value=v_trial)
         try:
             devsim.solve(type="dc", absolute_error=self.paras['absolute_error_VoltageSteps'], relative_error=self.paras['relative_error_VoltageSteps'], maximum_iterations=self.paras['maximum_iterations_VoltageSteps'])
+            self.voltage.append(v_trial)
         except devsim.error as msg:
             path = output(__file__, self.device)
             devsim.write_devices(file=os.path.join(path, "last_solvable.dd"), type="tecplot")
@@ -69,7 +69,7 @@ class loop_section():
             total_current    = electron_current + hole_current
             self.current.append(total_current*area_factor)
             if self.solve_model == "cv":
-                devsim.circuit_alter(name="V1", value=v_current)
+                devsim.circuit_alter(name="V1", value=v_trial)
                 devsim.solve(type="ac", frequency=self.paras["frequency"])
                 cap=1e12*devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*self.paras["frequency"]) # pF/cm^dim
                 self.capacitance.append(cap*area_factor)

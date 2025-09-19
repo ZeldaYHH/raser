@@ -18,12 +18,6 @@ from . import physics_drift_diffusion
 from util.output import output
 from .devsim_draw import *
 
-v_current = 0
-V = []
-c = []
-Current = []
-noise = []
-
 paras = {
     "absolute_error_Initial" : 1e10, 
     "relative_error_Initial" : 1e-4, 
@@ -50,9 +44,10 @@ paras = {
 
     "Voltage-step-model" : False,
     "step":1,
-
 }
+
 os.environ["OMP_NUM_THREADS"] = "1"
+
 def main (kwargs):
     simname = kwargs['label']
     is_cv = kwargs['cv']
@@ -125,13 +120,13 @@ def main (kwargs):
     devsim.set_parameter(name = "extended_model", value=True)
     devsim.set_parameter(name = "extended_equation", value=True)
     
-    if is_cv ==True:
+    if is_wf == True: # top priority
+        solve_model = "wf"
+    elif is_cv == True:
         solve_model = "cv"
     elif is_noise == True:
         solve_model = "noise"
-    elif is_wf ==True:
-        solve_model = "wf"
-    else :
+    else:
         solve_model = None
 
     path = output(__file__, device)
@@ -141,7 +136,7 @@ def main (kwargs):
     loop=loop_section.loop_section(paras=paras,device=device,region=region,solve_model=solve_model,irradiation=irradiation)
    
     if is_wf == True:
-        v_current=1
+        v_trial=1
         print("=======RASER info========\nBegin simulation WeightingField\n======================")
         for contact in readout_contacts:
             print(path)
@@ -154,67 +149,75 @@ def main (kwargs):
             paras.update({"milestone_step":paras["milestone_step"]})
 
             loop.initial_solver(contact=contact,set_contact_type=None,impact_model=impact_model,irradiation_model=irradiation_model,irradiation_flux=irradiation_flux)
-            loop.loop_solver(circuit_contact=contact,v_current=v_current,area_factor=paras["area_factor"])
+            loop.loop_solver(circuit_contact=contact,v_trial=v_trial,area_factor=paras["area_factor"])
 
-            save_milestone.save_milestone(device=device, region=region, v=v_current, path=folder_path,dimension=default_dimension,contact_name=contact,is_wf=is_wf)
+            save_milestone.save_milestone(device=device, v=v_trial, path=folder_path,dimension=default_dimension,contact_name=contact,is_wf=is_wf)
             devsim.write_devices(file=os.path.join(folder_path,"weightingfield.dat"), type="tecplot")
             
     elif is_wf == False:
         loop.initial_solver(contact=bias_contact, set_contact_type=None, impact_model=impact_model, irradiation_model=irradiation_model, irradiation_flux=irradiation_flux)
         v_current = 0
+        loop.loop_solver(circuit_contact=bias_contact, v_trial=0, area_factor=paras["area_factor"])
+        save_milestone.save_milestone(device=device, v=0, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
+        dd = os.path.join(path, '0V.dd')
+        devsim_device = os.path.join(path, '0V.devsim')
+        devsim.write_devices(file=dd, type="tecplot")
+        devsim.write_devices(file=devsim_device, type="devsim")
+        # solve and save at 0V
         if v_goal is None:
             v_goal = float(MyDetector.device_dict['bias']['voltage'])
         voltage_step = 1.0 
         if v_goal > 0:
-            voltage_step = paras['voltage_step']
+            milestone_step = paras['milestone_step']
         else:
-            voltage_step = -1 * paras['voltage_step']
+            milestone_step = -1 * paras['milestone_step']
         max_voltage_step = paras['max_voltage_step']
 
         step_too_small = False
-        voltage_milestones = [n*voltage_step for n in range(1, int(abs(v_goal)/abs(voltage_step)) + 1)]
+        milestone_flag = False
+        goal_flag = False
+        voltage_milestones = [n*milestone_step for n in range(1, int(abs(v_goal)/abs(milestone_step)) + 1)]
         while abs(v_current) <= abs(v_goal):
-            v_last = v_current
+            v_trial = v_current + voltage_step
+            if abs(v_trial) > abs(v_goal):
+                v_trial = v_goal
+                goal_flag = True
+            elif abs(v_trial) > abs(voltage_milestones[0]):
+                v_trial = voltage_milestones[0]
+                milestone_flag = True
             try:
-                loop.loop_solver(circuit_contact=bias_contact, v_current=v_current, area_factor=paras["area_factor"])
+                loop.loop_solver(circuit_contact=bias_contact, v_trial=v_trial, area_factor=paras["area_factor"])
                 if abs(voltage_step) < max_voltage_step:
                     voltage_step = voltage_step * paras['increase_factor']
                 else:
                     pass
-                print("=========RASER info===========\nConvergence success, voltage = {}, increased voltage step = {}\n================".format(v_current, voltage_step))      
+                print("=========RASER info===========\nConvergence success, voltage = {}, increased voltage step = {}\n================".format(v_trial, voltage_step))
+                if (paras['milestone_mode']) and (milestone_flag or goal_flag):
+                    save_milestone.save_milestone(device=device, v=v_trial, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
+                    dd = os.path.join(path, str(v_trial) + 'V.dd')
+                    devsim_device = os.path.join(path, str(v_trial) + 'V.devsim')
+                    devsim.write_devices(file=dd, type="tecplot")
+                    devsim.write_devices(file=devsim_device, type="devsim")
+                    if goal_flag:
+                        break
+                    if milestone_flag:
+                        voltage_milestones.pop(0)
+                        milestone_flag = False
+
             except devsim.error as msg:
+                milestone_flag = False
                 if str(msg).find("Convergence failure") == -1:
                     raise
                 voltage_step *= paras['decrease_factor'] 
 
-                print("=========RASER info===========\nConvergence failure, voltage = {}, decreased voltage step = {}\n================".format(v_current, voltage_step))
+                print("=========RASER info===========\nConvergence failure, voltage = {}, decreased voltage step = {}\n================".format(v_trial, voltage_step))
   
                 if abs(voltage_step) < 1e-7:
                     step_too_small = True
                     break  
                 continue  
-            if (paras['milestone_mode'] and abs(v_current % paras['milestone_step']) < 0.01 * paras['voltage_step']) or abs(abs(v_current) - abs(v_goal)) < 0.01 * paras['milestone_step']:
-                save_milestone.save_milestone(device=device, region=region, v=v_current, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
-                dd = os.path.join(path, str(v_current) + 'V.dd')
-                devsim_device = os.path.join(path, str(v_current) + 'V.devsim')
-                devsim.write_devices(file=dd, type="tecplot")
-                devsim.write_devices(file=devsim_device, type="devsim")
-            v_current = v_last + voltage_step 
 
-
-            if abs(v_current) > abs(v_goal):
-                v_current = v_goal
-                loop.loop_solver(circuit_contact=bias_contact, v_current=v_current, area_factor=paras["area_factor"])
-                if (paras['milestone_mode']):
-                    save_milestone.save_milestone(device=device, region=region, v=v_current, path=path, dimension=default_dimension, contact_name=bias_contact, is_wf=is_wf)
-                    dd = os.path.join(path, str(v_current) + 'V.dd')
-                    devsim_device = os.path.join(path, str(v_current) + 'V.devsim')
-                    devsim.write_devices(file=dd, type="tecplot")
-                    devsim.write_devices(file=devsim_device, type="devsim")
-                break
-
-            if abs(v_current) > abs(voltage_milestones[0]):
-                v_current = voltage_milestones.pop(0)
+            v_current = v_trial 
 
         else:
             print("Loop completed successfully.")

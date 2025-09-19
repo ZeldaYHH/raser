@@ -45,8 +45,8 @@ def main(tdr_file):
     print(devsim.get_device_list()[0])
     device = devsim.get_device_list()[0]
 
-    # TODO: ensure the region name is consistent with the intrinsic area we want
-    save_milestone(device, "Silicon_1", bias_voltage, dir_name, my_detector.dimension, None, False, is_tcad=True)
+    save_milestone(device, bias_voltage, dir_name, my_detector.dimension, None, False, is_tcad=True)
+
     devsim.reset_devsim()
 
 if __name__ == '__main__':

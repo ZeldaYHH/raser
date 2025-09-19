@@ -530,7 +530,7 @@ class CalCurrentGain(CalCurrent):
         f_gain_rate = open(path+'/voltage-gain_rate.csv', "a")
         writer_gain_rate = csv.writer(f_gain_rate)
         writer_gain_rate.writerow([str(my_f.voltage),str(gain_rate)])
-        with open(path+'/Voltage-gain_rate.txt', 'a') as file:
+        with open(path+'/voltage-gain_rate.txt', 'a') as file:
             file.write(str(my_f.voltage)+' -- '+str(gain_rate)+ '\n')
         # assuming gain layer at d>0
         if my_d.voltage<0 : # p layer at d=0, holes multiplicated into electrons
@@ -591,8 +591,13 @@ class CalCurrentGain(CalCurrent):
         # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
         # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
 
+        # TODO: support non-uniform field in gain layer
+
         n = 1001
-        z_list = np.linspace(0, my_d.avalanche_bond * 1e-4, n) # in cm
+        if "ilgad" in my_d.det_model:
+            z_list = np.linspace(my_d.avalanche_bond * 1e-4, my_d.l_z, n) # in cm
+        else:
+            z_list = np.linspace(0, my_d.avalanche_bond * 1e-4, n) # in cm
         alpha_n_list = np.zeros(n)
         alpha_p_list = np.zeros(n)
         for i in range(n):
@@ -603,12 +608,15 @@ class CalCurrentGain(CalCurrent):
             alpha_n_list[i] = alpha_n
             alpha_p_list[i] = alpha_p
 
-        if my_d.voltage>0:
-            alpha_major_list = alpha_n_list # multiplication contributed mainly by electrons in Si
+        if my_f.get_e_field(0, 0, my_d.avalanche_bond)[2] > 0:
+            alpha_major_list = alpha_n_list # multiplication contributed mainly by electrons in conventional Si LGAD
             alpha_minor_list = alpha_p_list
-        elif my_d.voltage<0:
-            alpha_major_list = alpha_p_list # multiplication contributed mainly by holes in SiC
+        else:
+            alpha_major_list = alpha_p_list # multiplication contributed mainly by holes in conventional SiC LGAD
             alpha_minor_list = alpha_n_list
+
+        # the integral supports iLGAD as well
+        
         diff_list = alpha_major_list - alpha_minor_list
         int_alpha_list = np.zeros(n-1)
 

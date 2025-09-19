@@ -9,15 +9,13 @@ from afe.ngspice import set_ngspice_input
 from afe.ngspice import set_tmp_cir
 from util.output import output, delete_file
 
-def cross_talk(name, cu):
+def cross_talk(name, cross_talk_cir, cu):
     read_ele_num = len(cu)
     cross_talk_cu = []
     for i in range(read_ele_num):
         cross_talk_cu.append(ROOT.TH1F("cross_talk"+str(i+1),"Cross Talked Current"+" No."+str(i+1)+"electrode",
                                 cu[i].GetNbinsX(), cu[i].GetXaxis().GetXmin(), cu[i].GetXaxis().GetXmax()))
         cross_talk_cu[i].Reset()
-
-    cross_talk_cir = os.getenv("RASER_SETTING_PATH")+"/detector/" + name + "_cross_talk.cir"
 
     input_current_strs = set_ngspice_input(cu)
     time_stamp = time_ns()
