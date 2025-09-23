@@ -12,7 +12,7 @@ VERSION = 4.1
 parser = argparse.ArgumentParser(prog='raser')
 parser.add_argument('--version', action='version', 
                     version='%(prog)s {}'.format(VERSION))
-parser.add_argument('-b', '--batch', help='submit BATCH job to cluster', action='count', default=0,dest='global_batch')
+parser.add_argument('-b', '--batch', help='submit BATCH job to cluster', action='count', default=0, dest='global_batch')
 parser.add_argument('-t', '--test', help='TEST', action="store_true")
 
 subparsers = parser.add_subparsers(help='sub-command help', dest="subparser_name")
@@ -83,7 +83,7 @@ parser_signal.add_argument('-g4', '--g4experiment', type=str, help='model of Gea
 parser_signal.add_argument('-g4_vis', help='visualization of Geant4 experiment', action="store_true")
 parser_signal.add_argument('-amp', '--amplifier', type=str, help='amplifier')
 parser_signal.add_argument('-s', '--scan', type=int, help='instance number for scan mode')
-parser_signal.add_argument('-b', '--batch', action='store_true',help='submit signal scan jobs to cluster (used with -s)',dest='signal_batch')
+parser_signal.add_argument('-b', '--batch', action='store_true', help='submit signal scan jobs to cluster (used with -s)', dest='signal_batch')
 parser_signal.add_argument('--job', type=int, help='flag of run in job')
 parser_signal.add_argument('-mem', type=int, help='memory limit of the job in 8GB', default=1)
 
