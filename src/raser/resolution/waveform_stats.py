@@ -5,9 +5,9 @@ from array import array
 
 import ROOT
 
-from device import build_device as bdv
-from util.output import output
-from util.math import is_number, fit_data_normal, fit_data_landau
+from ..device import build_device as bdv
+from ..util.output import output
+from ..util.math import is_number, fit_data_normal, fit_data_landau
 
 CFD = 0.5 # partition
 #TODO: get threshold and CFD from electronics setting

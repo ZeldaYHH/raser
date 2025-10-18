@@ -6,7 +6,7 @@ import numpy as np
 
 from . import devsim_draw
 from .create_parameter import create_parameter, delete_init
-from util.output import create_path
+from ..util.output import create_path
 
 def milestone_save_1D(device, v, path, is_tcad):
     if is_tcad:

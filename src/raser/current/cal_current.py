@@ -19,9 +19,9 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 from .model import Material
-from interaction.carrier_list import CarrierListFromG4P
-from util.math import Vector, signal_convolution
-from util.output import output
+from ..interaction.carrier_list import CarrierListFromG4P
+from ..util.math import Vector, signal_convolution
+from ..util.output import output
 
 t_bin = 10e-12
 # resolution of oscilloscope
@@ -71,7 +71,7 @@ class CarrierCluster:
         self.y_num = int((y_init-l_y/2) // p_y + n_y/2.0)
         if len(weighting_field) == 1 and (weighting_field[0]['x_span'] != 0 or weighting_field[0]['y_span'] != 0):
             self.x_reduced = (x_init-l_x/2) % p_x + field_shift_x
-            self.y_reduced = (y_init-l_y/2) % p_y + field_shift_y
+            self.y_reduced = (y_init-l_y/2) % p_y + field_shift_y 
 
         else:
             self.x_reduced = x_init

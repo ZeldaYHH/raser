@@ -20,7 +20,7 @@ import ROOT
 import csv
 ROOT.gROOT.SetBatch(True)
 
-from util.output import output
+from ..util.output import output
 
 
 # ROOT file parameters difinition

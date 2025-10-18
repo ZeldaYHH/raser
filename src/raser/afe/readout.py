@@ -23,9 +23,9 @@ ROOT.gROOT.SetBatch(True)
 
 from .ngspice import set_ngspice_input
 from .ngspice import set_tmp_cir
-from util.math import signal_convolution
-from util.output import output
-from util.output import delete_file
+from ..util.math import signal_convolution
+from ..util.output import output
+from ..util.output import delete_file
 
 class Amplifier:
     """Get current after amplifier with convolution, for each reading electrode

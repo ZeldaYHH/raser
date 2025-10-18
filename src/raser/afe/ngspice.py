@@ -2,7 +2,7 @@ import re
 
 import ROOT
 
-from util.output import output
+from ..util.output import output
 
 def set_ngspice_input(currents: list[ROOT.TH1F]):
     # TODO: check the cuts and refine the code

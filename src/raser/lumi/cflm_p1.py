@@ -533,7 +533,7 @@ def main():
             UImanager.ApplyCommand("/vis/viewer/refresh") 
     else:
         
-        from device import build_device as bdv
+        from ..device import build_device as bdv
         detector_json = "setting/detector/"
         with open(os.path.join(detector_json , g4_dic['DetModule'])) as q:
              det_dic = json.load(q)

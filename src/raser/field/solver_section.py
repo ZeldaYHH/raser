@@ -9,13 +9,13 @@ import math
 import devsim 
 import numpy as np
 
-from device.build_device import Detector
+from ..device.build_device import Detector
 from .create_mesh import DevsimMesh
 from .create_parameter import create_parameter, delete_init
 from . import save_milestone
 from . import loop_section
 from . import physics_drift_diffusion
-from util.output import output
+from ..util.output import output
 from .devsim_draw import *
 
 paras = {

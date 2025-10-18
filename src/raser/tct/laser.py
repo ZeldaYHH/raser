@@ -4,7 +4,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy as np
 
-from device.build_device import Detector
+from ..device.build_device import Detector
 
 class LaserInjection():
     """

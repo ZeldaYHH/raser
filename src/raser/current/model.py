@@ -13,7 +13,7 @@ import math
 import matplotlib.pyplot as plt
 import os
 
-from util.output import output
+from ..util.output import output
 
 class Material:
 

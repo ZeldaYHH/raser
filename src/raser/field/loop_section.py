@@ -10,8 +10,8 @@ import numpy as np
 from . import initial
 from . import physics_drift_diffusion
 from .create_parameter import delete_init
-from util.output import output
-from util.memory_decorator import memory_decorator
+from ..util.output import output
+from ..util.memory_decorator import memory_decorator
 
 class loop_section():
     def __init__(self, paras, device, region, solve_model, irradiation):

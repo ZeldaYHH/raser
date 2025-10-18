@@ -12,7 +12,7 @@ import pickle
 import numpy as np
 
 from . import devsim_draw
-from util.output import create_path
+from ..util.output import create_path
 
 def main(v, electrode_name, det_name):
     v = float(v)

@@ -12,12 +12,12 @@ import time
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-from device import build_device as bdv
-from field import devsim_field as devfield
-from current import cal_current as ccrt
-from afe import readout as rdo
+from ..device import build_device as bdv
+from ..field import devsim_field as devfield
+from ..current import cal_current as ccrt
+from ..afe import readout as rdo
 from .laser import LaserInjection
-from util.output import output, create_path
+from ..util.output import output, create_path
 
 def main(kwargs):
     """

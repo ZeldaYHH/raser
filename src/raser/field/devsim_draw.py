@@ -9,7 +9,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import matplotlib.pyplot
 
-from util.output import output
+from ..util.output import output
 
 def draw_iv(device,V,I,path):
 

@@ -13,7 +13,7 @@ import subprocess
 import grp
 import pwd
 
-from util.output import create_path
+from ..util.output import create_path
 
 def main(destination_subfolder, command, batch_level, is_test):
     stat_info = os.stat("./")
