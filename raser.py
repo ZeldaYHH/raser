@@ -120,7 +120,7 @@ if kwargs['global_batch'] != 0:
     if not kwargs.get('signal_batch', False):
         batch_level = kwargs['global_batch']
         import re
-        from src.raser.util import batchjob
+        from raser.util import batchjob
         destination = submodule
         command = ' '.join(sys.argv[1:])
         command = command.replace('--batch ', '')
