@@ -18,7 +18,7 @@ def main(kwargs):
     use_cluster = kwargs['signal_batch']
     if label == 'signal':
         if scan_number != None:
-            from util import batchjob
+            from ..util import batchjob
             scan_number = kwargs['scan']
             args = sys.argv
             command_tail_list = args[args.index('signal')+1:]

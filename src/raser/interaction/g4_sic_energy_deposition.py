@@ -10,8 +10,8 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy as np
 
-from current.model import Material
-from current.model import Vector
+from ..current.model import Material
+from ..current.model import Vector
 
 G4AnalysisManager = g4b.G4RootAnalysisManager
 class SiC_LGAD_DetectorConstruction(g4b.G4VUserDetectorConstruction):#是g4b.G4VUserDetectorConstruction的子类

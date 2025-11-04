@@ -8,7 +8,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy as np
 
-from util.output import create_path
+from ..util.output import create_path
 
 # TODO: tagged orphan file
 

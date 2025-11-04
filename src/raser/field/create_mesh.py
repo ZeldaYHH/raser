@@ -3,8 +3,8 @@ import os
 import devsim
 import matplotlib.pyplot as plt
 
-from device.build_device import Detector
-from util.output import output
+from ..device.build_device import Detector
+from ..util.output import output
 from . import model_create
 
 class DevsimMesh():

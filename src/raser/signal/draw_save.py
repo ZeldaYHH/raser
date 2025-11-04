@@ -12,7 +12,7 @@ import time
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-from util.output import output
+from ..util.output import output
 
 def energy_deposition(my_g4v):
     """

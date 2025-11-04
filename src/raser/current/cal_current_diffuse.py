@@ -17,8 +17,8 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 from .model import Material
-from interaction.carrier_list import PixelCarrierListFromG4P
-from util.math import Vector
+from ..interaction.carrier_list import PixelCarrierListFromG4P
+from ..util.math import Vector
 
 t_bin = 50e-12
 t_end = 10e-9

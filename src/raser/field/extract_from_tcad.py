@@ -15,7 +15,7 @@ import re
 import devsim
 
 from .save_milestone import save_milestone
-from device.build_device import Detector
+from ..device.build_device import Detector
 
 def main(tdr_file):
     # make sure the file is in output/[det_name]/ or output/[det_name]/weightingfield/[electrode_name]/

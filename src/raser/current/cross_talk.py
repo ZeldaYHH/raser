@@ -5,9 +5,9 @@ from time import time_ns
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-from afe.ngspice import set_ngspice_input
-from afe.ngspice import set_tmp_cir
-from util.output import output, delete_file
+from ..afe.ngspice import set_ngspice_input
+from ..afe.ngspice import set_tmp_cir
+from ..util.output import output, delete_file
 
 def cross_talk(name, cross_talk_cir, cu):
     read_ele_num = len(cu)

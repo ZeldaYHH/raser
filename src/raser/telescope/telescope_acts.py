@@ -5,7 +5,7 @@ from pathlib import Path
 import acts
 import acts.examples
 
-from util.io_decorator import io_decorator as iod
+from ..util.io_decorator import io_decorator as iod
 
 from acts.examples.simulation import (
     addParticleGun,

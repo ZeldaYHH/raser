@@ -4,11 +4,11 @@ import time
 import re
 import multiprocessing
 import ROOT
-from device import build_device as bdv
+from ..device import build_device as bdv
 from . import cflm_p1
-from field import devsim_field as devfield
-from current import cal_current as ccrt
-from util.output import output
+from ..field import devsim_field as devfield
+from ..current import cal_current as ccrt
+from ..util.output import output
 import json
 
 def main(output_path):

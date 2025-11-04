@@ -15,10 +15,10 @@ ROOT.gROOT.SetBatch(True)
 import acts
 import numpy as np
 
-from interaction.g4_telescope import TelescopeG4Interaction
-from device.build_device import Detector
-from current.cal_current_diffuse import CalCurrentDiffuse
-from util.output import create_path
+from ..interaction.g4_telescope import TelescopeG4Interaction
+from ..device.build_device import Detector
+from ..current.cal_current_diffuse import CalCurrentDiffuse
+from ..util.output import create_path
 
 class Telescope:
     def __init__(self,my_d,my_g4,my_c):

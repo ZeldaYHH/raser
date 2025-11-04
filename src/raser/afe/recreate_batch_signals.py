@@ -11,9 +11,9 @@ from array import array
 
 import ROOT
 
-from device.build_device import Detector
-from current.cross_talk import cross_talk
-from afe.readout import Amplifier
+from ..device.build_device import Detector
+from ..current.cross_talk import cross_talk
+from ..afe.readout import Amplifier
 
 def main(amp_name, det_name, file_name, tct=None):    
     my_d = Detector(det_name)

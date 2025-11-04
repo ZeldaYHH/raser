@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-from util.output import output
+from ..util.output import output
 
 def main(kwargs):
     label = kwargs['label'] # Operation label or detector name
@@ -16,7 +16,7 @@ def main(kwargs):
         readout.main(name)
     elif label == 'batch_signal':
         if kwargs['job_file'] == None:
-            from util import batchjob
+            from ..util import batchjob
             args = sys.argv
 
             if kwargs['tct'] != None:

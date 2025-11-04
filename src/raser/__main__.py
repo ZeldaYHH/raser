@@ -107,7 +107,8 @@ if len(sys.argv) == 1:
     
 kwargs = vars(args)
 
-submodule = kwargs['subparser_name']
+submodule = "." + kwargs['subparser_name']
+# __package__ is src.raser, the "." is meant to coorperate with src.raser to avoid namespace conflict
 
 if kwargs['global_batch'] != 0:
     if not kwargs.get('signal_batch', False):
@@ -122,9 +123,9 @@ if kwargs['global_batch'] != 0:
         is_test = vars(args)['test'] 
         batchjob.main(destination, command, batch_level, is_test)
     else:
-        submodule = importlib.import_module(submodule)
+        submodule = importlib.import_module(submodule, package=__package__)
         submodule.main(kwargs)
 else:
-    submodule = importlib.import_module(submodule)
+    submodule = importlib.import_module(submodule, package=__package__)
     submodule.main(kwargs)
     

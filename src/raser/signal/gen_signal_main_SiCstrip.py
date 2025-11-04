@@ -18,13 +18,13 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import geant4_pybind as g4b
 
-from device import build_device as bdv
-from interaction.interaction import GeneralG4Interaction
-from field import devsim_field as devfield
-from current import cal_current as ccrt
-from afe import readout as rdo
+from ..device import build_device as bdv
+from ..interaction.interaction import GeneralG4Interaction
+from ..field import devsim_field as devfield
+from ..current import cal_current as ccrt
+from ..afe import readout as rdo
 from .draw_save import energy_deposition, draw_drift_path
-from util.output import output
+from ..util.output import output
 
 
 def main(kwargs):

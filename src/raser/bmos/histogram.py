@@ -13,12 +13,12 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy
 
-from device import build_device as bdv
-from field import devsim_field as devfield
-from current import cal_current as ccrt
-from afe.set_pwl_input import set_pwl_input as pwlin
-from util.output import output
-from . import bmos
+from ..device import build_device as bdv
+from ..field import devsim_field as devfield
+from ..current import cal_current as ccrt
+from ..afe.set_pwl_input import set_pwl_input as pwlin
+from ..util.output import output
+from .. import bmos
 import numpy as np
 
 def mkdir(folder_name):

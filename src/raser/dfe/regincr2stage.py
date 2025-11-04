@@ -7,7 +7,7 @@
 
 import pymtl3 as mtl
 from .regincr import RegIncr
-from util.output import create_path
+from ..util.output import create_path
 
 class RegIncr2stage( mtl.Component ):
 # Constructor

@@ -15,7 +15,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 import numpy as np
 
-from util.math import *
+from ..util.math import *
 
 verbose = 0
 
