@@ -43,9 +43,10 @@ EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
-export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,$HOME/.Xauthority,$HOME/.vscode-server,$HOME/vscode-container,$dir_raser
+export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/condor/config.d,/etc/redhat-release,/run/user,$HOME/.Xauthority,$HOME/.vscode-server,$HOME/vscode-container,$dir_raser
 # notice: if home is binded, then the default path in the apptainer will change from current path to the home path
 # $HOME/.Xauthority for G4 visualization, $HOME/.vscode-server and $HOME/.vscode-container for vscode remote development
+# /run/user for vscode gui
 # condor_config and redhat-release for hep_job
 # For vscode users entering .sif, the symbol links should be converted into real paths
 
