@@ -283,3 +283,91 @@ def draw2D(x,y,value,title,v,path):
     canvas1.SaveAs(os.path.join(path, title+"{}_1d.pdf".format(v)))
     canvas1.SaveAs(os.path.join(path, title+"{}_1d.root".format(v)))
 
+
+def draw3D(x, y, z, value, title, v, path):
+    title = str(title)
+    unit_conv = 1e4  
+    z_mid = (max(z) + min(z)) / 2 
+    x_mid = (max(x) + min(x)) / 2  
+    y_mid = (max(y) + min(y)) / 2  
+    threshold = 0.5 / unit_conv  
+    
+    graph_3d_1d = ROOT.TGraph()
+    x_middle_1d = 0.5 * (max(x) - min(x)) * unit_conv 
+    y_middle_1d = 0.5 * (max(y) - min(y)) * unit_conv
+    z_1d = []
+    value_1d = []
+    for i in range(len(x)):
+        x_um = x[i] * unit_conv
+        y_um = y[i] * unit_conv
+        if abs(x_um - x_middle_1d) < 0.5 and abs(y_um - y_middle_1d) < 0.5:
+            z_1d.append(z[i] * unit_conv)  
+            value_1d.append(value[i]) 
+    sorted_data = sorted(zip(z_1d, value_1d), key=lambda d: d[0])
+    for j, (z_val, val) in enumerate(sorted_data):
+        graph_3d_1d.SetPoint(j, z_val, val)
+    canvas3d_1d = ROOT.TCanvas("canvas3d_1d", title, 1700, 1000)
+    graph_3d_1d.Draw("ALP") 
+    graph_3d_1d.GetXaxis().SetTitle("z [um]")
+    graph_3d_1d.GetYaxis().SetTitle(title.split()[0])
+    graph_3d_1d.SetTitle(f"{title}")
+    canvas3d_1d.Draw()
+    canvas3d_1d.SaveAs(os.path.join(path, f"{title}_{v}_3d_1d.pdf"))
+    canvas3d_1d.SaveAs(os.path.join(path, f"{title}_{v}_3d_1d.root"))
+
+    graph_xy = ROOT.TGraph2D()
+    for i in range(len(x)):
+        if abs(z[i] - z_mid) < threshold: 
+            graph_xy.SetPoint(graph_xy.GetN(), 
+                             x[i] * unit_conv,  
+                             y[i] * unit_conv,  
+                             value[i])         
+    if graph_xy.GetN() > 0:
+        canvas_xy = ROOT.TCanvas("canvas_xy", f"{title}_XY", 1000, int(1000 * (max(x)-min(x))/(max(y)-min(y))))
+        canvas_xy.SetRightMargin(0.15)
+        graph_xy.Draw("CONT4Z")
+        graph_xy.GetXaxis().SetTitle("x [um]")
+        graph_xy.GetYaxis().SetTitle("y [um]")
+        graph_xy.GetZaxis().SetTitle(f"{title.split()[0]} [unit]")
+        graph_xy.SetTitle(f"{title} (XY, z={z_mid*unit_conv:.1f}um)")
+        canvas_xy.Draw()
+        canvas_xy.SaveAs(os.path.join(path, f"{title}_{v}_XY.pdf"))
+        canvas_xy.SaveAs(os.path.join(path, f"{title}_{v}_XY.root"))
+
+    graph_yz = ROOT.TGraph2D()
+    for i in range(len(x)):
+        if abs(x[i] - x_mid) < threshold:  
+            graph_yz.SetPoint(graph_yz.GetN(), 
+                             y[i] * unit_conv,  
+                             z[i] * unit_conv, 
+                             value[i])          
+    if graph_yz.GetN() > 0:
+        canvas_yz = ROOT.TCanvas("canvas_yz", f"{title}_YZ", 1000, int(1000 * (max(y)-min(y))/(max(z)-min(z))))
+        canvas_yz.SetRightMargin(0.15)
+        graph_yz.Draw("CONT4Z")
+        graph_yz.GetXaxis().SetTitle("y [um]")
+        graph_yz.GetYaxis().SetTitle("z [um]")
+        graph_yz.GetZaxis().SetTitle(f"{title.split()[0]} [unit]")
+        graph_yz.SetTitle(f"{title} (YZ, x={x_mid*unit_conv:.1f}um)")
+        canvas_yz.Draw()
+        canvas_yz.SaveAs(os.path.join(path, f"{title}_{v}_YZ.pdf"))
+        canvas_yz.SaveAs(os.path.join(path, f"{title}_{v}_YZ.root"))
+
+    graph_xz = ROOT.TGraph2D()
+    for i in range(len(x)):
+        if abs(y[i] - y_mid) < threshold: 
+            graph_xz.SetPoint(graph_xz.GetN(), 
+                             x[i] * unit_conv, 
+                             z[i] * unit_conv,  
+                             value[i])          
+    if graph_xz.GetN() > 0:
+        canvas_xz = ROOT.TCanvas("canvas_xz", f"{title}_XZ", 1000, int(1000 * (max(x)-min(x))/(max(z)-min(z))))
+        canvas_xz.SetRightMargin(0.15)
+        graph_xz.Draw("CONT4Z")
+        graph_xz.GetXaxis().SetTitle("x [um]")
+        graph_xz.GetYaxis().SetTitle("z [um]")
+        graph_xz.GetZaxis().SetTitle(f"{title.split()[0]} [unit]")
+        graph_xz.SetTitle(f"{title} (XZ, y={y_mid*unit_conv:.1f}um)")
+        canvas_xz.Draw()
+        canvas_xz.SaveAs(os.path.join(path, f"{title}_{v}_XZ.pdf"))
+        canvas_xz.SaveAs(os.path.join(path, f"{title}_{v}_XZ.root"))
