@@ -45,6 +45,12 @@ def main(v, electrode_name, det_name):
         x = [point[0] for point in points]
         y = [point[1] for point in points]
         devsim_draw.draw2D(x, y, values, "Weighting Potential", 1, path)
+        
+    elif dimension == 3:
+        x = [point[0] for point in points]
+        y = [point[1] for point in points]
+        z = [point[2] for point in points]
+        devsim_draw.draw3D(x, y, z, values, "Weighting Potential", 1, path)
 
 if __name__ == '__main__':
     import sys
