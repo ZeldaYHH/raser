@@ -15,14 +15,17 @@ from typing import Callable
 import numpy as np
 from scipy.interpolate import interp1d as p1d
 from scipy.interpolate import interp2d as p2d
+from scipy.interpolate import interpn as pn
 from scipy.interpolate import griddata
-from scipy.interpolate import LinearNDInterpolator as LNDI
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-x_bin = 1000
-y_bin = 1000
-z_bin = 1000
+x_bin_2d = 200
+y_bin_2d = 200
+
+x_bin_3d = 50
+y_bin_3d = 50
+z_bin_3d = 50
 
 class Vector:
     def __init__(self,a1,a2,a3):
@@ -61,8 +64,10 @@ class Vector:
 def get_common_interpolate_1d(data):
     values = data['values']
     points = data['points']
-         
-    return p1d(points, values)
+
+    def f(x):
+        return p1d(points, values)(x)
+    return f
 
 def get_common_interpolate_2d(data):
     values = data['values']
@@ -71,12 +76,15 @@ def get_common_interpolate_2d(data):
     for point in data['points']:
         points_x.append(point[0])
         points_y.append(point[1])
-    new_x = np.linspace(min(points_x), max(points_x), x_bin)
-    new_y = np.linspace(min(points_y), max(points_y), y_bin)
+    new_x = np.linspace(min(points_x), max(points_x), x_bin_2d)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin_2d)
     new_points = np.array(np.meshgrid(new_x, new_y)).T.reshape(-1, 2)
     new_values = griddata((points_x, points_y), values, new_points, method='linear')
 
-    return p2d(new_x, new_y, new_values)
+    def f(x, y):
+        return p2d(new_x, new_y, new_values)(x,y)[0]
+    return f
+
 
 def get_common_interpolate_3d(data):
     values = data['values']
@@ -88,15 +96,17 @@ def get_common_interpolate_3d(data):
         points_y.append(point[1])
         points_z.append(point[2])
 
-    new_x = np.linspace(min(points_x), max(points_x), x_bin)
-    new_y = np.linspace(min(points_y), max(points_y), y_bin)
-    new_z = np.linspace(min(points_z), max(points_z), z_bin)
+    new_x = np.linspace(min(points_x), max(points_x), x_bin_3d)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin_3d)
+    new_z = np.linspace(min(points_z), max(points_z), z_bin_3d)
     new_points = np.array(np.meshgrid(new_x, new_y, new_z)).T.reshape(-1, 3)
+    new_points_pn = (new_x, new_y, new_z)
     new_values = griddata((points_x, points_y, points_z), values, new_points, method='linear')
+    new_values_pn = new_values.reshape(x_bin_3d, y_bin_3d, z_bin_3d)
 
     def f(x, y, z):
-        point = [x, y, z]
-        return LNDI(new_points, new_values)(point)
+        point = np.array([x, y, z]).reshape(1, -1)
+        return pn(new_points_pn, new_values_pn, point)[0]
     return f
 
 def signal_convolution(signal_original: ROOT.TH1F, signal_convolved: ROOT.TH1F, pulse_responce_function_list: list[Callable[[float],float]]):
@@ -135,10 +145,13 @@ def calculate_gradient(function: Callable, component: list, coordinate: list):
                 gradient_trial = (function(*args_plus) - function(*args_minus)) / diff_res
                 gradient.append(gradient_trial)
                 break
-            except ValueError:
-                continue
+            except ValueError as e:
+                if "out of bound" in str(e) or "interpolation range" in str(e):
+                    continue
+                else:
+                    raise e
         else:
-            raise ValueError(f"Point {component[i]} might be out of bound")
+            raise ValueError(f"Point {coordinate} might be out of bound")
     
     return gradient
 

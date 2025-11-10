@@ -89,7 +89,7 @@ def main(kwargs):
                 my_current.draw_currents(path) # Draw current
                 ele_current.draw_waveform(my_current.sum_cu, path) # Draw waveform
                 if 'strip' in my_d.det_model:
-                    my_current.charge_collection(path)
+                    my_current.charge_collection_strip(path)
             
             del my_f
             end = time.time()
@@ -137,7 +137,7 @@ def main(kwargs):
                 my_current.draw_currents(path) # Draw current
                 ele_current.draw_waveform(my_current.sum_cu, path) # Draw waveform
                 if 'strip' in my_d.det_model:
-                    my_current.charge_collection(path)
+                    my_current.charge_collection_strip(path)
             
             del my_f
             end = time.time()

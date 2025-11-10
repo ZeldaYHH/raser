@@ -71,8 +71,11 @@ def main(kwargs):
     g4_seed = random.randint(0,1e7)
     my_g4 = GeneralG4Interaction(my_d, my_d.g4experiment, g4_seed, g4_vis)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
-    if "strip" in my_d.det_model:
-        my_current.cross_talk_cu = cross_talk(det_name, my_d.cross_talk, my_current.sum_cu)
+    if ("strip" in my_d.det_model or "pixel" in my_d.det_model):
+        if my_d.cross_talk != None:
+            my_current.cross_talk_cu = cross_talk(det_name, my_d.cross_talk, my_current.sum_cu)
+        else:
+            my_current.cross_talk_cu = my_current.sum_cu
         ele_current = rdo.Amplifier(my_current.cross_talk_cu, my_d.amplifier)
     else:
         ele_current = rdo.Amplifier(my_current.sum_cu, my_d.amplifier)
@@ -82,13 +85,15 @@ def main(kwargs):
     #energy_deposition(my_g4)   # Draw Geant4 depostion distribution
     draw_drift_path(my_d,my_g4,my_f,my_current,path)
     my_current.draw_currents(path) # Draw current
-    if "strip" in my_d.det_model:
+    if "strip" in my_d.det_model or "pixel" in my_d.det_model:
         ele_current.draw_waveform(my_current.cross_talk_cu, path) # Draw waveform
     else:
         ele_current.draw_waveform(my_current.sum_cu, path)
 
     if 'strip' in my_d.det_model:
-        my_current.charge_collection(path)
+        my_current.charge_collection_strip(path)
+    if 'pixel' in my_d.det_model:
+        my_current.charge_collection_pixel(path)
     
     del my_f
     end = time.time()

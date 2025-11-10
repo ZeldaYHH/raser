@@ -101,7 +101,7 @@ def batch_loop(my_d, my_f, my_g4, g4_seed, total_events, instance_number):
             effective_number += 1
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, event-start_n)
 
-            if "strip" in my_d.det_model:
+            if ("strip" in my_d.det_model or "pixel" in my_d.det_model) and my_d.cross_talk != None:
                 my_current.cross_talk_cu = cross_talk(my_d.det_name, my_d.cross_talk, my_current.sum_cu)
             else:
                 my_current.cross_talk_cu = my_current.sum_cu

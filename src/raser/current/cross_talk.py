@@ -24,7 +24,9 @@ def cross_talk(name, cross_talk_cir, cu):
     path = output(__file__, name)
     tmp_cirs, raws = set_tmp_cir(read_ele_num, path, input_current_strs, cross_talk_cir, str(time_stamp)+"_"+str(pid))
     for i in range(read_ele_num):
-        subprocess.run(['ngspice -b '+tmp_cirs[i]], shell=True)
+        print("Running ngspice for cross talk simulation on electrode No.%d..."%(i+1))
+        subprocess.run(['ngspice -b '+tmp_cirs[i]], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     
     time_limit = 20e-9
     time_unit = 10e-12
