@@ -20,6 +20,12 @@
     },
     
     "temperature" : 300,
+    "vector_delta_t": 1e-12,
+    "vector_boundary_tolerance": 10.0,
+    "vector_min_field_strength": 25.0,
+    "current_smoothing_window": 11,
+    "current_savgol_window": 21,
+    "current_savgol_poly": 3,
 
     "cross_talk" : "./setting/detector/CMOS_strip_tcad_cross_talk.cir",
 

@@ -365,7 +365,7 @@ def milestone_save_3D(device, v, path, is_tcad):
    
     if is_tcad:
         for region in devsim.get_region_list(device=device):
-            if region == "aluminum" or devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue 
             ElectricField.extend(devsim.get_node_model_values(device=device, region=region, name=E))
         ElectricField = np.array(ElectricField)     
@@ -375,7 +375,7 @@ def milestone_save_3D(device, v, path, is_tcad):
         y_mid = []
         z_mid = []
         for region in devsim.get_region_list(device=device):
-            if region == "aluminum" or devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue      
             devsim.element_from_edge_model(edge_model=E, device=device, region=region)
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")

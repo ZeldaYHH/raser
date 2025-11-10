@@ -55,6 +55,49 @@ class Detector:
         self.amplifier = self.device_dict['amplifier']
         self.daq = self.device_dict['daq']
 
+        if "vector_delta_t" in self.device_dict:
+            try:
+                self.vector_delta_t = float(self.device_dict["vector_delta_t"])
+            except (TypeError, ValueError):
+                pass
+        if "vector_boundary_tolerance" in self.device_dict:
+            try:
+                self.vector_boundary_tolerance = float(self.device_dict["vector_boundary_tolerance"])
+            except (TypeError, ValueError):
+                pass
+        if "vector_field_resolution" in self.device_dict:
+            try:
+                self.vector_field_resolution = float(self.device_dict["vector_field_resolution"])
+            except (TypeError, ValueError):
+                pass
+        if "vector_field_fallback" in self.device_dict:
+            self.vector_field_fallback = self.device_dict["vector_field_fallback"]
+        if "vector_max_steps" in self.device_dict:
+            try:
+                self.vector_max_steps = int(self.device_dict["vector_max_steps"])
+            except (TypeError, ValueError):
+                pass
+        if "vector_min_field_strength" in self.device_dict:
+            try:
+                self.vector_min_field_strength = float(self.device_dict["vector_min_field_strength"])
+            except (TypeError, ValueError):
+                pass
+        if "current_smoothing_window" in self.device_dict:
+            try:
+                self.current_smoothing_window = int(self.device_dict["current_smoothing_window"])
+            except (TypeError, ValueError):
+                pass
+        if "current_savgol_window" in self.device_dict:
+            try:
+                self.current_savgol_window = int(self.device_dict["current_savgol_window"])
+            except (TypeError, ValueError):
+                pass
+        if "current_savgol_poly" in self.device_dict:
+            try:
+                self.current_savgol_poly = int(self.device_dict["current_savgol_poly"])
+            except (TypeError, ValueError):
+                pass
+
         if "strip" in self.det_model:
             self.x_ele_num = self.device_dict['read_ele_num']
             self.y_ele_num = 1
@@ -82,8 +125,13 @@ class Detector:
             self.e_gap = self.device_dict['e_gap']
             self.e_t = self.device_dict['e_t']
 
+        if "planar" in self.det_model or "lgad" == self.det_model:
+            self.p_x = self.device_dict['l_x']
+            self.p_y = self.device_dict['l_y']
+
         if "strip" in self.det_model: 
             self.p_x = self.device_dict['p_x']
+            self.p_y = self.device_dict['l_y']
             
         if "pixel" in self.det_model:
             self.p_x = self.device_dict["p_x"]
