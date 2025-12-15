@@ -69,6 +69,8 @@ def main(kwargs):
         amplifier = my_d.amplifier
 
     my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
+    if "lgad" in my_d.det_model:
+        my_d.gain_rate_cal(my_f)
     my_l = LaserInjection(my_d, laser_dic)
 
     my_current = ccrt.CalCurrentLaser(my_d, my_f, my_l)
