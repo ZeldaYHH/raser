@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: raser-2.3.sif
+From: raser-2.5.sif
 
 %environment
     export LC_ALL=C
