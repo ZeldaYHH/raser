@@ -4,7 +4,7 @@ From: ubuntu:24.04
 %files
     pyproject.toml /opt/raser/pyproject.toml
     requirements-linux-py39-lock.txt /opt/raser/requirements-linux-py39-lock.txt
-    geant4_pybind-0.1.2-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl /opt/raser/geant4_pybind-0.1.2-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+    wheels/geant4_pybind-0.1.2-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl /opt/raser/geant4_pybind-0.1.2-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
 
 %environment
     export LC_ALL=C
@@ -56,6 +56,7 @@ From: ubuntu:24.04
         libxrender-dev \
         libxmu-dev \
         libssl-dev \
+        libttb-dev \
         zlib1g-dev \
         libbz2-dev \
         libreadline-dev \
@@ -83,6 +84,7 @@ From: ubuntu:24.04
     mkdir -p /opt/raser
     mkdir -p /tmp/python-build
     cd /tmp/python-build
+    rm -f Python-3.9.18.tgz Python-3.9.18.tgz.*
 
     wget https://www.python.org/ftp/python/3.9.18/Python-3.9.18.tgz
     tar -xzf Python-3.9.18.tgz
