@@ -232,6 +232,23 @@ This keeps both:
 
 consistent.
 
+7.6 Build the container
+-----------------------
+
+The reference image should be built with the following command:
+
+    apptainer build raser_latest.sif raser-linux-reference-py39-pybind.def
+
+For consistency across local and cluster workflows, the generated image is expected to be named:
+
+    raser_latest.sif
+
+If a different output filename is used during local testing, it should be renamed back to:
+
+    raser_latest.sif
+
+before using the standard setup scripts or shared workflow documentation.
+
 ================================================================================
 8. Verified commands
 ================================================================================
