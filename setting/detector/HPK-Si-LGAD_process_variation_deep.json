@@ -1,0 +1,62 @@
+{
+    "det_name" : "HPK-Si-LGAD_process_variation_deep",
+    "det_model" : "lgad",
+    "material" : "Si",
+
+    "l_x" : 1300,
+    "l_y" : 1300,
+    "l_z" : 50,
+
+    "doping":{
+        "Acceptors" : "5e12*(step((50e-4)-x)-step(1e-4-x)) + 1.72e16*exp(-pow((x-3.95e-4)/(0.42e-4),2))*(step((5.1e-4)-x)-step(2.75e-4-x)) + 2.0e15*exp(-pow((x-4.55e-4)/(0.75e-4),2))*(step((6.5e-4)-x)-step(3.9e-4-x)) + 1.0e18*(step((151e-4)-x)-step((50e-4)-x))",
+        "Donors" : "1.0e19*step(1e-4-x)"
+    },
+
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : 200.0
+    },
+    
+    "temperature" : 300.0,
+    
+    "avalanche_bond" : 4.5,
+    "avalanche_model" : "vanOverstraeten",
+    "gain_layer_position" : {"start_um":3.5, "end_um":4.5, "peak_um":3.95},
+    "dopant_profile" : {"type":"deep_diffused_asymmetric_gaussian", "peak_concentration_cm3":1.9e16, "sigma_front_um":0.42, "tail_sigma_back_um":0.75, "description":"Deep-buried process-variation profile with implant diffusion, annealing broadening, and a mild deeper-side tail centered near 4 um."},
+
+    "area_factor" : 1,
+    "default_dimension" : 1,
+    "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top"}],
+    "field_shift_x" : 0,
+
+    "mesh" : {
+        "1D_mesh" : {
+            "mesh_line" : [
+                {"pos" : 0,       "ps" : 1e-4, "tag" : "top"},
+                {"pos" : 0.5e-4,  "ps" : 1e-5, "tag" : "jun_up"},
+                {"pos" : 1e-4,    "ps" : 1e-5, "tag" : "mid"},
+                {"pos" : 3.5e-4,  "ps" : 1e-5, "tag" : "gain_up"},
+                {"pos" : 3.95e-4, "ps" : 1e-5, "tag" : "gain_peak"},
+                {"pos" : 4.5e-4,  "ps" : 1e-5, "tag" : "gain_down"},
+                {"pos" : 5.5e-4,  "ps" : 1e-5, "tag" : "tail"},
+                {"pos" : 150e-4,  "ps" : 1e-4, "tag" : "bot"}
+            ],
+            "region" : [
+                {
+                    "material" : "Silicon", 
+                    "region" : "HPK-Si-LGAD_process_variation_deep", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    },
+
+    "g4experiment" : "time_resolution",
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
+}
