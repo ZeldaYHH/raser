@@ -1,0 +1,107 @@
+{
+    "det_name" : "DJLGAD_reference",
+    "det_model" : "lgad",
+    "material" : "Si",
+
+    "description" : {
+        "title" : "Deep-Junction LGAD-like reference structure",
+        "structure" : "n+ / p- upper drift / deep p gain / deep n layer / p- lower bulk / p+",
+        "notes" : [
+            "Ordinary LGAD places the p gain layer directly below the surface n+ readout implant.",
+            "DJLGAD_reference buries the multiplication junction inside the bulk.",
+            "The deep p gain layer and the adjacent deep n layer form an internal buried p/n multiplication junction.",
+            "This is not a simple downward shift of a single p gain layer; it adds an internal p/n junction.",
+            "DJLGAD_reference is the baseline detector for later depth, dose, and junction scans."
+        ]
+    },
+
+    "djlgad_parameters" : {
+        "unit_length_um" : "All layer depths below are in um. The active RASER sensor geometry and the 1D devsim mesh both use a 50 um backside contact depth.",
+        "profile_model" : "box_like_piecewise_constant",
+        "total_thickness" : 50.0,
+        "nplus_depth" : 1.0,
+        "upper_drift_thickness" : 7.0,
+        "deep_p_start" : 8.0,
+        "deep_p_thickness" : 1.0,
+        "deep_n_start" : 9.0,
+        "deep_n_thickness" : 1.0,
+        "lower_bulk_thickness" : 39.0,
+        "pplus_depth" : 1.0,
+        "buried_junction_depth" : 9.0,
+        "N_nplus" : 1.0e19,
+        "N_pbulk" : 5.0e12,
+        "N_deep_p_gain" : 1.5e16,
+        "N_deep_n" : 8.0e15,
+        "N_pplus" : 1.0e18,
+        "design_note" : "The deep p/n junction is placed near 9 um so the dominant high-field region is intended to be internal, while the surface n+ / p- junction remains intentionally lightly doped on the p side."
+    },
+
+    "l_x" : 1300,
+    "l_y" : 1300,
+    "l_z" : 50,
+
+    "doping":{
+        "Acceptors" : "5.0e12*(step((8e-4)-x)-step(1e-4-x)) + 1.5e16*(step((9e-4)-x)-step(8e-4-x)) + 5.0e12*(step((49e-4)-x)-step(10e-4-x)) + 1.0e18*(step((50e-4)-x)-step(49e-4-x))",
+        "Donors" : "1.0e19*step(1e-4-x) + 8.0e15*(step((10e-4)-x)-step(9e-4-x))"
+    },
+
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : 200.0
+    },
+    
+    "temperature" : 300.0,
+    
+    "avalanche_bond" : 9.0,
+    "avalanche_model" : "vanOverstraeten",
+    "gain_layer_position" : {"start_um":8.0, "end_um":10.0, "junction_um":9.0, "deep_p_start_um":8.0, "deep_p_end_um":9.0, "deep_n_start_um":9.0, "deep_n_end_um":10.0},
+    "dopant_profile" : {
+        "type":"djlgad_buried_box_pn_junction",
+        "acceptor_profile":"p- upper drift from 1-8 um, deep p gain layer from 8-9 um, p- lower bulk from 10-49 um, p+ backside from 49-50 um",
+        "donor_profile":"n+ surface readout implant from 0-1 um and deep n layer from 9-10 um",
+        "N_deep_p_gain_cm3":1.5e16,
+        "N_deep_n_cm3":8.0e15,
+        "N_pbulk_cm3":5.0e12,
+        "description":"Reference DJ-LGAD-like buried p/n gain junction. The deep p and deep n layers jointly define the internal multiplication junction."
+    },
+
+    "area_factor" : 1,
+    "default_dimension" : 1,
+    "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top"}],
+    "field_shift_x" : 0,
+
+    "mesh" : {
+        "1D_mesh" : {
+            "mesh_line" : [
+                {"pos" : 0,       "ps" : 5e-5, "tag" : "top"},
+                {"pos" : 0.5e-4,  "ps" : 1e-5, "tag" : "nplus_mid"},
+                {"pos" : 1e-4,    "ps" : 1e-5, "tag" : "nplus_end"},
+                {"pos" : 4e-4,    "ps" : 5e-5, "tag" : "upper_drift_mid"},
+                {"pos" : 8e-4,    "ps" : 1e-5, "tag" : "deep_p_start"},
+                {"pos" : 8.5e-4,  "ps" : 1e-5, "tag" : "deep_p_mid"},
+                {"pos" : 9e-4,    "ps" : 5e-6, "tag" : "buried_pn_junction"},
+                {"pos" : 9.5e-4,  "ps" : 1e-5, "tag" : "deep_n_mid"},
+                {"pos" : 10e-4,   "ps" : 1e-5, "tag" : "deep_n_end"},
+                {"pos" : 25e-4,   "ps" : 5e-5, "tag" : "lower_bulk_mid"},
+                {"pos" : 49e-4,   "ps" : 1e-5, "tag" : "pplus_start"},
+                {"pos" : 50e-4,   "ps" : 1e-5, "tag" : "bot"}
+            ],
+            "region" : [
+                {
+                    "material" : "Silicon", 
+                    "region" : "DJLGAD_reference", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    },
+
+    "g4experiment" : "time_resolution",
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
+}
