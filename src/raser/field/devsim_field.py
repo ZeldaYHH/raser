@@ -30,14 +30,15 @@ resolution_default_plugin_2d = {'x': 0.1, 'y': 0.1, 'z': 10000.0}
 resolution_default_3d = {'z': 0.5, 'x': 1, 'y': 1}
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_out_contact, is_plugin=False, irradiation_flux=0, 
+    def __init__(self, device_name, dimension, voltage, read_out_contact, mesher, is_plugin=False, irradiation_flux=0, 
                  bounds=None, resolution=None):
         self.name = device_name
         self.voltage = voltage
         self.dimension = dimension
         self.read_out_contact = read_out_contact
         self.is_plugin = is_plugin  # 保存插件标志
-        
+        self.mesher = mesher  # 保存mesher标志
+
         # 初始化缓存相关属性
         if self.dimension == 1:
             resolution_default = resolution_default_1d
@@ -93,6 +94,7 @@ class DevsimField:
         if irradiation_flux != 0:
             path = "./output/field/{}/{}/".format(self.name, irradiation_flux)
 
+        DopingFile = None
         doping_file_pattern = re.compile(r'^NetDoping_(-?\d+\.?\d*)V\.pkl$')
         for filename in os.listdir(path):
             if doping_file_pattern.match(filename):
@@ -100,9 +102,9 @@ class DevsimField:
                 # example: DopingFile = path + "NetDoping_0V.pkl"
                 break
 
-        PotentialFile = path + "Potential_{}V.pkl".format(self.voltage)
-        TrappingRate_pFile = path + "TrappingRate_p_{}V.pkl".format(self.voltage)
-        TrappingRate_nFile = path + "TrappingRate_n_{}V.pkl".format(self.voltage)
+        PotentialFile = self._resolve_voltage_pickle(path, "Potential", self.voltage)
+        TrappingRate_pFile = self._resolve_voltage_pickle(path, "TrappingRate_p", self.voltage)
+        TrappingRate_nFile = self._resolve_voltage_pickle(path, "TrappingRate_n", self.voltage)
 
         self.set_doping(DopingFile) #self.Doping
         self.set_potential(PotentialFile) #self.Potential, self.x_efield, self.y_efield, self.z_efield
@@ -112,6 +114,23 @@ class DevsimField:
         
         logger.info(f"DevsimField initialization complete, resolution: {self.resolution} um")
 
+    def _resolve_voltage_pickle(self, path, prefix, voltage):
+        exact_path = os.path.join(path, "{}_{}V.pkl".format(prefix, voltage))
+        if os.path.exists(exact_path):
+            return exact_path
+
+        try:
+            target_voltage = float(voltage)
+        except (TypeError, ValueError):
+            return exact_path
+
+        pattern = re.compile(r"^{}_(-?\d+(?:\.\d+)?)V\.pkl$".format(re.escape(prefix)))
+        for filename in os.listdir(path):
+            match = pattern.match(filename)
+            if match and math.isclose(float(match.group(1)), target_voltage, rel_tol=0.0, abs_tol=1e-9):
+                return os.path.join(path, filename)
+        return exact_path
+
     def set_doping(self, DopingFile):
         try:
             with open(DopingFile,'rb') as file:
@@ -120,7 +139,7 @@ class DevsimField:
                 if DopingNotUniform['metadata']['dimension'] < self.dimension:
                     print("Doping dimension not match")
                     return
-        except FileNotFoundError:
+        except (FileNotFoundError, TypeError):
             print("Doping file not found at {}, please run field simulation first".format(DopingFile))
             print("or manually set the doping file")
             return
@@ -159,7 +178,9 @@ class DevsimField:
     def set_w_p(self, WeightingPotentialFiles):
         self.WeightingPotential = []
         for i in range(len(self.read_out_contact)):
-            WeightingPotentialFile = WeightingPotentialFiles[i]
+            WeightingPotentialFile = self._resolve_voltage_pickle(
+                os.path.dirname(WeightingPotentialFiles[i]), "Potential", 1
+            )
             try:
                 with open(WeightingPotentialFile,'rb') as file:
                     WeightingPotentialNotUniform=pickle.load(file)
@@ -225,8 +246,8 @@ class DevsimField:
 
         self.TrappingRate_n = TrappingRate_nUniform
         
-    # DEVSIM dimension order: x, y, z
-    # RASER dimension order: z, x, y
+    # 3D pickle points are stored in detector order (x, y, z).
+    # 2D planar fields keep the legacy (z, x) convention.
 
     def _get_doping(self, x, y, z):
         '''
@@ -242,7 +263,10 @@ class DevsimField:
             else:
                 return self.Doping(z, x)
         elif self.dimension == 3:
-            return self.Doping(z, x, y)
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                return self.Doping(x, y, z)
+            else :
+                return self.Doping(z, x, y)
     
     def _get_potential(self, x, y, z):
         '''
@@ -258,12 +282,15 @@ class DevsimField:
             else:
                 return self.Potential(z, x)
         elif self.dimension == 3:
-            return self.Potential(z, x, y)
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                return self.Potential(x, y, z)
+            else:
+                return self.Potential(z, x, y)
     
     def _get_e_field(self, x, y, z):
         '''
             input: position in um
-            output: intensity in V/um
+            output: intensity in V/cm
         ''' 
         x, y, z = x / 1e4, y / 1e4, z / 1e4  # um to cm
 
@@ -286,11 +313,18 @@ class DevsimField:
                 return (E_x, 0, E_z)
 
         elif self.dimension == 3:
-            nabla_U = calculate_gradient(self.Potential, ['z', 'x', 'y'], [z, x, y])
-            E_z = -1 * nabla_U[0]
-            E_x = -1 * nabla_U[1]
-            E_y = -1 * nabla_U[2]
-            return (E_x, E_y, E_z)
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                nabla_U = calculate_gradient(self.Potential, ['x', 'y', 'z'], [x, y, z])
+                E_x = -1 * nabla_U[0]
+                E_y = -1 * nabla_U[1]
+                E_z = -1 * nabla_U[2]
+                return (E_x, E_y, E_z)
+            else:
+                nabla_U = calculate_gradient(self.Potential, ['z', 'x', 'y'], [z, x, y])
+                E_z = -1 * nabla_U[0]
+                E_x = -1 * nabla_U[1]
+                E_y = -1 * nabla_U[2]
+                return (E_x, E_y, E_z)
 
     def _get_w_p(self, x, y, z, i): # used in cal current
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
@@ -302,7 +336,10 @@ class DevsimField:
             else:
                 U_w = self.WeightingPotential[i](z, x)
         elif self.dimension == 3:
-            U_w = self.WeightingPotential[i](z, x, y)
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                U_w = self.WeightingPotential[i](x, y, z)
+            else:
+                U_w = self.WeightingPotential[i](z, x, y)
 
         # exclude non-physical values
         if U_w < 0:
@@ -337,8 +374,11 @@ class DevsimField:
                 return self.TrappingRate_n(z, x)
         
         elif self.dimension == 3:
-            return self.TrappingRate_n(z, x, y)
-    
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                return self.TrappingRate_n(x, y, z)
+            else:
+                return self.TrappingRate_n(z, x, y)
+
     def _get_trap_h(self, x, y, z):
         '''
             input: position in um
@@ -353,7 +393,10 @@ class DevsimField:
             else:
                 return self.TrappingRate_p(z, x)
         elif self.dimension == 3:
-            return self.TrappingRate_p(z, x, y)
+            if self.mesher == "sde": # SDE使用x,y,z坐标
+                return self.TrappingRate_p(x, y, z)
+            else:
+                return self.TrappingRate_p(z, x, y)
 
     # 缓存方法
     def get_e_field_cached(self, x, y, z):
