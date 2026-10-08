@@ -59,6 +59,23 @@ checkout __main__.py for detail.
 Tutorial
 ======
 
+For new DJ-LGAD simulations, use `DJLGAD_Ayyoub_1D_with_coefficient` by default:
+
+    raser field -cv DJLGAD_Ayyoub_1D_with_coefficient
+    raser field -wf DJLGAD_Ayyoub_1D_with_coefficient
+    raser signal -s 20 DJLGAD_Ayyoub_1D_with_coefficient
+    raser resolution DJLGAD_Ayyoub_1D_with_coefficient
+
+Both buried gain-layer peaks use
+`N(x) = N_peak * exp(-0.5 * ((x - x0) / sigma)^2)`, with
+`N_peak = 3.0e16 cm^-3` and `sigma = 0.17 um`.
+Relative to `DJLGAD_Ayyoub_1D`, the only physical change is the `1/2`
+coefficient in the two Gaussian exponents. The original configuration remains
+available for comparisons with earlier results. Generate fields for the new
+configuration before running signals; its wider peaks change the electric field
+and gain. For an isolated complete Gaussian peak, the integrated doping is
+`sqrt(2)` times the original value at the same peak concentration.
+
 For signal simulation of 
     HPK-Si-PiN and HPK-Si-LGAD in 10.1016/j.nima.2024.169479 (under reorganization):
 
